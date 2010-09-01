@@ -1,0 +1,62 @@
+Bugs to fix:
+(not including ones for async, for those see below)
+
+?* Handling of general entities in non-expanding mode wrong:
+  eats entities (finishCharacters() buggy?)
+
+Fixes to conformance:
+
+[DONE] * Coalescing mode
+[DONE] * Do NOT report ignorable white space in prolog, by default
+    (won't implement XMLInputFactory2.P_REPORT_PROLOG_WHITESPACE for now)
+[DONE] * EventWriter should force non-lazy parsing mode for stream reader.
+    (ditto for SAX reader)
+* Support for entities (explicitly defined ones, XInclude,
+  or DTD-induced)
+* Basic DTD handling? Starting with the internal subset:
+  * Entity value parsing? (no PE expansion, yet)
+  * Attribute type info?
+  * Attribute default values?
+[DONE] * Repairing writer (non-repairing implemented)
+
+Testing:
+
+* Create basic event (start/end elem/doc, characters, CDATA, PI, comments)
+  tests over all scanners; including async one (need faced to abstract
+  out differences). This because StaxTest generally will only test one
+  or at most two types of backend XmlScanner impls.
+
+Async:
+
+* Multi-byte char handling not implemented for comments
+* Handling of:
+   * PI
+   * CData
+   * Entities (partial impl, not with blocking yet)
+* Bootstrapping (xml decl handling)
+* API for constructing instances (AsyncInputFactory?)
+* API for feeding more data
+
+Performance:
+
+[partial] * Inline 2-byte UTF-8 handling for text? (to help w/ russian, german)
+  [note: doesn't seem to help!]
+[DONE] * Separate char type codes for tables, to make valid codes consequtive
+  and minimize value space (may be faster)
+* XmlScanner.bindNs(): replace linear scan with hash, for big tables
+ (test with degenerate doc like nux-samples/ns-soap.xml!)
+* Namespace URIs:
+    * Can we avoid intern()ing/canonicalizing URIs? (not without changing 
+      comparisons). If we can, only intern() first N distinct (to avoid
+      degenerate cases; like 16); check canonical for M (like 64)
+[DONE] * Specialize InternCache used for URIs, not to require construction
+      of Strings; use a non-linear hash (since URIs are loooong)
+* Prefix String creation/interning: optimize? (since prefixes tend
+  to cluster)
+  (note: similarly for output side?)
+[Done?] * For output side: figure out how to cache serialized names
+  (just the last one?)
+[DONE] * Optimize parsePName() of StreamScanner, for the common case where
+  buffer does have 8 more bytes: inline handling of first 4 or 8 bytes.
+* Utf8XmlWriter.doConstructName(): replace calls to String.getBytes()
+  with more efficient (for short names) version

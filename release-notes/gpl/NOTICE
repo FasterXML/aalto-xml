@@ -1,0 +1,8 @@
+This product currently only contains code developed by authors
+of specific components, as identified by the source code files.
+
+Since product implements Stax API (defined by JSR-173), it has
+dependencies to Stax API classes.
+
+For additional credits (generally to people who reported problems)
+see CREDITS file.
