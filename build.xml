@@ -4,8 +4,8 @@
 
     <!-- Source directories -->
     <property name="dir.src" location="${basedir}/src" />
-    <property name="dir.src.java" location="${dir.src}/java" />
-    <property name="dir.src.test" location="${dir.src}/test" />
+    <property name="dir.src.java" location="${dir.src}/main/java" />
+    <property name="dir.src.test" location="${dir.src}/test/java" />
     <property name="dir.resources" location="${dir.src}/resources" />
     <property name="dir.releasenotes" location="${basedir}/release-notes" />
 
