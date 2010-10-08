@@ -3,8 +3,6 @@ package sax;
 import java.io.*;
 
 import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
-import javax.xml.stream.XMLStreamException;
 
 import org.xml.sax.*;
 import org.xml.sax.helpers.DefaultHandler;

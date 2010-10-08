@@ -109,10 +109,14 @@ public final class XmlNames
             return false;
         }
         // !!! TODO: xml 1.1 vs 1.0 rules: none valid for 1.0, many for 1.1
+        return false;
+
+        /*
         if (true) {
             return false;
         }
         return true;
+        */
     }
 
 }
