@@ -41,7 +41,7 @@ public final class TextAccumulator
             // Any prior text?
             if (mText != null) {
                 mBuilder = new StringBuilder(mText.length() + len);
-                mBuilder.append(buf, start, end-start);
+                mBuilder.append(mText);
                 mText = null;
             } else if (mBuilder == null) {
                 /* more efficient to use a builder than a string; and although
