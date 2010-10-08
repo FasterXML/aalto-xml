@@ -11,7 +11,7 @@
     <groupId>com.fasterxml</groupId>
     <artifactId>aalto-xml</artifactId>
     <packaging>bundle</packaging>
-    <version>0.9.6-SNAPSHOT</version>
+    <version>0.9.6</version>
     <name>aalto-xml</name>
   <description>Ultra-high performance non-blocking XML processor (Stax/Stax2,
 SAX/SAX2)
@@ -60,7 +60,7 @@ SAX/SAX2)
       <dependency>
         <groupId>junit</groupId>
         <artifactId>junit</artifactId>
-        <version>[4.0.0,5.0.0)</version>
+        <version>4.8.2</version>
         <scope>test</scope>
       </dependency>
     </dependencies>
