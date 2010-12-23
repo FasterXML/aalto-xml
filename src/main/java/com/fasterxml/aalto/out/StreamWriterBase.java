@@ -53,9 +53,9 @@ public abstract class StreamWriterBase
     protected enum State { PROLOG, TREE, EPILOG };
 
     /*
-    /////////////////////////////////////////////////////
-    // Configuration
-    /////////////////////////////////////////////////////
+    /**********************************************************************
+    /* Configuration
+    /**********************************************************************
      */
 
     protected final WriterConfig _config;
@@ -82,17 +82,17 @@ public abstract class StreamWriterBase
     protected final boolean _cfgCDataAsText;
 
     /*
-    ////////////////////////////////////////////////////
-    // Symbol table for reusing name serializations
-    ////////////////////////////////////////////////////
+    /**********************************************************************
+    /* Symbol table for reusing name serializations
+    /**********************************************************************
     */
 
-    WNameTable _symbols;
+    protected WNameTable _symbols;
 
     /*
-    ////////////////////////////////////////////////////
-    // Output objects
-    ////////////////////////////////////////////////////
+    /**********************************************************************
+    /* Output objects
+    /**********************************************************************
      */
 
     /**
@@ -108,9 +108,9 @@ public abstract class StreamWriterBase
     protected ValueEncoderFactory _valueEncoderFactory;
 
     /*
-    ////////////////////////////////////////////////////
-    // Validation support
-    ////////////////////////////////////////////////////
+    /**********************************************************************
+    /* Validation support
+    /**********************************************************************
      */
 
     /**
@@ -133,9 +133,9 @@ public abstract class StreamWriterBase
     protected ValidationProblemHandler _vldProblemHandler = null;
 
     /*
-    ////////////////////////////////////////////////////
-    // State information
-    ////////////////////////////////////////////////////
+    /**********************************************************************
+    /* State information
+    /**********************************************************************
      */
 
     protected State _state = State.PROLOG;
@@ -183,15 +183,15 @@ public abstract class StreamWriterBase
     protected String _dtdRootElemName = null;
 
     /*
-    ////////////////////////////////////////////////////
-    // Pool for recycling OutputElement instances.
-    //
-    // Note: although pooling of cheap objects like OutputElement
-    // is usually not a good idea, here it does make sense, as
-    // instances are still short-lived (same as writer's). Since
-    // instances are ONLY reused within this context, they stay in
-    // cheap ("Eden") GC area, and can lead to slight net gain
-    ////////////////////////////////////////////////////
+    /**********************************************************************
+    /* Pool for recycling OutputElement instances.
+    /*
+    /* Note: although pooling of cheap objects like OutputElement
+    /* is usually not a good idea, here it does make sense, as
+    /* instances are still short-lived (same as writer's). Since
+    /* instances are ONLY reused within this context, they stay in
+    /* cheap ("Eden") GC area, and can lead to slight net gain
+    /**********************************************************************
      */
 
     protected OutputElement _outputElemPool = null;
@@ -207,9 +207,9 @@ public abstract class StreamWriterBase
     protected int _poolSize = 0;
 
     /*
-    /////////////////////////////////////////////////////
-    // Life-cycle
-    /////////////////////////////////////////////////////
+    /**********************************************************************
+    /* Life-cycle
+    /**********************************************************************
      */
 
     protected StreamWriterBase(WriterConfig cfg, XmlWriter writer,
@@ -229,9 +229,9 @@ public abstract class StreamWriterBase
     }
 
     /*
-    /////////////////////////////////////////////////////
-    // Basic Stax API
-    /////////////////////////////////////////////////////
+    /**********************************************************************
+    /* Basic Stax API
+    /**********************************************************************
      */
 
     public void close()
@@ -258,8 +258,8 @@ public abstract class StreamWriterBase
     //public String getPrefix(String uri);
 
     public Object getProperty(String name) {
-        // false -> not mandatory, unrecognized will return null
-        return _config.getProperty(name, false);
+        // true -> mandatory, unrecognized will throw exception, as per Stax javadocs
+        return _config.getProperty(name, true);
     }
 
     public abstract void setDefaultNamespace(String uri)
@@ -688,9 +688,9 @@ public abstract class StreamWriterBase
         throws XMLStreamException;
     
     /*
-    ////////////////////////////////////////////////////
-    // NamespaceContext implementation
-    ////////////////////////////////////////////////////
+    /**********************************************************************
+    /* NamespaceContext implementation
+    /**********************************************************************
      */
 
     public String getNamespaceURI(String prefix)
@@ -721,10 +721,10 @@ public abstract class StreamWriterBase
     }
 
     /*
-    /////////////////////////////////////////////////
-    // TypedXMLStreamWriter2 implementation
-    // (Typed Access API, Stax v3.0)
-    /////////////////////////////////////////////////
+    /**********************************************************************
+    /* TypedXMLStreamWriter2 implementation
+    /* (Typed Access API, Stax v3.0)
+    /**********************************************************************
      */
 
     // // // Typed element content write methods
@@ -946,9 +946,9 @@ public abstract class StreamWriterBase
         throws XMLStreamException;
 
     /*
-    ////////////////////////////////////////////////////
-    // XMLStreamWriter2 methods (StAX2)
-    ////////////////////////////////////////////////////
+    /**********************************************************************
+    /* XMLStreamWriter2 methods (StAX2)
+    /**********************************************************************
      */
 
     public void writeSpace(String text)
@@ -975,9 +975,9 @@ public abstract class StreamWriterBase
     //public void copyEventFromReader(XMLStreamReader2 sr, boolean preserveEventData) throws XMLStreamException
 
     /*
-    ////////////////////////////////////////////////////
-    // StAX2, output handling
-    ////////////////////////////////////////////////////
+    /**********************************************************************
+    /* Stax2, output handling
+    /**********************************************************************
      */
 
     public void closeCompletely()
@@ -987,9 +987,9 @@ public abstract class StreamWriterBase
     }
 
     /*
-    ////////////////////////////////////////////////////
-    // StAX2, config
-    ////////////////////////////////////////////////////
+    /**********************************************************************
+    /* Stax2, config
+    /**********************************************************************
      */
 
     // NOTE: getProperty() defined in Stax 1.0 interface
@@ -1079,9 +1079,9 @@ public abstract class StreamWriterBase
     }
 
     /*
-    ////////////////////////////////////////////////////
-    // StAX2, other accessors, mutators
-    ////////////////////////////////////////////////////
+    /**********************************************************************
+    /* Stax2, other accessors, mutators
+    /**********************************************************************
      */
 
     public XMLStreamLocation2 getLocation()
@@ -1096,9 +1096,9 @@ public abstract class StreamWriterBase
     }
 
     /*
-    ////////////////////////////////////////////////////
-    // StAX2, output methods
-    ////////////////////////////////////////////////////
+    /**********************************************************************
+    /* StAX2, output methods
+    /**********************************************************************
      */
 
     public void writeCData(char[] cbuf, int start, int len)
@@ -1209,9 +1209,9 @@ public abstract class StreamWriterBase
     }
 
     /*
-    ////////////////////////////////////////////////////
-    // ValidationContext interface (StAX2, validation)
-    ////////////////////////////////////////////////////
+    /**********************************************************************
+    /* ValidationContext interface (Stax2, validation)
+    /**********************************************************************
      */
 
     public String getXmlVersion() {
@@ -1299,9 +1299,9 @@ public abstract class StreamWriterBase
     }
 
     /*
-    ////////////////////////////////////////////////////
-    // Package methods (ie not part of public API)
-    ////////////////////////////////////////////////////
+    /**********************************************************************
+    /* Package methods (ie not part of public API)
+    /**********************************************************************
      */
 
     /**
@@ -1356,9 +1356,9 @@ public abstract class StreamWriterBase
     }
 
     /*
-    ////////////////////////////////////////////////////
-    // Package methods, write helpers
-    ////////////////////////////////////////////////////
+    /**********************************************************************
+    /* Package methods, write helpers
+    /**********************************************************************
      */
 
     protected final void _writeAttribute(WName name, String value)
@@ -1507,9 +1507,9 @@ public abstract class StreamWriterBase
     }
 
     /*
-    ////////////////////////////////////////////////////
-    // Package methods, validation
-    ////////////////////////////////////////////////////
+    /**********************************************************************
+    /* Package methods, validation
+    /**********************************************************************
      */
 
     protected final void _verifyWriteAttr(WName name)
@@ -1585,9 +1585,9 @@ public abstract class StreamWriterBase
     }
 
     /*
-    ////////////////////////////////////////////////////
-    // Package methods, basic output problem reporting
-    ////////////////////////////////////////////////////
+    /**********************************************************************
+    /* Package methods, basic output problem reporting
+    /**********************************************************************
      */
 
     protected static void throwOutputError(String msg)
@@ -1694,9 +1694,9 @@ public abstract class StreamWriterBase
     */
 
     /*
-    ///////////////////////////////////////////////////////
-    // Package methods, output validation problem reporting
-    ///////////////////////////////////////////////////////
+    /**********************************************************************
+    /* Package methods, output validation problem reporting
+    /**********************************************************************
      */
 
     protected void _reportInvalidContent(int evtType)
@@ -1732,9 +1732,9 @@ public abstract class StreamWriterBase
     }
 
     /*
-    ///////////////////////////////////////////////////////
-    // Package methods, output validation problem reporting
-    ///////////////////////////////////////////////////////
+    /**********************************************************************
+    /* Package methods, output validation problem reporting
+    /**********************************************************************
      */
 
     private final void _finishDocument(boolean forceRealClose)
