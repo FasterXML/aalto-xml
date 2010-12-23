@@ -59,7 +59,7 @@ public final class StreamReaderImpl
     implements XMLStreamReader2,
                AttributeInfo, DTDInfo, LocationInfo
 {
-    // // // Main state consts:
+    // // // Main state constants
 
     final static int STATE_PROLOG = 0; // Before root element
     final static int STATE_TREE = 1; // Parsing actual XML tree
@@ -67,9 +67,9 @@ public final class StreamReaderImpl
     final static int STATE_CLOSED = 3; // After reader has been closed
 
     /*
-    /////////////////////////////////////////////////////
-    // Configuration
-    /////////////////////////////////////////////////////
+    /**********************************************************************
+    /* Configuration
+    /**********************************************************************
      */
 
     /**
@@ -84,9 +84,9 @@ public final class StreamReaderImpl
     protected final boolean _cfgReportTextAsChars;
 
     /*
-    /////////////////////////////////////////////////////
-    // Current state
-    /////////////////////////////////////////////////////
+    /**********************************************************************
+    /* Current state
+    /**********************************************************************
      */
 
     protected int _currToken;
@@ -121,9 +121,9 @@ public final class StreamReaderImpl
     protected CharArrayBase64Decoder _base64Decoder = null;
 
     /*
-    /////////////////////////////////////////////////////
-    // Collected info
-    /////////////////////////////////////////////////////
+    /**********************************************************************
+    /* Collected XML declaration info
+    /**********************************************************************
      */
 
     // // // Info from XML declaration:
@@ -135,9 +135,9 @@ public final class StreamReaderImpl
     //final String mInputEncoding;
 
     /*
-    /////////////////////////////////////////////////////
-    // Life-cycle:
-    /////////////////////////////////////////////////////
+    /**********************************************************************
+    /* Life-cycle:
+    /**********************************************************************
      */
 
     public StreamReaderImpl(XmlScanner scanner)
@@ -164,9 +164,9 @@ public final class StreamReaderImpl
     }
 
     /*
-    /////////////////////////////////////////////////////
-    // XMLStreamReader API
-    /////////////////////////////////////////////////////
+    /**********************************************************************
+    /* XMLStreamReader API
+    /**********************************************************************
      */
 
     // // // Bit masks used for quick type comparisons
@@ -211,9 +211,9 @@ public final class StreamReaderImpl
         ;
 
     /*
-    ////////////////////////////////////////////////////
-    // XMLStreamReader, document info
-    ////////////////////////////////////////////////////
+    /**********************************************************************
+    /* XMLStreamReader, document info
+    /**********************************************************************
      */
 
     /**
@@ -253,9 +253,9 @@ public final class StreamReaderImpl
     }
 
     /*
-    ////////////////////////////////////////////////////
-    // Public API, configuration
-    ////////////////////////////////////////////////////
+    /**********************************************************************
+    /* Public API, configuration
+    /**********************************************************************
      */
 
     public Object getProperty(String name)
@@ -273,9 +273,9 @@ public final class StreamReaderImpl
     }
 
     /*
-    ////////////////////////////////////////////////////
-    // XMLStreamReader, current state
-    ////////////////////////////////////////////////////
+    /**********************************************************************
+    /* XMLStreamReader, current state
+    /**********************************************************************
      */
 
     // // // Attribute access:
@@ -618,7 +618,7 @@ public final class StreamReaderImpl
 
     public boolean isCharacters()
     {
-        return (_currToken == CHARACTERS);
+        return (getEventType() == CHARACTERS);
     }
 
     public boolean isEndElement() {
@@ -699,9 +699,9 @@ public final class StreamReaderImpl
     }
 
     /*
-    ////////////////////////////////////////////////////
-    // XMLStreamReader, iterating
-    ////////////////////////////////////////////////////
+    /**********************************************************************
+    /* XMLStreamReader, iterating
+    /**********************************************************************
      */
 
     public int next()
@@ -805,9 +805,9 @@ public final class StreamReaderImpl
     }
 
     /*
-    /////////////////////////////////////////////////
-    // TypedXMLStreamReader2 implementation
-    /////////////////////////////////////////////////
+    /**********************************************************************
+    /* TypedXMLStreamReader2 implementation
+    /**********************************************************************
      */
 
     public boolean getElementAsBoolean() throws XMLStreamException
@@ -909,9 +909,9 @@ public final class StreamReaderImpl
     } 
 
     /*
-    ////////////////////////////////////////////////////////
-    // TypedXMLStreamReader2 implementation, array elements
-    ////////////////////////////////////////////////////////
+    /**********************************************************************
+    /* TypedXMLStreamReader2 implementation, array elements
+    /**********************************************************************
      */
 
     public int readElementAsIntArray(int[] value, int from, int length) throws XMLStreamException
@@ -998,9 +998,9 @@ public final class StreamReaderImpl
     }
         
     /*
-    ////////////////////////////////////////////////////////
-    // TypedXMLStreamReader2 implementation, binary data
-    ////////////////////////////////////////////////////////
+    /**********************************************************************
+    /* TypedXMLStreamReader2 implementation, binary data
+    /**********************************************************************
      */
 
 
@@ -1117,9 +1117,9 @@ public final class StreamReaderImpl
     }
 
     /*
-    ///////////////////////////////////////////////////////////
-    // TypedXMLStreamReader2 implementation, scalar attributes
-    ///////////////////////////////////////////////////////////
+    /**********************************************************************
+    /* TypedXMLStreamReader2 implementation, scalar attributes
+    /**********************************************************************
      */
 
     public int getAttributeIndex(String namespaceURI, String localName)
@@ -1270,9 +1270,9 @@ public final class StreamReaderImpl
     }
 
     /*
-    ////////////////////////////////////////////////////
-    // XMLStreamReader2 (StAX2) implementation
-    ////////////////////////////////////////////////////
+    /**********************************************************************
+    /* XMLStreamReader2 (Stax2) implementation
+    /**********************************************************************
      */
 
     // // // StAX2, per-reader configuration
@@ -1456,9 +1456,9 @@ public final class StreamReaderImpl
     }
 
     /*
-    ////////////////////////////////////////////////////
-    // DTDInfo implementation (StAX 2)
-    ////////////////////////////////////////////////////
+    /**********************************************************************
+    /* DTDInfo implementation (StAX 2)
+    /**********************************************************************
      */
 
     /**

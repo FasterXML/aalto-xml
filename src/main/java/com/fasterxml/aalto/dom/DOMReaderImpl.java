@@ -18,19 +18,19 @@ import com.fasterxml.aalto.in.ReaderConfig;
 public class DOMReaderImpl
     extends DOMWrappingReader
 {
-    protected final ReaderConfig mConfig;
+    protected final ReaderConfig _config;
 
     /*
-    ///////////////////////////////////////////////////
-    // Life-cycle
-    ///////////////////////////////////////////////////
+    /**********************************************************************
+    /* Life-cycle
+    /**********************************************************************
      */
 
     protected DOMReaderImpl(DOMSource src, ReaderConfig cfg)
         throws XMLStreamException
     {
         super(src, cfg.willSupportNamespaces(), cfg.willCoalesceText());
-        mConfig = cfg;
+        _config = cfg;
         if (cfg.hasInternNamesBeenEnabled()) {
             setInternNames(cfg.willInternNames());
         }
@@ -46,14 +46,14 @@ public class DOMReaderImpl
     }
 
     /*
-    ///////////////////////////////////////////////////
-    // Defined/Overridden config methods
-    ///////////////////////////////////////////////////
+    /**********************************************************************
+    /* Defined/Overridden config methods
+    /**********************************************************************
      */
 
     public boolean isPropertySupported(String name)
     {
-        return mConfig.isPropertySupported(name);
+        return _config.isPropertySupported(name);
     }
 
     public Object getProperty(String name)
@@ -66,8 +66,8 @@ public class DOMReaderImpl
             // !!! TBI
             return Collections.EMPTY_LIST;
         }
-        // false -> not mandatory, unrecognized will return null
-        return mConfig.getProperty(name, false);
+        // true -> mandatory, unrecognized will throw exception
+        return _config.getProperty(name, true);
     }
 
     public boolean setProperty(String name, Object value)
@@ -75,13 +75,13 @@ public class DOMReaderImpl
         /* Note: can not call local method, since it'll return false for
          * recognized but non-mutable properties
          */
-        return mConfig.setProperty(name, value);
+        return _config.setProperty(name, value);
     }
 
     /*
-    ///////////////////////////////////////////////////
-    // Defined/Overridden error reporting
-    ///////////////////////////////////////////////////
+    /**********************************************************************
+    /* Defined/Overridden error reporting
+    /**********************************************************************
      */
 
     // @Override
