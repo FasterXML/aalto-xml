@@ -23,7 +23,6 @@
     <property name="TestResultsDir" location="${dir.test}/results" />
     <property name="TestXmlResultsDir" location="${TestResultsDir}/xml" />
     <property name="StaxTestClassesDir" location="${dir.test}/staxtest-classes" />
-    <property name="Stax2TestClassesDir" location="${dir.test}/stax2test-classes" />
     <!-- Distribution -->
     <property name="dir.dist" location="${basedir}/dist" />
 
@@ -254,7 +253,7 @@
     <!--*********************************************************************-->
     <!-- Tasks from here down are in support of junit tests.                 -->
     <!--*********************************************************************-->
-    <target name="all-tests" depends="test,staxtest,stax2test" />
+    <target name="all-tests" depends="test,staxtest" />
 
     <!-- Running generic StAX tests -->
     <target name="staxtest" depends="prepare-staxtest">
@@ -265,11 +264,11 @@
                 <fileset dir="${StaxTestClassesDir}">
                     <!-- Need to exclude inner classes... -->
                     <exclude name="**/*$*.class"/>
-                    <!-- Also, no point in testing DTD validation, as it's
-                         not implemented
-                      -->
+                    <!-- As well as (for now) validating-writer tests and DTD handling -->
                     <exclude name="org/codehaus/stax/test/vstream/*.class"/>
+                    <exclude name="stax2/vwstream/**/*.class"/>
                     <include name="org/codehaus/stax/test/**/Test*.class"/>
+                    <include name="stax2/**/Test*.class"/>
                 </fileset>
             </batchtest>
             <formatter type="xml" />
@@ -302,56 +301,6 @@
              have not found one so far)
           -->
         <unzip dest="${StaxTestClassesDir}" overwrite="false">
-           <fileset dir="${dir.lib}/test">
-              <include name="staxtest_*.jar" />
-           </fileset>
-        </unzip>
-    </target>
-
-    <!-- Running StAX2 extension tests -->
-    <target name="stax2test" depends="prepare-stax2test">
-       <!-- showoutput 'yes' to allow outputting debug msgs... -->
-        <junit fork="no" printsummary="yes" haltonfailure="no"
-         showoutput="yes">
-            <batchtest fork="no" todir="${TestXmlResultsDir}">
-                <fileset dir="${Stax2TestClassesDir}">
-                    <!-- Need to exclude inner classes... -->
-                    <exclude name="**/*$*.class"/>
-                    <!-- As well as (for now) validating-writer tests -->
-                    <exclude name="stax2/vwstream/**/*.class"/>
-                    <include name="stax2/**/Test*.class"/>
-                </fileset>
-            </batchtest>
-            <formatter type="xml" />
-            <classpath refid="classpath.compile" />
-            <classpath path="${Stax2TestClassesDir}" />
-            <classpath>
-              <pathelement path="${dir.build.classes}" />
-             <!-- Note: need to add the dummy aalto.jar, since it has properties
-                -  to point StAX to use correct implementation classes!
-               -->
-              <fileset dir="${dir.build}">
-                <include name="service-def-*.jar" />
-              </fileset> 
-              <path refid="libs.junit"/>
-           </classpath>  
-        </junit>
-
-        <junitreport todir="${TestResultsDir}">
-            <fileset dir="${TestXmlResultsDir}">
-                <include name="TEST-*.xml" />
-            </fileset>
-            <report todir="${TestResultsDir}" />
-        </junitreport>
-    </target>
-
-    <target name="prepare-stax2test" depends="jar.resources">
-        <mkdir dir="${Stax2TestClassesDir}" />
-        <!-- and unpack test classes... unfortunately needed so JUnit
-             can find classes (maybe there's a way to refer to a jar too,
-             have not found one so far)
-          -->
-        <unzip dest="${Stax2TestClassesDir}" overwrite="false">
            <fileset dir="${dir.lib}/test">
               <include name="stax2test-*.jar" />
            </fileset>
