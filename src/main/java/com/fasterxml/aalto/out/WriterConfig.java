@@ -61,17 +61,17 @@ public final class WriterConfig
     }
 
     /*
-    //////////////////////////////////////////////////////////
-    // Configurable object properties:
-    //////////////////////////////////////////////////////////
+    /**********************************************************************
+    /* Configurable object properties:
+    /**********************************************************************
      */
 
     private String _propAutoNsPrefix;
 
     /*
-    //////////////////////////////////////////////////////////
-    // Output/stream state:
-    //////////////////////////////////////////////////////////
+    /**********************************************************************
+    /* Output/stream state:
+    /**********************************************************************
      */
 
    /**
@@ -79,7 +79,7 @@ public final class WriterConfig
      * instances created for readers by an output factory. It is used
      * for sharing symbol tables.
      */
-    private final EncodingContext _encCtxt;
+    private final EncodingContext _encodingContext;
 
     /**
      * Encoding passed in either during construction, or via xml
@@ -88,9 +88,9 @@ public final class WriterConfig
     private String _encoding;
 
     /*
-    //////////////////////////////////////////////////////////
-    // Buffer recycling:
-    //////////////////////////////////////////////////////////
+    /**********************************************************************
+    /* Buffer recycling:
+    /**********************************************************************
      */
 
     /**
@@ -110,9 +110,9 @@ public final class WriterConfig
     BufferRecycler _currRecycler = null;
 
     /*
-    /////////////////////////////////////////////////////
-    // Life-cycle
-    /////////////////////////////////////////////////////
+    /**********************************************************************
+    /* Life-cycle
+    /**********************************************************************
      */
 
     private WriterConfig(String encoding, int flags, int flagMods,
@@ -121,7 +121,7 @@ public final class WriterConfig
     {
         super(flags, flagMods);
         _encoding = encoding;
-        _encCtxt = encCtxt;
+        _encodingContext = encCtxt;
 
         /* Ok, let's then see if we can find a buffer recycler. Since they
          * are lazily constructed, and since GC may just flush them out
@@ -160,14 +160,14 @@ public final class WriterConfig
     }
 
     /*
-    /////////////////////////////////////////////////////
-    // Common accessors from CommonConfig
-    /////////////////////////////////////////////////////
+    /**********************************************************************
+    /* Common accessors from CommonConfig
+    /**********************************************************************
      */
 
     public WriterConfig createNonShared()
     {
-        return new WriterConfig(_encoding, _flags, _flagMods, _encCtxt,
+        return new WriterConfig(_encoding, _flags, _flagMods, _encodingContext,
                                 _propAutoNsPrefix);
     }
 
@@ -194,13 +194,13 @@ public final class WriterConfig
     }
 
     /*
-    /////////////////////////////////////////////////////
-    // Accessors, configurable properties
-    /////////////////////////////////////////////////////
+    /**********************************************************************
+    /* Accessors, configurable properties
+    /**********************************************************************
      */
 
     @Override
-        public Object getProperty(String name, boolean isMandatory)
+    public Object getProperty(String name, boolean isMandatory)
     {
         Integer I = sProperties.get(name);
         if (I == null) {
@@ -267,9 +267,9 @@ public final class WriterConfig
     }
 
     /*
-    /////////////////////////////////////////////////////
-    // Accessors
-    /////////////////////////////////////////////////////
+    /**********************************************************************
+    /* Accessors
+    /**********************************************************************
      */
 
     // // // Configuration, Stax std props:
@@ -299,9 +299,9 @@ public final class WriterConfig
     }
 
     /*
-    /////////////////////////////////////////////////////
-    // Stax2 additions
-    /////////////////////////////////////////////////////
+    /**********************************************************************
+    /* Stax2 additions
+    /**********************************************************************
      */
 
      public void configureForXmlConformance()
@@ -347,9 +347,9 @@ public final class WriterConfig
     }
 
     /*
-    /////////////////////////////////////////////////////
-    // Impl specific additions, validation
-    /////////////////////////////////////////////////////
+    /**********************************************************************
+    /* Impl specific additions, validation
+    /**********************************************************************
      */
 
     public boolean willCheckStructure() {
@@ -383,9 +383,9 @@ public final class WriterConfig
     }
 
     /*
-    /////////////////////////////////////////////////////
-    // Buffer recycling:
-    /////////////////////////////////////////////////////
+    /**********************************************************************
+    /* Buffer recycling:
+    /**********************************************************************
      */
 
     public char[] allocSmallCBuffer(int minSize)
@@ -477,35 +477,35 @@ public final class WriterConfig
     }
 
     /*
-    /////////////////////////////////////////////////////
-    // Symbol table reusing, character types
-    /////////////////////////////////////////////////////
+    /**********************************************************************
+    /* Symbol table reusing, character types
+    /**********************************************************************
      */
 
     public WNameTable getUtf8Symbols(WNameFactory f)
     {
-        return _encCtxt.getUtf8Symbols(f);
+        return _encodingContext.getUtf8Symbols(f);
     }
 
     public WNameTable getLatin1Symbols(WNameFactory f)
     {
-        return _encCtxt.getLatin1Symbols(f);
+        return _encodingContext.getLatin1Symbols(f);
     }
 
     public WNameTable getAsciiSymbols(WNameFactory f)
     {
-        return _encCtxt.getAsciiSymbols(f);
+        return _encodingContext.getAsciiSymbols(f);
     }
 
     public WNameTable getCharSymbols(WNameFactory f)
     {
-        return _encCtxt.getCharSymbols(f);
+        return _encodingContext.getCharSymbols(f);
     }
     
     /*
-    /////////////////////////////////////////////////////
-    // Helper classes
-    /////////////////////////////////////////////////////
+    /**********************************************************************
+    /* Helper classes
+    /**********************************************************************
      */
 
     /**

@@ -10,10 +10,10 @@ import org.codehaus.stax2.XMLStreamProperties;
 public abstract class CommonConfig
 {
     /*
-    ////////////////////////////////////////////////
-    // Implementation info
-    ////////////////////////////////////////////////
-    */
+    /**********************************************************************
+    /* Implementation info
+    /**********************************************************************
+     */
 
     protected final static String IMPL_NAME = "aalto";
     
@@ -30,10 +30,10 @@ public abstract class CommonConfig
     protected final static String IMPL_VERSION = "0.9";
 
     /*
-    ////////////////////////////////////////////////
-    // Internal constants
-    ////////////////////////////////////////////////
-    */
+    /**********************************************************************
+    /* Internal constants
+    /**********************************************************************
+     */
 
     final static int PROP_IMPL_NAME = 1;
     final static int PROP_IMPL_VERSION = 2;
@@ -87,9 +87,9 @@ public abstract class CommonConfig
     }
 
     /*
-    //////////////////////////////////////////////////////////
-    // Public API, generic StAX config methods
-    //////////////////////////////////////////////////////////
+    /**********************************************************************
+    /* Public API, generic StAX config methods
+    /**********************************************************************
      */
 
     /**
@@ -111,7 +111,10 @@ public abstract class CommonConfig
                 return Boolean.FALSE;
             }
         }
-        throw new IllegalArgumentException("Unrecognized property '"+propName+"'");
+        if (isMandatory) {
+            throw new IllegalArgumentException("Unrecognized property '"+propName+"'");
+        }
+        return null;
     }
 
     public boolean isPropertySupported(String propName)
@@ -133,9 +136,9 @@ public abstract class CommonConfig
     }
 
     /*
-    /////////////////////////////////////////////
-    // Public API beyond Stax2
-    /////////////////////////////////////////////
+    /**********************************************************************
+    /* Public API beyond Stax2
+    /**********************************************************************
      */
 
     /**
@@ -163,9 +166,9 @@ public abstract class CommonConfig
     public abstract boolean isXml11();
 
     /*
-    /////////////////////////////////////////////
-    // Helper methods for sub-classes
-    /////////////////////////////////////////////
+    /**********************************************************************
+    /* Helper methods for sub-classes
+    /**********************************************************************
      */
 
     protected final boolean hasFlag(int flagMask)
@@ -202,4 +205,3 @@ public abstract class CommonConfig
         return (_flagMods & flagMask) != 0;
     }
 }
-

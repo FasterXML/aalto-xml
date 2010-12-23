@@ -63,9 +63,9 @@ public final class InputFactoryImpl
     protected XMLEventAllocator _allocator = null;
 
     /*
-    /////////////////////////////////////////////////////
-    // Life-cycle:
-    /////////////////////////////////////////////////////
+    /**********************************************************************
+    /* Life-cycle:
+    /**********************************************************************
      */
 
     public InputFactoryImpl()
@@ -74,9 +74,9 @@ public final class InputFactoryImpl
     }
 
     /*
-    /////////////////////////////////////////////////////////
-    // StAX, XMLInputFactory: filtered reader factory methods
-    /////////////////////////////////////////////////////////
+    /**********************************************************************
+    /* StAX, XMLInputFactory: filtered reader factory methods
+    /**********************************************************************
      */
 
     // // // Filtered reader factory methods
@@ -105,9 +105,9 @@ public final class InputFactoryImpl
     }
 
     /*
-    /////////////////////////////////////////////////////////
-    // StAX, XMLInputFactory: XMLEventReader factory methods
-    /////////////////////////////////////////////////////////
+    /**********************************************************************
+    /* StAX, XMLInputFactory: XMLEventReader factory methods
+    /**********************************************************************
      */
 
     public XMLEventReader createXMLEventReader(InputStream in)
@@ -153,9 +153,9 @@ public final class InputFactoryImpl
     }
 
     /*
-    /////////////////////////////////////////////////////////
-    // StAX, XMLInputFactory: XMLStreamReader factory methods
-    /////////////////////////////////////////////////////////
+    /**********************************************************************
+    /* StAX, XMLInputFactory: XMLStreamReader factory methods
+    /**********************************************************************
      */
 
     public XMLStreamReader createXMLStreamReader(InputStream in)
@@ -195,9 +195,9 @@ public final class InputFactoryImpl
     }
 
     /*
-    /////////////////////////////////////////////////////
-    // StAX, XMLInputFactory; generic accessors/mutators
-    /////////////////////////////////////////////////////
+    /**********************************************************************
+    /* StAX, XMLInputFactory; generic accessors/mutators
+    /**********************************************************************
      */
 
     public Object getProperty(String name)
@@ -243,12 +243,10 @@ public final class InputFactoryImpl
     }
 
     /*
-    /////////////////////////////////////////////////////
-    // StAX2 implementation
-    /////////////////////////////////////////////////////
+    /**********************************************************************
+    /* StAX2 implementation; additional factory methods
+    /**********************************************************************
      */
-
-    // // // StAX2, additional factory methods:
 
     public XMLEventReader2 createXMLEventReader(URL src)
         throws XMLStreamException
@@ -306,9 +304,9 @@ public final class InputFactoryImpl
     }
 
     /*
-    /////////////////////////////////////////////////////
-    // Internal/package methods
-    /////////////////////////////////////////////////////
+    /**********************************************************************
+    /* Internal/package methods
+    /**********************************************************************
      */
 
     /**

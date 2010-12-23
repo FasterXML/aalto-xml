@@ -1,16 +1,25 @@
-Version: 0.9.5
+Version: 0.9.7
 
-Release date: 20-Mar-2009
+Release date: 
 
 Description:
-  Minor intermediate release that moves code under "com.fasterxml.aalto"
-  package.
+  ...
 
   The last remaining part to complete for official 1.0 release is
   to complete non-blocking parser implementation; need to define API,
   implement xml declaration handling.
 
 == History: ==
+
+0.9.6 [11-Oct-2010]
+
+  * Build system converted to use Maven for easier deployment; OSGi bundle,
+    moved home page to [http://wiki.fasterxml.com/AaltoHome]
+
+0.9.5 [20-Mar-2009]
+
+  * Licensing change to basic Apache License 2.0
+  * Moved code under "com.fasterxml.aalto" Java package.
 
 0.9.4 [04-Feb-2009]
 

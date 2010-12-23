@@ -46,17 +46,17 @@ public final class OutputFactoryImpl
     extends XMLOutputFactory2
 {
     /*
-    /////////////////////////////////////////////////////
-    // Actual storage of configuration settings
-    /////////////////////////////////////////////////////
+    /**********************************************************************
+    /* Actual storage of configuration settings
+    /**********************************************************************
      */
 
     protected final WriterConfig _config;
 
     /*
-    /////////////////////////////////////////////////////
-    // Life-cycle
-    /////////////////////////////////////////////////////
+    /**********************************************************************
+    /* Life-cycle
+    /**********************************************************************
      */
 
     public OutputFactoryImpl() {
@@ -64,9 +64,9 @@ public final class OutputFactoryImpl
     }
 
     /*
-    /////////////////////////////////////////////////////
-    // XMLOutputFactory API
-    /////////////////////////////////////////////////////
+    /**********************************************************************
+    /* XMLOutputFactory API
+    /**********************************************************************
      */
 
     public XMLEventWriter createXMLEventWriter(OutputStream out)
@@ -119,8 +119,8 @@ public final class OutputFactoryImpl
     
     public Object getProperty(String name)
     {
-        // false -> is mandatory, unrecognized will throw IllegalArgumentException
-        return _config.getProperty(name, false);
+        // true -> is mandatory, unrecognized will throw IllegalArgumentException
+        return _config.getProperty(name, true);
     }
     
     public boolean isPropertySupported(String name) {
@@ -133,9 +133,9 @@ public final class OutputFactoryImpl
     }
 
     /*
-    /////////////////////////////////////////
-    // StAX2 extensions
-    /////////////////////////////////////////
+    /**********************************************************************
+    /* StAX2 extensions
+    /**********************************************************************
      */
 
     // // // StAX2 additional (encoding-aware) factory methods
@@ -177,9 +177,9 @@ public final class OutputFactoryImpl
     }
     
     /*
-    /////////////////////////////////////////
-    // Internal methods:
-    /////////////////////////////////////////
+    /**********************************************************************
+    /* Internal methods:
+    /**********************************************************************
      */
 
     /**
@@ -328,7 +328,7 @@ public final class OutputFactoryImpl
             return createSW(null, w, encoding, autoclose);
         }
         if (sysId != null && sysId.length() > 0) {
-            /* 26-Dec-2008, TSa: If we must construct URL from system id,
+            /* 26-Dec-2008, tatu: If we must construct URL from system id,
              *   it means caller will not have access to resulting
              *   stream, thus we will force auto-closing.
              */
