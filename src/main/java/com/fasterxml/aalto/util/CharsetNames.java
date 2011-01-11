@@ -3,7 +3,6 @@ package com.fasterxml.aalto.util;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 
-import com.fasterxml.aalto.XmlConsts;
 
 /**
  * Simple utility class that normalizes given character input character

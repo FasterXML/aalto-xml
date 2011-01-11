@@ -37,10 +37,10 @@ import org.codehaus.stax2.ri.evt.Stax2EventReaderAdapter;
 import org.codehaus.stax2.ri.evt.Stax2FilteredEventReader;
 
 
-import com.fasterxml.aalto.IoStreamException;
 import com.fasterxml.aalto.dom.DOMReaderImpl;
 import com.fasterxml.aalto.evt.EventAllocatorImpl;
 import com.fasterxml.aalto.evt.EventReaderImpl;
+import com.fasterxml.aalto.impl.IoStreamException;
 import com.fasterxml.aalto.in.*;
 import com.fasterxml.aalto.util.URLUtil;
 

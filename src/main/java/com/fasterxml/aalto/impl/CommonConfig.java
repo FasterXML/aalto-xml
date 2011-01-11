@@ -1,4 +1,4 @@
-package com.fasterxml.aalto;
+package com.fasterxml.aalto.impl;
 
 import java.util.*;
 

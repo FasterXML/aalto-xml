@@ -20,7 +20,7 @@ import javax.xml.stream.util.XMLEventAllocator;
 import org.codehaus.stax2.XMLStreamReader2;
 import org.codehaus.stax2.ri.Stax2EventReaderImpl;
 
-import com.fasterxml.aalto.StreamExceptionBase;
+import com.fasterxml.aalto.impl.StreamExceptionBase;
 
 /**
  * Simple implementation based on Stax2 reference implementation

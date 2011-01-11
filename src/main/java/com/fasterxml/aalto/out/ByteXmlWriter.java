@@ -22,10 +22,10 @@ import javax.xml.stream.*;
 import org.codehaus.stax2.ri.typed.AsciiValueEncoder;
 
 
-import com.fasterxml.aalto.ErrorConsts;
-import com.fasterxml.aalto.XmlConsts;
+import com.fasterxml.aalto.impl.ErrorConsts;
 import com.fasterxml.aalto.util.XmlCharTypes;
 import com.fasterxml.aalto.util.XmlChars;
+import com.fasterxml.aalto.util.XmlConsts;
 
 import static com.fasterxml.aalto.out.OutputCharTypes.*;
 

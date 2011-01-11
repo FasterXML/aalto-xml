@@ -21,7 +21,7 @@ import javax.xml.stream.XMLStreamException;
 import org.codehaus.stax2.XMLStreamLocation2;
 
 
-import com.fasterxml.aalto.LocationImpl;
+import com.fasterxml.aalto.impl.LocationImpl;
 import com.fasterxml.aalto.util.DataUtil;
 import com.fasterxml.aalto.util.XmlCharTypes;
 import com.fasterxml.aalto.util.XmlChars;

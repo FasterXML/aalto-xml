@@ -18,8 +18,8 @@ package com.fasterxml.aalto.in;
 import java.io.*;
 
 
-import com.fasterxml.aalto.XmlConsts;
 import com.fasterxml.aalto.in.ReaderConfig;
+import com.fasterxml.aalto.util.XmlConsts;
 
 /**
  * Since JDK does not come with UTF-32/UCS-4, let's implement a simple

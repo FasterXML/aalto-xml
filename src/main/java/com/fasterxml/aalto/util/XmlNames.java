@@ -15,7 +15,6 @@
 
 package com.fasterxml.aalto.util;
 
-import com.fasterxml.aalto.XmlConsts;
 
 /**
  * Simple utility class used for checking validity of xml names.

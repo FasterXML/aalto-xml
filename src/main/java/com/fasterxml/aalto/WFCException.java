@@ -17,6 +17,8 @@ package com.fasterxml.aalto;
 
 import javax.xml.stream.Location;
 
+import com.fasterxml.aalto.impl.StreamExceptionBase;
+
 /**
  * Base class for reader-side Well-Formedness Constraint violation
  * (fatal error) exceptions.

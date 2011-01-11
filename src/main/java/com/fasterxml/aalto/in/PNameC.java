@@ -15,7 +15,7 @@
 
 package com.fasterxml.aalto.in;
 
-import com.fasterxml.aalto.ErrorConsts;
+import com.fasterxml.aalto.impl.ErrorConsts;
 
 /**
  * An alternate implementation of PName: instead of coming straight from

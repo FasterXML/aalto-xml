@@ -29,13 +29,13 @@ import org.codehaus.stax2.ri.Stax2EventWriterImpl;
 import org.codehaus.stax2.ri.Stax2WriterAdapter;
 
 
-import com.fasterxml.aalto.IoStreamException;
-import com.fasterxml.aalto.StreamExceptionBase;
-import com.fasterxml.aalto.XmlConsts;
 import com.fasterxml.aalto.dom.DOMWriterImpl;
+import com.fasterxml.aalto.impl.IoStreamException;
+import com.fasterxml.aalto.impl.StreamExceptionBase;
 import com.fasterxml.aalto.out.*;
 import com.fasterxml.aalto.util.CharsetNames;
 import com.fasterxml.aalto.util.URLUtil;
+import com.fasterxml.aalto.util.XmlConsts;
 
 /**
  * Basic implementation of {@link XMLOutputFactory}.

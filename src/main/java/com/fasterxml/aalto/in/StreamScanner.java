@@ -20,8 +20,8 @@ import java.io.*;
 import javax.xml.stream.XMLStreamException;
 
 
-import com.fasterxml.aalto.ErrorConsts;
-import com.fasterxml.aalto.IoStreamException;
+import com.fasterxml.aalto.impl.ErrorConsts;
+import com.fasterxml.aalto.impl.IoStreamException;
 import com.fasterxml.aalto.util.DataUtil;
 import com.fasterxml.aalto.util.TextBuilder;
 

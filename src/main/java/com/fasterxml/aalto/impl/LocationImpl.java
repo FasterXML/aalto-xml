@@ -1,4 +1,4 @@
-package com.fasterxml.aalto;
+package com.fasterxml.aalto.impl;
 
 import org.codehaus.stax2.XMLStreamLocation2;
 

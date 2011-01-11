@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-package com.fasterxml.aalto;
+package com.fasterxml.aalto.impl;
 
 import javax.xml.stream.*;
 

@@ -20,9 +20,9 @@ import java.io.*;
 import javax.xml.stream.Location;
 import javax.xml.stream.XMLStreamException;
 
-import com.fasterxml.aalto.IoStreamException;
 import com.fasterxml.aalto.WFCException;
-import com.fasterxml.aalto.XmlConsts;
+import com.fasterxml.aalto.impl.IoStreamException;
+import com.fasterxml.aalto.util.XmlConsts;
 
 /**
  * Abstract base class that defines shared functionality between different

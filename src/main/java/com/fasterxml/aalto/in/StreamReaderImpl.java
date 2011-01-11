@@ -43,10 +43,10 @@ import org.codehaus.stax2.ri.typed.CharArrayBase64Decoder;
 import org.codehaus.stax2.ri.typed.ValueDecoderFactory;
 
 
-import com.fasterxml.aalto.ErrorConsts;
-import com.fasterxml.aalto.IoStreamException;
 import com.fasterxml.aalto.UncheckedStreamException;
 import com.fasterxml.aalto.WFCException;
+import com.fasterxml.aalto.impl.ErrorConsts;
+import com.fasterxml.aalto.impl.IoStreamException;
 import com.fasterxml.aalto.util.TextAccumulator;
 import com.fasterxml.aalto.util.XmlNames;
 

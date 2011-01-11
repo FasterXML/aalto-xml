@@ -30,7 +30,7 @@ import org.codehaus.stax2.ri.typed.CharArrayBase64Decoder;
 import org.codehaus.stax2.ri.typed.ValueDecoderFactory;
 
 
-import com.fasterxml.aalto.ErrorConsts;
+import com.fasterxml.aalto.impl.ErrorConsts;
 import com.fasterxml.aalto.util.DataUtil;
 
 /**

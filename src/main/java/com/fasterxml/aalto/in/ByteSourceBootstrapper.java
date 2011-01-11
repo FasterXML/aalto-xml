@@ -21,8 +21,8 @@ import javax.xml.stream.Location;
 import javax.xml.stream.XMLStreamException;
 
 
-import com.fasterxml.aalto.IoStreamException;
-import com.fasterxml.aalto.LocationImpl;
+import com.fasterxml.aalto.impl.IoStreamException;
+import com.fasterxml.aalto.impl.LocationImpl;
 import com.fasterxml.aalto.util.CharsetNames;
 
 /**

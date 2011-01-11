@@ -8,12 +8,12 @@ import javax.xml.stream.*;
 import org.codehaus.stax2.XMLInputFactory2;
 
 
-import com.fasterxml.aalto.CommonConfig;
-import com.fasterxml.aalto.XmlConsts;
+import com.fasterxml.aalto.impl.CommonConfig;
 import com.fasterxml.aalto.util.BufferRecycler;
 import com.fasterxml.aalto.util.CharsetNames;
 import com.fasterxml.aalto.util.UriCanonicalizer;
 import com.fasterxml.aalto.util.XmlCharTypes;
+import com.fasterxml.aalto.util.XmlConsts;
 
 /**
  * This is the shared configuration object passed by the factory to reader,

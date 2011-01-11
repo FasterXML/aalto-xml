@@ -9,7 +9,7 @@ import org.codehaus.stax2.XMLOutputFactory2;
 import org.codehaus.stax2.XMLStreamProperties;
 
 
-import com.fasterxml.aalto.CommonConfig;
+import com.fasterxml.aalto.impl.CommonConfig;
 import com.fasterxml.aalto.util.BufferRecycler;
 
 /**

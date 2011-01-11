@@ -1,0 +1,10 @@
+# Maven stuff
+target
+
+# Eclipse
+.classpath
+.project
+.settings
+
+# Legacy ant
+build

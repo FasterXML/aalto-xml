@@ -23,11 +23,11 @@ import javax.xml.stream.*;
 import org.codehaus.stax2.ri.typed.AsciiValueEncoder;
 
 
-import com.fasterxml.aalto.ErrorConsts;
-import com.fasterxml.aalto.IoStreamException;
-import com.fasterxml.aalto.XmlConsts;
+import com.fasterxml.aalto.impl.ErrorConsts;
+import com.fasterxml.aalto.impl.IoStreamException;
 import com.fasterxml.aalto.util.CharsetNames;
 import com.fasterxml.aalto.util.XmlChars;
+import com.fasterxml.aalto.util.XmlConsts;
 
 /**
  * Base class for output type / encoding-specific serializers

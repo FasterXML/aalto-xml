@@ -22,7 +22,7 @@ import javax.xml.stream.*;
 import org.codehaus.stax2.ri.typed.AsciiValueEncoder;
 
 
-import com.fasterxml.aalto.ErrorConsts;
+import com.fasterxml.aalto.impl.ErrorConsts;
 import com.fasterxml.aalto.io.UTF8Writer;
 import com.fasterxml.aalto.util.XmlCharTypes;
 

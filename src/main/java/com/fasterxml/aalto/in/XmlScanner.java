@@ -25,15 +25,15 @@ import org.codehaus.stax2.typed.TypedXMLStreamException;
 import org.codehaus.stax2.ri.typed.CharArrayBase64Decoder;
 
 
-import com.fasterxml.aalto.ErrorConsts;
-import com.fasterxml.aalto.IoStreamException;
 import com.fasterxml.aalto.WFCException;
-import com.fasterxml.aalto.XmlConsts;
+import com.fasterxml.aalto.impl.ErrorConsts;
+import com.fasterxml.aalto.impl.IoStreamException;
 import com.fasterxml.aalto.util.DataUtil;
 import com.fasterxml.aalto.util.EmptyIterator;
 import com.fasterxml.aalto.util.SingletonIterator;
 import com.fasterxml.aalto.util.TextBuilder;
 import com.fasterxml.aalto.util.XmlChars;
+import com.fasterxml.aalto.util.XmlConsts;
 
 /**
  * This is the abstract base class for all scanner implementations,

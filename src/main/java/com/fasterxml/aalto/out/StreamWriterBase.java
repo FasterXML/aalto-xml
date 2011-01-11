@@ -35,13 +35,13 @@ import org.codehaus.stax2.typed.Base64Variant;
 import org.codehaus.stax2.typed.Base64Variants;
 
 
-import com.fasterxml.aalto.ErrorConsts;
-import com.fasterxml.aalto.IoStreamException;
-import com.fasterxml.aalto.LocationImpl;
-import com.fasterxml.aalto.StreamExceptionBase;
 import com.fasterxml.aalto.ValidationException;
-import com.fasterxml.aalto.XmlConsts;
+import com.fasterxml.aalto.impl.ErrorConsts;
+import com.fasterxml.aalto.impl.IoStreamException;
+import com.fasterxml.aalto.impl.LocationImpl;
+import com.fasterxml.aalto.impl.StreamExceptionBase;
 import com.fasterxml.aalto.util.TextUtil;
+import com.fasterxml.aalto.util.XmlConsts;
 
 /**
  * Base class for {@link XMLStreamReader} implementations.

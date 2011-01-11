@@ -1,4 +1,4 @@
-package com.fasterxml.aalto;
+package com.fasterxml.aalto.util;
 
 /**
  * Simple constant container interface, shared by input and output

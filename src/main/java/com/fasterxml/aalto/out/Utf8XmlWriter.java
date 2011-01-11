@@ -19,8 +19,8 @@ import java.io.*;
 
 import javax.xml.stream.*;
 
-import com.fasterxml.aalto.IoStreamException;
-import com.fasterxml.aalto.XmlConsts;
+import com.fasterxml.aalto.impl.IoStreamException;
+import com.fasterxml.aalto.util.XmlConsts;
 
 /**
  * This is the generic implementation of {@link XmlWriter}, used if
