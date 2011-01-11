@@ -1790,8 +1790,8 @@ public class StreamReaderImpl
      */
 
     @Override
-        public final String toString()
+    public final String toString()
     {
-        return "[Aalto stream reader, scanner type: "+_scanner.getClass().getName()+"]";
+        return "[Aalto stream reader, scanner: "+_scanner+"]";
     }
 }

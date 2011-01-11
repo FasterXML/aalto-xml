@@ -5,10 +5,9 @@ import java.util.List;
 
 import javax.xml.stream.*;
 
+import com.fasterxml.aalto.AsyncInputFeeder;
 import com.fasterxml.aalto.AsyncXMLStreamReader;
-import com.fasterxml.aalto.async.*;
-import com.fasterxml.aalto.in.*;
-import com.fasterxml.aalto.stax.StreamReaderImpl;
+import com.fasterxml.aalto.stax.InputFactoryImpl;
 
 /**
  * Simple helper test class for checking how stream reader handles xml
@@ -18,18 +17,15 @@ public class TestAsyncReader
     implements XMLStreamConstants
 {
     @SuppressWarnings("unchecked")
-	protected int test(File file)
-        throws Exception
+    protected int test(File file) throws Exception
     {
-        int total = 0;
+        int bytes = 0;
 
         InputStream in = new FileInputStream(file);
-        ReaderConfig cfg = new ReaderConfig();
-        cfg.setActualEncoding("UTF-8");
 
-        AsyncUtfScanner asc = new AsyncUtfScanner(cfg);
-        StreamReaderImpl sr = new StreamReaderImpl(asc);
-
+        AsyncXMLStreamReader asyncReader = new InputFactoryImpl().createAsyncXMLStreamReader();
+        final AsyncInputFeeder feeder = asyncReader.getInputFeeder();
+        
         final byte[] buf = new byte[3000];
 
         /*
@@ -43,27 +39,28 @@ public class TestAsyncReader
             int type;
 
             // May need to feed multiple segments:
-            while ((type = sr.next()) == AsyncXMLStreamReader.EVENT_INCOMPLETE) {
-                System.out.println("DEBUG: scanner -> "+asc.toString());
+            while ((type = asyncReader.next()) == AsyncXMLStreamReader.EVENT_INCOMPLETE) {
+                if (!feeder.needMoreInput()) { // sanity check for this test (not needed for real code)
+                    throw new IllegalStateException("Got EVENT_INCOMPLETE but not expecting more input");
+                }
+                System.out.println("READ-MORE: reader == "+asyncReader.toString());
                 int len = in.read(buf, 1, 3);
                 if (len < 0) {
                     System.err.println("Error: Unexpected EOF");
                     break main_loop;
                 }
-                asc.addInput(buf, 1, len);
+                feeder.feedInput(buf, 1, len);
+                bytes += len;
             }
 
             if (type == END_DOCUMENT) {
                 System.out.print("[END_DOCUMENT]");
                 break;
             }
-            total += type; // so it won't be optimized out...
-
             System.out.print("["+type+"]");
 
-            if (sr.hasText()) {
-                String text = sr.getText();
-                total += text.length(); // to prevent dead code elimination
+            if (asyncReader.hasText()) {
+                String text = asyncReader.getText();
                 if (type == CHARACTERS || type == CDATA || type == COMMENT) {
                     System.out.println(" Text("+text.length()+") = '"+text+"'.");
                     if (text.length() >= 1) {
@@ -77,8 +74,8 @@ public class TestAsyncReader
                     }
                 } else if (type == DTD) {
                     System.out.println(" DTD;");
-                    List<Object> entities = (List<Object>) sr.getProperty("javax.xml.stream.entities");
-                    List<Object> notations = (List<Object>) sr.getProperty("javax.xml.stream.notations");
+                    List<Object> entities = (List<Object>) asyncReader.getProperty("javax.xml.stream.entities");
+                    List<Object> notations = (List<Object>) asyncReader.getProperty("javax.xml.stream.notations");
                     int entCount = (entities == null) ? -1 : entities.size();
                     int notCount = (notations == null) ? -1 : notations.size();
                     System.out.print("  ("+entCount+" entities, "+notCount
@@ -88,7 +85,7 @@ public class TestAsyncReader
                     System.out.println(">>");
                 } else if (type == ENTITY_REFERENCE) {
                     // entity ref
-                    System.out.println(" Entity ref: &"+sr.getLocalName()+" -> '"+sr.getText()+"'.");
+                    System.out.println(" Entity ref: &"+asyncReader.getLocalName()+" -> '"+asyncReader.getText()+"'.");
                     //hasName = false; // to suppress further output
                 } else { // PI?
                     ;
@@ -96,60 +93,60 @@ public class TestAsyncReader
             }
 
             if (type == PROCESSING_INSTRUCTION) {
-                System.out.println(" PI target = '"+sr.getPITarget()+"'.");
-                System.out.println(" PI data = '"+sr.getPIData()+"'.");
+                System.out.println(" PI target = '"+asyncReader.getPITarget()+"'.");
+                System.out.println(" PI data = '"+asyncReader.getPIData()+"'.");
             } else if (type == START_ELEMENT) {
-                String prefix = sr.getPrefix();
+                String prefix = asyncReader.getPrefix();
                 System.out.print('<');
                 if (prefix != null && prefix.length() > 0) {
                     System.out.print(prefix);
                     System.out.print(':');
                 }
-                System.out.print(sr.getLocalName());
-                //System.out.println("[first char 0x"+Integer.toHexString(sr.getLocalName().charAt(0))+"]");
+                System.out.print(asyncReader.getLocalName());
+                //System.out.println("[first char 0x"+Integer.toHexString(asyncReader.getLocalName().charAt(0))+"]");
                 System.out.print(" {ns '");
-                System.out.print(sr.getNamespaceURI());
+                System.out.print(asyncReader.getNamespaceURI());
                 System.out.print("'}> ");
-                int count = sr.getAttributeCount();
-                int nsCount = sr.getNamespaceCount();
+                int count = asyncReader.getAttributeCount();
+                int nsCount = asyncReader.getNamespaceCount();
                 System.out.println(" ["+nsCount+" ns, "+count+" attrs]");
                 // debugging:
                 for (int i = 0; i < nsCount; ++i) {
-                    System.out.println(" ns#"+i+": '"+sr.getNamespacePrefix(i)
-                                     +"' -> '"+sr.getNamespaceURI(i)
+                    System.out.println(" ns#"+i+": '"+asyncReader.getNamespacePrefix(i)
+                                     +"' -> '"+asyncReader.getNamespaceURI(i)
                                      +"'");
                 }
                 for (int i = 0; i < count; ++i) {
-                    String val = sr.getAttributeValue(i);
-                    System.out.print(" attr#"+i+": "+sr.getAttributePrefix(i)
-                                     +":"+sr.getAttributeLocalName(i)
-                                     +" ("+sr.getAttributeNamespace(i)
+                    String val = asyncReader.getAttributeValue(i);
+                    System.out.print(" attr#"+i+": "+asyncReader.getAttributePrefix(i)
+                                     +":"+asyncReader.getAttributeLocalName(i)
+                                     +" ("+asyncReader.getAttributeNamespace(i)
                                      +") -> '"+val
                                      +"' ["+(val.length())+"]");
-                    System.out.println(sr.isAttributeSpecified(i) ?
+                    System.out.println(asyncReader.isAttributeSpecified(i) ?
                                        "[specified]" : "[Default]");
                 }
             } else if (type == END_ELEMENT) {
                 System.out.print("</");
-                String prefix = sr.getPrefix();
+                String prefix = asyncReader.getPrefix();
                 if (prefix != null && prefix.length() > 0) {
                     System.out.print(prefix);
                     System.out.print(':');
                 }
-                System.out.print(sr.getLocalName());
+                System.out.print(asyncReader.getLocalName());
                 System.out.print(" {ns '");
-                System.out.print(sr.getNamespaceURI());
+                System.out.print(asyncReader.getNamespaceURI());
                 System.out.print("'}> ");
-                int nsCount = sr.getNamespaceCount();
+                int nsCount = asyncReader.getNamespaceCount();
                 System.out.println(" ["+nsCount+" ns unbound]");
             } else if (type == START_DOCUMENT) { // only for multi-doc mode
-                System.out.print("XML-DECL: version = '"+sr.getVersion()
-                                 +"', xml-decl-encoding = '"+sr.getCharacterEncodingScheme()
-                                 +"', app-encoding = '"+sr.getEncoding()
-                                 +"', stand-alone set: "+sr.standaloneSet());
+                System.out.print("XML-DECL: version = '"+asyncReader.getVersion()
+                                 +"', xml-decl-encoding = '"+asyncReader.getCharacterEncodingScheme()
+                                 +"', app-encoding = '"+asyncReader.getEncoding()
+                                 +"', stand-alone set: "+asyncReader.standaloneSet());
             }
         }
-        return total;
+        return bytes;
     }
 
     public static void main(String[] args)
@@ -163,7 +160,7 @@ public class TestAsyncReader
         try {
             int total = new TestAsyncReader().test(new File(args[0]));
             System.out.println();
-            System.out.println("Total: "+total);
+            System.out.println("Bytes processed: "+total);
         } catch (Throwable t) {
           System.err.println("Error: "+t);
           t.printStackTrace();

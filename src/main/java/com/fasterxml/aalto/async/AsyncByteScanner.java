@@ -172,6 +172,12 @@ public abstract class AsyncByteScanner
      */
     protected int _pendingInput = 0;
 
+    /**
+     * Flag that is sent when calling application indicates that there will
+     * be no more input to parse.
+     */
+    protected boolean _endOfInput = false;
+    
     /*
     /**********************************************************************
     /* Name parsing state
@@ -224,23 +230,29 @@ public abstract class AsyncByteScanner
     @Override
     public String toString()
     {
-        return "[curr="+_currToken+" next="+_nextEvent+", state = "+_state+"]";
+        return "asyncScanner; curr="+_currToken+" next="+_nextEvent+", state = "+_state;
     }
 
     /*
     /**********************************************************************
-    /* Input feeding
+    /* Async input, methods to feed (push) content to parse
     /**********************************************************************
      */
 
-    public final boolean hasInput() { return _inputPtr < _inputEnd; }
+    public final boolean needMoreInput() {
+        return (_inputPtr >=_inputEnd) && !_endOfInput;
+    }
 
-    public void addInput(byte[] buf, int start, int len)
+    public void feedInput(byte[] buf, int start, int len)
         throws XMLStreamException
     {
         // Must not have remaining input
-        if (hasInput()) {
+        if (_inputPtr < _inputEnd) {
             throw new XMLStreamException("Still have "+(_inputEnd - _inputPtr)+" unread bytes");
+        }
+        // and shouldn't have been marked as end-of-input
+        if (_endOfInput) {
+            throw new XMLStreamException("Already closed, can not feed more input");
         }
         // Time to update pointers first
         _pastBytes += _origBufferLen;
@@ -253,16 +265,22 @@ public abstract class AsyncByteScanner
         _origBufferLen = len;
     }
 
+    public void endOfInput() {
+        _endOfInput = true;
+    }
+    
     /**
      * Since the async scanner has no access to whatever passes content,
      * there is no input source in same sense as with blocking scanner;
-     * and there is nothing to close.
+     * and there is nothing to close. But we can at least mark input
+     * as having ended.
      */
     @Override
     protected void _closeSource()
         throws IOException
     {
         // nothing to do, we are done.
+        _endOfInput = true;
     }
 
     /*
