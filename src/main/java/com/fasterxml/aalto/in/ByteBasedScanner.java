@@ -109,13 +109,13 @@ public abstract class ByteBasedScanner
      * This buffer is used for name parsing. Will be expanded if/as
      * needed; 32 ints can hold names 128 ascii chars long.
      */
-    protected int[] mQuadBuffer = new int[32];
+    protected int[] _quadBuffer = new int[32];
 
     /**
      * For now, symbol table contains prefixed names. In future it is
      * possible that they may be split into prefixes and local names?
      */
-    protected final ByteBasedPNameTable mSymbols;
+    protected final ByteBasedPNameTable _symbols;
 
     /**
      * This is a simple container object that is used to access the
@@ -123,7 +123,7 @@ public abstract class ByteBasedScanner
      * we actually support multiple utf-8 compatible encodings, not
      * just utf-8 itself.
      */
-    protected final XmlCharTypes mCharTypes;
+    protected final XmlCharTypes _charTypes;
 
     /*
     /**********************************************************************
@@ -135,14 +135,14 @@ public abstract class ByteBasedScanner
      * Number of bytes that were read and processed before the contents
      * of the current buffer; used for calculating absolute offsets.
      */
-    protected int mPastBytes;
+    protected int _pastBytes;
 
     /**
      * Offset used to calculate the column value given current input
      * buffer pointer. May be negative, if the first character of the
      * row was contained within an earlier buffer.
      */
-    protected int mRowStartOffset;
+    protected int _rowStartOffset;
 
     /*
     /**********************************************************************
@@ -156,7 +156,7 @@ public abstract class ByteBasedScanner
      * expansion). Negative, if from entity expansion; positive if
      * a singular char.
      */
-    protected int mTmpChar = INT_NULL;
+    protected int _tmpChar = INT_NULL;
 
     /*
     /**********************************************************************
@@ -167,18 +167,18 @@ public abstract class ByteBasedScanner
     protected ByteBasedScanner(ReaderConfig cfg)
     {
         super(cfg);
-        mSymbols = cfg.getBBSymbols();
-        mCharTypes = cfg.getCharTypes();
-        mPastBytes = 0; // should it be passed by caller?
-        mRowStartOffset = 0; // should probably be passed by caller...
+        _symbols = cfg.getBBSymbols();
+        _charTypes = cfg.getCharTypes();
+        _pastBytes = 0; // should it be passed by caller?
+        _rowStartOffset = 0; // should probably be passed by caller...
     }
 
     @Override
     protected void _releaseBuffers()
     {
         super._releaseBuffers();
-        if (mSymbols.maybeDirty()) {
-            _config.updateBBSymbols(mSymbols);
+        if (_symbols.maybeDirty()) {
+            _config.updateBBSymbols(_symbols);
         }
     }
 
@@ -193,7 +193,7 @@ public abstract class ByteBasedScanner
     public XMLStreamLocation2 getCurrentLocation()
     {
         return LocationImpl.fromZeroBased(_config.getPublicId(), _config.getSystemId(),
-             mPastBytes + _inputPtr, _currRow, _inputPtr - mRowStartOffset);
+             _pastBytes + _inputPtr, _currRow, _inputPtr - _rowStartOffset);
     }
 
     public int getCurrentLineNr()
@@ -203,18 +203,18 @@ public abstract class ByteBasedScanner
 
     public int getCurrentColumnNr()
     {
-        return _inputPtr - mRowStartOffset;
+        return _inputPtr - _rowStartOffset;
     }
 
     protected final void markLF(int offset)
     {
-        mRowStartOffset = offset;
+        _rowStartOffset = offset;
         ++_currRow;
     }
 
     protected final void markLF()
     {
-        mRowStartOffset = _inputPtr;
+        _rowStartOffset = _inputPtr;
         ++_currRow;
     }
 
@@ -462,7 +462,7 @@ public abstract class ByteBasedScanner
         if (lastQuadBytes < 4) {
             quads[qlen-1] = lastQuad;
         }
-        return mSymbols.addSymbol(hash, baseName, last_colon, quads, qlen);
+        return _symbols.addSymbol(hash, baseName, last_colon, quads, qlen);
     }
 
     protected void reportInvalidInitial(int mask)

@@ -30,7 +30,6 @@ import com.fasterxml.aalto.util.XmlCharTypes;
  */
 public class AsyncUtfScanner
     extends AsyncByteScanner
-    //implements AsyncXMLStreamReader
 {
     private final static int EVENT_INCOMPLETE = AsyncXMLStreamReader.EVENT_INCOMPLETE;
 
@@ -72,7 +71,7 @@ public class AsyncUtfScanner
         dummy_loop:
         do { // dummy loop, to allow break
             int c = (int) b & 0xFF;
-            switch (mCharTypes.TEXT_CHARS[c]) {
+            switch (_charTypes.TEXT_CHARS[c]) {
             case XmlCharTypes.CT_INVALID:
                 throwInvalidXmlChar(c);
             case XmlCharTypes.CT_WS_CR:
@@ -181,7 +180,7 @@ public class AsyncUtfScanner
             // Nah, a multi-byte UTF-8 char:
             
             // Let's just retest the first pending byte (in LSB):
-            switch (mCharTypes.TEXT_CHARS[c & 0xFF]) {
+            switch (_charTypes.TEXT_CHARS[c & 0xFF]) {
             case XmlCharTypes.CT_MULTIBYTE_2:
                 // Easy: must have just one byte, did get another one:
                 _textBuilder.resetWithChar((char) decodeUtf8_2(c));
@@ -277,7 +276,7 @@ public class AsyncUtfScanner
             throwInternal();
         }
 
-        final int[] TYPES = mCharTypes.TEXT_CHARS;
+        final int[] TYPES = _charTypes.TEXT_CHARS;
         final byte[] inputBuffer = _inputBuffer;
         char[] outputBuffer = _textBuilder.getBufferWithoutReset();
         // Should have just one code point (one or two chars). Assert?
@@ -491,7 +490,7 @@ public class AsyncUtfScanner
         // Nah, a multi-byte UTF-8 char:
         
         // Let's just retest the first pending byte (in LSB):
-        switch (mCharTypes.TEXT_CHARS[c & 0xFF]) {
+        switch (_charTypes.TEXT_CHARS[c & 0xFF]) {
         case XmlCharTypes.CT_MULTIBYTE_2:
             // Easy: must have just one byte, did get another one:
             _textBuilder.append((char) decodeUtf8_2(c));
@@ -572,7 +571,7 @@ public class AsyncUtfScanner
             throwInternal();
         }
 
-        final int[] TYPES = mCharTypes.TEXT_CHARS;
+        final int[] TYPES = _charTypes.TEXT_CHARS;
         final byte[] inputBuffer = _inputBuffer;
 
         main_loop:
@@ -716,7 +715,7 @@ public class AsyncUtfScanner
         throws XMLStreamException
     {
         char[] attrBuffer = _attrCollector.continueValue();
-        final int[] TYPES = mCharTypes.ATTR_CHARS;
+        final int[] TYPES = _charTypes.ATTR_CHARS;
         final int quoteChar = (int) _elemAttrQuote;
 
         // First; any pending input?
@@ -856,7 +855,7 @@ public class AsyncUtfScanner
     protected boolean handleNsDecl()
         throws XMLStreamException
     {
-        final int[] TYPES = mCharTypes.ATTR_CHARS;
+        final int[] TYPES = _charTypes.ATTR_CHARS;
         char[] attrBuffer = _nameBuffer;
 
         final int quoteChar = (int) _elemAttrQuote;
@@ -1028,7 +1027,7 @@ public class AsyncUtfScanner
         char[] outputBuffer = _textBuilder.getBufferWithoutReset();
         int outPtr = _textBuilder.getCurrentLength();
 
-        final int[] TYPES = mCharTypes.OTHER_CHARS;
+        final int[] TYPES = _charTypes.OTHER_CHARS;
         final byte[] inputBuffer = _inputBuffer;
 
         main_loop:
@@ -1187,7 +1186,7 @@ public class AsyncUtfScanner
             // otherwise we should be good to continue
         }
 
-        final int[] TYPES = mCharTypes.OTHER_CHARS;
+        final int[] TYPES = _charTypes.OTHER_CHARS;
         final byte[] inputBuffer = _inputBuffer;
 
         main_loop:
@@ -1450,7 +1449,7 @@ public class AsyncUtfScanner
     protected final PName addPName(int hash, int[] quads, int qlen, int lastQuadBytes)
         throws XMLStreamException
     {
-        return addUtfPName(mCharTypes, hash, quads, qlen, lastQuadBytes);
+        return addUtfPName(_charTypes, hash, quads, qlen, lastQuadBytes);
     }
 
     /*

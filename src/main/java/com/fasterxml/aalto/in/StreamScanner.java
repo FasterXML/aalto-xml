@@ -33,21 +33,21 @@ public abstract class StreamScanner
     extends ByteBasedScanner
 {
     /*
-    ////////////////////////////////////////
-    // Configuration
-    ////////////////////////////////////////
-    */
+    /**********************************************************************
+    /* Configuration
+    /**********************************************************************
+     */
 
     /**
      * Underlying InputStream to use for reading content.
      */
-    InputStream _in;
+    protected InputStream _in;
 
     /*
-    ///////////////////////////////////////////////////////////////
-    // Input buffering
-    ///////////////////////////////////////////////////////////////
-    */
+    /**********************************************************************
+    /* Input buffering
+    /**********************************************************************
+     */
 
     protected byte[] _inputBuffer;
 
@@ -56,9 +56,9 @@ public abstract class StreamScanner
     protected int _inputEnd;
 
     /*
-    ////////////////////////////////////////////////
-    // Life-cycle
-    ////////////////////////////////////////////////
+    /**********************************************************************
+    /* Life-cycle
+    /**********************************************************************
      */
 
     public StreamScanner(ReaderConfig cfg,
@@ -99,9 +99,9 @@ public abstract class StreamScanner
     }
 
     /*
-    ////////////////////////////////////////////////
-    // Abstract methods for sub-classes to implement
-    ////////////////////////////////////////////////
+    /**********************************************************************
+    /* Abstract methods for sub-classes to implement
+    /**********************************************************************
      */
 
     protected abstract int handleEntityInText(boolean inAttr)
@@ -114,9 +114,9 @@ public abstract class StreamScanner
         throws XMLStreamException;
 
     /*
-    ////////////////////////////////////////////////
-    // Implementation of parsing API
-    ////////////////////////////////////////////////
+    /**********************************************************************
+    /* Implementation of parsing API
+    /**********************************************************************
      */
 
     public final int nextFromProlog(boolean isProlog)
@@ -257,12 +257,12 @@ public abstract class StreamScanner
              * Since we may want to store the char as is, too, let's negate
              * entity-based char
              */
-            mTmpChar = -i;
+            _tmpChar = -i;
         } else {
             /* Let's store it for future reference. May or may not be used --
              * so let's not advance input ptr quite yet.
              */
-            mTmpChar = (int) b & 0xFF; // need to ensure it won't be negative
+            _tmpChar = (int) b & 0xFF; // need to ensure it won't be negative
         }
         if (_cfgLazyParsing) {
             _tokenIncomplete = true;
@@ -273,9 +273,9 @@ public abstract class StreamScanner
     }
 
     /*
-    ////////////////////////////////////////////////
-    // Internal methods, secondary parsing
-    ////////////////////////////////////////////////
+    /**********************************************************************
+    /* Internal methods, secondary parsing
+    /**********************************************************************
      */
 
     private final int handlePrologDeclStart(boolean isProlog)
@@ -856,9 +856,9 @@ public abstract class StreamScanner
     */
 
     /*
-    ////////////////////////////////////////////////
-    // Common name/entity parsing
-    ////////////////////////////////////////////////
+    /**********************************************************************
+    /* Common name/entity parsing
+    /**********************************************************************
      */
 
     /**
@@ -962,7 +962,7 @@ public abstract class StreamScanner
         }
 
         // Ok, no, longer loop. Let's offline
-        int[] quads = mQuadBuffer;
+        int[] quads = _quadBuffer;
         quads[0] = q1;
         quads[1] = q2;
         return parsePNameLong(i2, quads);
@@ -1008,7 +1008,7 @@ public abstract class StreamScanner
                 }
             }
             if (qix >= quads.length) { // let's just double?
-                mQuadBuffer = quads = DataUtil.growArrayBy(quads, quads.length);
+                _quadBuffer = quads = DataUtil.growArrayBy(quads, quads.length);
             }
             quads[qix] = q;
             ++qix;
@@ -1028,7 +1028,7 @@ public abstract class StreamScanner
             throwUnexpectedChar(q, "; expected a name start character");
         }
 
-        int[] quads = mQuadBuffer;
+        int[] quads = _quadBuffer;
         int qix = 0;
         // Let's optimize a bit for shorter PNames...
         int firstQuad = 0;
@@ -1087,7 +1087,7 @@ public abstract class StreamScanner
                 quads[1] = q;
             } else { // 3rd or after... need to make sure there's room
                 if (qix >= quads.length) { // let's just double?
-                    mQuadBuffer = quads = DataUtil.growArrayBy(quads, quads.length);
+                    _quadBuffer = quads = DataUtil.growArrayBy(quads, quads.length);
                 }
                 quads[qix] = q;
             }
@@ -1112,11 +1112,11 @@ public abstract class StreamScanner
         // First, need to push back the byte read but not used:
         --_inputPtr;
         int hash = ByteBasedPNameTable.calcHash(onlyQuad);
-        PName name = mSymbols.findSymbol(hash, onlyQuad, 0);
+        PName name = _symbols.findSymbol(hash, onlyQuad, 0);
         if (name == null) {
             // Let's simplify things a bit, and just use array based one then:
-            mQuadBuffer[0] = onlyQuad;
-            name = addPName(hash, mQuadBuffer, 1, lastByteCount);
+            _quadBuffer[0] = onlyQuad;
+            name = addPName(hash, _quadBuffer, 1, lastByteCount);
         }
         return name;
     }
@@ -1139,12 +1139,12 @@ public abstract class StreamScanner
         // First, need to push back the byte read but not used:
         --_inputPtr;
         int hash = ByteBasedPNameTable.calcHash(firstQuad, secondQuad);
-        PName name = mSymbols.findSymbol(hash, firstQuad, secondQuad);
+        PName name = _symbols.findSymbol(hash, firstQuad, secondQuad);
         if (name == null) {
             // Let's just use array, then
-            mQuadBuffer[0] = firstQuad;
-            mQuadBuffer[1] = secondQuad;
-            name = addPName(hash, mQuadBuffer, 2, lastByteCount);
+            _quadBuffer[0] = firstQuad;
+            _quadBuffer[1] = secondQuad;
+            name = addPName(hash, _quadBuffer, 2, lastByteCount);
         }
         return name;
     }
@@ -1174,11 +1174,11 @@ public abstract class StreamScanner
          * not yet in the array, let's add:
          */
         if (qlen >= quads.length) { // let's just double?
-            mQuadBuffer = quads = DataUtil.growArrayBy(quads, quads.length);
+            _quadBuffer = quads = DataUtil.growArrayBy(quads, quads.length);
         }
         quads[qlen++] = lastQuad;
         int hash = ByteBasedPNameTable.calcHash(quads, qlen);
-        PName name = mSymbols.findSymbol(hash, quads, qlen);
+        PName name = _symbols.findSymbol(hash, quads, qlen);
         if (name == null) {
             name = addPName(hash, quads, qlen, lastByteCount);
         }
@@ -1425,17 +1425,17 @@ public abstract class StreamScanner
     }
 
     /*
-    ////////////////////////////////////////////////
-    // Methods for sub-classes, reading data
-    ////////////////////////////////////////////////
+    /**********************************************************************
+    /* Methods for sub-classes, reading data
+    /**********************************************************************
      */
 
     protected final boolean loadMore()
         throws XMLStreamException
     {
         // First, let's update offsets:
-        mPastBytes += _inputEnd;
-        mRowStartOffset -= _inputEnd;
+        _pastBytes += _inputEnd;
+        _rowStartOffset -= _inputEnd;
         _inputPtr = 0;
 
         // If it's a block source, there's no input stream, or any more data:
@@ -1515,8 +1515,8 @@ public abstract class StreamScanner
 
         // otherwise, need to use cut'n pasted code from loadMore()...
 
-        mPastBytes += _inputPtr;
-        mRowStartOffset -= _inputPtr;
+        _pastBytes += _inputPtr;
+        _rowStartOffset -= _inputPtr;
 
         int remaining = (_inputEnd - _inputPtr); // must be > 0
         System.arraycopy(_inputBuffer, _inputPtr, _inputBuffer, 0, remaining);

@@ -1,4 +1,4 @@
-/* Woodstox Lite ("wool") XML processor
+/* Aalto XML processor
  *
  * Copyright (c) 2006- Tatu Saloranta, tatu.saloranta@iki.fi
  *
@@ -32,9 +32,9 @@ public final class Utf8Scanner
     extends StreamScanner
 {
     /*
-    ////////////////////////////////////////////////
-    // Life-cycle
-    ////////////////////////////////////////////////
+    /**********************************************************************
+    /* Life-cycle
+    /**********************************************************************
      */
 
     public Utf8Scanner(ReaderConfig cfg, InputStream in,
@@ -44,9 +44,9 @@ public final class Utf8Scanner
     }
 
     /*
-    ////////////////////////////////////////////////
-    // Internal methods, secondary parsing
-    ////////////////////////////////////////////////
+    /**********************************************************************
+    /* Internal methods, secondary parsing
+    /**********************************************************************
      */
 
     protected int handleStartElement(byte b)
@@ -259,7 +259,7 @@ public final class Utf8Scanner
         throws XMLStreamException
     {
         char[] attrBuffer = _attrCollector.startNewValue(attrName, attrPtr);
-        final int[] TYPES = mCharTypes.ATTR_CHARS;
+        final int[] TYPES = _charTypes.ATTR_CHARS;
         final int quoteChar = (int) quoteByte;
         
         value_loop:
@@ -551,7 +551,7 @@ public final class Utf8Scanner
             start = "";
         }
 
-        final int[] TYPES = mCharTypes.NAME_CHARS;
+        final int[] TYPES = _charTypes.NAME_CHARS;
 
         /* All righty: we have the beginning of the name, plus the first
          * byte too. So let's see what we can do with it.
@@ -633,15 +633,15 @@ public final class Utf8Scanner
     }
 
     /*
-    ////////////////////////////////////////////////
-    // Internal methods, name parsing:
-    ////////////////////////////////////////////////
+    /**********************************************************************
+    /* Internal methods, name parsing:
+    /**********************************************************************
      */
 
     protected final PName addPName(int hash, int[] quads, int qlen, int lastQuadBytes)
         throws XMLStreamException
     {
-        return addUtfPName(mCharTypes, hash, quads, qlen, lastQuadBytes);
+        return addUtfPName(_charTypes, hash, quads, qlen, lastQuadBytes);
     }
 
     /**
@@ -700,7 +700,7 @@ public final class Utf8Scanner
         char[] outputBuffer = _nameBuffer;
         int outPtr = 0;
         // attribute types are closest matches, so let's use them
-        final int[] TYPES = mCharTypes.ATTR_CHARS;
+        final int[] TYPES = _charTypes.ATTR_CHARS;
         //boolean spaceToAdd = false;
 
         main_loop:
@@ -764,15 +764,15 @@ public final class Utf8Scanner
     }
 
     /*
-    ////////////////////////////////////////////////
-    // Content skipping
-    ////////////////////////////////////////////////
+    /**********************************************************************
+    /* Content skipping
+    /**********************************************************************
      */
 
     protected final boolean skipCharacters()
         throws XMLStreamException
     {
-        final int[] TYPES = mCharTypes.TEXT_CHARS;
+        final int[] TYPES = _charTypes.TEXT_CHARS;
         final byte[] inputBuffer = _inputBuffer;
 
         while (true) {
@@ -865,7 +865,7 @@ public final class Utf8Scanner
     protected final void skipComment()
         throws XMLStreamException
     {
-        final int[] TYPES = mCharTypes.OTHER_CHARS;
+        final int[] TYPES = _charTypes.OTHER_CHARS;
         final byte[] inputBuffer = _inputBuffer;
 
         while (true) {
@@ -942,7 +942,7 @@ public final class Utf8Scanner
     protected final void skipCData()
         throws XMLStreamException
     {
-        final int[] TYPES = mCharTypes.OTHER_CHARS;
+        final int[] TYPES = _charTypes.OTHER_CHARS;
         final byte[] inputBuffer = _inputBuffer;
 
         while (true) {
@@ -1037,7 +1037,7 @@ public final class Utf8Scanner
     protected final void skipDTD()
         throws XMLStreamException
     {
-        final int[] TYPES = mCharTypes.DTD_CHARS;
+        final int[] TYPES = _charTypes.DTD_CHARS;
         int nesting = 1; // for brackets
 
         main_loop:
@@ -1117,7 +1117,7 @@ public final class Utf8Scanner
     protected final void skipPI()
         throws XMLStreamException
     {
-        final int[] TYPES = mCharTypes.OTHER_CHARS;
+        final int[] TYPES = _charTypes.OTHER_CHARS;
         final byte[] inputBuffer = _inputBuffer;
 
         while (true) {
@@ -1401,15 +1401,15 @@ public final class Utf8Scanner
     }
 
     /*
-    ////////////////////////////////////////////////
-    // Content parsing
-    ////////////////////////////////////////////////
+    /**********************************************************************
+    /* Content parsing
+    /**********************************************************************
      */
 
     protected final void finishCData()
         throws XMLStreamException
     {
-        final int[] TYPES = mCharTypes.OTHER_CHARS;
+        final int[] TYPES = _charTypes.OTHER_CHARS;
         final byte[] inputBuffer = _inputBuffer;
         char[] outputBuffer = _textBuilder.resetWithEmpty();
         int outPtr = 0;
@@ -1546,7 +1546,7 @@ public final class Utf8Scanner
         char[] outputBuffer;
 
         // Ok, so what was the first char / entity?
-        c = mTmpChar;
+        c = _tmpChar;
         if (c < 0) { // from entity; can just copy as is
             c = -c;
             outputBuffer = _textBuilder.resetWithEmpty();
@@ -1575,7 +1575,7 @@ public final class Utf8Scanner
             }
         }
 
-        final int[] TYPES = mCharTypes.TEXT_CHARS;
+        final int[] TYPES = _charTypes.TEXT_CHARS;
         final byte[] inputBuffer = _inputBuffer;
 
         main_loop:
@@ -1726,7 +1726,7 @@ public final class Utf8Scanner
     protected final void finishComment()
         throws XMLStreamException
     {
-        final int[] TYPES = mCharTypes.OTHER_CHARS;
+        final int[] TYPES = _charTypes.OTHER_CHARS;
         final byte[] inputBuffer = _inputBuffer;
         char[] outputBuffer = _textBuilder.resetWithEmpty();
         int outPtr = 0;
@@ -1835,7 +1835,7 @@ public final class Utf8Scanner
             _textBuilder.resetWithEmpty() : null;
         int outPtr = 0;
 
-        final int[] TYPES = mCharTypes.DTD_CHARS;
+        final int[] TYPES = _charTypes.DTD_CHARS;
         boolean inDecl = false; // in declaration/directive?
         int quoteChar = 0; // inside quoted string?
 
@@ -1970,7 +1970,7 @@ public final class Utf8Scanner
     protected final void finishPI()
         throws XMLStreamException
     {
-        final int[] TYPES = mCharTypes.OTHER_CHARS;
+        final int[] TYPES = _charTypes.OTHER_CHARS;
         final byte[] inputBuffer = _inputBuffer;
         char[] outputBuffer = _textBuilder.resetWithEmpty();
         int outPtr = 0;
@@ -2075,7 +2075,7 @@ public final class Utf8Scanner
         /* Ok: so, mTmpChar contains first space char. If it looks
          * like indentation, we can probably optimize a bit...
          */
-        int tmp = mTmpChar;
+        int tmp = _tmpChar;
         char[] outputBuffer;
         int outPtr;
 
@@ -2145,9 +2145,9 @@ public final class Utf8Scanner
     }
 
     /*
-    ////////////////////////////////////////////////
-    // 2nd level parsing/skipping for coalesced text
-    ////////////////////////////////////////////////
+    /**********************************************************************
+    /* 2nd level parsing/skipping for coalesced text
+    /**********************************************************************
      */
 
     /**
@@ -2212,7 +2212,7 @@ public final class Utf8Scanner
     {
         // first char can't be from (char) entity (wrt finishCharacters)
 
-        final int[] TYPES = mCharTypes.TEXT_CHARS;
+        final int[] TYPES = _charTypes.TEXT_CHARS;
         final byte[] inputBuffer = _inputBuffer;
 
         char[] outputBuffer = _textBuilder.getBufferWithoutReset();
@@ -2363,7 +2363,7 @@ public final class Utf8Scanner
     protected final void finishCoalescedCData()
         throws XMLStreamException
     {
-        final int[] TYPES = mCharTypes.OTHER_CHARS;
+        final int[] TYPES = _charTypes.OTHER_CHARS;
         final byte[] inputBuffer = _inputBuffer;
 
         char[] outputBuffer = _textBuilder.getBufferWithoutReset();
@@ -2543,9 +2543,9 @@ public final class Utf8Scanner
     }
 
     /*
-    ////////////////////////////////////////////////
-    // Other methods, utf-decoding
-    ////////////////////////////////////////////////
+    /**********************************************************************
+    /* Other methods, utf-decoding
+    /**********************************************************************
      */
 
     /**
@@ -2765,9 +2765,9 @@ public final class Utf8Scanner
     */
 
     /*
-    ////////////////////////////////////////////////
-    // Internal methods, error reporting
-    ////////////////////////////////////////////////
+    /**********************************************************************
+    /* Internal methods, error reporting
+    /**********************************************************************
      */
 
     /**
@@ -2827,15 +2827,13 @@ public final class Utf8Scanner
     protected void reportInvalidInitial(int mask)
         throws XMLStreamException
     {
-        reportInputProblem("Invalid UTF-8 start byte 0x"
-                           +Integer.toHexString(mask));
+        reportInputProblem("Invalid UTF-8 start byte 0x"+Integer.toHexString(mask));
     }
 
     protected void reportInvalidOther(int mask)
         throws XMLStreamException
     {
-        reportInputProblem("Invalid UTF-8 middle byte 0x"
-                           +Integer.toHexString(mask));
+        reportInputProblem("Invalid UTF-8 middle byte 0x"+Integer.toHexString(mask));
     }
 
     protected void reportInvalidOther(int mask, int ptr)

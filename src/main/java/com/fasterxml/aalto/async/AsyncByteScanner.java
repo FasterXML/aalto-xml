@@ -180,7 +180,7 @@ public abstract class AsyncByteScanner
 
     /**
      * Number of complete quads parsed for current name (quads
-     * themselves are stored in {@link #mQuadBuffer}).
+     * themselves are stored in {@link #_quadBuffer}).
      */
     protected int _quadCount;
 
@@ -243,8 +243,8 @@ public abstract class AsyncByteScanner
             throw new XMLStreamException("Still have "+(_inputEnd - _inputPtr)+" unread bytes");
         }
         // Time to update pointers first
-        mPastBytes += _origBufferLen;
-        mRowStartOffset -= _origBufferLen;
+        _pastBytes += _origBufferLen;
+        _rowStartOffset -= _origBufferLen;
 
         // And then update buffer settings
         _inputBuffer = buf;
@@ -1433,13 +1433,13 @@ public abstract class AsyncByteScanner
              * result array and update state
              */
             if (_quadCount == 0) { // first quad
-                mQuadBuffer[0] = q;
+                _quadBuffer[0] = q;
                 _quadCount = 1;
             } else {
-                if (_quadCount >= mQuadBuffer.length) { // let's just double?
-                    mQuadBuffer = DataUtil.growArrayBy(mQuadBuffer, mQuadBuffer.length);
+                if (_quadCount >= _quadBuffer.length) { // let's just double?
+                    _quadBuffer = DataUtil.growArrayBy(_quadBuffer, _quadBuffer.length);
                 }
-                mQuadBuffer[_quadCount++] = q;
+                _quadBuffer[_quadCount++] = q;
             }
             _currQuadBytes = 0;
         }
@@ -1470,7 +1470,7 @@ public abstract class AsyncByteScanner
                     if (q < 45 || q > 58 || q == 47) {
                         // apos, quot?
                         if (_quadCount == 1) {
-                            q = mQuadBuffer[0];
+                            q = _quadBuffer[0];
                             if (q == EntityNames.ENTITY_APOS_QUAD) {
                                 return EntityNames.ENTITY_APOS;
                             }
@@ -1548,13 +1548,13 @@ public abstract class AsyncByteScanner
              * result array and update state
              */
             if (_quadCount == 0) { // first quad
-                mQuadBuffer[0] = q;
+                _quadBuffer[0] = q;
                 _quadCount = 1;
             } else {
-                if (_quadCount >= mQuadBuffer.length) { // let's just double?
-                    mQuadBuffer = DataUtil.growArrayBy(mQuadBuffer, mQuadBuffer.length);
+                if (_quadCount >= _quadBuffer.length) { // let's just double?
+                    _quadBuffer = DataUtil.growArrayBy(_quadBuffer, _quadBuffer.length);
                 }
-                mQuadBuffer[_quadCount++] = q;
+                _quadBuffer[_quadCount++] = q;
             }
             _currQuadBytes = 0;
         }
@@ -1586,42 +1586,42 @@ public abstract class AsyncByteScanner
         int qlen = _quadCount;
         // Also: if last quad is empty, will need take last from qbuf.
         if (lastByteCount == 0) {
-            lastQuad = mQuadBuffer[--qlen];
+            lastQuad = _quadBuffer[--qlen];
             lastByteCount = 4;
         }
         // Separate handling for short names:
         if (qlen <= 1) { // short name?
             if (qlen == 0) { // 4-bytes or less; only has 'lastQuad' defined
                 int hash = ByteBasedPNameTable.calcHash(lastQuad);
-                PName name = mSymbols.findSymbol(hash, lastQuad, 0);
+                PName name = _symbols.findSymbol(hash, lastQuad, 0);
                 if (name == null) {
                     // Let's simplify things a bit, and just use array based one then:
-                    mQuadBuffer[0] = lastQuad;
-                    name = addPName(hash, mQuadBuffer, 1, lastByteCount);
+                    _quadBuffer[0] = lastQuad;
+                    name = addPName(hash, _quadBuffer, 1, lastByteCount);
                 }
                 return name;
             }
-            int firstQuad = mQuadBuffer[0];
+            int firstQuad = _quadBuffer[0];
             int hash = ByteBasedPNameTable.calcHash(firstQuad, lastQuad);
-            PName name = mSymbols.findSymbol(hash, firstQuad, lastQuad);
+            PName name = _symbols.findSymbol(hash, firstQuad, lastQuad);
             if (name == null) {
                 // As above, let's just use array, then
-                mQuadBuffer[1] = lastQuad;
-                name = addPName(hash, mQuadBuffer, 2, lastByteCount);
+                _quadBuffer[1] = lastQuad;
+                name = addPName(hash, _quadBuffer, 2, lastByteCount);
             }
             return name;
         }
         /* Nope, long (3 quads or more). At this point, the last quad is
          * not yet in the array, let's add:
          */
-        if (qlen >= mQuadBuffer.length) { // let's just double?
-            mQuadBuffer = DataUtil.growArrayBy(mQuadBuffer, mQuadBuffer.length);
+        if (qlen >= _quadBuffer.length) { // let's just double?
+            _quadBuffer = DataUtil.growArrayBy(_quadBuffer, _quadBuffer.length);
         }
-        mQuadBuffer[qlen++] = lastQuad;
-        int hash = ByteBasedPNameTable.calcHash(mQuadBuffer, qlen);
-        PName name = mSymbols.findSymbol(hash, mQuadBuffer, qlen);
+        _quadBuffer[qlen++] = lastQuad;
+        int hash = ByteBasedPNameTable.calcHash(_quadBuffer, qlen);
+        PName name = _symbols.findSymbol(hash, _quadBuffer, qlen);
         if (name == null) {
-            name = addPName(hash, mQuadBuffer, qlen, lastByteCount);
+            name = addPName(hash, _quadBuffer, qlen, lastByteCount);
         }
         return name;
     }
@@ -1699,7 +1699,7 @@ public abstract class AsyncByteScanner
             ++_inputPtr;
         }
         ++_currRow;
-        mRowStartOffset = _inputPtr;
+        _rowStartOffset = _inputPtr;
         return true;
     }
 
