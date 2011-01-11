@@ -106,9 +106,9 @@ public abstract class XmlScanner
     private final static int BIND_CACHE_MASK = 0x3F;
 
     /*
-    ////////////////////////////////////////////////
-    // Configuration
-    ////////////////////////////////////////////////
+    /**********************************************************************
+    /* Configuration
+    /**********************************************************************
      */
 
     protected final ReaderConfig _config;
@@ -129,10 +129,10 @@ public abstract class XmlScanner
     protected boolean _cfgLazyParsing;
 
     /*
-    ///////////////////////////////////////////////////////////////
-    // Tokenization state
-    ///////////////////////////////////////////////////////////////
-    */
+    /**********************************************************************
+    /* Tokenization state
+    /**********************************************************************
+     */
 
     protected int _currToken = START_DOCUMENT;
 
@@ -155,10 +155,10 @@ public abstract class XmlScanner
     protected boolean _entityPending = false;
 
     /*
-    ///////////////////////////////////////////////////////////////
-    // Name/String handling
-    ///////////////////////////////////////////////////////////////
-    */
+    /**********************************************************************
+    /* Name/String handling
+    /**********************************************************************
+     */
 
     /**
      * Similarly, need a char buffer for actual String construction
@@ -176,9 +176,9 @@ public abstract class XmlScanner
     protected PName _tokenName = null;
 
     /*
-    ////////////////////////////////////////////////
-    // Element information
-    ////////////////////////////////////////////////
+    /**********************************************************************
+    /* Element information
+    /**********************************************************************
      */
 
     /**
@@ -204,9 +204,9 @@ public abstract class XmlScanner
     protected String _systemId;
 
     /*
-    ////////////////////////////////////////////////
-    // Namespace binding
-    ////////////////////////////////////////////////
+    /**********************************************************************
+    /* Namespace binding
+    /**********************************************************************
      */
 
     /**
@@ -251,9 +251,9 @@ public abstract class XmlScanner
     int _nsBindMisses = 0;
 
     /*
-    ////////////////////////////////////////////////
-    // Support for non-transient NamespaceContext
-    ////////////////////////////////////////////////
+    /**********************************************************************
+    /* Support for non-transient NamespaceContext
+    /**********************************************************************
      */
 
     /**
@@ -264,9 +264,9 @@ public abstract class XmlScanner
     protected FixedNsContext _lastNsContext = FixedNsContext.EMPTY_CONTEXT;
 
     /*
-    ////////////////////////////////////////////////
-    // Attribute info
-    ////////////////////////////////////////////////
+    /**********************************************************************
+    /* Attribute info
+    /**********************************************************************
      */
 
     protected final AttributeCollector _attrCollector;
@@ -274,9 +274,9 @@ public abstract class XmlScanner
     protected int _attrCount = 0;
 
     /*
-    ////////////////////////////////////////////////
-    // Minimal location info for all impls
-    ////////////////////////////////////////////////
+    /**********************************************************************
+    /* Minimal location info for all impls
+    /**********************************************************************
      */
 
     /**
@@ -287,9 +287,9 @@ public abstract class XmlScanner
     protected int _currRow;
 
     /*
-    ////////////////////////////////////////////////
-    // Life-cycle
-    ////////////////////////////////////////////////
+    /**********************************************************************
+    /* Life-cycle
+    /**********************************************************************
      */
 
     protected XmlScanner(ReaderConfig cfg)
@@ -341,9 +341,9 @@ public abstract class XmlScanner
     protected abstract void _closeSource() throws IOException;
 
     /*
-    ////////////////////////////////////////////////
-    // Package access methods, needed by SAX impl
-    ////////////////////////////////////////////////
+    /**********************************************************************
+    /* Package access methods, needed by SAX impl
+    /**********************************************************************
      */
 
     public ReaderConfig getConfig() { return _config; }
@@ -351,9 +351,9 @@ public abstract class XmlScanner
     public AttributeCollector getAttrCollector() { return _attrCollector; }
 
     /*
-    ////////////////////////////////////////////////
-    // Public scanner interface, iterating
-    ////////////////////////////////////////////////
+    /**********************************************************************
+    /* Public scanner interface, iterating
+    /**********************************************************************
      */
 
     // // // First, main iteration methods
@@ -452,9 +452,9 @@ public abstract class XmlScanner
     }
 
     /*
-    ////////////////////////////////////////////////
-    // Public scanner interface, location access
-    ////////////////////////////////////////////////
+    /**********************************************************************
+    /* Public scanner interface, location access
+    /**********************************************************************
      */
 
     /**
@@ -494,9 +494,9 @@ public abstract class XmlScanner
     }
 
     /*
-    ////////////////////////////////////////////////
-    // Public scanner interface, other methods
-    ////////////////////////////////////////////////
+    /**********************************************************************
+    /* Public scanner interface, other methods
+    /**********************************************************************
      */
 
     public final boolean hasEmptyStack() {
@@ -508,10 +508,10 @@ public abstract class XmlScanner
     public final boolean isEmptyTag() { return _isEmptyTag; }
 
     /*
-    ///////////////////////////////////////////////
-    // Data accessors, names:
-    ///////////////////////////////////////////////
-    */
+    /**********************************************************************
+    /* Data accessors, names:
+    /**********************************************************************
+     */
 
     public final PName getName() {
         return _tokenName;
@@ -538,10 +538,10 @@ public abstract class XmlScanner
     }
 
     /*
-    ///////////////////////////////////////////////
-    // Data accessors, (element) text:
-    ///////////////////////////////////////////////
-    */
+    /**********************************************************************
+    /* Data accessors, (element) text:
+    /**********************************************************************
+     */
 
     public final String getText()
         throws XMLStreamException
@@ -611,7 +611,7 @@ public abstract class XmlScanner
      * @param reset If true, need to tell text buffer to reset its decoding
      *   state; if false, shouldn't
      */
-    final int decodeElements(TypedArrayDecoder tad, boolean reset)
+    public final int decodeElements(TypedArrayDecoder tad, boolean reset)
         throws XMLStreamException
     {
         if (_tokenIncomplete) {
@@ -633,7 +633,7 @@ public abstract class XmlScanner
      * Method called by the stream reader to reset given base64 decoder
      * with data from the current text event.
      */
-    final void resetForDecoding(Base64Variant v, CharArrayBase64Decoder dec, boolean firstChunk)
+    public final void resetForDecoding(Base64Variant v, CharArrayBase64Decoder dec, boolean firstChunk)
         throws XMLStreamException
     {
         if (_tokenIncomplete) {
@@ -643,10 +643,10 @@ public abstract class XmlScanner
     }
 
     /*
-    ///////////////////////////////////////////////
-    // Data accessors, firing SAX events
-    ///////////////////////////////////////////////
-    */
+    /**********************************************************************
+    /* Data accessors, firing SAX events
+    /**********************************************************************
+     */
 
     public void fireSaxStartElement(ContentHandler h, Attributes attrs)
         throws SAXException
@@ -748,10 +748,10 @@ public abstract class XmlScanner
     }
 
     /*
-    ///////////////////////////////////////////////
-    // Data accessors, attributes:
-    ///////////////////////////////////////////////
-    */
+    /**********************************************************************
+    /* Data accessors, attributes:
+    /**********************************************************************
+     */
 
     public final int getAttrCount() {
         return _attrCount;
@@ -854,10 +854,10 @@ public abstract class XmlScanner
     }
 
     /*
-    ///////////////////////////////////////////////
-    // Data accessors, namespace declarations:
-    ///////////////////////////////////////////////
-    */
+    /**********************************************************************
+    /* Data accessors, namespace declarations:
+    /**********************************************************************
+     */
 
     public final int getNsCount()
     {
@@ -918,9 +918,9 @@ public abstract class XmlScanner
     }
 
     /*
-    ////////////////////////////////////////////////
-    // NamespaceContext implementation
-    ////////////////////////////////////////////////
+    /**********************************************************************
+    /* NamespaceContext implementation
+    /**********************************************************************
      */
 
     public String getNamespaceURI(String prefix)
@@ -1044,9 +1044,9 @@ public abstract class XmlScanner
     }
 
     /*
-    ////////////////////////////////////////////////
-    // Abstract methods for sub-classes to implement
-    ////////////////////////////////////////////////
+    /**********************************************************************
+    /* Abstract methods for sub-classes to implement
+    /**********************************************************************
      */
 
     // // token-finish methods
@@ -1106,9 +1106,9 @@ public abstract class XmlScanner
         throws XMLStreamException;
 
     /*
-    ///////////////////////////////////////////////////
-    // Basic namespace binding methods
-    ///////////////////////////////////////////////////
+    /**********************************************************************
+    /* Basic namespace binding methods
+    /**********************************************************************
      */
 
     /**
@@ -1291,9 +1291,9 @@ public abstract class XmlScanner
     }
 
     /*
-    ///////////////////////////////////////////////////
-    // Helper methods for sub-classes, error reporting
-    ///////////////////////////////////////////////////
+    /**********************************************************************
+    /* Helper methods for sub-classes, error reporting
+    /**********************************************************************
      */
 
     protected void reportInputProblem(String msg)

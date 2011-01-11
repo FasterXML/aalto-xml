@@ -8,6 +8,7 @@ import javax.xml.stream.*;
 import com.fasterxml.aalto.AsyncXMLStreamReader;
 import com.fasterxml.aalto.async.*;
 import com.fasterxml.aalto.in.*;
+import com.fasterxml.aalto.stax.StreamReaderImpl;
 
 /**
  * Simple helper test class for checking how stream reader handles xml

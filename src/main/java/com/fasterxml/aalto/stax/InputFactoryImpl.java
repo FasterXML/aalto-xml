@@ -37,6 +37,9 @@ import org.codehaus.stax2.ri.evt.Stax2EventReaderAdapter;
 import org.codehaus.stax2.ri.evt.Stax2FilteredEventReader;
 
 import com.fasterxml.aalto.AsyncXMLInputFactory;
+import com.fasterxml.aalto.AsyncXMLStreamReader;
+import com.fasterxml.aalto.async.AsyncStreamReaderImpl;
+import com.fasterxml.aalto.async.AsyncUtfScanner;
 import com.fasterxml.aalto.dom.DOMReaderImpl;
 import com.fasterxml.aalto.evt.EventAllocatorImpl;
 import com.fasterxml.aalto.evt.EventReaderImpl;
@@ -313,20 +316,24 @@ public final class InputFactoryImpl
      */
 
     @Override
-    public XMLStreamReader2 createAsyncXMLStreamReader()
+    public AsyncXMLStreamReader createAsyncXMLStreamReader()
     {
-        return null;
+        // TODO: pass system and/or public ids?
+        ReaderConfig cfg = getNonSharedConfig(null, null, null, false, false);
+        cfg.setActualEncoding("UTF-8");
+        return new AsyncStreamReaderImpl(new AsyncUtfScanner(cfg));
     }
 
     @Override
-    public XMLStreamReader2 createAsyncXMLStreamReader(byte[] input) {
+    public AsyncXMLStreamReader createAsyncXMLStreamReader(byte[] input) {
         return createAsyncXMLStreamReader(input, 0, input.length);
     }
 
     @Override
-    public XMLStreamReader2 createAsyncXMLStreamReader(byte[] input, int offset, int length)
+    public AsyncXMLStreamReader createAsyncXMLStreamReader(byte[] input, int offset, int length)
     {
-        return null;
+        AsyncXMLStreamReader sr = createAsyncXMLStreamReader();
+        return sr;
     }
     
     /*

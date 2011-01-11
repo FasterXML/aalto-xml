@@ -17,7 +17,7 @@ public abstract class AsyncXMLInputFactory
      * 
      * @return Non-blocking stream reader without any input
      */
-    public abstract XMLStreamReader2 createAsyncXMLStreamReader();
+    public abstract AsyncXMLStreamReader createAsyncXMLStreamReader();
 
     /**
      * Method for constructing a non-blocking {@link XMLStreamReader2} instance
@@ -33,7 +33,7 @@ public abstract class AsyncXMLInputFactory
      * 
      * @return Non-blocking stream reader initialized with given input
      */
-    public abstract XMLStreamReader2 createAsyncXMLStreamReader(byte[] input);
+    public abstract AsyncXMLStreamReader createAsyncXMLStreamReader(byte[] input);
 
     /**
      * Method for constructing a non-blocking {@link XMLStreamReader2} instance
@@ -49,5 +49,5 @@ public abstract class AsyncXMLInputFactory
      * 
      * @return Non-blocking stream reader initialized with given input
      */
-    public abstract XMLStreamReader2 createAsyncXMLStreamReader(byte[] input, int offset, int length);
+    public abstract AsyncXMLStreamReader createAsyncXMLStreamReader(byte[] input, int offset, int length);
 }
