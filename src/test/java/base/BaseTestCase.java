@@ -6,9 +6,10 @@ import javax.xml.stream.*;
 
 import org.codehaus.stax2.*;
 
+import com.fasterxml.aalto.AsyncXMLStreamReader;
 import com.fasterxml.aalto.stax.*;
 
-public class BaseTestCase
+public abstract class BaseTestCase
     extends junit.framework.TestCase
     implements XMLStreamConstants
 {
@@ -17,18 +18,18 @@ public class BaseTestCase
     public final static String ENC_ASCII = "US-ASCII";
 
     /*
-    ///////////////////////////////////////////////////
-    // Lazy-loaded thingies
-    ///////////////////////////////////////////////////
+    /**********************************************************************
+    /* Lazy-loaded thingies
+    /**********************************************************************
      */
 
     XMLInputFactory2 mInputFactory = null;
     XMLOutputFactory2 mOutputFactory = null;
 
-   /*
-    //////////////////////////////////////////////////
-    // Factory methods
-    //////////////////////////////////////////////////
+    /*
+    /**********************************************************************
+    /* Factory methods
+    /**********************************************************************
      */
 
     protected XMLInputFactory2 getInputFactory()
@@ -60,9 +61,9 @@ public class BaseTestCase
     }
 
     /*
-    //////////////////////////////////////////////////
-    // Additional assert methods
-    //////////////////////////////////////////////////
+    /**********************************************************************
+    /* Additional assert methods
+    /**********************************************************************
      */
 
     final static HashMap<Integer,String> mTokenTypes = new HashMap<Integer,String>();
@@ -78,6 +79,9 @@ public class BaseTestCase
         mTokenTypes.put(DTD, "DTD");
         mTokenTypes.put(SPACE, "SPACE");
         mTokenTypes.put(ENTITY_REFERENCE, "ENTITY_REFERENCE");
+
+        // and Async addition(s)
+        mTokenTypes.put(AsyncXMLStreamReader.EVENT_INCOMPLETE, "Async.EVENT_INCOMPLETE");
     }
 
     protected static String tokenTypeDesc(int tt)

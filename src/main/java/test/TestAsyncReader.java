@@ -43,7 +43,7 @@ public class TestAsyncReader
                 if (!feeder.needMoreInput()) { // sanity check for this test (not needed for real code)
                     throw new IllegalStateException("Got EVENT_INCOMPLETE but not expecting more input");
                 }
-                System.out.println("READ-MORE: reader == "+asyncReader.toString());
+//                System.out.println("READ-MORE: reader == "+asyncReader.toString());
                 int len = in.read(buf, 1, 3);
                 if (len < 0) {
                     System.err.println("Error: Unexpected EOF");
@@ -64,7 +64,7 @@ public class TestAsyncReader
                 if (type == CHARACTERS || type == CDATA || type == COMMENT) {
                     System.out.println(" Text("+text.length()+") = '"+text+"'.");
                     if (text.length() >= 1) {
-                        System.out.println(" [first char code: 0x"+Integer.toHexString(text.charAt(0))+"]");
+//                        System.out.println(" [first char code: 0x"+Integer.toHexString(text.charAt(0))+"]");
                     }
                 } else if (type == SPACE) {
                     System.out.print(" Ws = '"+text+"'.");
@@ -78,8 +78,7 @@ public class TestAsyncReader
                     List<Object> notations = (List<Object>) asyncReader.getProperty("javax.xml.stream.notations");
                     int entCount = (entities == null) ? -1 : entities.size();
                     int notCount = (notations == null) ? -1 : notations.size();
-                    System.out.print("  ("+entCount+" entities, "+notCount
-                                       +" notations), sysid ");
+                    System.out.print("  ("+entCount+" entities, "+notCount+" notations), sysid ");
                     System.out.print(", declaration = <<");
                     System.out.print(text);
                     System.out.println(">>");
@@ -103,7 +102,7 @@ public class TestAsyncReader
                     System.out.print(':');
                 }
                 System.out.print(asyncReader.getLocalName());
-                //System.out.println("[first char 0x"+Integer.toHexString(asyncReader.getLocalName().charAt(0))+"]");
+    //System.out.println("[first char 0x"+Integer.toHexString(asyncReader.getLocalName().charAt(0))+"]");
                 System.out.print(" {ns '");
                 System.out.print(asyncReader.getNamespaceURI());
                 System.out.print("'}> ");
