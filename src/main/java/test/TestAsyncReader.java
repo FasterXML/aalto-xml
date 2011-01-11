@@ -5,7 +5,7 @@ import java.util.List;
 
 import javax.xml.stream.*;
 
-
+import com.fasterxml.aalto.AsyncXMLStreamReader;
 import com.fasterxml.aalto.async.*;
 import com.fasterxml.aalto.in.*;
 
@@ -42,7 +42,7 @@ public class TestAsyncReader
             int type;
 
             // May need to feed multiple segments:
-            while ((type = sr.next()) == AsyncByteScanner.EVENT_INCOMPLETE) {
+            while ((type = sr.next()) == AsyncXMLStreamReader.EVENT_INCOMPLETE) {
                 System.out.println("DEBUG: scanner -> "+asc.toString());
                 int len = in.read(buf, 1, 3);
                 if (len < 0) {

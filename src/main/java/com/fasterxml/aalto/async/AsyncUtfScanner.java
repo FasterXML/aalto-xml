@@ -18,6 +18,7 @@ package com.fasterxml.aalto.async;
 import javax.xml.stream.XMLStreamException;
 
 
+import com.fasterxml.aalto.AsyncXMLStreamReader;
 import com.fasterxml.aalto.in.*;
 import com.fasterxml.aalto.util.DataUtil;
 import com.fasterxml.aalto.util.XmlCharTypes;
@@ -29,13 +30,16 @@ import com.fasterxml.aalto.util.XmlCharTypes;
  */
 public class AsyncUtfScanner
     extends AsyncByteScanner
+    //implements AsyncXMLStreamReader
 {
+    private final static int EVENT_INCOMPLETE = AsyncXMLStreamReader.EVENT_INCOMPLETE;
+
     /*
-    ////////////////////////////////////////////////
-    // Markers to use for 'pending' character, if
-    // not multi-byte UTF character
-    ////////////////////////////////////////////////
-    */
+    /**********************************************************************
+    /* Markers to use for 'pending' character, if
+    /* not multi-byte UTF character
+    /**********************************************************************
+     */
 
     final static int PENDING_STATE_CR = -1;
 
@@ -45,9 +49,9 @@ public class AsyncUtfScanner
     final static int PENDING_STATE_COMMENT_HYPHEN2 = -4;
 
     /*
-    ////////////////////////////////////////////////
-    // Instance construction
-    ////////////////////////////////////////////////
+    /**********************************************************************
+    /* Instance construction
+    /**********************************************************************
      */
 
     public AsyncUtfScanner(ReaderConfig cfg)
@@ -56,11 +60,12 @@ public class AsyncUtfScanner
     }
 
     /*
-    ///////////////////////////////////////////////////
-    // Implementation of parsing API, character events
-    ///////////////////////////////////////////////////
+    /**********************************************************************
+    /* Implementation of parsing API, character events
+    /**********************************************************************
      */
 
+    @Override
     protected final int startCharacters(byte b)
         throws XMLStreamException
     {
@@ -75,7 +80,7 @@ public class AsyncUtfScanner
                  * is called. No need to check that (could assert)
                  */
                 if (_inputPtr >= _inputEnd) { // no more input available
-                    mPendingInput = PENDING_STATE_CR;
+                    _pendingInput = PENDING_STATE_CR;
                     return EVENT_INCOMPLETE;
                 }
                 if (_inputBuffer[_inputPtr] == BYTE_LF) {
@@ -89,7 +94,7 @@ public class AsyncUtfScanner
                 break;
             case XmlCharTypes.CT_MULTIBYTE_2:
                 if (_inputPtr >= _inputEnd) {
-                    mPendingInput = c;
+                    _pendingInput = c;
                     return EVENT_INCOMPLETE;
                 }
                 c = decodeUtf8_2(c);
@@ -100,7 +105,7 @@ public class AsyncUtfScanner
                         int d = (int) _inputBuffer[_inputPtr++] & 0xFF;
                         c |= (d << 8);
                     }
-                    mPendingInput = c;
+                    _pendingInput = c;
                     return EVENT_INCOMPLETE;
                 }
                 c = decodeUtf8_3(c);
@@ -115,7 +120,7 @@ public class AsyncUtfScanner
                             c |= (d << 16);
                         }
                     }
-                    mPendingInput = c;
+                    _pendingInput = c;
                     return EVENT_INCOMPLETE;
                 }
                 c = decodeUtf8_4(c);
@@ -162,8 +167,8 @@ public class AsyncUtfScanner
         }
 
         // K. So what was the type again?
-        int c = mPendingInput;
-        mPendingInput = 0;
+        int c = _pendingInput;
+        _pendingInput = 0;
 
         // Possible \r\n linefeed?
         if (c == PENDING_STATE_CR) {
@@ -188,7 +193,7 @@ public class AsyncUtfScanner
                     int c2 = (c >> 8);
                     if (c2 == 0) { // just one; need two more
                         if (_inputPtr >= _inputEnd) { // but got only one
-                            mPendingInput = c | (next << 8);
+                            _pendingInput = c | (next << 8);
                             return EVENT_INCOMPLETE;
                         }
                         int c3 = _inputBuffer[_inputPtr++] & 0xFF;
@@ -205,12 +210,12 @@ public class AsyncUtfScanner
                     // Only had one?
                     if ((c >> 8) == 0) { // ok, so need 3 more
                         if (_inputPtr >= _inputEnd) { // just have 1
-                            mPendingInput = c | (next << 8);
+                            _pendingInput = c | (next << 8);
                             return EVENT_INCOMPLETE;
                         }
                         int c2 = _inputBuffer[_inputPtr++] & 0xFF;
                         if (_inputPtr >= _inputEnd) { // almost, got 2
-                            mPendingInput = c | (next << 8) | (c2 << 16);
+                            _pendingInput = c | (next << 8) | (c2 << 16);
                             return EVENT_INCOMPLETE;
                         }
                         int c3 = _inputBuffer[_inputPtr++] & 0xFF;
@@ -221,7 +226,7 @@ public class AsyncUtfScanner
                         
                         if (c3 == 0) { // just two
                             if (_inputPtr >= _inputEnd) { // one short
-                                mPendingInput = c | (next << 16);
+                                _pendingInput = c | (next << 16);
                                 return EVENT_INCOMPLETE;
                             }
                             c3 = _inputBuffer[_inputPtr++] & 0xFF;
@@ -267,7 +272,7 @@ public class AsyncUtfScanner
          * revisit this subject when (if) coalescing mode is to be
          * tackled.
          */
-        if (mPendingInput != 0) {
+        if (_pendingInput != 0) {
             // !!! TBI: needs to be changed for coalescing mode
             throwInternal();
         }
@@ -316,7 +321,7 @@ public class AsyncUtfScanner
             case XmlCharTypes.CT_WS_CR:
                 {
                     if (_inputPtr >= _inputEnd) {
-                        mPendingInput = PENDING_STATE_CR;
+                        _pendingInput = PENDING_STATE_CR;
                         break main_loop;
                     }
                     if (inputBuffer[_inputPtr] == BYTE_LF) {
@@ -331,7 +336,7 @@ public class AsyncUtfScanner
                 break;
             case XmlCharTypes.CT_MULTIBYTE_2:
                 if (_inputPtr >= _inputEnd) {
-                    mPendingInput = c;
+                    _pendingInput = c;
                     break main_loop;
                 }
                 c = decodeUtf8_2(c);
@@ -342,7 +347,7 @@ public class AsyncUtfScanner
                         int d = (int) _inputBuffer[_inputPtr++] & 0xFF;
                         c |= (d << 8);
                     }
-                    mPendingInput = c;
+                    _pendingInput = c;
                     break main_loop;
                 }
                 c = decodeUtf8_3(c);
@@ -357,7 +362,7 @@ public class AsyncUtfScanner
                             c |= (d << 16);
                         }
                     }
-                    mPendingInput = c;
+                    _pendingInput = c;
                     break main_loop;
                 }
                 c = decodeUtf8_4(c);
@@ -442,7 +447,7 @@ public class AsyncUtfScanner
         throws XMLStreamException
     {
         // First things first: any pending partial multi-bytes?
-        if (mPendingInput != 0) {
+        if (_pendingInput != 0) {
             if (!handleAndAppendPending()) {
                 return EVENT_INCOMPLETE;
             }
@@ -467,8 +472,8 @@ public class AsyncUtfScanner
         if (_inputPtr >= _inputEnd) {
             return false;
         }
-        int c = mPendingInput;
-        mPendingInput = 0;
+        int c = _pendingInput;
+        _pendingInput = 0;
 
         // Possible \r\n linefeed?
         if (c < 0) { // markers are all negative
@@ -499,7 +504,7 @@ public class AsyncUtfScanner
                 int c2 = (c >> 8);
                 if (c2 == 0) { // just one; need two more
                     if (_inputPtr >= _inputEnd) { // but got only one
-                        mPendingInput = c | (next << 8);
+                        _pendingInput = c | (next << 8);
                         return false;
                     }
                     int c3 = _inputBuffer[_inputPtr++] & 0xFF;
@@ -516,12 +521,12 @@ public class AsyncUtfScanner
                 // Only had one?
                 if ((c >> 8) == 0) { // ok, so need 3 more
                     if (_inputPtr >= _inputEnd) { // just have 1
-                        mPendingInput = c | (next << 8);
+                        _pendingInput = c | (next << 8);
                         return false;
                     }
                     int c2 = _inputBuffer[_inputPtr++] & 0xFF;
                     if (_inputPtr >= _inputEnd) { // almost, got 2
-                        mPendingInput = c | (next << 8) | (c2 << 16);
+                        _pendingInput = c | (next << 8) | (c2 << 16);
                         return false;
                     }
                     int c3 = _inputBuffer[_inputPtr++] & 0xFF;
@@ -532,7 +537,7 @@ public class AsyncUtfScanner
                     
                     if (c3 == 0) { // just two
                         if (_inputPtr >= _inputEnd) { // one short
-                            mPendingInput = c | (next << 16);
+                            _pendingInput = c | (next << 16);
                             return false;
                         }
                         c3 = _inputBuffer[_inputPtr++] & 0xFF;
@@ -563,7 +568,7 @@ public class AsyncUtfScanner
     protected boolean skipCharacters()
         throws XMLStreamException
     {
-        if (mPendingInput != 0) {
+        if (_pendingInput != 0) {
             throwInternal();
         }
 
@@ -597,7 +602,7 @@ public class AsyncUtfScanner
             case XmlCharTypes.CT_WS_CR:
                 {
                     if (_inputPtr >= _inputEnd) {
-                        mPendingInput = PENDING_STATE_CR;
+                        _pendingInput = PENDING_STATE_CR;
                         break main_loop;
                     }
                     if (inputBuffer[_inputPtr] == BYTE_LF) {
@@ -611,7 +616,7 @@ public class AsyncUtfScanner
                 break;
             case XmlCharTypes.CT_MULTIBYTE_2:
                 if (_inputPtr >= _inputEnd) {
-                    mPendingInput = c;
+                    _pendingInput = c;
                     break main_loop;
                 }
                 skipUtf8_2(c);
@@ -622,7 +627,7 @@ public class AsyncUtfScanner
                         int d = (int) _inputBuffer[_inputPtr++] & 0xFF;
                         c |= (d << 8);
                     }
-                    mPendingInput = c;
+                    _pendingInput = c;
                     break main_loop;
                 }
                 decodeUtf8_3(c);
@@ -637,7 +642,7 @@ public class AsyncUtfScanner
                             c |= (d << 16);
                         }
                     }
-                    mPendingInput = c;
+                    _pendingInput = c;
                     break main_loop;
                 }
                 decodeUtf8_4(c);
@@ -698,9 +703,9 @@ public class AsyncUtfScanner
     }
 
     /*
-    ////////////////////////////////////////////////
-    // Implementation of parsing API, element/attr events
-    ////////////////////////////////////////////////
+    /**********************************************************************
+    /* Implementation of parsing API, element/attr events
+    /**********************************************************************
      */
 
     /**
@@ -712,18 +717,18 @@ public class AsyncUtfScanner
     {
         char[] attrBuffer = _attrCollector.continueValue();
         final int[] TYPES = mCharTypes.ATTR_CHARS;
-        final int quoteChar = (int) mElemAttrQuote;
+        final int quoteChar = (int) _elemAttrQuote;
 
         // First; any pending input?
-        if (mPendingInput != 0) {
+        if (_pendingInput != 0) {
             if (!handlePartialCR()) {
                 return false;
             }
-            if (mElemAttrPtr >= attrBuffer.length) {
+            if (_elemAttrPtr >= attrBuffer.length) {
                 attrBuffer = _attrCollector.valueBufferFull();
             }
             // All lfs get converted to spaces, in attribute values
-            attrBuffer[mElemAttrPtr++] = ' ';
+            attrBuffer[_elemAttrPtr++] = ' ';
         }
         
         value_loop:
@@ -735,12 +740,12 @@ public class AsyncUtfScanner
                 if (_inputPtr >= _inputEnd) {
                     return false;
                 }
-                if (mElemAttrPtr >= attrBuffer.length) {
+                if (_elemAttrPtr >= attrBuffer.length) {
                     attrBuffer = _attrCollector.valueBufferFull();
                 }
                 int max = _inputEnd;
                 {
-                    int max2 = _inputPtr + (attrBuffer.length - mElemAttrPtr);
+                    int max2 = _inputPtr + (attrBuffer.length - _elemAttrPtr);
                     if (max2 < max) {
                         max = max2;
                     }
@@ -750,7 +755,7 @@ public class AsyncUtfScanner
                     if (TYPES[c] != 0) {
                         break ascii_loop;
                     }
-                    attrBuffer[mElemAttrPtr++] = (char) c;
+                    attrBuffer[_elemAttrPtr++] = (char) c;
                 }
             }
             
@@ -759,7 +764,7 @@ public class AsyncUtfScanner
                 throwInvalidXmlChar(c);
             case XmlCharTypes.CT_WS_CR:
                 if (_inputPtr >= _inputEnd) {
-                    mPendingInput = PENDING_STATE_CR;
+                    _pendingInput = PENDING_STATE_CR;
                     return false;
                 }
                 if (_inputBuffer[_inputPtr] == BYTE_LF) {
@@ -775,7 +780,7 @@ public class AsyncUtfScanner
                 break;
             case XmlCharTypes.CT_MULTIBYTE_2:
                 if (_inputPtr >= _inputEnd) {
-                    mPendingInput = c;
+                    _pendingInput = c;
                     return false;
                 }
                 c = decodeUtf8_2(c);
@@ -786,7 +791,7 @@ public class AsyncUtfScanner
                         int d = (int) _inputBuffer[_inputPtr++] & 0xFF;
                         c |= (d << 8);
                     }
-                    mPendingInput = c;
+                    _pendingInput = c;
                     return false;
                 }
                 c = decodeUtf8_3(c);
@@ -801,14 +806,14 @@ public class AsyncUtfScanner
                             c |= (d << 16);
                         }
                     }
-                    mPendingInput = c;
+                    _pendingInput = c;
                     return false;
                 }
                 c = decodeUtf8_4(c);
                 // Let's add first part right away:
-                attrBuffer[mElemAttrPtr++] = (char) (0xD800 | (c >> 10));
+                attrBuffer[_elemAttrPtr++] = (char) (0xD800 | (c >> 10));
                 c = 0xDC00 | (c & 0x3FF);
-                if (mElemAttrPtr >= attrBuffer.length) {
+                if (_elemAttrPtr >= attrBuffer.length) {
                     attrBuffer = _attrCollector.valueBufferFull();
                 }
                 break;
@@ -821,14 +826,14 @@ public class AsyncUtfScanner
                 /* !!! TODO: may be blocking to get rest of entity name?
                  */
                 if (c == 0) { // general entity; should never happen
-                    reportUnexpandedEntityInAttr(mElemAttrName, false);
+                    reportUnexpandedEntityInAttr(_elemAttrName, false);
                 }
                 // Ok; does it need a surrogate though? (over 16 bits)
                 if ((c >> 16) != 0) {
                     c -= 0x10000;
-                    attrBuffer[mElemAttrPtr++] = (char) (0xD800 | (c >> 10));
+                    attrBuffer[_elemAttrPtr++] = (char) (0xD800 | (c >> 10));
                     c = 0xDC00 | (c & 0x3FF);
-                    if (mElemAttrPtr >= attrBuffer.length) {
+                    if (_elemAttrPtr >= attrBuffer.length) {
                         attrBuffer = _attrCollector.valueBufferFull();
                     }
                 }
@@ -842,7 +847,7 @@ public class AsyncUtfScanner
                 // Other chars are not important here...
             }
             // We know there's room for at least one char without checking
-            attrBuffer[mElemAttrPtr++] = (char) c;
+            attrBuffer[_elemAttrPtr++] = (char) c;
         }
 
         return true; // yeah, we're done!
@@ -854,18 +859,18 @@ public class AsyncUtfScanner
         final int[] TYPES = mCharTypes.ATTR_CHARS;
         char[] attrBuffer = _nameBuffer;
 
-        final int quoteChar = (int) mElemAttrQuote;
+        final int quoteChar = (int) _elemAttrQuote;
 
         // First; any pending input?
-        if (mPendingInput != 0) {
+        if (_pendingInput != 0) {
             if (!handlePartialCR()) {
                 return false;
             }
-            if (mElemAttrPtr >= attrBuffer.length) {
+            if (_elemAttrPtr >= attrBuffer.length) {
                 _nameBuffer = attrBuffer = DataUtil.growArrayBy(attrBuffer, attrBuffer.length);
             }
             // All lfs get converted to spaces, in attribute values
-            attrBuffer[mElemAttrPtr++] = ' ';
+            attrBuffer[_elemAttrPtr++] = ' ';
         }
         
         value_loop:
@@ -877,12 +882,12 @@ public class AsyncUtfScanner
                 if (_inputPtr >= _inputEnd) {
                     return false;
                 }
-                if (mElemAttrPtr >= attrBuffer.length) {
+                if (_elemAttrPtr >= attrBuffer.length) {
                     _nameBuffer = attrBuffer = DataUtil.growArrayBy(attrBuffer, attrBuffer.length);
                 }
                 int max = _inputEnd;
                 {
-                    int max2 = _inputPtr + (attrBuffer.length - mElemAttrPtr);
+                    int max2 = _inputPtr + (attrBuffer.length - _elemAttrPtr);
                     if (max2 < max) {
                         max = max2;
                     }
@@ -892,7 +897,7 @@ public class AsyncUtfScanner
                     if (TYPES[c] != 0) {
                         break ascii_loop;
                     }
-                    attrBuffer[mElemAttrPtr++] = (char) c;
+                    attrBuffer[_elemAttrPtr++] = (char) c;
                 }
             }
             
@@ -901,7 +906,7 @@ public class AsyncUtfScanner
                 throwInvalidXmlChar(c);
             case XmlCharTypes.CT_WS_CR:
                 if (_inputPtr >= _inputEnd) {
-                    mPendingInput = PENDING_STATE_CR;
+                    _pendingInput = PENDING_STATE_CR;
                     return false;
                 }
                 if (_inputBuffer[_inputPtr] == BYTE_LF) {
@@ -917,7 +922,7 @@ public class AsyncUtfScanner
                 break;
             case XmlCharTypes.CT_MULTIBYTE_2:
                 if (_inputPtr >= _inputEnd) {
-                    mPendingInput = c;
+                    _pendingInput = c;
                     return false;
                 }
                 c = decodeUtf8_2(c);
@@ -928,7 +933,7 @@ public class AsyncUtfScanner
                         int d = (int) _inputBuffer[_inputPtr++] & 0xFF;
                         c |= (d << 8);
                     }
-                    mPendingInput = c;
+                    _pendingInput = c;
                     return false;
                 }
                 c = decodeUtf8_3(c);
@@ -943,14 +948,14 @@ public class AsyncUtfScanner
                             c |= (d << 16);
                         }
                     }
-                    mPendingInput = c;
+                    _pendingInput = c;
                     return false;
                 }
                 c = decodeUtf8_4(c);
                 // Let's add first part right away:
-                attrBuffer[mElemAttrPtr++] = (char) (0xD800 | (c >> 10));
+                attrBuffer[_elemAttrPtr++] = (char) (0xD800 | (c >> 10));
                 c = 0xDC00 | (c & 0x3FF);
-                if (mElemAttrPtr >= attrBuffer.length) {
+                if (_elemAttrPtr >= attrBuffer.length) {
                     _nameBuffer = attrBuffer = DataUtil.growArrayBy(attrBuffer, attrBuffer.length);
                 }
                 break;
@@ -963,14 +968,14 @@ public class AsyncUtfScanner
                 /* !!! TODO: may be blocking to get rest of entity name?
                  */
                 if (c == 0) { // general entity; should never happen
-                    reportUnexpandedEntityInAttr(mElemAttrName, true);
+                    reportUnexpandedEntityInAttr(_elemAttrName, true);
                 }
                 // Ok; does it need a surrogate though? (over 16 bits)
                 if ((c >> 16) != 0) {
                     c -= 0x10000;
-                    attrBuffer[mElemAttrPtr++] = (char) (0xD800 | (c >> 10));
+                    attrBuffer[_elemAttrPtr++] = (char) (0xD800 | (c >> 10));
                     c = 0xDC00 | (c & 0x3FF);
-                    if (mElemAttrPtr >= attrBuffer.length) {
+                    if (_elemAttrPtr >= attrBuffer.length) {
                         attrBuffer = _attrCollector.valueBufferFull();
                     }
                 }
@@ -984,34 +989,34 @@ public class AsyncUtfScanner
                 // Other chars are not important here...
             }
             // We know there's room for at least one char without checking
-            attrBuffer[mElemAttrPtr++] = (char) c;
+            attrBuffer[_elemAttrPtr++] = (char) c;
         }
 
         /* Simple optimization: for default ns removal (or, with
          * ns 1.1, any other as well), will use empty value... no
          * need to try to intern:
          */
-        int attrPtr = mElemAttrPtr;
+        int attrPtr = _elemAttrPtr;
         if (attrPtr == 0) {
-            bindNs(mElemAttrName, "");
+            bindNs(_elemAttrName, "");
         } else {
             String uri = _config.canonicalizeURI(attrBuffer, attrPtr);
-            bindNs(mElemAttrName, uri);
+            bindNs(_elemAttrName, uri);
         }
         return true;
     }
 
     /*
-    ////////////////////////////////////////////////
-    // Implementation of parsing API, other events
-    ////////////////////////////////////////////////
+    /**********************************************************************
+    /* Implementation of parsing API, other events
+    /**********************************************************************
      */
 
     protected final int parseCommentContents()
         throws XMLStreamException
     {
         // Left-overs from last input block?
-        if (mPendingInput != 0) { // CR, multi-byte, or '-'?
+        if (_pendingInput != 0) { // CR, multi-byte, or '-'?
             int result = handleCommentPending();
             // If there's not enough input, or if we completed, can leave
             if (result != 0) {
@@ -1061,7 +1066,7 @@ public class AsyncUtfScanner
             case XmlCharTypes.CT_WS_CR:
                 {
                     if (_inputPtr < _inputEnd) {
-                        mPendingInput = PENDING_STATE_CR;
+                        _pendingInput = PENDING_STATE_CR;
                         break main_loop;
                     }
                     if (inputBuffer[_inputPtr] == BYTE_LF) {
@@ -1095,21 +1100,21 @@ public class AsyncUtfScanner
                 reportInvalidInitial(c);
             case XmlCharTypes.CT_HYPHEN: // '-->'?
                 if (_inputPtr >= _inputEnd) {
-                    mPendingInput = PENDING_STATE_COMMENT_HYPHEN1;
+                    _pendingInput = PENDING_STATE_COMMENT_HYPHEN1;
                     break main_loop;
                 }
                 if (_inputBuffer[_inputPtr] == BYTE_HYPHEN) { // ok, must be end then
                     ++_inputPtr;
                     if (_inputPtr >= _inputEnd) {
-                        mPendingInput = PENDING_STATE_COMMENT_HYPHEN2;
+                        _pendingInput = PENDING_STATE_COMMENT_HYPHEN2;
                         break main_loop;
                     }
                     if (_inputBuffer[_inputPtr++] != BYTE_GT) {
                         reportDoubleHyphenInComments();
                     }
                     _textBuilder.setCurrentLength(outPtr);
-                    mState = STATE_DEFAULT;
-                    mNextEvent = EVENT_INCOMPLETE;
+                    _state = STATE_DEFAULT;
+                    _nextEvent = EVENT_INCOMPLETE;
                     return COMMENT;
                 }
                 break;
@@ -1134,7 +1139,7 @@ public class AsyncUtfScanner
     protected final int handleCommentPending()
         throws XMLStreamException
     {
-        if (mPendingInput == PENDING_STATE_COMMENT_HYPHEN1) {
+        if (_pendingInput == PENDING_STATE_COMMENT_HYPHEN1) {
             if (_inputPtr >= _inputEnd) {
                 return EVENT_INCOMPLETE;
             }
@@ -1144,13 +1149,13 @@ public class AsyncUtfScanner
                 return 0;
             }
             ++_inputPtr;
-            mPendingInput = PENDING_STATE_COMMENT_HYPHEN2;
+            _pendingInput = PENDING_STATE_COMMENT_HYPHEN2;
             if (_inputPtr >= _inputEnd) { // no more input?
                 return EVENT_INCOMPLETE;
             }
             // continue
         }
-        if (mPendingInput == PENDING_STATE_COMMENT_HYPHEN2) {
+        if (_pendingInput == PENDING_STATE_COMMENT_HYPHEN2) {
             if (_inputPtr >= _inputEnd) {
                 return EVENT_INCOMPLETE;
             }
@@ -1158,8 +1163,8 @@ public class AsyncUtfScanner
             if (b != BYTE_HYPHEN) {
                 reportDoubleHyphenInComments();
             } 
-            mState = STATE_DEFAULT;
-            mNextEvent = EVENT_INCOMPLETE;
+            _state = STATE_DEFAULT;
+            _nextEvent = EVENT_INCOMPLETE;
             return PROCESSING_INSTRUCTION;
         }
         // Otherwise can use default code
@@ -1173,7 +1178,7 @@ public class AsyncUtfScanner
         int outPtr = _textBuilder.getCurrentLength();
 
         // Left-overs from last input block?
-        if (mPendingInput != 0) { // CR, multi-byte, '?'
+        if (_pendingInput != 0) { // CR, multi-byte, '?'
             int result = handlePIPending();
             // If there's not enough input, or if we completed, can leave
             if (result != 0) {
@@ -1220,7 +1225,7 @@ public class AsyncUtfScanner
             case XmlCharTypes.CT_WS_CR:
                 {
                     if (_inputPtr < _inputEnd) {
-                        mPendingInput = PENDING_STATE_CR;
+                        _pendingInput = PENDING_STATE_CR;
                         break main_loop;
                     }
                     if (inputBuffer[_inputPtr] == BYTE_LF) {
@@ -1255,14 +1260,14 @@ public class AsyncUtfScanner
             case XmlCharTypes.CT_QMARK:
 
                 if (_inputPtr >= _inputEnd) {
-                    mPendingInput = PENDING_STATE_PI_QMARK;
+                    _pendingInput = PENDING_STATE_PI_QMARK;
                     break main_loop;
                 }
                 if (_inputBuffer[_inputPtr] == BYTE_GT) { // end
                     ++_inputPtr;
                     _textBuilder.setCurrentLength(outPtr);
-                    mState = STATE_DEFAULT;
-                    mNextEvent = EVENT_INCOMPLETE;
+                    _state = STATE_DEFAULT;
+                    _nextEvent = EVENT_INCOMPLETE;
                     return PROCESSING_INSTRUCTION;
                 }
                 // Not end mark, just need to reprocess the second char
@@ -1289,20 +1294,20 @@ public class AsyncUtfScanner
         throws XMLStreamException
     {
         // First, the special case, end marker:
-        if (mPendingInput == PENDING_STATE_PI_QMARK) {
+        if (_pendingInput == PENDING_STATE_PI_QMARK) {
             if (_inputPtr >= _inputEnd) {
                 return EVENT_INCOMPLETE;
             }
             byte b = _inputBuffer[_inputPtr];
-            mPendingInput = 0;
+            _pendingInput = 0;
             if (b != BYTE_GT) {
                 // can't be the end marker, just append '-' and go
                 _textBuilder.append("?");
                 return 0;
             }
             ++_inputPtr;
-            mState = STATE_DEFAULT;
-            mNextEvent = EVENT_INCOMPLETE;
+            _state = STATE_DEFAULT;
+            _nextEvent = EVENT_INCOMPLETE;
             return PROCESSING_INSTRUCTION;
         }
         // Otherwise can use default code
@@ -1310,9 +1315,9 @@ public class AsyncUtfScanner
     }
 
     /*
-    ////////////////////////////////////////////////
-    // Multi-byte char decoding
-    ////////////////////////////////////////////////
+    /**********************************************************************
+    /* Multi-byte char decoding
+    /**********************************************************************
      */
 
     /**
@@ -1437,9 +1442,9 @@ public class AsyncUtfScanner
     }
 
     /*
-    ////////////////////////////////////////////////
-    // Name handling
-    ////////////////////////////////////////////////
+    /**********************************************************************
+    /* Name handling
+    /**********************************************************************
      */
 
     protected final PName addPName(int hash, int[] quads, int qlen, int lastQuadBytes)
@@ -1449,9 +1454,9 @@ public class AsyncUtfScanner
     }
 
     /*
-    ////////////////////////////////////////////////
-    // Error reporting
-    ////////////////////////////////////////////////
+    /**********************************************************************
+    /* Error reporting
+    /**********************************************************************
      */
 
     protected void reportInvalidInitial(int mask)

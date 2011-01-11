@@ -19,6 +19,7 @@ import java.io.IOException;
 import javax.xml.stream.XMLStreamException;
 
 
+import com.fasterxml.aalto.AsyncXMLStreamReader;
 import com.fasterxml.aalto.impl.ErrorConsts;
 import com.fasterxml.aalto.in.*;
 import com.fasterxml.aalto.util.DataUtil;
@@ -31,23 +32,12 @@ import com.fasterxml.aalto.util.DataUtil;
 public abstract class AsyncByteScanner
     extends ByteBasedScanner
 {
-    /*
-    ////////////////////////////////////////////////
-    // Generic/public constants
-    ////////////////////////////////////////////////
-     */
-
-    /**
-     * As per javadocs of {@link javax.xml.stream.XMLStreamConstants},
-     * event codes 0 through 256 (inclusive?) are reserved by the Stax
-     * specs, so we'll use the next available code.
-     */
-    public final static int EVENT_INCOMPLETE = 257;
+    private final static int EVENT_INCOMPLETE = AsyncXMLStreamReader.EVENT_INCOMPLETE;
 
     /*
-    ////////////////////////////////////////////////
-    // State consts
-    ////////////////////////////////////////////////
+    /**********************************************************************
+    /* State consts
+    /**********************************************************************
      */
 
     /**
@@ -120,9 +110,9 @@ public abstract class AsyncByteScanner
 
 
     /*
-    ////////////////////////////////////////////////
-    // Input buffer handling
-    ////////////////////////////////////////////////
+    /**********************************************************************
+    /* Input buffer handling
+    /**********************************************************************
      */
 
     /**
@@ -136,12 +126,12 @@ public abstract class AsyncByteScanner
      * contained. This is needed to correctly update location
      * information when the block has been completed.
      */
-    protected int mOrigBufferLen;
+    protected int _origBufferLen;
 
     /*
-    ////////////////////////////////////////////////
-    // General state tracking
-    ////////////////////////////////////////////////
+    /**********************************************************************
+    /* General state tracking
+    /**********************************************************************
      */
 
     /**
@@ -149,20 +139,20 @@ public abstract class AsyncByteScanner
      * event we are trying to parse, even if it's not yet
      * complete. Type of that event is stored here.
      */
-    protected int mNextEvent = EVENT_INCOMPLETE;
+    protected int _nextEvent = EVENT_INCOMPLETE;
 
     /**
      * In addition to the event type, there is need for additional
      * state information
      */
-    protected int mState = STATE_DEFAULT;
+    protected int _state = STATE_DEFAULT;
 
     /**
      * For token/state combinations that are 'shared' between
      * events (or embedded in them), this is where the surrounding
      * event state is retained.
      */
-    protected int mSurroundingEvent = EVENT_INCOMPLETE;
+    protected int _surroundingEvent = EVENT_INCOMPLETE;
 
     /**
      * There are some multi-byte combinations that must be handled
@@ -180,19 +170,19 @@ public abstract class AsyncByteScanner
      * Note: it is assumed that if value is 0, there is no data.
      * Thus, if 0 needed to be added pending, it has to be masked.
      */
-    protected int mPendingInput = 0;
+    protected int _pendingInput = 0;
 
     /*
-    ////////////////////////////////////////////////
-    // Name parsing state
-    ////////////////////////////////////////////////
+    /**********************************************************************
+    /* Name parsing state
+    /**********************************************************************
      */
 
     /**
      * Number of complete quads parsed for current name (quads
      * themselves are stored in {@link #mQuadBuffer}).
      */
-    protected int mQuadCount;
+    protected int _quadCount;
 
     /**
      * Bytes parsed for the current, incomplete, quad
@@ -205,25 +195,25 @@ public abstract class AsyncByteScanner
     protected int _currQuadBytes = 0;
 
     /*
-    ////////////////////////////////////////////////
-    // (Start) element parsing state
-    ////////////////////////////////////////////////
+    /**********************************************************************
+    /* (Start) element parsing state
+    /**********************************************************************
      */
 
-    protected boolean mElemAllNsBound;
+    protected boolean _elemAllNsBound;
 
-    protected boolean mElemAttrCount;
+    protected boolean _elemAttrCount;
 
-    protected byte mElemAttrQuote;
+    protected byte _elemAttrQuote;
 
-    protected PName mElemAttrName;
+    protected PName _elemAttrName;
 
-    protected int mElemAttrPtr;
+    protected int _elemAttrPtr;
 
     /*
-    ////////////////////////////////////////////////
-    // Instance construction
-    ////////////////////////////////////////////////
+    /**********************************************************************
+    /* Instance construction
+    /**********************************************************************
      */
 
     public AsyncByteScanner(ReaderConfig cfg)
@@ -234,13 +224,13 @@ public abstract class AsyncByteScanner
     @Override
     public String toString()
     {
-        return "[curr="+_currToken+" next="+mNextEvent+", state = "+mState+"]";
+        return "[curr="+_currToken+" next="+_nextEvent+", state = "+_state+"]";
     }
 
     /*
-    ////////////////////////////////////////////////
-    // Input feeding
-    ////////////////////////////////////////////////
+    /**********************************************************************
+    /* Input feeding
+    /**********************************************************************
      */
 
     public final boolean hasInput() { return _inputPtr < _inputEnd; }
@@ -253,14 +243,14 @@ public abstract class AsyncByteScanner
             throw new XMLStreamException("Still have "+(_inputEnd - _inputPtr)+" unread bytes");
         }
         // Time to update pointers first
-        mPastBytes += mOrigBufferLen;
-        mRowStartOffset -= mOrigBufferLen;
+        mPastBytes += _origBufferLen;
+        mRowStartOffset -= _origBufferLen;
 
         // And then update buffer settings
         _inputBuffer = buf;
         _inputPtr = start;
         _inputEnd = start+len;
-        mOrigBufferLen = len;
+        _origBufferLen = len;
     }
 
     /**
@@ -276,9 +266,9 @@ public abstract class AsyncByteScanner
     }
 
     /*
-    ////////////////////////////////////////////////
-    // Implementation of parsing API
-    ////////////////////////////////////////////////
+    /**********************************************************************
+    /* Implementation of parsing API
+    /**********************************************************************
      */
 
     public final int nextFromProlog(boolean isProlog)
@@ -287,19 +277,19 @@ public abstract class AsyncByteScanner
         // Had fully complete event? Need to reset state etc:
         if (_currToken != EVENT_INCOMPLETE) {
             assert(!_tokenIncomplete); // only CHARACTERS can be
-            _currToken = mNextEvent = EVENT_INCOMPLETE;
-            mState = STATE_DEFAULT;
+            _currToken = _nextEvent = EVENT_INCOMPLETE;
+            _state = STATE_DEFAULT;
         }
 
         // Ok, do we know which event it will be?
-        if (mNextEvent == EVENT_INCOMPLETE) { // nope
+        if (_nextEvent == EVENT_INCOMPLETE) { // nope
             // First: did we have a lone CR at the end of the buffer?
-            if (mPendingInput != 0) { // yup
+            if (_pendingInput != 0) { // yup
                 if (!handlePartialCR()) {
                     return _currToken;
                 }
             }
-            while (mState == STATE_DEFAULT) {
+            while (_state == STATE_DEFAULT) {
                 if (_inputPtr >= _inputEnd) { // no more input available
                     return _currToken;
                 }
@@ -309,7 +299,7 @@ public abstract class AsyncByteScanner
                  * pretty much an error.
                  */
                 if (b == BYTE_LT) { // root element, comment, proc instr?
-                    mState = STATE_PROLOG_SEEN_LT;
+                    _state = STATE_PROLOG_SEEN_LT;
                     break;
                 }
                 if (b == BYTE_SPACE || b == BYTE_CR
@@ -323,18 +313,18 @@ public abstract class AsyncByteScanner
                 }
             }
 
-            if (mState == STATE_PROLOG_SEEN_LT) {
+            if (_state == STATE_PROLOG_SEEN_LT) {
                 if (_inputPtr >= _inputEnd) {
                     return _currToken;
                 }
                 byte b = _inputBuffer[_inputPtr++];
                 if (b == BYTE_EXCL) { // comment or DOCTYPE declaration?
-                    mState = STATE_PROLOG_DECL;
+                    _state = STATE_PROLOG_DECL;
                     return handlePrologDeclStart(isProlog);
                 }
                 if (b == BYTE_QMARK) { // PI
-                    mNextEvent = PROCESSING_INSTRUCTION;
-                    mState = STATE_DEFAULT;
+                    _nextEvent = PROCESSING_INSTRUCTION;
+                    _state = STATE_DEFAULT;
                     return handlePI();
                 }
                 if (b == BYTE_SLASH || !isProlog) {
@@ -342,7 +332,7 @@ public abstract class AsyncByteScanner
                 }
                 return handleStartElementStart(b);
             }
-            if (mState == STATE_PROLOG_DECL) {
+            if (_state == STATE_PROLOG_DECL) {
                 return handlePrologDeclStart(isProlog);
             }
             // should never have anything else...
@@ -350,7 +340,7 @@ public abstract class AsyncByteScanner
         }
 
         // At this point, we do know the event type
-        switch (mNextEvent) {
+        switch (_nextEvent) {
         case START_ELEMENT:
             return handleStartElement();
         case PROCESSING_INSTRUCTION:
@@ -393,18 +383,18 @@ public abstract class AsyncByteScanner
                 skipCharacters();
                 _tokenIncomplete = false;
             }
-            _currToken = mNextEvent = EVENT_INCOMPLETE;
-            mState = STATE_DEFAULT;
+            _currToken = _nextEvent = EVENT_INCOMPLETE;
+            _state = STATE_DEFAULT;
         }
 
         // Don't yet know the type?
-        if (mNextEvent == EVENT_INCOMPLETE) {
-            if (mState == STATE_DEFAULT) {
+        if (_nextEvent == EVENT_INCOMPLETE) {
+            if (_state == STATE_DEFAULT) {
                 /* We can only have pending input for (incomplete)
                  * CHARACTERS event.
                  */
-                if (mPendingInput != 0) { // CR, or multi-byte?
-                    mNextEvent = CHARACTERS;
+                if (_pendingInput != 0) { // CR, or multi-byte?
+                    _nextEvent = CHARACTERS;
                     return startCharactersPending();
                 }
                 if (_inputPtr >= _inputEnd) { // nothing we can do?
@@ -412,11 +402,11 @@ public abstract class AsyncByteScanner
                 }
                 byte b = _inputBuffer[_inputPtr++];
                 if (b == BYTE_LT) { // root element, comment, proc instr?
-                    mState = STATE_TREE_SEEN_LT;
+                    _state = STATE_TREE_SEEN_LT;
                 } else if (b == BYTE_AMP) {
-                    mState = STATE_TREE_SEEN_AMP;
+                    _state = STATE_TREE_SEEN_AMP;
                 } else {
-                    mNextEvent = CHARACTERS;
+                    _nextEvent = CHARACTERS;
                     return startCharacters(b);
                 }
             }
@@ -424,14 +414,14 @@ public abstract class AsyncByteScanner
             if (_inputPtr >= _inputEnd) {
                 return _currToken; // i.e. EVENT_INCOMPLETE
             }
-            if (mState == STATE_TREE_SEEN_LT) {
+            if (_state == STATE_TREE_SEEN_LT) {
                 // Ok, so we've just seen the less-than char...
                 byte b = _inputBuffer[_inputPtr++];
                 if (b == BYTE_EXCL) { // comment or CDATA
-                    mState = STATE_TREE_SEEN_EXCL;
+                    _state = STATE_TREE_SEEN_EXCL;
                 } else if (b == BYTE_QMARK) {
-                    mNextEvent = PROCESSING_INSTRUCTION;
-                    mState = STATE_DEFAULT;
+                    _nextEvent = PROCESSING_INSTRUCTION;
+                    _state = STATE_DEFAULT;
                     return handlePI();
                 } else if (b == BYTE_SLASH) {
                     return handleEndElementStart();
@@ -439,22 +429,22 @@ public abstract class AsyncByteScanner
                     // Probably start element -- need to retain first char tho
                     return handleStartElementStart(b);
                 }
-            } else if (mState == STATE_TREE_SEEN_AMP) {
+            } else if (_state == STATE_TREE_SEEN_AMP) {
                 return handleEntityStart(EVENT_INCOMPLETE, _inputBuffer[_inputPtr++]);
             }
                 
-            if (mState == STATE_TREE_SEEN_EXCL) {
+            if (_state == STATE_TREE_SEEN_EXCL) {
                 if (_inputPtr >= _inputEnd) {
                     return _currToken; // i.e. EVENT_INCOMPLETE
                 }
                 byte b = _inputBuffer[_inputPtr++];
                 // Comment or CDATA?
                 if (b == BYTE_HYPHEN) { // Comment
-                    mNextEvent = COMMENT;
-                    mState = STATE_DEFAULT;
+                    _nextEvent = COMMENT;
+                    _state = STATE_DEFAULT;
                 } else if (b == BYTE_LBRACKET) { // CDATA
-                    mNextEvent = CDATA;
-                    mState = STATE_DEFAULT;
+                    _nextEvent = CDATA;
+                    _state = STATE_DEFAULT;
                 } else {
                     reportTreeUnexpChar(decodeCharForError(b), " (expected either '-' for COMMENT or '[CDATA[' for CDATA section)");
                 }
@@ -466,7 +456,7 @@ public abstract class AsyncByteScanner
         /* We know the type; event is usually partially processed
          * and needs to be completely read.
          */
-        switch (mNextEvent) {
+        switch (_nextEvent) {
         case START_ELEMENT:
             return handleStartElement();
         case END_ELEMENT:
@@ -486,16 +476,17 @@ public abstract class AsyncByteScanner
             }
             // Otherwise, should not get here
             throwInternal();
-        }
+        }    ////////////////////////////////////////////////
+
 
         return throwInternal(); // never gets here
     }
 
     /*
-    ////////////////////////////////////////////////
-    // Second-level parsing
-    ////////////////////////////////////////////////
-    */
+    /**********************************************************************
+    /* Second-level parsing
+    /**********************************************************************
+     */
 
     /**
      * @return True, if was able to skip through the space and find
@@ -514,7 +505,7 @@ public abstract class AsyncByteScanner
                 markLF();
             } else if (b == BYTE_CR) {
                 if (_inputPtr >= _inputEnd) {
-                    mPendingInput = INT_CR;
+                    _pendingInput = INT_CR;
                     break;
                 }
                 if (_inputBuffer[_inputPtr] == BYTE_LF) {
@@ -537,13 +528,13 @@ public abstract class AsyncByteScanner
         byte b = _inputBuffer[_inputPtr++];
         // So far, we have seen "<!", need to know if it's DTD or COMMENT 
         if (b == BYTE_HYPHEN) {
-            mNextEvent = COMMENT;
-            mState = STATE_DEFAULT;
+            _nextEvent = COMMENT;
+            _state = STATE_DEFAULT;
             return handleComment();
         }
         if (b == BYTE_D) {
-            mNextEvent = DTD;
-            mState = STATE_DEFAULT;
+            _nextEvent = DTD;
+            _state = STATE_DEFAULT;
             return handleDTD();
         }
         reportPrologUnexpChar(isProlog, decodeCharForError(b), " (expected '-' for COMMENT)");
@@ -554,7 +545,7 @@ public abstract class AsyncByteScanner
         throws XMLStreamException
     {
         // Most common case fisrt:
-        if (mState == STATE_PI_IN_DATA) {
+        if (_state == STATE_PI_IN_DATA) {
             return parsePIData();
         }
 
@@ -563,16 +554,16 @@ public abstract class AsyncByteScanner
             if (_inputPtr >= _inputEnd) {
                 return EVENT_INCOMPLETE;
             }
-            switch (mState) {
+            switch (_state) {
             case STATE_DEFAULT:
                 _textBuilder.resetWithEmpty();
                 _tokenName = parseNewName(_inputBuffer[_inputPtr++]);
                 if (_tokenName == null) {
-                    mState = STATE_PI_IN_TARGET;
+                    _state = STATE_PI_IN_TARGET;
                     return EVENT_INCOMPLETE;
                 }
                 checkPITargetName(_tokenName);
-                mState = STATE_PI_AFTER_TARGET;
+                _state = STATE_PI_AFTER_TARGET;
                 // fall through
             case STATE_PI_AFTER_TARGET:
                 // Need ws or "?>"
@@ -586,13 +577,13 @@ public abstract class AsyncByteScanner
                             break main_loop; // means we are done
                         }
                         // If not (whatever reason), let's move to check state
-                        mState = STATE_PI_AFTER_TARGET_QMARK;
+                        _state = STATE_PI_AFTER_TARGET_QMARK;
                         break;
                     }
                     if (b == BYTE_SPACE || b == BYTE_CR
                                || b == BYTE_LF || b == BYTE_TAB) {
                         if (!asyncSkipSpace()) { // ran out of input?
-                            mState = STATE_PI_AFTER_TARGET_WS;
+                            _state = STATE_PI_AFTER_TARGET_WS;
                             return EVENT_INCOMPLETE;
                         }
                         // Quick check, perhaps we'll see end marker?
@@ -603,7 +594,7 @@ public abstract class AsyncByteScanner
                             break main_loop; // means we are done
                         }
                         // If not, we'll move to 'data' portion of PI
-                        mState = STATE_PI_IN_DATA;
+                        _state = STATE_PI_IN_DATA;
                         return parsePIData();
                     }
                     // Otherwise, it's an error
@@ -615,7 +606,7 @@ public abstract class AsyncByteScanner
                     return EVENT_INCOMPLETE;
                 }
                 // Can just move to "data" portion right away
-                mState = STATE_PI_IN_DATA;
+                _state = STATE_PI_IN_DATA;
                 return parsePIData();
             case STATE_PI_AFTER_TARGET_QMARK:
                 {
@@ -634,7 +625,7 @@ public abstract class AsyncByteScanner
                     return EVENT_INCOMPLETE;
                 }
                 checkPITargetName(_tokenName);
-                mState = STATE_PI_AFTER_TARGET;
+                _state = STATE_PI_AFTER_TARGET;
                 break;
                 
             default:
@@ -642,15 +633,15 @@ public abstract class AsyncByteScanner
             }
         }
         
-        mState = STATE_DEFAULT;
-        mNextEvent = EVENT_INCOMPLETE;
+        _state = STATE_DEFAULT;
+        _nextEvent = EVENT_INCOMPLETE;
         return PROCESSING_INSTRUCTION;
     }
 
     private int handleComment()
         throws XMLStreamException
     {
-        if (mState == STATE_COMMENT_CONTENT) {
+        if (_state == STATE_COMMENT_CONTENT) {
             return parseCommentContents();
         }
 
@@ -659,21 +650,21 @@ public abstract class AsyncByteScanner
         }
         byte b = _inputBuffer[_inputPtr++];
         
-        if (mState == STATE_DEFAULT) {
+        if (_state == STATE_DEFAULT) {
             if (b != BYTE_HYPHEN) {
                 reportTreeUnexpChar(decodeCharForError(b), " (expected '-' for COMMENT)");
             }
-            mState = STATE_COMMENT_CONTENT;
+            _state = STATE_COMMENT_CONTENT;
             _textBuilder.resetWithEmpty();
             return parseCommentContents();
         }
-        if (mState == STATE_COMMENT_HYPHEN2) {
+        if (_state == STATE_COMMENT_HYPHEN2) {
             // We are almost done, just need to get '>' at the end
             if (b != BYTE_GT) {
                 reportDoubleHyphenInComments();
             }
-            mState = STATE_DEFAULT;
-            mNextEvent = EVENT_INCOMPLETE;
+            _state = STATE_DEFAULT;
+            _nextEvent = EVENT_INCOMPLETE;
             return COMMENT;
         }
         return throwInternal();
@@ -738,11 +729,11 @@ public abstract class AsyncByteScanner
     protected int handleEntityStart(int surroundingEvent, byte b)
         throws XMLStreamException
     {
-        mNextEvent = ENTITY_REFERENCE;
-        mSurroundingEvent = surroundingEvent;
+        _nextEvent = ENTITY_REFERENCE;
+        _surroundingEvent = surroundingEvent;
 
         if (b == BYTE_HASH) {
-            mState = STATE_ENT_SEEN_HASH;
+            _state = STATE_ENT_SEEN_HASH;
             return handleEntity();
         }
 
@@ -750,7 +741,7 @@ public abstract class AsyncByteScanner
         if (n != null) {
             return handleGeneralEntity(n);
         }
-        mState = STATE_ENT_IN_NAME;
+        _state = STATE_ENT_IN_NAME;
         return EVENT_INCOMPLETE;
     }
 
@@ -783,9 +774,9 @@ public abstract class AsyncByteScanner
         throws XMLStreamException
     {
         PName elemName = parseNewName(b);
-        mNextEvent = START_ELEMENT;
+        _nextEvent = START_ELEMENT;
         if (elemName == null) {
-            mState = STATE_SE_ELEM_NAME;
+            _state = STATE_SE_ELEM_NAME;
             return EVENT_INCOMPLETE;
         }
         initStartElement(elemName);
@@ -804,7 +795,7 @@ public abstract class AsyncByteScanner
             byte b;
             int c;
 
-            switch (mState) {
+            switch (_state) {
             case STATE_SE_ELEM_NAME:
                 {
                     PName elemName = parsePName();
@@ -819,7 +810,7 @@ public abstract class AsyncByteScanner
                 // Fall through to next state
                 
             case STATE_SE_SPACE_OR_END: // obligatory space, or end
-                if (mPendingInput != 0) {
+                if (_pendingInput != 0) {
                     if (!handlePartialCR()) {
                         return EVENT_INCOMPLETE;
                     }
@@ -833,7 +824,7 @@ public abstract class AsyncByteScanner
                             markLF();
                         } else if (c == INT_CR) {
                             if (_inputPtr >= _inputEnd) {
-                                mPendingInput = c;
+                                _pendingInput = c;
                                 return EVENT_INCOMPLETE;
                             }
                             if (_inputBuffer[_inputPtr] == BYTE_LF) {
@@ -846,12 +837,12 @@ public abstract class AsyncByteScanner
                     } else if (c == INT_GT) { // must be '/' or '>'
                         return finishStartElement(false);
                     } else if (c == INT_SLASH) {
-                        mState = STATE_SE_SEEN_SLASH;
+                        _state = STATE_SE_SEEN_SLASH;
                     } else {
                         throwUnexpectedChar(decodeCharForError(b), " expected space, or '>' or \"/>\"");
                     }
                 }
-                mState = STATE_SE_SPACE_OR_ATTRNAME;
+                _state = STATE_SE_SPACE_OR_ATTRNAME;
                 if (_inputPtr >= _inputEnd) {
                     return EVENT_INCOMPLETE;
                 }
@@ -865,7 +856,7 @@ public abstract class AsyncByteScanner
                  * has to be skipped
                  */
 
-                if (mPendingInput != 0) {
+                if (_pendingInput != 0) {
                     if (!handlePartialCR()) {
                         return EVENT_INCOMPLETE;
                     }
@@ -881,7 +872,7 @@ public abstract class AsyncByteScanner
                         markLF();
                     } else if (c == INT_CR) {
                         if (_inputPtr >= _inputEnd) {
-                            mPendingInput = c;
+                            _pendingInput = c;
                             return EVENT_INCOMPLETE;
                         }
                         if (_inputBuffer[_inputPtr] == BYTE_LF) {
@@ -898,16 +889,16 @@ public abstract class AsyncByteScanner
                     c = (int) b & 0xFF;
                 }
 
-                switch (mState) {
+                switch (_state) {
                 case STATE_SE_SPACE_OR_ATTRNAME:
                     {
                         PName n = parseNewName(b);
                         if (n == null) {
-                            mState = STATE_SE_ATTR_NAME;
+                            _state = STATE_SE_ATTR_NAME;
                             return EVENT_INCOMPLETE;
                         }
-                        mState = STATE_SE_SPACE_OR_EQ;
-                        mElemAttrName = n;
+                        _state = STATE_SE_SPACE_OR_EQ;
+                        _elemAttrName = n;
                     }
                     continue main_loop;
 
@@ -915,7 +906,7 @@ public abstract class AsyncByteScanner
                     if (b != BYTE_EQ) {
                         throwUnexpectedChar(decodeCharForError(b), " expected '='");
                     }
-                    mState = STATE_SE_SPACE_OR_ATTRVALUE;
+                    _state = STATE_SE_SPACE_OR_ATTRVALUE;
                     continue main_loop;
 
                 case STATE_SE_SPACE_OR_ATTRVALUE:
@@ -935,8 +926,8 @@ public abstract class AsyncByteScanner
                     if (n == null) {
                         return EVENT_INCOMPLETE;
                     }
-                    mElemAttrName = n;
-                    mState = STATE_SE_SPACE_OR_EQ;
+                    _elemAttrName = n;
+                    _state = STATE_SE_SPACE_OR_EQ;
                 }
                 break;
 
@@ -944,14 +935,14 @@ public abstract class AsyncByteScanner
                 if (!handleAttrValue()) {
                     return EVENT_INCOMPLETE;
                 }
-                mState = STATE_SE_SPACE_OR_END;
+                _state = STATE_SE_SPACE_OR_END;
                 break;
 
             case STATE_SE_ATTR_VALUE_NSDECL:
                 if (!handleNsDecl()) {
                     return EVENT_INCOMPLETE;
                 }
-                mState = STATE_SE_SPACE_OR_END;
+                _state = STATE_SE_SPACE_OR_END;
                 break;
 
             case STATE_SE_SEEN_SLASH:
@@ -972,23 +963,23 @@ public abstract class AsyncByteScanner
     {
         String prefix = elemName.getPrefix();
         if (prefix == null) { // element in default ns
-            mElemAllNsBound = true; // which need not be bound
+            _elemAllNsBound = true; // which need not be bound
         } else {
             elemName = bindName(elemName, prefix);
-            mElemAllNsBound = elemName.isBound();
+            _elemAllNsBound = elemName.isBound();
         }
         _tokenName = elemName;
         _currElem = new ElementScope(elemName, _currElem);
         _attrCount = 0;
-        mElemAttrPtr = 0;
-        mState = STATE_SE_SPACE_OR_END;
+        _elemAttrPtr = 0;
+        _state = STATE_SE_SPACE_OR_END;
     }
 
     private void initAttribute(byte quoteChar)
     {
-        mElemAttrQuote = quoteChar;
+        _elemAttrQuote = quoteChar;
 
-        PName attrName = mElemAttrName;
+        PName attrName = _elemAttrName;
         String prefix = attrName.getPrefix();
         boolean nsDecl;
  
@@ -1000,21 +991,21 @@ public abstract class AsyncByteScanner
                 nsDecl = true;
             } else {
                 attrName = bindName(attrName, prefix);
-                if (mElemAllNsBound) {
-                    mElemAllNsBound = attrName.isBound();
+                if (_elemAllNsBound) {
+                    _elemAllNsBound = attrName.isBound();
                 }
                 nsDecl = false;
             }
         }
 
         if (nsDecl) {
-            mState = STATE_SE_ATTR_VALUE_NSDECL;
+            _state = STATE_SE_ATTR_VALUE_NSDECL;
             // Ns decls use name buffer transiently
-            mElemAttrPtr = 0;
+            _elemAttrPtr = 0;
         } else {
-            mState = STATE_SE_ATTR_VALUE_NORMAL;
+            _state = STATE_SE_ATTR_VALUE_NORMAL;
             // Regular attributes are appended, shouldn't reset ptr
-            _attrCollector.startNewValue(attrName, mElemAttrPtr);
+            _attrCollector.startNewValue(attrName, _elemAttrPtr);
         }
     }
 
@@ -1034,7 +1025,7 @@ public abstract class AsyncByteScanner
         _isEmptyTag = emptyTag;
 
         // Note: this call also checks attribute uniqueness
-        int act = _attrCollector.finishLastValue(mElemAttrPtr);
+        int act = _attrCollector.finishLastValue(_elemAttrPtr);
         if (act < 0) { // error, dup attr indicated by -1
             act = _attrCollector.getCount(); // let's get correct count
             reportInputProblem(_attrCollector.getErrorMsg());
@@ -1046,7 +1037,7 @@ public abstract class AsyncByteScanner
          * That's legal, assuming declaration was found later on...
          * let's check
          */
-        if (!mElemAllNsBound) {
+        if (!_elemAllNsBound) {
             if (!_tokenName.isBound()) { // element itself unbound
                 reportUnboundPrefix(_tokenName, false);
             }
@@ -1073,9 +1064,9 @@ public abstract class AsyncByteScanner
          */
         int size = _tokenName.sizeInQuads();
         if ((_inputEnd - _inputPtr) < ((size << 2) + 1)) { // may need to load more
-            mNextEvent = END_ELEMENT;
-            mState = STATE_DEFAULT;
-            mQuadCount = _currQuad = _currQuadBytes = 0;
+            _nextEvent = END_ELEMENT;
+            _state = STATE_DEFAULT;
+            _quadCount = _currQuad = _currQuadBytes = 0;
             /* No, need to take it slow. Can not yet give up, though,
              * without reading remainder of the buffer
              */
@@ -1123,9 +1114,9 @@ public abstract class AsyncByteScanner
                 markLF();
             } else if (i2 == INT_CR) {
                 if (_inputPtr >= _inputEnd) {
-                    mPendingInput = i2;
-                    mNextEvent = END_ELEMENT;
-                    mState = STATE_EE_NEED_GT;
+                    _pendingInput = i2;
+                    _nextEvent = END_ELEMENT;
+                    _state = STATE_EE_NEED_GT;
                     return EVENT_INCOMPLETE;
                 }
                 if (_inputBuffer[_inputPtr] == BYTE_LF) {
@@ -1136,8 +1127,8 @@ public abstract class AsyncByteScanner
                 throwInvalidSpace(i2);
             }
             if (_inputPtr >= _inputEnd) {
-                mNextEvent = END_ELEMENT;
-                mState = STATE_EE_NEED_GT;
+                _nextEvent = END_ELEMENT;
+                _state = STATE_EE_NEED_GT;
                 return EVENT_INCOMPLETE;
             }
             i2 = _inputBuffer[_inputPtr++] & 0xFF;
@@ -1155,10 +1146,10 @@ public abstract class AsyncByteScanner
     private int handleEndElement()
         throws XMLStreamException
     {
-        if (mState == STATE_DEFAULT) { // parsing name
+        if (_state == STATE_DEFAULT) { // parsing name
             final PName elemName = _tokenName;
             final int quadSize = elemName.sizeInQuads() - 1; // need to ignore last for now
-            for (; mQuadCount < quadSize; ++mQuadCount) { // first, full quads
+            for (; _quadCount < quadSize; ++_quadCount) { // first, full quads
                 for (; _currQuadBytes < 4; ++_currQuadBytes) {
                     if (_inputPtr >= _inputEnd) {
                         return EVENT_INCOMPLETE;
@@ -1166,7 +1157,7 @@ public abstract class AsyncByteScanner
                     _currQuad = (_currQuad << 8) | (_inputBuffer[_inputPtr++] & 0xFF);
                 }
                 // match?
-                if (_currQuad != elemName.getQuad(mQuadCount)) {
+                if (_currQuad != elemName.getQuad(_quadCount)) {
                     reportUnexpectedEndTag(elemName.getPrefixedName());
                 }
                 _currQuad = _currQuadBytes = 0;
@@ -1190,12 +1181,12 @@ public abstract class AsyncByteScanner
                 }
             }
             // Bueno. How about optional space, '>'?
-            mState = STATE_EE_NEED_GT;
-        } else if (mState != STATE_EE_NEED_GT) {
+            _state = STATE_EE_NEED_GT;
+        } else if (_state != STATE_EE_NEED_GT) {
             throwInternal();
         }
 
-        if (mPendingInput != 0) {
+        if (_pendingInput != 0) {
             if (!handlePartialCR()) {
                 return EVENT_INCOMPLETE;
             }
@@ -1213,7 +1204,7 @@ public abstract class AsyncByteScanner
                     markLF();
                 } else if (i2 == INT_CR) {
                     if (_inputPtr >= _inputEnd) {
-                        mPendingInput = i2;
+                        _pendingInput = i2;
                         return EVENT_INCOMPLETE;
                     }
                     if (_inputBuffer[_inputPtr] == BYTE_LF) {
@@ -1235,10 +1226,10 @@ public abstract class AsyncByteScanner
     }
 
     /*
-    ////////////////////////////////////////////////
-    // Abstract methods from base class, parsing
-    ////////////////////////////////////////////////
-    */
+    /**********************************************************************
+    /* Abstract methods from base class, parsing
+    /**********************************************************************
+     */
 
     protected abstract void finishCharacters()
         throws XMLStreamException;
@@ -1316,9 +1307,9 @@ public abstract class AsyncByteScanner
     }
 
     /*
-    ////////////////////////////////////////////////
-    // Common name/entity parsing
-    ////////////////////////////////////////////////
+    /**********************************************************************
+    /* Common name/entity parsing
+    /**********************************************************************
      */
 
     protected PName parseNewName(byte b)
@@ -1333,7 +1324,7 @@ public abstract class AsyncByteScanner
         if (q < INT_A) { // lowest acceptable start char, except for ':' that would be allowed in non-ns mode
             throwUnexpectedChar(q, "; expected a name start character");
         }
-        mQuadCount = 0;
+        _quadCount = 0;
         _currQuad = q;
         _currQuadBytes = 1;
         return parsePName();
@@ -1346,7 +1337,7 @@ public abstract class AsyncByteScanner
         if (q < INT_A) {
             throwUnexpectedChar(q, "; expected a name start character");
         }
-        mQuadCount = 0;
+        _quadCount = 0;
         _currQuad = q;
         _currQuadBytes = 1;
         return parseEntityName();
@@ -1441,14 +1432,14 @@ public abstract class AsyncByteScanner
             /* If we get this far, need to add full quad into
              * result array and update state
              */
-            if (mQuadCount == 0) { // first quad
+            if (_quadCount == 0) { // first quad
                 mQuadBuffer[0] = q;
-                mQuadCount = 1;
+                _quadCount = 1;
             } else {
-                if (mQuadCount >= mQuadBuffer.length) { // let's just double?
+                if (_quadCount >= mQuadBuffer.length) { // let's just double?
                     mQuadBuffer = DataUtil.growArrayBy(mQuadBuffer, mQuadBuffer.length);
                 }
-                mQuadBuffer[mQuadCount++] = q;
+                mQuadBuffer[_quadCount++] = q;
             }
             _currQuadBytes = 0;
         }
@@ -1478,7 +1469,7 @@ public abstract class AsyncByteScanner
                     // Ok; "_" (45), "." (46) and "0"-"9"/":" (48 - 57/58) still name chars
                     if (q < 45 || q > 58 || q == 47) {
                         // apos, quot?
-                        if (mQuadCount == 1) {
+                        if (_quadCount == 1) {
                             q = mQuadBuffer[0];
                             if (q == EntityNames.ENTITY_APOS_QUAD) {
                                 return EntityNames.ENTITY_APOS;
@@ -1518,7 +1509,7 @@ public abstract class AsyncByteScanner
                 if (i < 65) { // 'A'
                     if (i < 45 || i > 58 || i == 47) {
                         // lt or gt?
-                        if (mQuadCount == 0) {
+                        if (_quadCount == 0) {
                             if (q == EntityNames.ENTITY_GT_QUAD) {
                                 return EntityNames.ENTITY_GT;
                             }
@@ -1542,7 +1533,7 @@ public abstract class AsyncByteScanner
                 if (i < 65) { // 'A'
                     if (i < 45 || i > 58 || i == 47) {
                         // amp?
-                        if (mQuadCount == 0) {
+                        if (_quadCount == 0) {
                             if (q == EntityNames.ENTITY_AMP_QUAD) {
                                 return EntityNames.ENTITY_AMP;
                             }
@@ -1556,14 +1547,14 @@ public abstract class AsyncByteScanner
             /* If we get this far, need to add full quad into
              * result array and update state
              */
-            if (mQuadCount == 0) { // first quad
+            if (_quadCount == 0) { // first quad
                 mQuadBuffer[0] = q;
-                mQuadCount = 1;
+                _quadCount = 1;
             } else {
-                if (mQuadCount >= mQuadBuffer.length) { // let's just double?
+                if (_quadCount >= mQuadBuffer.length) { // let's just double?
                     mQuadBuffer = DataUtil.growArrayBy(mQuadBuffer, mQuadBuffer.length);
                 }
-                mQuadBuffer[mQuadCount++] = q;
+                mQuadBuffer[_quadCount++] = q;
             }
             _currQuadBytes = 0;
         }
@@ -1592,7 +1583,7 @@ public abstract class AsyncByteScanner
     {
         // First, need to push back the byte read but not used:
         --_inputPtr;
-        int qlen = mQuadCount;
+        int qlen = _quadCount;
         // Also: if last quad is empty, will need take last from qbuf.
         if (lastByteCount == 0) {
             lastQuad = mQuadBuffer[--qlen];
@@ -1636,19 +1627,19 @@ public abstract class AsyncByteScanner
     }
 
     /*
-    ///////////////////////////////////////////////////
-    // methods from base class, name handling
-    ///////////////////////////////////////////////////
-    */
+    /**********************************************************************
+    /* methods from base class, name handling
+    /**********************************************************************
+     */
 
     protected abstract PName addPName(int hash, int[] quads, int qlen, int lastQuadBytes)
         throws XMLStreamException;
 
     /*
-    /////////////////////////////////////////////////////
-    // methods from base class, error reporting
-    /////////////////////////////////////////////////////
-    */
+    /**********************************************************************
+    /* methods from base class, error reporting
+    /**********************************************************************
+     */
 
     protected int decodeCharForError(byte b)
         throws XMLStreamException
@@ -1668,10 +1659,10 @@ public abstract class AsyncByteScanner
     }
 
     /*
-    ///////////////////////////////////////////////////
-    // Internal methods, entity expansion
-    ///////////////////////////////////////////////////
-    */
+    /**********************************************************************
+    /* Internal methods, entity expansion
+    /**********************************************************************
+     */
     
     protected int handleCharacterEntity()
         throws XMLStreamException
@@ -1681,10 +1672,10 @@ public abstract class AsyncByteScanner
     }
 
     /*
-    ///////////////////////////////////////////////////
-    // Internal methods, LF handling
-    ///////////////////////////////////////////////////
-    */
+    /**********************************************************************
+    /* Internal methods, LF handling
+    /**********************************************************************
+     */
 
     /**
      * Method called when there is a pending \r (from past buffer),
@@ -1697,13 +1688,13 @@ public abstract class AsyncByteScanner
     protected final boolean handlePartialCR()
     {
         // sanity check
-        if (mPendingInput != INT_CR) {
+        if (_pendingInput != INT_CR) {
             throwInternal();
         }
         if (_inputPtr >= _inputEnd) {
             return false;
         }
-        mPendingInput = 0;
+        _pendingInput = 0;
         if (_inputBuffer[_inputPtr] == BYTE_LF) {
             ++_inputPtr;
         }
@@ -1713,10 +1704,10 @@ public abstract class AsyncByteScanner
     }
 
     /*
-    ///////////////////////////////////////////////////
-    // Internal methods, error handling
-    ///////////////////////////////////////////////////
-    */
+    /**********************************************************************
+    /* Internal methods, error handling
+    /**********************************************************************
+     */
 
     protected int throwInternal()
     {

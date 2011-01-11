@@ -36,7 +36,7 @@ import org.codehaus.stax2.ri.Stax2ReaderAdapter;
 import org.codehaus.stax2.ri.evt.Stax2EventReaderAdapter;
 import org.codehaus.stax2.ri.evt.Stax2FilteredEventReader;
 
-
+import com.fasterxml.aalto.AsyncXMLInputFactory;
 import com.fasterxml.aalto.dom.DOMReaderImpl;
 import com.fasterxml.aalto.evt.EventAllocatorImpl;
 import com.fasterxml.aalto.evt.EventReaderImpl;
@@ -45,12 +45,15 @@ import com.fasterxml.aalto.in.*;
 import com.fasterxml.aalto.util.URLUtil;
 
 /**
- * Basic implementation of {@link XMLInputFactory}.
+ * Aalto implementation of basic Stax factory (both
+ * {@link javax.xml.stream.XMLInputFactory} and {@link org.codehaus.stax2.XMLInputFactory2})
+ * as well as API for producing non-blocking (async) parsers
+ * (that is, {@link AsyncXMLInputFactory}).
  *
  * @author Tatu Saloranta
  */
 public final class InputFactoryImpl
-    extends XMLInputFactory2
+    extends AsyncXMLInputFactory
 {
     /**
      * This is the currently active configuration that will be used
@@ -75,7 +78,7 @@ public final class InputFactoryImpl
 
     /*
     /**********************************************************************
-    /* StAX, XMLInputFactory: filtered reader factory methods
+    /* Stax, XMLInputFactory: filtered reader factory methods
     /**********************************************************************
      */
 
@@ -106,7 +109,7 @@ public final class InputFactoryImpl
 
     /*
     /**********************************************************************
-    /* StAX, XMLInputFactory: XMLEventReader factory methods
+    /* Stax, XMLInputFactory: XMLEventReader factory methods
     /**********************************************************************
      */
 
@@ -154,7 +157,7 @@ public final class InputFactoryImpl
 
     /*
     /**********************************************************************
-    /* StAX, XMLInputFactory: XMLStreamReader factory methods
+    /* Stax, XMLInputFactory: XMLStreamReader factory methods
     /**********************************************************************
      */
 
@@ -196,7 +199,7 @@ public final class InputFactoryImpl
 
     /*
     /**********************************************************************
-    /* StAX, XMLInputFactory; generic accessors/mutators
+    /* Stax, XMLInputFactory; generic accessors/mutators
     /**********************************************************************
      */
 
@@ -244,7 +247,7 @@ public final class InputFactoryImpl
 
     /*
     /**********************************************************************
-    /* StAX2 implementation; additional factory methods
+    /* Stax2 implementation; additional factory methods
     /**********************************************************************
      */
 
@@ -303,6 +306,29 @@ public final class InputFactoryImpl
         _config.configureForRoundTripping();
     }
 
+    /*
+    /**********************************************************************
+    /* Non-blocking reader factories (AsyncXMLInputFactory)
+    /**********************************************************************
+     */
+
+    @Override
+    public XMLStreamReader2 createAsyncXMLStreamReader()
+    {
+        return null;
+    }
+
+    @Override
+    public XMLStreamReader2 createAsyncXMLStreamReader(byte[] input) {
+        return createAsyncXMLStreamReader(input, 0, input.length);
+    }
+
+    @Override
+    public XMLStreamReader2 createAsyncXMLStreamReader(byte[] input, int offset, int length)
+    {
+        return null;
+    }
+    
     /*
     /**********************************************************************
     /* Internal/package methods

@@ -1,4 +1,4 @@
-/* Woodstox Lite ("wool") XML processor
+/* Aalto XML processor
  *
  * Copyright (c) 2006- Tatu Saloranta, tatu.saloranta@iki.fi
  *
@@ -20,7 +20,6 @@ import javax.xml.stream.XMLStreamException;
 
 import org.codehaus.stax2.XMLStreamLocation2;
 
-
 import com.fasterxml.aalto.impl.LocationImpl;
 import com.fasterxml.aalto.util.DataUtil;
 import com.fasterxml.aalto.util.XmlCharTypes;
@@ -36,9 +35,9 @@ public abstract class ByteBasedScanner
     extends XmlScanner
 {
     /*
-    ////////////////////////////////////////////////
-    // Byte constants
-    ////////////////////////////////////////////////
+    /**********************************************************************
+    /* Byte constants
+    /**********************************************************************
      */
 
     // White-space:
@@ -84,10 +83,10 @@ public abstract class ByteBasedScanner
     final protected static byte BYTE_T = (byte) 'T';
 
     /*
-    ///////////////////////////////////////////////////////////////
-    // Input buffering
-    ///////////////////////////////////////////////////////////////
-    */
+    /**********************************************************************
+    /* Input buffering
+    /**********************************************************************
+     */
 
     /**
      * Pointer to the next unread byte in the input buffer.
@@ -101,10 +100,10 @@ public abstract class ByteBasedScanner
     protected int _inputEnd;
 
     /*
-    ////////////////////////////////////////
-    // Symbol and character handling
-    ////////////////////////////////////////
-    */
+    /**********************************************************************
+    /* Symbol and character handling
+    /**********************************************************************
+     */
 
     /**
      * This buffer is used for name parsing. Will be expanded if/as
@@ -127,10 +126,10 @@ public abstract class ByteBasedScanner
     protected final XmlCharTypes mCharTypes;
 
     /*
-    ///////////////////////////////////////////////////////////////
-    // Location info
-    ///////////////////////////////////////////////////////////////
-    */
+    /**********************************************************************
+    /* Location info
+    /**********************************************************************
+     */
 
     /**
      * Number of bytes that were read and processed before the contents
@@ -146,9 +145,9 @@ public abstract class ByteBasedScanner
     protected int mRowStartOffset;
 
     /*
-    ////////////////////////////////////////////////
-    // Parsing state
-    ////////////////////////////////////////////////
+    /**********************************************************************
+    /* Parsing state
+    /**********************************************************************
      */
 
     /**
@@ -160,9 +159,9 @@ public abstract class ByteBasedScanner
     protected int mTmpChar = INT_NULL;
 
     /*
-    ////////////////////////////////////////////////
-    // Life-cycle
-    ////////////////////////////////////////////////
+    /**********************************************************************
+    /* Life-cycle
+    /**********************************************************************
      */
 
     protected ByteBasedScanner(ReaderConfig cfg)
@@ -186,9 +185,9 @@ public abstract class ByteBasedScanner
     protected abstract void _closeSource() throws IOException;
 
     /*
-    ////////////////////////////////////////////////
-    // Location handling
-    ////////////////////////////////////////////////
+    /**********************************************************************
+    /* Location handling
+    /**********************************************************************
      */
 
     public XMLStreamLocation2 getCurrentLocation()
@@ -220,9 +219,9 @@ public abstract class ByteBasedScanner
     }
 
     /*
-    ////////////////////////////////////////////////
-    // Abstract methods for sub-classes to implement
-    ////////////////////////////////////////////////
+    /**********************************************************************
+    /* Abstract methods for sub-classes to implement
+    /**********************************************************************
      */
 
     /**
@@ -238,9 +237,9 @@ public abstract class ByteBasedScanner
         throws XMLStreamException;
 
     /*
-    ////////////////////////////////////////////////
-    // And then shared functionality for sub-classes
-    ////////////////////////////////////////////////
+    /**********************************************************************
+    /* And then shared functionality for sub-classes
+    /**********************************************************************
      */
 
     /**
