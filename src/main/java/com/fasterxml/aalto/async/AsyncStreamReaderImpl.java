@@ -18,6 +18,7 @@ public class AsyncStreamReaderImpl extends StreamReaderImpl
     {
         super(scanner);
         _asyncScanner = scanner;
+        _currToken = EVENT_INCOMPLETE;
     }
 
     /*

@@ -14,19 +14,28 @@ public class BasicParsingTest extends BaseAsyncTest
         AsyncXMLInputFactory f = new InputFactoryImpl();
         AsyncXMLStreamReader sr = f.createAsyncXMLStreamReader();
         AsyncReaderWrapper reader = new AsyncReaderWrapper(sr,        
-            "<!--comment--><root attr='1'>text<![CDATA[cdata]]> & stuff</root><?pi data?>");
+            "<!--comment&stuff--><root attr='1'>text<![CDATA[cdata & stuff]]></root><?pi data?>");
 
         // minor deviation from Stax; START_DOCUMENT not available right away
-        assertTokenType(AsyncXMLStreamReader.EVENT_INCOMPLETE, reader.currentToken());
-        assertTokenType(XMLStreamConstants.START_DOCUMENT, reader.nextToken());
-        assertTokenType(XMLStreamConstants.COMMENT, reader.nextToken());
-        assertTokenType(XMLStreamConstants.START_ELEMENT, reader.nextToken());
-        assertTokenType(XMLStreamConstants.CDATA, reader.nextToken());
-        /* Ok; need to loop a bit here...
-         */
-        assertTokenType(XMLStreamConstants.CDATA, reader.nextToken());
-        String str = collectAsyncText(reader); // moves to end-element
-        assertEquals("", str);
+//        assertTokenType(AsyncXMLStreamReader.EVENT_INCOMPLETE, reader.currentToken());
+        int t = reader.nextToken();
+//        assertTokenType(XMLStreamConstants.START_DOCUMENT, reader.nextToken());
+        assertTokenType(XMLStreamConstants.COMMENT, t);
+        assertEquals("comment&stuff", sr.getText());
+        assertTokenType(START_ELEMENT, reader.nextToken());
+        assertEquals("root", sr.getLocalName());
+        assertEquals("", sr.getNamespaceURI());
+        assertEquals(1, sr.getAttributeCount());
+        assertEquals("attr", sr.getAttributeLocalName(0));
+        assertEquals("", sr.getAttributeNamespace(0));
+        assertEquals("1", sr.getAttributeValue(0));
+        assertTokenType(CHARACTERS, reader.nextToken());
+        String str = collectAsyncText(reader, CHARACTERS); // moves to end-element
+        assertEquals("text", str);
+        // note: moved to next element by now, so:
+        assertTokenType(CDATA, reader.currentToken());
+        str = collectAsyncText(reader, CDATA); // moves to end-element
+        assertEquals("cdata & stuff", str);
         assertTokenType(XMLStreamConstants.END_ELEMENT, reader.currentToken());
         assertTokenType(XMLStreamConstants.PROCESSING_INSTRUCTION, reader.nextToken());
         assertTokenType(XMLStreamConstants.END_DOCUMENT, reader.nextToken());
@@ -39,10 +48,10 @@ public class BasicParsingTest extends BaseAsyncTest
     /**********************************************************************
      */
 
-    protected String collectAsyncText(AsyncReaderWrapper reader) throws XMLStreamException
+    protected String collectAsyncText(AsyncReaderWrapper reader, int tt) throws XMLStreamException
     {
         StringBuilder sb = new StringBuilder();
-        while (reader.currentToken() == XMLStreamConstants.CHARACTERS) {
+        while (reader.currentToken() == tt) {
             sb.append(reader.currentText());
             reader.nextToken();
         }

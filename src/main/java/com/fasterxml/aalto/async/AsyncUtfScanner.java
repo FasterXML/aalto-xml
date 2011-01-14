@@ -56,6 +56,7 @@ public class AsyncUtfScanner
     public AsyncUtfScanner(ReaderConfig cfg)
     {
         super(cfg);
+        _currToken = EVENT_INCOMPLETE;
     }
 
     /*
@@ -1158,13 +1159,14 @@ public class AsyncUtfScanner
             if (_inputPtr >= _inputEnd) {
                 return EVENT_INCOMPLETE;
             }
+            _pendingInput = 0;
             byte b = _inputBuffer[_inputPtr++];
-            if (b != BYTE_HYPHEN) {
+            if (b != BYTE_GT) {
                 reportDoubleHyphenInComments();
             } 
             _state = STATE_DEFAULT;
             _nextEvent = EVENT_INCOMPLETE;
-            return PROCESSING_INSTRUCTION;
+            return COMMENT;
         }
         // Otherwise can use default code
         return handleAndAppendPending() ? 0 : EVENT_INCOMPLETE;

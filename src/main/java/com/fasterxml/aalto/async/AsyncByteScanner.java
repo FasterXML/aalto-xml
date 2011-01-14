@@ -294,11 +294,9 @@ public abstract class AsyncByteScanner
     {
         // Had fully complete event? Need to reset state etc:
         if (_currToken != EVENT_INCOMPLETE) {
-            assert(!_tokenIncomplete); // only CHARACTERS can be
             _currToken = _nextEvent = EVENT_INCOMPLETE;
             _state = STATE_DEFAULT;
         }
-
         // Ok, do we know which event it will be?
         if (_nextEvent == EVENT_INCOMPLETE) { // nope
             // First: did we have a lone CR at the end of the buffer?
@@ -356,7 +354,7 @@ public abstract class AsyncByteScanner
             // should never have anything else...
             return throwInternal();
         }
-
+        
         // At this point, we do know the event type
         switch (_nextEvent) {
         case START_ELEMENT:
@@ -494,9 +492,7 @@ public abstract class AsyncByteScanner
             }
             // Otherwise, should not get here
             throwInternal();
-        }    ////////////////////////////////////////////////
-
-
+        }
         return throwInternal(); // never gets here
     }
 
@@ -656,8 +652,7 @@ public abstract class AsyncByteScanner
         return PROCESSING_INSTRUCTION;
     }
 
-    private int handleComment()
-        throws XMLStreamException
+    private final int handleComment() throws XMLStreamException
     {
         if (_state == STATE_COMMENT_CONTENT) {
             return parseCommentContents();
