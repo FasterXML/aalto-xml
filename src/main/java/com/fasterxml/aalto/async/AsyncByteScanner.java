@@ -25,7 +25,7 @@ import com.fasterxml.aalto.in.*;
 import com.fasterxml.aalto.util.DataUtil;
 
 /**
- * This is the base class for asynchronous (non-blocking) xml
+ * This is the base class for asynchronous (non-blocking) XML
  * scanners. Due to basic complexity of async approach, character-based
  * doesn't make much sense, so only byte-based input is supported.
  */
@@ -76,6 +76,16 @@ public abstract class AsyncByteScanner
     final static int STATE_COMMENT_HYPHEN = 2; // content, and one '-'
     final static int STATE_COMMENT_HYPHEN2 = 3; // content, "--"
 
+    // For cdata, STATE_DEFAULT means that just "<![" has been seen
+    final static int STATE_CDATA_CONTENT = 1; // start marker seen, maybe some content
+    final static int STATE_CDATA_C = 2; // "<![C"
+    final static int STATE_CDATA_CD = 3; // "<![CD"
+    final static int STATE_CDATA_CDA = 4; // "<![CDA"
+    final static int STATE_CDATA_CDAT = 5; // "<![CDAT"
+    final static int STATE_CDATA_CDATA = 6; // "<![CDATA"
+    final static int STATE_CDATA_CONTENT_BRACKET = 7; // contents and single ']'
+    final static int STATE_CDATA_CONTENT_BRACKET2 = 8; // contents and ']]'
+    
     // For PIs, default means that '<?' has been seen, nothing else
 
     // (note: funny ordering, starting with "quick path" entries)
@@ -233,6 +243,28 @@ public abstract class AsyncByteScanner
         return "asyncScanner; curr="+_currToken+" next="+_nextEvent+", state = "+_state;
     }
 
+    /*
+    /**********************************************************************
+    /* Methods for subclasses to implement
+    /**********************************************************************
+     */
+    
+    protected abstract int parseCommentContents() throws XMLStreamException;
+
+    protected abstract int parseCDataContents() throws XMLStreamException;
+
+    protected abstract int parsePIData() throws XMLStreamException;
+
+    /**
+     * This method gets called, if the first character of a
+     * CHARACTERS event could not be fully read (multi-byte,
+     * split over buffer boundary). If so, there is some
+     * pending data to be handled.
+     */
+    protected abstract int startCharactersPending() throws XMLStreamException;
+
+    protected abstract int finishCharactersCoalescing() throws XMLStreamException;
+    
     /*
     /**********************************************************************
     /* Async input, methods to feed (push) content to parse
@@ -402,7 +434,7 @@ public abstract class AsyncByteScanner
             _currToken = _nextEvent = EVENT_INCOMPLETE;
             _state = STATE_DEFAULT;
         }
-
+        
         // Don't yet know the type?
         if (_nextEvent == EVENT_INCOMPLETE) {
             if (_state == STATE_DEFAULT) {
@@ -468,7 +500,7 @@ public abstract class AsyncByteScanner
                 throwInternal();
             }
         }
-
+        
         /* We know the type; event is usually partially processed
          * and needs to be completely read.
          */
@@ -683,12 +715,6 @@ public abstract class AsyncByteScanner
         return throwInternal();
     }
 
-    protected abstract int parseCommentContents()
-        throws XMLStreamException;
-
-    protected abstract int parsePIData()
-        throws XMLStreamException;
-
     /**
      * Method called to initialize state for CHARACTERS event, after
      * just a single byte has been seen. What needs to be done next
@@ -708,28 +734,93 @@ public abstract class AsyncByteScanner
     protected abstract int startCharacters(byte b)
         throws XMLStreamException;
 
-    /**
-     * This method gets called, if the first character of a
-     * CHARACTERS event could not be fully read (multi-byte,
-     * split over buffer boundary). If so, there is some
-     * pending data to be handled.
-     */
-    protected abstract int startCharactersPending()
-        throws XMLStreamException;
-
-    protected abstract int finishCharactersCoalescing()
-        throws XMLStreamException;
-
-    private int handleCData()
+    private int handleCData() throws XMLStreamException
+    {
+        if (_state == STATE_CDATA_CONTENT) {
+            return parseCDataContents();
+        }
+        if (_inputPtr >= _inputEnd) {
+            return EVENT_INCOMPLETE;
+        }
+        return handleCDataStartMarker(_inputBuffer[_inputPtr++]);
+    }
+    
+    private int handleCDataStartMarker(byte b)
         throws XMLStreamException
     {
-        // !!! TBI
-        return 0;
+        switch (_state) {
+        case STATE_DEFAULT:
+            if (b != BYTE_C) {
+                reportTreeUnexpChar(decodeCharForError(b), " (expected 'C' for CDATA)");
+            }
+            _state = STATE_CDATA_C;
+            if (_inputPtr >= _inputEnd) {
+                return EVENT_INCOMPLETE;
+            }
+            b = _inputBuffer[_inputPtr++];
+            // fall through
+        case STATE_CDATA_C:
+            if (b != BYTE_D) {
+                reportTreeUnexpChar(decodeCharForError(b), " (expected 'D' for CDATA)");
+            }
+            _state = STATE_CDATA_CD;
+            if (_inputPtr >= _inputEnd) {
+                return EVENT_INCOMPLETE;
+            }
+            b = _inputBuffer[_inputPtr++];
+            // fall through
+        case STATE_CDATA_CD:
+            if (b != BYTE_A) {
+                reportTreeUnexpChar(decodeCharForError(b), " (expected 'A' for CDATA)");
+            }
+            _state = STATE_CDATA_CDA;
+            if (_inputPtr >= _inputEnd) {
+                return EVENT_INCOMPLETE;
+            }
+            b = _inputBuffer[_inputPtr++];
+            // fall through
+        case STATE_CDATA_CDA:
+            if (b != BYTE_T) {
+                reportTreeUnexpChar(decodeCharForError(b), " (expected 'T' for CDATA)");
+            }
+            _state = STATE_CDATA_CDAT;
+            if (_inputPtr >= _inputEnd) {
+                return EVENT_INCOMPLETE;
+            }
+            b = _inputBuffer[_inputPtr++];
+            // fall through
+        case STATE_CDATA_CDAT:
+            if (b != BYTE_A) {
+                reportTreeUnexpChar(decodeCharForError(b), " (expected 'A' for CDATA)");
+            }
+            _state = STATE_CDATA_CDATA;
+            if (_inputPtr >= _inputEnd) {
+                return EVENT_INCOMPLETE;
+            }
+            b = _inputBuffer[_inputPtr++];
+            // fall through
+        case STATE_CDATA_CDATA:
+            if (b != BYTE_LBRACKET) {
+                reportTreeUnexpChar(decodeCharForError(b), " (expected '[' for CDATA)");
+            }
+            _textBuilder.resetWithEmpty();
+            _state = STATE_CDATA_CONTENT;
+            if (_inputPtr >= _inputEnd) {
+                return EVENT_INCOMPLETE;
+            }
+            b = _inputBuffer[_inputPtr++];
+            return parseCDataContents();
+
+        case STATE_CDATA_CONTENT_BRACKET: // seen one ']' in content
+//            if (b == )
+        }
+        return throwInternal();
     }
 
     private int handleDTD()
         throws XMLStreamException
     {
+        if (true) throw new UnsupportedOperationException();
         // !!! TBI
         return 0;
     }
@@ -761,6 +852,7 @@ public abstract class AsyncByteScanner
     protected int handleEntity()
         throws XMLStreamException
     {
+        if (true) throw new UnsupportedOperationException();
         // !!! TBI
         return 0;
     }
@@ -775,6 +867,7 @@ public abstract class AsyncByteScanner
         } else if (name == "gt") {
         }
 
+        if (true) throw new UnsupportedOperationException();
         // !!! TBI
         return EVENT_INCOMPLETE;
     }

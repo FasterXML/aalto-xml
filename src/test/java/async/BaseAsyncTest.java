@@ -20,10 +20,10 @@ abstract class BaseAsyncTest extends base.BaseTestCase
         private int _offset = 0;
 
         public AsyncReaderWrapper(AsyncXMLStreamReader sr, String xmlString) {
-            this(sr, xmlString, 1);
+            this(sr, 1, xmlString);
         }
         
-        public AsyncReaderWrapper(AsyncXMLStreamReader sr, String xmlString, int bytesPerCall)
+        public AsyncReaderWrapper(AsyncXMLStreamReader sr, int bytesPerCall, String xmlString)
         {
             _streamReader = sr;
             _bytesPerFeed = bytesPerCall;

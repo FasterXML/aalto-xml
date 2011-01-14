@@ -24,9 +24,9 @@ import com.fasterxml.aalto.util.DataUtil;
 import com.fasterxml.aalto.util.XmlCharTypes;
 
 /**
- * This class handles parsing of UTF-8 encoded xml streams, as well as
+ * This class handles parsing of UTF-8 encoded XML streams, as well as
  * other UTF-8 compatible (subset) encodings (specifically, Latin1 and
- * US-Ascii).
+ * US-ASCII).
  */
 public class AsyncUtfScanner
     extends AsyncByteScanner
@@ -47,6 +47,9 @@ public class AsyncUtfScanner
     final static int PENDING_STATE_COMMENT_HYPHEN1 = -3;
     final static int PENDING_STATE_COMMENT_HYPHEN2 = -4;
 
+    final static int PENDING_STATE_CDATA_BRACKET1 = -3;
+    final static int PENDING_STATE_CDATA_BRACKET2 = -4;
+    
     /*
     /**********************************************************************
     /* Instance construction
@@ -1172,6 +1175,185 @@ public class AsyncUtfScanner
         return handleAndAppendPending() ? 0 : EVENT_INCOMPLETE;
     }
 
+    protected final int parseCDataContents()
+        throws XMLStreamException
+    {
+        // Left-overs from last input block?
+        if (_pendingInput != 0) { // CR, multi-byte, or ']'?
+            int result = handleCDataPending();
+            // If there's not enough input, or if we completed, can leave
+            if (result != 0) {
+                return result;
+            }
+            // otherwise we should be good to continue
+        }
+    
+        char[] outputBuffer = _textBuilder.getBufferWithoutReset();
+        int outPtr = _textBuilder.getCurrentLength();
+    
+        final int[] TYPES = _charTypes.OTHER_CHARS;
+        final byte[] inputBuffer = _inputBuffer;
+    
+        main_loop:
+        while (true) {
+            int c;
+            // Then the tight ascii non-funny-char loop:
+            ascii_loop:
+            while (true) {
+                if (_inputPtr >= _inputEnd) {
+                    break main_loop;
+                }
+                if (outPtr >= outputBuffer.length) {
+                    outputBuffer = _textBuilder.finishCurrentSegment();
+                    outPtr = 0;
+                }
+                int max = _inputEnd;
+                {
+                    int max2 = _inputPtr + (outputBuffer.length - outPtr);
+                    if (max2 < max) {
+                        max = max2;
+                    }
+                }
+                while (_inputPtr < max) {
+                    c = (int) inputBuffer[_inputPtr++] & 0xFF;
+                    if (TYPES[c] != 0) {
+                        break ascii_loop;
+                    }
+                    outputBuffer[outPtr++] = (char) c;
+                }
+            }
+    
+            switch (TYPES[c]) {
+            case XmlCharTypes.CT_INVALID:
+                throwInvalidXmlChar(c);
+            case XmlCharTypes.CT_WS_CR:
+                {
+                    if (_inputPtr < _inputEnd) {
+                        _pendingInput = PENDING_STATE_CR;
+                        break main_loop;
+                    }
+                    if (inputBuffer[_inputPtr] == BYTE_LF) {
+                        ++_inputPtr;
+                    }
+                    markLF();
+                }
+                c = INT_LF;
+                break;
+            case XmlCharTypes.CT_WS_LF:
+                markLF();
+                break;
+            case XmlCharTypes.CT_MULTIBYTE_2:
+                c = decodeUtf8_2(c);
+                break;
+            case XmlCharTypes.CT_MULTIBYTE_3:
+                c = decodeUtf8_3(c);
+                break;
+            case XmlCharTypes.CT_MULTIBYTE_4:
+                c = decodeUtf8_4(c);
+                // Let's add first part right away:
+                outputBuffer[outPtr++] = (char) (0xD800 | (c >> 10));
+                if (outPtr >= outputBuffer.length) {
+                    outputBuffer = _textBuilder.finishCurrentSegment();
+                    outPtr = 0;
+                }
+                c = 0xDC00 | (c & 0x3FF);
+                // And let the other char output down below
+                break;
+            case XmlCharTypes.CT_MULTIBYTE_N:
+                reportInvalidInitial(c);
+            case XmlCharTypes.CT_RBRACKET: // ']]>'?
+                if (_inputPtr >= _inputEnd) {
+                    _pendingInput = PENDING_STATE_CDATA_BRACKET1;
+                    break main_loop;
+                }
+                // Hmmh. This is more complex... so be it.
+                if (_inputBuffer[_inputPtr] == BYTE_RBRACKET) { // end might be nigh...
+                    ++_inputPtr;
+                    while (true) {
+                        if (_inputPtr >= _inputEnd) {
+                            _pendingInput = PENDING_STATE_CDATA_BRACKET2;
+                            break main_loop;
+                        }
+                        if (_inputBuffer[_inputPtr] == BYTE_GT) {
+                            _textBuilder.setCurrentLength(outPtr);
+                            _state = STATE_DEFAULT;
+                            _nextEvent = EVENT_INCOMPLETE;
+                            return CDATA;
+                        }
+                        if (_inputBuffer[_inputPtr] != BYTE_RBRACKET) { // neither '>' nor ']'; push "]]" back
+                            outputBuffer[outPtr++] = ']';
+                            if (outPtr >= outputBuffer.length) {
+                                outputBuffer = _textBuilder.finishCurrentSegment();
+                                outPtr = 0;
+                            }
+                            outputBuffer[outPtr++] = ']';
+                            continue main_loop;
+                        }
+                        // Got third bracket; push one back, keep on checking
+                        ++_inputPtr;
+                        outputBuffer[outPtr++] = ']';
+                        if (outPtr >= outputBuffer.length) {
+                            outputBuffer = _textBuilder.finishCurrentSegment();
+                            outPtr = 0;
+                        }
+                    }
+                }
+                break;
+            // default:
+                // Other types are not important here...
+            }
+    
+            // Ok, can output the char (we know there's room for one more)
+            outputBuffer[outPtr++] = (char) c;
+        }
+    
+        _textBuilder.setCurrentLength(outPtr);
+        return EVENT_INCOMPLETE;
+    }
+
+    /**
+     * @return EVENT_INCOMPLETE, if there's not enough input to
+     *   handle pending char, CDATA, if we handled complete
+     *   "]]>" end marker, or 0 to indicate something else
+     *   was succesfully handled.
+     */
+    protected final int handleCDataPending()
+        throws XMLStreamException
+    {
+        if (_pendingInput == PENDING_STATE_CDATA_BRACKET1) {
+            if (_inputPtr >= _inputEnd) {
+                return EVENT_INCOMPLETE;
+            }
+            if (_inputBuffer[_inputPtr] != BYTE_RBRACKET) {
+                // can't be the end marker, just append ']' and go
+                _textBuilder.append("]");
+                return 0;
+            }
+            ++_inputPtr;
+            _pendingInput = PENDING_STATE_CDATA_BRACKET2;
+            if (_inputPtr >= _inputEnd) { // no more input?
+                return EVENT_INCOMPLETE;
+            }
+            // continue
+        }
+        if (_pendingInput == PENDING_STATE_CDATA_BRACKET2) {
+            if (_inputPtr >= _inputEnd) {
+                return EVENT_INCOMPLETE;
+            }
+            _pendingInput = 0;
+            byte b = _inputBuffer[_inputPtr++];
+            if (b != BYTE_GT) {
+                _textBuilder.append("]]");
+                return 0;
+            } 
+            _state = STATE_DEFAULT;
+            _nextEvent = EVENT_INCOMPLETE;
+            return CDATA;
+        }
+        // Otherwise can use default code
+        return handleAndAppendPending() ? 0 : EVENT_INCOMPLETE;
+    }
+    
     protected final int parsePIData()
         throws XMLStreamException
     {

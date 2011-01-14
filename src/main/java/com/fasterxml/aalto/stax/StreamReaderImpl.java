@@ -708,8 +708,7 @@ public class StreamReaderImpl
     /**********************************************************************
      */
 
-    public final int next()
-        throws XMLStreamException
+    public final int next() throws XMLStreamException
     {
         if (_parseState == STATE_TREE) {
             int type = _scanner.nextFromTree();
