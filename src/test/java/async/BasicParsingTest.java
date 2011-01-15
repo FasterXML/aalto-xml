@@ -7,7 +7,7 @@ import com.fasterxml.aalto.AsyncXMLInputFactory;
 import com.fasterxml.aalto.AsyncXMLStreamReader;
 import com.fasterxml.aalto.stax.InputFactoryImpl;
 
-public class BasicParsingTest extends BaseAsyncTest
+public class BasicParsingTest extends AsyncTestBase
 {
     public void testSimple() throws Exception
     {
@@ -29,14 +29,14 @@ public class BasicParsingTest extends BaseAsyncTest
         AsyncXMLInputFactory f = new InputFactoryImpl();
         AsyncXMLStreamReader sr = f.createAsyncXMLStreamReader();
         AsyncReaderWrapper reader = new AsyncReaderWrapper(sr, chunkSize, 
-            "<!--comment&stuff--><root attr='1'>text<![CDATA[cdata &] ]] stuff]]></root><?pi data? what data??>");
+            "<!--comment&s\r\ntuf-fy>--><root\r\nattr='1'>text<![CDATA[cdata\r\n&] ]] stuff]]></root><?pi\r\ndata? what\ndata??>");
 
         // minor deviation from Stax; START_DOCUMENT not available right away
 //        assertTokenType(AsyncXMLStreamReader.EVENT_INCOMPLETE, reader.currentToken());
         int t = reader.nextToken();
 //        assertTokenType(XMLStreamConstants.START_DOCUMENT, reader.nextToken());
         assertTokenType(XMLStreamConstants.COMMENT, t);
-        assertEquals("comment&stuff", sr.getText());
+        assertEquals("comment&s\ntuf-fy>", sr.getText());
         assertTokenType(START_ELEMENT, reader.nextToken());
         assertEquals("root", sr.getLocalName());
         assertEquals("", sr.getNamespaceURI());
@@ -50,13 +50,13 @@ public class BasicParsingTest extends BaseAsyncTest
         // note: moved to next element by now, so:
         assertTokenType(CDATA, reader.currentToken());
         str = collectAsyncText(reader, CDATA); // moves to end-element
-        assertEquals("cdata &] ]] stuff", str);
+        assertEquals("cdata\n&] ]] stuff", str);
         assertTokenType(XMLStreamConstants.END_ELEMENT, reader.currentToken());
         assertEquals("root", sr.getLocalName());
         assertEquals("", sr.getNamespaceURI());
         assertTokenType(XMLStreamConstants.PROCESSING_INSTRUCTION, reader.nextToken());
         assertEquals("pi", sr.getPITarget());
-        assertEquals("data? what data?", sr.getPIData());
+        assertEquals("data? what\ndata?", sr.getPIData());
         assertTokenType(XMLStreamConstants.END_DOCUMENT, reader.nextToken());
         assertFalse(sr.hasNext());
     }

@@ -688,7 +688,6 @@ public abstract class AsyncByteScanner
         if (_state == STATE_COMMENT_CONTENT) {
             return parseCommentContents();
         }
-
         if (_inputPtr >= _inputEnd) {
             return EVENT_INCOMPLETE;
         }

@@ -1069,7 +1069,7 @@ public class AsyncUtfScanner
                 throwInvalidXmlChar(c);
             case XmlCharTypes.CT_WS_CR:
                 {
-                    if (_inputPtr < _inputEnd) {
+                    if (_inputPtr >= _inputEnd) {
                         _pendingInput = PENDING_STATE_CR;
                         break main_loop;
                     }
@@ -1143,12 +1143,13 @@ public class AsyncUtfScanner
     protected final int handleCommentPending()
         throws XMLStreamException
     {
+        if (_inputPtr >= _inputEnd) {
+            return EVENT_INCOMPLETE;
+        }
         if (_pendingInput == PENDING_STATE_COMMENT_HYPHEN1) {
-            if (_inputPtr >= _inputEnd) {
-                return EVENT_INCOMPLETE;
-            }
             if (_inputBuffer[_inputPtr] != BYTE_HYPHEN) {
                 // can't be the end marker, just append '-' and go
+                _pendingInput = 0;
                 _textBuilder.append("-");
                 return 0;
             }
@@ -1160,9 +1161,6 @@ public class AsyncUtfScanner
             // continue
         }
         if (_pendingInput == PENDING_STATE_COMMENT_HYPHEN2) {
-            if (_inputPtr >= _inputEnd) {
-                return EVENT_INCOMPLETE;
-            }
             _pendingInput = 0;
             byte b = _inputBuffer[_inputPtr++];
             if (b != BYTE_GT) {
@@ -1229,7 +1227,7 @@ public class AsyncUtfScanner
                 throwInvalidXmlChar(c);
             case XmlCharTypes.CT_WS_CR:
                 {
-                    if (_inputPtr < _inputEnd) {
+                    if (_inputPtr >= _inputEnd) {
                         _pendingInput = PENDING_STATE_CR;
                         break main_loop;
                     }
@@ -1408,7 +1406,7 @@ public class AsyncUtfScanner
                 throwInvalidXmlChar(c);
             case XmlCharTypes.CT_WS_CR:
                 {
-                    if (_inputPtr < _inputEnd) {
+                    if (_inputPtr >= _inputEnd) {
                         _pendingInput = PENDING_STATE_CR;
                         break main_loop;
                     }

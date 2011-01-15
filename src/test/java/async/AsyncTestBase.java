@@ -7,7 +7,7 @@ import javax.xml.stream.XMLStreamException;
 import com.fasterxml.aalto.AsyncInputFeeder;
 import com.fasterxml.aalto.AsyncXMLStreamReader;
 
-abstract class BaseAsyncTest extends base.BaseTestCase
+abstract class AsyncTestBase extends base.BaseTestCase
 {
     /**
      * Helper class used with async parser
