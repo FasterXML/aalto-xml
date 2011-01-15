@@ -35,23 +35,6 @@ public class AsyncUtfScanner
 
     /*
     /**********************************************************************
-    /* Markers to use for 'pending' character, if
-    /* not multi-byte UTF character
-    /**********************************************************************
-     */
-
-    final static int PENDING_STATE_CR = -1;
-
-    final static int PENDING_STATE_PI_QMARK = -2;
-
-    final static int PENDING_STATE_COMMENT_HYPHEN1 = -3;
-    final static int PENDING_STATE_COMMENT_HYPHEN2 = -4;
-
-    final static int PENDING_STATE_CDATA_BRACKET1 = -3;
-    final static int PENDING_STATE_CDATA_BRACKET2 = -4;
-    
-    /*
-    /**********************************************************************
     /* Instance construction
     /**********************************************************************
      */
@@ -493,7 +476,6 @@ public class AsyncUtfScanner
         }
 
         // Nah, a multi-byte UTF-8 char:
-        
         // Let's just retest the first pending byte (in LSB):
         switch (_charTypes.TEXT_CHARS[c & 0xFF]) {
         case XmlCharTypes.CT_MULTIBYTE_2:
@@ -1186,7 +1168,6 @@ public class AsyncUtfScanner
             }
             // otherwise we should be good to continue
         }
-    
         char[] outputBuffer = _textBuilder.getBufferWithoutReset();
         int outPtr = _textBuilder.getCurrentLength();
     
@@ -1325,8 +1306,8 @@ public class AsyncUtfScanner
             }
             if (_inputBuffer[_inputPtr] != BYTE_RBRACKET) {
                 // can't be the end marker, just append ']' and go
-                _textBuilder.append("]");
-                return 0;
+                _textBuilder.append(']');
+                return (_pendingInput = 0);
             }
             ++_inputPtr;
             _pendingInput = PENDING_STATE_CDATA_BRACKET2;
@@ -1335,19 +1316,23 @@ public class AsyncUtfScanner
             }
             // continue
         }
-        if (_pendingInput == PENDING_STATE_CDATA_BRACKET2) {
+        while (_pendingInput == PENDING_STATE_CDATA_BRACKET2) {
             if (_inputPtr >= _inputEnd) {
                 return EVENT_INCOMPLETE;
             }
-            _pendingInput = 0;
             byte b = _inputBuffer[_inputPtr++];
-            if (b != BYTE_GT) {
+            if (b == BYTE_GT) {
+                _pendingInput = 0;
+                _state = STATE_DEFAULT;
+                _nextEvent = EVENT_INCOMPLETE;
+                return CDATA;
+            }
+            if (b != BYTE_RBRACKET) {
+                --_inputPtr;
                 _textBuilder.append("]]");
-                return 0;
-            } 
-            _state = STATE_DEFAULT;
-            _nextEvent = EVENT_INCOMPLETE;
-            return CDATA;
+                return (_pendingInput = 0);
+            }
+            _textBuilder.append(']');
         }
         // Otherwise can use default code
         return handleAndAppendPending() ? 0 : EVENT_INCOMPLETE;
@@ -1368,7 +1353,7 @@ public class AsyncUtfScanner
 
         char[] outputBuffer = _textBuilder.getBufferWithoutReset();
         int outPtr = _textBuilder.getCurrentLength();
-
+        
         final int[] TYPES = _charTypes.OTHER_CHARS;
         final byte[] inputBuffer = _inputBuffer;
 

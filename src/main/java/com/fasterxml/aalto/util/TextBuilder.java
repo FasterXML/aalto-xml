@@ -828,14 +828,16 @@ public final class TextBuilder
 
     /**
      * Note: calling this method may not be as efficient as calling
-     * {@link #contentsAsString}, since it's not guaranteed that resulting
-     * String is cached.
+     * {@link #contentsAsString}, since it is guaranteed that resulting
+     * String is NOT cached (to ensure we see no stale data)
      */
     @Override
     public String toString() {
+        _resultString = null;
+        _resultArray = null;
          return contentsAsString();
     }
-
+    
     /*
     /**********************************************************************
     /* Internal methods:

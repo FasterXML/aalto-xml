@@ -118,6 +118,22 @@ public abstract class AsyncByteScanner
     final static int STATE_ENT_IN_HEX_DIGIT = 4; // seen &#x and 1 or more hex digits
     final static int STATE_ENT_IN_NAME = 5; // seen & and part of the name
 
+    /*
+    /**********************************************************************
+    /* Markers to use for 'pending' character, if
+    /* not multi-byte UTF character
+    /**********************************************************************
+     */
+
+    final static int PENDING_STATE_CR = -1;
+
+    final static int PENDING_STATE_PI_QMARK = -2;
+
+    final static int PENDING_STATE_COMMENT_HYPHEN1 = -3;
+    final static int PENDING_STATE_COMMENT_HYPHEN2 = -4;
+
+    final static int PENDING_STATE_CDATA_BRACKET1 = -3;
+    final static int PENDING_STATE_CDATA_BRACKET2 = -4;    
 
     /*
     /**********************************************************************
@@ -550,6 +566,11 @@ public abstract class AsyncByteScanner
         while (_inputPtr < _inputEnd) {
             byte b = _inputBuffer[_inputPtr];
             if ((b & 0xFF) > INT_SPACE) {
+                // hmmmh. Shouldn't this be handled someplace else?
+                if (_pendingInput == PENDING_STATE_CR) {
+                    markLF();
+                    _pendingInput = 0;
+                }
                 return true;
             }
             ++_inputPtr;
@@ -557,7 +578,7 @@ public abstract class AsyncByteScanner
                 markLF();
             } else if (b == BYTE_CR) {
                 if (_inputPtr >= _inputEnd) {
-                    _pendingInput = INT_CR;
+                    _pendingInput = PENDING_STATE_CR;
                     break;
                 }
                 if (_inputBuffer[_inputPtr] == BYTE_LF) {
@@ -596,7 +617,7 @@ public abstract class AsyncByteScanner
     private int handlePI()
         throws XMLStreamException
     {
-        // Most common case fisrt:
+        // Most common case first:
         if (_state == STATE_PI_IN_DATA) {
             return parsePIData();
         }
@@ -608,7 +629,6 @@ public abstract class AsyncByteScanner
             }
             switch (_state) {
             case STATE_DEFAULT:
-                _textBuilder.resetWithEmpty();
                 _tokenName = parseNewName(_inputBuffer[_inputPtr++]);
                 if (_tokenName == null) {
                     _state = STATE_PI_IN_TARGET;
@@ -658,6 +678,7 @@ public abstract class AsyncByteScanner
                 }
                 // Can just move to "data" portion right away
                 _state = STATE_PI_IN_DATA;
+                _textBuilder.resetWithEmpty();
                 return parsePIData();
             case STATE_PI_AFTER_TARGET_QMARK:
                 {
@@ -934,7 +955,7 @@ public abstract class AsyncByteScanner
                             markLF();
                         } else if (c == INT_CR) {
                             if (_inputPtr >= _inputEnd) {
-                                _pendingInput = c;
+                                _pendingInput = PENDING_STATE_CR;
                                 return EVENT_INCOMPLETE;
                             }
                             if (_inputBuffer[_inputPtr] == BYTE_LF) {
@@ -983,7 +1004,7 @@ public abstract class AsyncByteScanner
                         markLF();
                     } else if (c == INT_CR) {
                         if (_inputPtr >= _inputEnd) {
-                            _pendingInput = c;
+                            _pendingInput = PENDING_STATE_CR;
                             return EVENT_INCOMPLETE;
                         }
                         if (_inputBuffer[_inputPtr] == BYTE_LF) {
@@ -1232,7 +1253,7 @@ public abstract class AsyncByteScanner
                 markLF();
             } else if (i2 == INT_CR) {
                 if (_inputPtr >= _inputEnd) {
-                    _pendingInput = i2;
+                    _pendingInput = PENDING_STATE_CR;
                     _nextEvent = END_ELEMENT;
                     _state = STATE_EE_NEED_GT;
                     return EVENT_INCOMPLETE;
@@ -1322,7 +1343,7 @@ public abstract class AsyncByteScanner
                     markLF();
                 } else if (i2 == INT_CR) {
                     if (_inputPtr >= _inputEnd) {
-                        _pendingInput = i2;
+                        _pendingInput = PENDING_STATE_CR;
                         return EVENT_INCOMPLETE;
                     }
                     if (_inputBuffer[_inputPtr] == BYTE_LF) {
@@ -1806,7 +1827,7 @@ public abstract class AsyncByteScanner
     protected final boolean handlePartialCR()
     {
         // sanity check
-        if (_pendingInput != INT_CR) {
+        if (_pendingInput != PENDING_STATE_CR) {
             throwInternal();
         }
         if (_inputPtr >= _inputEnd) {
