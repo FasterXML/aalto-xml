@@ -339,6 +339,9 @@ public abstract class AsyncByteScanner
             }
             while (_state == STATE_DEFAULT) {
                 if (_inputPtr >= _inputEnd) { // no more input available
+                    if (_endOfInput) { // for good? That may be fine
+                        return TOKEN_EOI;
+                    }
                     return _currToken;
                 }
                 byte b = _inputBuffer[_inputPtr++];
@@ -354,6 +357,9 @@ public abstract class AsyncByteScanner
                     || b == BYTE_LF || b == BYTE_TAB) {
                     // Prolog/epilog ws is to be skipped, not part of Infoset
                     if (!asyncSkipSpace()) { // ran out of input?
+                        if (_endOfInput) { // for good? That may be fine
+                            return TOKEN_EOI;
+                        }
                         return _currToken;
                     }
                 } else {
@@ -942,6 +948,7 @@ public abstract class AsyncByteScanner
                         return finishStartElement(false);
                     } else if (c == INT_SLASH) {
                         _state = STATE_SE_SEEN_SLASH;
+                        continue main_loop;
                     } else {
                         throwUnexpectedChar(decodeCharForError(b), " expected space, or '>' or \"/>\"");
                     }
