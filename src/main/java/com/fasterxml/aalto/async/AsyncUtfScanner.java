@@ -456,6 +456,7 @@ public class AsyncUtfScanner
             }
         }
 
+        if (true) throw new UnsupportedOperationException();
         // !!! TBI
         
         return 0;
@@ -1357,9 +1358,6 @@ public class AsyncUtfScanner
     protected final int parsePIData()
         throws XMLStreamException
     {
-        char[] outputBuffer = _textBuilder.getBufferWithoutReset();
-        int outPtr = _textBuilder.getCurrentLength();
-
         // Left-overs from last input block?
         if (_pendingInput != 0) { // CR, multi-byte, '?'
             int result = handlePIPending();
@@ -1370,17 +1368,20 @@ public class AsyncUtfScanner
             // otherwise we should be good to continue
         }
 
+        char[] outputBuffer = _textBuilder.getBufferWithoutReset();
+        int outPtr = _textBuilder.getCurrentLength();
+
         final int[] TYPES = _charTypes.OTHER_CHARS;
         final byte[] inputBuffer = _inputBuffer;
 
         main_loop:
         while (true) {
             int c;
-            // Then the tight ascii non-funny-char loop:
+            // Then the tight ASCII non-funny-char loop:
             ascii_loop:
             while (true) {
                 if (_inputPtr >= _inputEnd) {
-                    return EVENT_INCOMPLETE;
+                    break main_loop;
                 }
                 if (outPtr >= outputBuffer.length) {
                     outputBuffer = _textBuilder.finishCurrentSegment();
@@ -1485,7 +1486,7 @@ public class AsyncUtfScanner
             _pendingInput = 0;
             if (b != BYTE_GT) {
                 // can't be the end marker, just append '-' and go
-                _textBuilder.append("?");
+                _textBuilder.append('?');
                 return 0;
             }
             ++_inputPtr;

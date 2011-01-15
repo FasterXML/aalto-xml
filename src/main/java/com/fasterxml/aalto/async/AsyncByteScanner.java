@@ -617,8 +617,7 @@ public abstract class AsyncByteScanner
                     byte b = _inputBuffer[_inputPtr++];
                     if (b == BYTE_QMARK) {
                         // Quick check, can we see '>' as well? All done, if so
-                        if (_inputPtr < _inputEnd
-                            && _inputBuffer[_inputPtr] == BYTE_GT) {
+                        if (_inputPtr < _inputEnd && _inputBuffer[_inputPtr] == BYTE_GT) {
                             ++_inputPtr;
                             break main_loop; // means we are done
                         }
