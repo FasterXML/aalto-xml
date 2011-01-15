@@ -12,7 +12,6 @@ public class BasicParsingTest extends AsyncTestBase
     public void testEmptyRoot() throws Exception
     {
         // let's try with different chunking, addition (or not) of space
-        
         _testEmptyRoot(1, false);
         _testEmptyRoot(2, false);
         _testEmptyRoot(3, false);
@@ -33,7 +32,7 @@ public class BasicParsingTest extends AsyncTestBase
         _testRootNoContent(3);
         _testRootNoContent(5);
     }
-        
+
     public void testSimple() throws Exception
     {
         _testSimple(1);
@@ -81,6 +80,7 @@ public class BasicParsingTest extends AsyncTestBase
         assertEquals("", sr.getNamespaceURI());
         assertEquals(0, sr.getAttributeCount());
         assertTokenType(END_ELEMENT, reader.nextToken());
+
         assertEquals("root", sr.getLocalName());
         assertEquals("", sr.getNamespaceURI());
         assertTokenType(XMLStreamConstants.END_DOCUMENT, reader.nextToken());

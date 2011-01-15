@@ -928,7 +928,7 @@ public abstract class AsyncByteScanner
                 } else {
                     b = _inputBuffer[_inputPtr++];
                     c = (int) b & 0xFF;
-
+                    
                     if (c <= INT_SPACE) {
                         if (c == INT_LF) {
                             markLF();
@@ -996,12 +996,19 @@ public abstract class AsyncByteScanner
                     if (_inputPtr >= _inputEnd) {
                         return EVENT_INCOMPLETE;
                     }
-                    b = _inputBuffer[_inputPtr];
+                    b = _inputBuffer[_inputPtr++];
                     c = (int) b & 0xFF;
                 }
 
                 switch (_state) {
                 case STATE_SE_SPACE_OR_ATTRNAME:
+                    if (b == BYTE_SLASH) {
+                        _state = STATE_SE_SEEN_SLASH;
+                        continue main_loop;
+                    }
+                    if (b == BYTE_GT) {
+                        return finishStartElement(false);
+                    }
                     {
                         PName n = parseNewName(b);
                         if (n == null) {
