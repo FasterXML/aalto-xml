@@ -92,13 +92,13 @@ public class BasicParsingTest extends AsyncTestBase
         assertTokenType(END_ELEMENT, reader.nextToken());
         assertEquals("root", sr.getLocalName());
         assertTokenType(COMMENT, reader.nextToken());
-        assertEquals("\nHi - ho!", sr.getText());
+        assertEquals("\nHi - ho!->", sr.getText());
         assertTokenType(END_DOCUMENT, reader.nextToken());
     }
 
     private void _testPI(String spaces, int chunkSize) throws Exception
     {
-        String XML = spaces+"<?p    i ?><root><?pi \nwith\r\ndata? or not????></root><?proc    \r?>";
+        String XML = spaces+"<?p    i ?><root><?pi \nwith\r\ndata??><?x \nfoo>bar? ?></root><?proc    \r?>";
         AsyncXMLInputFactory f = new InputFactoryImpl();
         AsyncXMLStreamReader sr = f.createAsyncXMLStreamReader();
         AsyncReaderWrapper reader = new AsyncReaderWrapper(sr, chunkSize, XML);
@@ -110,7 +110,10 @@ public class BasicParsingTest extends AsyncTestBase
         assertEquals("root", sr.getLocalName());
         assertTokenType(PROCESSING_INSTRUCTION, reader.nextToken());
         assertEquals("pi", sr.getPITarget());
-        assertEquals("with\ndata? or not???", sr.getPIData());
+        assertEquals("with\ndata?", sr.getPIData());
+        assertTokenType(PROCESSING_INSTRUCTION, reader.nextToken());
+        assertEquals("x", sr.getPITarget());
+        assertEquals("foo>bar? ", sr.getPIData());
         assertTokenType(END_ELEMENT, reader.nextToken());
         assertEquals("root", sr.getLocalName());
         assertTokenType(PROCESSING_INSTRUCTION, reader.nextToken());
