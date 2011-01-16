@@ -547,6 +547,7 @@ public abstract class AsyncByteScanner
             // Otherwise, should not get here
             throwInternal();
         }
+        if (true) throw new RuntimeException("Unrecognized event: "+_nextEvent);
         return throwInternal(); // never gets here
     }
 
@@ -854,7 +855,7 @@ public abstract class AsyncByteScanner
     /**
      * @param surroundingEvent Context (next event at the time
      *   ampersand was encountered) in which entity is found. Will
-     *   often be the next event set after entity is resolve.
+     *   often be the next event set after entity is resolved.
      */
     protected int handleEntityStart(int surroundingEvent, byte b)
         throws XMLStreamException
@@ -868,6 +869,7 @@ public abstract class AsyncByteScanner
         }
 
         PName n = parseNewName(b);
+        // null if incomplete; non-null otherwise
         if (n != null) {
             return handleGeneralEntity(n);
         }
@@ -1807,7 +1809,8 @@ public abstract class AsyncByteScanner
     protected int handleCharacterEntity()
         throws XMLStreamException
     {
-        // !!! TBI
+        if (true) throw new UnsupportedOperationException();
+        // !!! @TODO
         return 0;
     }
 
