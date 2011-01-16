@@ -29,6 +29,30 @@ public class BasicParsingTest extends AsyncTestBase
         }
     }
 
+    public void testElements() throws Exception
+    {
+        // let's try with different chunking, addition (or not) of space
+        for (int spaces = 0; spaces < 3; ++spaces) {
+            String SPC = "  ".substring(0, spaces);
+            _testElements(1, SPC);
+            _testElements(2, SPC);
+            _testElements(3, SPC);
+            _testElements(5, SPC);
+        }
+    }
+
+    public void testText() throws Exception
+    {
+        // let's try with different chunking, addition (or not) of space
+        for (int spaces = 0; spaces < 3; ++spaces) {
+            String SPC = "  ".substring(0, spaces);
+            _testText(1, SPC);
+            _testText(2, SPC);
+            _testText(3, SPC);
+            _testText(5, SPC);
+        }
+    }
+    
     public void testComments() throws Exception
     {
         for (int spaces = 0; spaces < 3; ++spaces) {
@@ -76,6 +100,66 @@ public class BasicParsingTest extends AsyncTestBase
         assertFalse(sr.hasNext());
     }
 
+    private void _testElements(int chunkSize, String SPC) throws Exception
+    {
+        AsyncXMLInputFactory f = new InputFactoryImpl();
+        AsyncXMLStreamReader sr = f.createAsyncXMLStreamReader();
+        final String XML = SPC+"<root attr='1&amp;2'><leaf xmlns='abc' a   ='3'\rb=''  /></root>";
+        AsyncReaderWrapper reader = new AsyncReaderWrapper(sr, chunkSize, XML);
+
+        // should start with START_DOCUMENT, but for now skip
+        int t = reader.nextToken();
+        assertTokenType(START_ELEMENT, t);
+        assertEquals("root", sr.getLocalName());
+        assertEquals("", sr.getNamespaceURI());
+        assertEquals(1, sr.getAttributeCount());
+        assertEquals("1&2", sr.getAttributeValue(0));
+        assertEquals("attr", sr.getAttributeLocalName(0));
+        assertEquals("", sr.getAttributeNamespace(0));
+        assertTokenType(START_ELEMENT, t);
+        assertEquals("leaf", sr.getLocalName());
+        assertEquals("abc", sr.getNamespaceURI());
+        assertEquals(2, sr.getAttributeCount());
+
+        assertEquals("a", sr.getAttributeLocalName(0));
+        assertEquals("", sr.getAttributeNamespace(0));
+        assertEquals("3", sr.getAttributeValue(0));
+        assertEquals("rb", sr.getAttributeLocalName(1));
+        assertEquals("", sr.getAttributeNamespace(1));
+        assertEquals("", sr.getAttributeValue(1));
+        
+        assertTokenType(END_ELEMENT, reader.nextToken());
+        assertEquals("leaf", sr.getLocalName());
+        assertEquals("abc", sr.getNamespaceURI());
+        assertTokenType(END_ELEMENT, reader.nextToken());
+        assertEquals("root", sr.getLocalName());
+        assertEquals("", sr.getNamespaceURI());
+        assertTokenType(XMLStreamConstants.END_DOCUMENT, reader.nextToken());
+        assertFalse(sr.hasNext());
+    }
+
+    private void _testText(int chunkSize, String SPC) throws Exception
+    {
+        AsyncXMLInputFactory f = new InputFactoryImpl();
+        AsyncXMLStreamReader sr = f.createAsyncXMLStreamReader();
+        final String XML = SPC+"<root>a&lt;b\rMOT</root>";
+        AsyncReaderWrapper reader = new AsyncReaderWrapper(sr, chunkSize, XML);
+
+        // should start with START_DOCUMENT, but for now skip
+        int t = reader.nextToken();
+        assertTokenType(START_ELEMENT, t);
+        assertEquals("root", sr.getLocalName());
+        assertEquals("", sr.getNamespaceURI());
+        assertTokenType(CHARACTERS, reader.nextToken());
+        String str = collectAsyncText(reader, CHARACTERS); // moves to end-element
+        assertEquals("a<b\nMOT", str);
+        assertTokenType(END_ELEMENT, reader.currentToken());
+        assertEquals("root", sr.getLocalName());
+        assertEquals("", sr.getNamespaceURI());
+        assertTokenType(XMLStreamConstants.END_DOCUMENT, reader.nextToken());
+        assertFalse(sr.hasNext());
+    }
+    
     private void _testComments(String spaces, int chunkSize) throws Exception
     {
         String XML = spaces+"<!--comments&s\r\ntuf-fy>--><root><!----></root><!--\nHi - ho!->-->";

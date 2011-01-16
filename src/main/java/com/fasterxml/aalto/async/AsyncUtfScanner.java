@@ -1343,6 +1343,7 @@ public class AsyncUtfScanner
     {
         // Left-overs from last input block?
         if (_pendingInput != 0) { // CR, multi-byte, '?'
+System.err.println("PI, pending = "+_pendingInput);            
             int result = handlePIPending();
             // If there's not enough input, or if we completed, can leave
             if (result != 0) {
@@ -1350,13 +1351,15 @@ public class AsyncUtfScanner
             }
             // otherwise we should be good to continue
         }
-
+        
         char[] outputBuffer = _textBuilder.getBufferWithoutReset();
         int outPtr = _textBuilder.getCurrentLength();
         
         final int[] TYPES = _charTypes.OTHER_CHARS;
         final byte[] inputBuffer = _inputBuffer;
 
+System.err.println("ParsePIData, pend "+_pendingInput+", len "+outPtr+" -> '"+new String(outputBuffer, 0, outPtr)+"'");
+        
         main_loop:
         while (true) {
             int c;
@@ -1446,6 +1449,8 @@ public class AsyncUtfScanner
             // Ok, can output the char (we know there's room for one more)
             outputBuffer[outPtr++] = (char) c;
         }
+
+System.err.println(" set length at "+outPtr+" -> '"+new String(outputBuffer, 0, outPtr)+"'");
 
         _textBuilder.setCurrentLength(outPtr);
         return EVENT_INCOMPLETE;

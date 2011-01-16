@@ -666,6 +666,7 @@ public abstract class AsyncByteScanner
                         }
                         // If not, we'll move to 'data' portion of PI
                         _state = STATE_PI_IN_DATA;
+                        _textBuilder.resetWithEmpty();
                         return parsePIData();
                     }
                     // Otherwise, it's an error
