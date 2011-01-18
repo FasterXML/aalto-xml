@@ -552,6 +552,9 @@ public abstract class AsyncByteScanner
                     return finishCharactersCoalescing();
                 }
             }
+            if (_pendingInput != 0) { // multi-byte, or CR without LF
+                return startCharactersPending();
+            }
             // Otherwise, should not get here
             throwInternal();
 //        case ENTITY_REFERENCE:

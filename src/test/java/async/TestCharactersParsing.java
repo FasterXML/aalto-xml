@@ -9,15 +9,25 @@ import com.fasterxml.aalto.stax.InputFactoryImpl;
 
 public class TestCharactersParsing extends AsyncTestBase
 {
-    public void testText() throws Exception
+    public void testLinefeeds() throws Exception
     {
         // let's try with different chunking, addition (or not) of space
         for (int spaces = 0; spaces < 3; ++spaces) {
-            String SPC = "  ".substring(0, spaces);
-            _testText(1, SPC);
-            _testText(2, SPC);
-            _testText(3, SPC);
-            _testText(5, SPC);
+            _testLinefeeds(1, spaces(spaces));
+            _testLinefeeds(2, spaces(spaces));
+            _testLinefeeds(3, spaces(spaces));
+            _testLinefeeds(5, spaces(spaces));
+        }
+    }
+
+    public void testTextWithEntities() throws Exception
+    {
+        // let's try with different chunking, addition (or not) of space
+        for (int spaces = 0; spaces < 3; ++spaces) {
+            _testTextWithEntities(1, spaces(spaces));
+            _testTextWithEntities(2, spaces(spaces));
+            _testTextWithEntities(3, spaces(spaces));
+            _testTextWithEntities(5, spaces(spaces));
         }
     }
 
@@ -27,7 +37,29 @@ public class TestCharactersParsing extends AsyncTestBase
     /**********************************************************************
      */
     
-    private void _testText(int chunkSize, String SPC) throws Exception
+    private void _testLinefeeds(int chunkSize, String SPC) throws Exception
+    {
+        AsyncXMLInputFactory f = new InputFactoryImpl();
+        AsyncXMLStreamReader sr = f.createAsyncXMLStreamReader();
+        final String XML = SPC+"<root>\rFirst\r\nSecond\nThird</root>";
+        AsyncReaderWrapper reader = new AsyncReaderWrapper(sr, chunkSize, XML);
+
+        assertTokenType(START_ELEMENT, _verifyStart(reader));
+        assertEquals("root", sr.getLocalName());
+        assertEquals("", sr.getNamespaceURI());
+
+        assertTokenType(CHARACTERS, reader.nextToken());
+        String str = collectAsyncText(reader, CHARACTERS); // moves to end-element
+        assertEquals("\nFirst\nSecond\nThird", str);
+
+        assertTokenType(END_ELEMENT, reader.currentToken());
+        assertEquals("root", sr.getLocalName());
+        assertEquals("", sr.getNamespaceURI());
+        assertTokenType(XMLStreamConstants.END_DOCUMENT, reader.nextToken());
+        assertFalse(sr.hasNext());
+    }
+
+    private void _testTextWithEntities(int chunkSize, String SPC) throws Exception
     {
         AsyncXMLInputFactory f = new InputFactoryImpl();
         AsyncXMLStreamReader sr = f.createAsyncXMLStreamReader();
@@ -48,7 +80,7 @@ public class TestCharactersParsing extends AsyncTestBase
         assertTokenType(XMLStreamConstants.END_DOCUMENT, reader.nextToken());
         assertFalse(sr.hasNext());
     }
-
+    
     /*
     /**********************************************************************
     /* Helper methods
