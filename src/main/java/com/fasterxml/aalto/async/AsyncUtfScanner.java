@@ -367,7 +367,7 @@ public class AsyncUtfScanner
                 --_inputPtr;
                 break main_loop;
             case XmlCharTypes.CT_AMP:
-                c = handleCharacterEntity();
+                c = handleEntityInCharacters();
                 if (c == 0) { // not a succesfully expanded char entity
                     // _inputPtr set by entity expansion method
                     break main_loop;
@@ -445,6 +445,30 @@ public class AsyncUtfScanner
         return 0;
     }
 
+    /**
+     * Method called to handle entity encountered inside
+     * CHARACTERS segment.
+     */
+    protected int handleEntityInCharacters()
+        throws XMLStreamException
+    {
+        if (true) throw new UnsupportedOperationException();
+        // !!! @TODO
+        return 0;
+    }
+
+    /**
+     * Method called to handle entity encountered inside
+     * attribute value.
+     */
+    protected int handleEntityInAttributeValue()
+        throws XMLStreamException
+    {
+        if (true) throw new UnsupportedOperationException();
+        // !!! @TODO
+        return 0;
+    }
+    
     /**
      * Method called to handle split multi-byte character, by decoding
      * it and appending to the text buffer, if possible.
@@ -639,7 +663,7 @@ public class AsyncUtfScanner
                 --_inputPtr;
                 return false;
             case XmlCharTypes.CT_AMP:
-                c = handleCharacterEntity();
+                c = handleEntityInCharacters();
                 if (c == 0) { // not a succesfully expanded char entity
                     return true; // did bump into general entity
                 }
@@ -808,7 +832,7 @@ public class AsyncUtfScanner
             case XmlCharTypes.CT_LT:
                 throwUnexpectedChar(c, "'<' not allowed in attribute value");
             case XmlCharTypes.CT_AMP:
-                c = handleCharacterEntity();
+                c = handleEntityInAttributeValue();
                 /* !!! TODO: may be blocking to get rest of entity name?
                  */
                 if (c == 0) { // general entity; should never happen
@@ -950,7 +974,7 @@ public class AsyncUtfScanner
             case XmlCharTypes.CT_LT:
                 throwUnexpectedChar(c, "'<' not allowed in attribute value");
             case XmlCharTypes.CT_AMP:
-                c = handleCharacterEntity();
+                c = handleEntityInAttributeValue();
                 /* !!! TODO: may be blocking to get rest of entity name?
                  */
                 if (c == 0) { // general entity; should never happen

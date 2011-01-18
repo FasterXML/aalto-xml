@@ -60,6 +60,7 @@ public abstract class AsyncByteScanner
     final static int STATE_TREE_SEEN_AMP = 2; // "&" seen
     final static int STATE_TREE_SEEN_EXCL = 3; // "<!" seen
     final static int STATE_TREE_SEEN_SLASH = 4; // "</" seen
+    final static int STATE_TREE_SEEN_ENTITY_START = 5; // "&" and part of name
 
     // // // States within event types (STATE_DEFAULT is shared):
 
@@ -506,6 +507,8 @@ public abstract class AsyncByteScanner
                 }
             } else if (_state == STATE_TREE_SEEN_AMP) {
                 return handleEntityStartingToken();
+            } else if (_state == STATE_TREE_SEEN_ENTITY_START) {
+                return handleEntityStartingToken2();
             }
                 
             if (_state == STATE_TREE_SEEN_EXCL) {
@@ -870,8 +873,6 @@ public abstract class AsyncByteScanner
     protected int handleEntityStartingToken()
         throws XMLStreamException
     {
-        _nextEvent = ENTITY_REFERENCE;
-
         byte b = _inputBuffer[_inputPtr++]; // we know one is available
         if (b == BYTE_HASH) { // numeric character entity
             _nextEvent = CHARACTERS;
@@ -883,12 +884,12 @@ public abstract class AsyncByteScanner
             // !!! TBI
             return handleEntity();
         }
-        PName n = parseNewName(b);
+        PName n = parseNewEntityName(b);
         // null if incomplete; non-null otherwise
         if (n == null) {
             // Not sure if it's a char entity or general one; so we don't yet know type
             _textBuilder.resetWithEmpty();
-            _state = STATE_TREE_SEEN_AMP;
+            _state = STATE_TREE_SEEN_ENTITY_START;
             return (_nextEvent = EVENT_INCOMPLETE);
         }
         int ch = decodeGeneralEntity(n);
@@ -908,6 +909,38 @@ public abstract class AsyncByteScanner
         return _currToken;
     }
 
+    /**
+     * Method called when we see an entity that is starting a new token,
+     * and part of its name has been decoded (but not all)
+     * 
+     * @return
+     * @throws XMLStreamException
+     */
+    protected int handleEntityStartingToken2()
+        throws XMLStreamException
+    {
+        PName n = parseEntityName();
+        // null if incomplete; non-null otherwise
+        if (n == null) {
+            return _nextEvent; // i.e. EVENT_INCOMPLETE
+        }
+        int ch = decodeGeneralEntity(n);
+        if (ch == 0) { // not a character entity
+            _tokenName = n;
+            return (_currToken = ENTITY_REFERENCE);
+        }
+        // character entity; initialize buffer,
+        _textBuilder.resetWithChar((char)ch);
+        _nextEvent = 0;
+        _currToken = CHARACTERS;
+        if (_cfgLazyParsing) {
+            _tokenIncomplete = true;
+        } else {
+            finishCharacters();
+        }
+        return _currToken;
+    }
+    
     protected int handleEntity()
         throws XMLStreamException
     {
@@ -1840,20 +1873,6 @@ public abstract class AsyncByteScanner
             !targetName.hasPrefix()) {
             reportInputProblem(ErrorConsts.ERR_WF_PI_XML_TARGET);
         }
-    }
-
-    /*
-    /**********************************************************************
-    /* Internal methods, entity expansion
-    /**********************************************************************
-     */
-    
-    protected int handleCharacterEntity()
-        throws XMLStreamException
-    {
-        if (true) throw new UnsupportedOperationException();
-        // !!! @TODO
-        return 0;
     }
 
     /*
