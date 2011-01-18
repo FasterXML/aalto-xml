@@ -9,6 +9,13 @@ import com.fasterxml.aalto.AsyncXMLStreamReader;
 
 abstract class AsyncTestBase extends base.BaseTestCase
 {
+    final static String SPACES = "                ";
+    
+    public static String spaces(int count) 
+    {
+        return SPACES.substring(0, Math.min(SPACES.length(), count));
+    }
+    
     /**
      * Helper class used with async parser
      */

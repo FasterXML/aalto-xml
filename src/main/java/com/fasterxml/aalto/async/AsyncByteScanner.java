@@ -71,6 +71,11 @@ public abstract class AsyncByteScanner
     final static int STATE_TEXT_BRACKET1 = 2;
     final static int STATE_TEXT_BRACKET2 = 3;
 
+    // just seen "&#"
+    final static int STATE_TEXT_AMP_AND_HASH = 4;
+    // seen '&' and partial name:
+    final static int STATE_TEXT_AMP_NAME = 5;
+
     // For comments, STATE_DEFAULT means "<!-" has been seen
     final static int STATE_COMMENT_CONTENT = 1; // "<!--"
     final static int STATE_COMMENT_HYPHEN = 2; // content, and one '-'
@@ -241,7 +246,7 @@ public abstract class AsyncByteScanner
     protected PName _elemAttrName;
 
     protected int _elemAttrPtr;
-
+    
     /*
     /**********************************************************************
     /* Instance construction
@@ -500,7 +505,7 @@ public abstract class AsyncByteScanner
                     return handleStartElementStart(b);
                 }
             } else if (_state == STATE_TREE_SEEN_AMP) {
-                return handleEntityStart(EVENT_INCOMPLETE, _inputBuffer[_inputPtr++]);
+                return handleEntityStartingToken();
             }
                 
             if (_state == STATE_TREE_SEEN_EXCL) {
@@ -546,8 +551,8 @@ public abstract class AsyncByteScanner
             }
             // Otherwise, should not get here
             throwInternal();
+//        case ENTITY_REFERENCE:
         }
-        if (true) throw new RuntimeException("Unrecognized event: "+_nextEvent);
         return throwInternal(); // never gets here
     }
 
@@ -853,28 +858,54 @@ public abstract class AsyncByteScanner
     }
 
     /**
+     * Method called when a new token (within tree) starts with an
+     * entity.
+     * 
      * @param surroundingEvent Context (next event at the time
      *   ampersand was encountered) in which entity is found. Will
      *   often be the next event set after entity is resolved.
+     *   
+     * @return Type of event to return
      */
-    protected int handleEntityStart(int surroundingEvent, byte b)
+    protected int handleEntityStartingToken()
         throws XMLStreamException
     {
         _nextEvent = ENTITY_REFERENCE;
-        _surroundingEvent = surroundingEvent;
 
-        if (b == BYTE_HASH) {
-            _state = STATE_ENT_SEEN_HASH;
+        byte b = _inputBuffer[_inputPtr++]; // we know one is available
+        if (b == BYTE_HASH) { // numeric character entity
+            _nextEvent = CHARACTERS;
+            if (_inputPtr >= _inputEnd) { // but no more content to parse yet
+                _textBuilder.resetWithEmpty();
+                _state = STATE_TEXT_AMP_AND_HASH;
+                return (_nextEvent = EVENT_INCOMPLETE);
+            }
+            // !!! TBI
             return handleEntity();
         }
-
         PName n = parseNewName(b);
         // null if incomplete; non-null otherwise
-        if (n != null) {
-            return handleGeneralEntity(n);
+        if (n == null) {
+            // Not sure if it's a char entity or general one; so we don't yet know type
+            _textBuilder.resetWithEmpty();
+            _state = STATE_TREE_SEEN_AMP;
+            return (_nextEvent = EVENT_INCOMPLETE);
         }
-        _state = STATE_ENT_IN_NAME;
-        return EVENT_INCOMPLETE;
+        int ch = decodeGeneralEntity(n);
+        if (ch == 0) { // not a character entity
+            _tokenName = n;
+            return (_nextEvent = _currToken = ENTITY_REFERENCE);
+        }
+        // character entity; initialize buffer,
+        _textBuilder.resetWithChar((char)ch);
+        _nextEvent = 0;
+        _currToken = CHARACTERS;
+        if (_cfgLazyParsing) {
+            _tokenIncomplete = true;
+        } else {
+            finishCharacters();
+        }
+        return _currToken;
     }
 
     protected int handleEntity()
@@ -885,19 +916,30 @@ public abstract class AsyncByteScanner
         return 0;
     }
 
-    protected final int handleGeneralEntity(PName entityName)
+    /**
+     * 
+     * @return Character of entity expanded, if character entity;
+     *   zero if not
+     */
+    protected final int decodeGeneralEntity(PName entityName)
     {
         String name = entityName.getPrefixedName();
         if (name == "amp") {
-        } else if (name == "lt") {
-        } else if (name == "apos") {
-        } else if (name == "quot") {
-        } else if (name == "gt") {
+            return INT_AMP;
         }
-
-        if (true) throw new UnsupportedOperationException();
-        // !!! TBI
-        return EVENT_INCOMPLETE;
+        if (name == "lt") {
+            return INT_LT;
+        }
+        if (name == "apos") {
+            return INT_APOS;
+        }
+        if (name == "quot") {
+            return INT_QUOTE;
+        }
+        if (name == "gt") {
+            return INT_GT;
+        }
+        return 0;
     }
 
     /**
