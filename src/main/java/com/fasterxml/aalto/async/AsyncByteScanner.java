@@ -1074,11 +1074,9 @@ public abstract class AsyncByteScanner
             case STATE_SE_SPACE_OR_ATTRNAME:
             case STATE_SE_SPACE_OR_EQ:
             case STATE_SE_SPACE_OR_ATTRVALUE:
-                /* Common to these states is that there may
-                 * be leading space(s), so let's see if any
-                 * has to be skipped
+                /* Common to these states is that there may be leading space(s),
+                 * so let's see if any has to be skipped
                  */
-
                 if (_pendingInput != 0) {
                     if (!handlePartialCR()) {
                         return EVENT_INCOMPLETE;
@@ -1145,7 +1143,6 @@ public abstract class AsyncByteScanner
                     }
                     initAttribute(b);
                     continue main_loop;
-
                 default:
                     throwInternal();
                 }
@@ -1208,7 +1205,7 @@ public abstract class AsyncByteScanner
     private void initAttribute(byte quoteChar)
     {
         _elemAttrQuote = quoteChar;
-
+        
         PName attrName = _elemAttrName;
         String prefix = attrName.getPrefix();
         boolean nsDecl;

@@ -937,7 +937,6 @@ public class AsyncUtfScanner
     }
 
     /**
-     * 
      * @return True if the partial information was succesfully handled;
      *    false if not
      */
@@ -1008,19 +1007,14 @@ public class AsyncUtfScanner
     {
         final int[] TYPES = _charTypes.ATTR_CHARS;
         char[] attrBuffer = _nameBuffer;
-
         final int quoteChar = (int) _elemAttrQuote;
 
         // First; any pending input?
         if (_pendingInput != 0) {
-            if (!handlePartialCR()) {
+            if (!handleNsValuePending()) {
                 return false;
             }
-            if (_elemAttrPtr >= attrBuffer.length) {
-                _nameBuffer = attrBuffer = DataUtil.growArrayBy(attrBuffer, attrBuffer.length);
-            }
-            // All lfs get converted to spaces, in attribute values
-            attrBuffer[_elemAttrPtr++] = ' ';
+            _pendingInput = 0;
         }
         
         value_loop:
@@ -1157,6 +1151,73 @@ public class AsyncUtfScanner
         return true;
     }
 
+    /**
+     * @return True if the partial information was succesfully handled;
+     *    false if not
+     */
+    private final boolean handleNsValuePending() throws XMLStreamException
+    {
+        if (_pendingInput == PENDING_STATE_CR) {
+            if (!handlePartialCR()) {
+                return false;
+            }
+            char[] attrBuffer = _attrCollector.continueValue();
+            if (_elemAttrPtr >= attrBuffer.length) {
+                attrBuffer = _attrCollector.valueBufferFull();
+            }
+            // All lfs get converted to spaces, in attribute values
+            attrBuffer[_elemAttrPtr++] = ' ';
+            return true;
+        }
+
+        // otherwise must be related to entity handling within attribute value
+        if (_inputPtr >= _inputEnd) {
+            return false;
+        }
+        PName entityName;
+        if (_pendingInput == PENDING_STATE_ATTR_VALUE_AMP) {
+            byte b = _inputBuffer[_inputPtr++];
+            if (b == BYTE_HASH) { // numeric character entity
+                _pendingInput = PENDING_STATE_ATTR_VALUE_AMPHASH;
+                // !!! TBI
+                if (true) throw new UnsupportedOperationException();
+            }
+            entityName = parseNewEntityName(b);
+        } else if (_pendingInput == PENDING_STATE_ATTR_VALUE_AMPHASH) {
+            // !!! TBI
+            if (true) throw new UnsupportedOperationException();
+        } else if (_pendingInput == PENDING_STATE_ATTR_VALUE_ENTITY_NAME) {
+            entityName = parseEntityName();
+        } else {
+            throwInternal();
+            entityName = null; // never gets here, but compiler complains if we don't do it
+        }
+        if (entityName == null) {
+            _pendingInput = PENDING_STATE_ATTR_VALUE_ENTITY_NAME;
+            return false;
+        }        
+        int c = decodeGeneralEntity(entityName);
+        if (c == 0) { // can't have general entities within attribute values
+            _tokenName = entityName;
+            reportUnexpandedEntityInAttr(_elemAttrName, false);
+        }
+        char[] attrBuffer = _attrCollector.continueValue();
+        // Ok; does it need a surrogate though? (over 16 bits)
+        if ((c >> 16) != 0) {
+            c -= 0x10000;
+            if (_elemAttrPtr >= attrBuffer.length) {
+                attrBuffer = _attrCollector.valueBufferFull();
+            }
+            attrBuffer[_elemAttrPtr++] = (char) (0xD800 | (c >> 10));
+            c = 0xDC00 | (c & 0x3FF);
+        }
+        if (_elemAttrPtr >= attrBuffer.length) {
+            attrBuffer = _attrCollector.valueBufferFull();
+        }
+        attrBuffer[_elemAttrPtr++] = (char) c;
+        return true; // done it!
+    }
+    
     /*
     /**********************************************************************
     /* Implementation of parsing API, other events

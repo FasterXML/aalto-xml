@@ -140,9 +140,9 @@ public final class AttributeCollector
     private String _allAttrValues = null;
 
     /*
-    //////////////////////////////////////////////////////
-    // Life-cycle methods (creation, further construction)
-    //////////////////////////////////////////////////////
+    /**********************************************************************
+    /* Life-cycle methods (creation, further construction)
+    /**********************************************************************
      */
 
     protected AttributeCollector(ReaderConfig cfg)
@@ -350,9 +350,9 @@ public final class AttributeCollector
     }
 
     /*
-    //////////////////////////////////////////////////////
-    // Accessors
-    //////////////////////////////////////////////////////
+    /**********************************************************************
+    /* Accessors
+    /**********************************************************************
      */
 
     public final int getCount() { return _attrCount; }
@@ -444,9 +444,9 @@ public final class AttributeCollector
     public String getErrorMsg() { return _errorMsg; }
 
     /*
-    //////////////////////////////////////////////////////
-    // Type-safe accessors to support TypedXMLStreamReader
-    //////////////////////////////////////////////////////
+    /**********************************************************************
+    /* Type-safe accessors to support TypedXMLStreamReader
+    /**********************************************************************
      */
 
     public final void decodeValue(int index, TypedValueDecoder dec)
@@ -589,9 +589,9 @@ public final class AttributeCollector
     }
 
     /*
-    //////////////////////////////////////////////////////
-    // Internal methods
-    //////////////////////////////////////////////////////
+    /**********************************************************************
+    /* Internal methods
+    /**********************************************************************
      */
 
     private void noteDupAttr(int ix1, int ix2)

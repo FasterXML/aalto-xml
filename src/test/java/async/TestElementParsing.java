@@ -81,6 +81,7 @@ public class TestElementParsing extends AsyncTestBase
         assertEquals("1&2", sr.getAttributeValue(0));
         assertEquals("attr", sr.getAttributeLocalName(0));
         assertEquals("", sr.getAttributeNamespace(0));
+        
         assertTokenType(START_ELEMENT, reader.nextToken());
         assertEquals("leaf", sr.getLocalName());
         assertEquals("abc", sr.getNamespaceURI());
@@ -89,7 +90,7 @@ public class TestElementParsing extends AsyncTestBase
         assertEquals("a", sr.getAttributeLocalName(0));
         assertEquals("", sr.getAttributeNamespace(0));
         assertEquals("3", sr.getAttributeValue(0));
-        assertEquals("rb", sr.getAttributeLocalName(1));
+        assertEquals("b", sr.getAttributeLocalName(1));
         assertEquals("", sr.getAttributeNamespace(1));
         assertEquals("", sr.getAttributeValue(1));
         
