@@ -879,15 +879,19 @@ public abstract class XmlScanner
     private NsDeclaration findCurrNsDecl(int index)
     {
         NsDeclaration nsDecl = _lastNsDecl;
-        /* 17-Sep-2006, tatus: There is disparity between START/END_ELEMENT;
+        /* 17-Sep-2006, tatu: There is disparity between START/END_ELEMENT;
          *   with START_ELEMENT, _depth is one higher than that of ns
          *   declarations; with END_ELEMENT, the same
          */
         int level = _depth;
+        int count;
+        // 20-Jan-2011, tatu: Hmmh... since declarations are in reverse order should we reorder?
         if (_currToken == START_ELEMENT) {
+            count = _currNsCount - 1 - index;
             --level;
+        } else {
+            count = index;
         }
-        int count = index;
 
         while (nsDecl != null && nsDecl.getLevel() == level) {
             if (count == 0) {

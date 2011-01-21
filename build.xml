@@ -6,7 +6,7 @@
     <property name="dir.src" location="${basedir}/src" />
     <property name="dir.src.java" location="${dir.src}/main/java" />
     <property name="dir.src.test" location="${dir.src}/test/java" />
-    <property name="dir.resources" location="${dir.src}/resources" />
+    <property name="dir.resources" location="${dir.src}/main/resources" />
     <property name="dir.releasenotes" location="${basedir}/release-notes" />
 
     <!-- Libs -->
@@ -126,7 +126,7 @@
     <target name="compile" depends="prepare,copy-resources">
         <javac srcdir="${dir.src.java}" destdir="${dir.build.classes}"
             source="1.6" target="1.6"
-            debug="true"
+            debug="true" includeantruntime="false"
         >
             <include name="com/fasterxml/**/*.java" />
             <include name="test/**/*.java" />
@@ -312,7 +312,7 @@
 
     <target name="test.compile" depends="compile">
         <javac srcdir="${dir.src.test}" destdir="${dir.classes.test}"
-            debug="true"
+            debug="true" includeantruntime="false"
         >
             <include name="**/*.java" />
             <classpath refid="classpath.compile" />
