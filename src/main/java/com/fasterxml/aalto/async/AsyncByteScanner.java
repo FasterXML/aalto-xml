@@ -72,10 +72,12 @@ public abstract class AsyncByteScanner
     final static int STATE_TEXT_BRACKET1 = 2;
     final static int STATE_TEXT_BRACKET2 = 3;
 
+    // just seen "&"
+    final static int STATE_TEXT_AMP = 4;
     // just seen "&#"
-    final static int STATE_TEXT_AMP_AND_HASH = 4;
+    final static int STATE_TEXT_AMP_AND_HASH = 5;
     // seen '&' and partial name:
-    final static int STATE_TEXT_AMP_NAME = 5;
+    final static int STATE_TEXT_AMP_NAME = 6;
 
     // For comments, STATE_DEFAULT means "<!-" has been seen
     final static int STATE_COMMENT_CONTENT = 1; // "<!--"
@@ -885,7 +887,7 @@ public abstract class AsyncByteScanner
                 return (_nextEvent = EVENT_INCOMPLETE);
             }
             // !!! TBI
-            return handleEntity();
+            return handleNonCharEntity();
         }
         PName n = parseNewEntityName(b);
         // null if incomplete; non-null otherwise
@@ -943,8 +945,13 @@ public abstract class AsyncByteScanner
         }
         return _currToken;
     }
-    
-    protected int handleEntity()
+
+    /**
+     * Method called to handle cases where we find something other than
+     * a character entity (or one of 4 pre-defined general entities that
+     * act like character entities)
+     */
+    protected int handleNonCharEntity()
         throws XMLStreamException
     {
         if (true) throw new UnsupportedOperationException();

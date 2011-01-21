@@ -447,13 +447,68 @@ public class AsyncUtfScanner
 
     /**
      * Method called to handle entity encountered inside
-     * CHARACTERS segment.
+     * CHARACTERS segment, when trying to complete a non-coalescing text segment.
      */
     protected int handleEntityInCharacters()
         throws XMLStreamException
     {
-        if (true) throw new UnsupportedOperationException();
-        // !!! @TODO
+        /* Thing that simplifies processing here is that handling
+         * is pretty much optional: if there isn't enough data, we
+         * just return 0 and are done with it.
+         * 
+         * Also: we need at least 3 more characters for any character entiyt
+         */
+        int ptr = _inputPtr;
+        if ((ptr  + 3) <= _inputEnd) {
+            byte b = _inputBuffer[ptr++];
+            if (b == BYTE_HASH) { // numeric character entity
+                // !!! TBI
+                if (true) throw new UnsupportedOperationException();
+            }
+            // general entity; maybe one of pre-defined ones
+            if (b == BYTE_a) { // amp or apos?
+                b = _inputBuffer[ptr++];
+                if (b == BYTE_m) {
+                    if ((ptr + 1) < _inputPtr
+                            && _inputBuffer[ptr] == BYTE_p
+                            && _inputBuffer[ptr+1] == BYTE_SEMICOLON) {
+                        _inputPtr = ptr + 2;
+                        return INT_AMP;
+                    }
+                } else if (b == BYTE_p) {
+                    if ((ptr + 2) < _inputPtr
+                            && _inputBuffer[ptr] == BYTE_o
+                            && _inputBuffer[ptr+1] == BYTE_s
+                            && _inputBuffer[ptr+2] == BYTE_SEMICOLON) {
+                        _inputPtr = ptr + 3;
+                        return INT_APOS;
+                    }
+                }
+            } else if (b == BYTE_g) { // gt?
+                if (_inputBuffer[ptr] == BYTE_t
+                        && _inputBuffer[ptr+1] == BYTE_SEMICOLON) {
+                    _inputPtr = ptr + 2;
+                    return INT_GT;
+                }
+            } else if (b == BYTE_l) { // lt?
+                if (_inputBuffer[ptr] == BYTE_t
+                        && _inputBuffer[ptr+1] == BYTE_SEMICOLON) {
+                    _inputPtr = ptr + 2;
+                    return INT_LT;
+                }
+            } else if (b == BYTE_q) { // quot?
+                if ((ptr + 3) < _inputPtr
+                        && _inputBuffer[ptr] == BYTE_u
+                        && _inputBuffer[ptr+1] == BYTE_o
+                        && _inputBuffer[ptr+2] == BYTE_t
+                        && _inputBuffer[ptr+3] == BYTE_SEMICOLON) {
+                    _inputPtr = ptr + 4;
+                    return INT_APOS;
+                }
+            }
+        }
+        // couldn't handle; push back ampersand, bail out
+        --_inputPtr;
         return 0;
     }
 
