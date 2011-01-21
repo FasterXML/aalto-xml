@@ -1001,7 +1001,7 @@ public class AsyncUtfScanner
         attrBuffer[_elemAttrPtr++] = (char) c;
         return true; // done it!
     }
-    
+
     protected boolean handleNsDecl()
         throws XMLStreamException
     {
@@ -1026,12 +1026,12 @@ public class AsyncUtfScanner
                 if (_inputPtr >= _inputEnd) {
                     return false;
                 }
-                if (_elemAttrPtr >= attrBuffer.length) {
+                if (_elemNsPtr >= attrBuffer.length) {
                     _nameBuffer = attrBuffer = DataUtil.growArrayBy(attrBuffer, attrBuffer.length);
                 }
                 int max = _inputEnd;
                 {
-                    int max2 = _inputPtr + (attrBuffer.length - _elemAttrPtr);
+                    int max2 = _inputPtr + (attrBuffer.length - _elemNsPtr);
                     if (max2 < max) {
                         max = max2;
                     }
@@ -1041,7 +1041,7 @@ public class AsyncUtfScanner
                     if (TYPES[c] != 0) {
                         break ascii_loop;
                     }
-                    attrBuffer[_elemAttrPtr++] = (char) c;
+                    attrBuffer[_elemNsPtr++] = (char) c;
                 }
             }
             
@@ -1097,9 +1097,9 @@ public class AsyncUtfScanner
                 }
                 c = decodeUtf8_4(c);
                 // Let's add first part right away:
-                attrBuffer[_elemAttrPtr++] = (char) (0xD800 | (c >> 10));
+                attrBuffer[_elemNsPtr++] = (char) (0xD800 | (c >> 10));
                 c = 0xDC00 | (c & 0x3FF);
-                if (_elemAttrPtr >= attrBuffer.length) {
+                if (_elemNsPtr >= attrBuffer.length) {
                     _nameBuffer = attrBuffer = DataUtil.growArrayBy(attrBuffer, attrBuffer.length);
                 }
                 break;
@@ -1118,10 +1118,10 @@ public class AsyncUtfScanner
                 // Ok; does it need a surrogate though? (over 16 bits)
                 if ((c >> 16) != 0) {
                     c -= 0x10000;
-                    attrBuffer[_elemAttrPtr++] = (char) (0xD800 | (c >> 10));
+                    attrBuffer[_elemNsPtr++] = (char) (0xD800 | (c >> 10));
                     c = 0xDC00 | (c & 0x3FF);
-                    if (_elemAttrPtr >= attrBuffer.length) {
-                        attrBuffer = _attrCollector.valueBufferFull();
+                    if (_elemNsPtr >= attrBuffer.length) {
+                        _nameBuffer = attrBuffer = DataUtil.growArrayBy(attrBuffer, attrBuffer.length);
                     }
                 }
                 break;
@@ -1134,14 +1134,14 @@ public class AsyncUtfScanner
                 // Other chars are not important here...
             }
             // We know there's room for at least one char without checking
-            attrBuffer[_elemAttrPtr++] = (char) c;
+            attrBuffer[_elemNsPtr++] = (char) c;
         }
 
         /* Simple optimization: for default ns removal (or, with
          * ns 1.1, any other as well), will use empty value... no
          * need to try to intern:
          */
-        int attrPtr = _elemAttrPtr;
+        int attrPtr = _elemNsPtr;
         if (attrPtr == 0) {
             bindNs(_elemAttrName, "");
         } else {
@@ -1161,12 +1161,12 @@ public class AsyncUtfScanner
             if (!handlePartialCR()) {
                 return false;
             }
-            char[] attrBuffer = _attrCollector.continueValue();
-            if (_elemAttrPtr >= attrBuffer.length) {
-                attrBuffer = _attrCollector.valueBufferFull();
+            char[] attrBuffer = _nameBuffer;
+            if (_elemNsPtr >= attrBuffer.length) {
+                _nameBuffer = attrBuffer = DataUtil.growArrayBy(attrBuffer, attrBuffer.length);
             }
             // All lfs get converted to spaces, in attribute values
-            attrBuffer[_elemAttrPtr++] = ' ';
+            attrBuffer[_elemNsPtr++] = ' ';
             return true;
         }
 
@@ -1205,16 +1205,16 @@ public class AsyncUtfScanner
         // Ok; does it need a surrogate though? (over 16 bits)
         if ((c >> 16) != 0) {
             c -= 0x10000;
-            if (_elemAttrPtr >= attrBuffer.length) {
-                attrBuffer = _attrCollector.valueBufferFull();
+            if (_elemNsPtr >= attrBuffer.length) {
+                _nameBuffer = attrBuffer = DataUtil.growArrayBy(attrBuffer, attrBuffer.length);
             }
-            attrBuffer[_elemAttrPtr++] = (char) (0xD800 | (c >> 10));
+            attrBuffer[_elemNsPtr++] = (char) (0xD800 | (c >> 10));
             c = 0xDC00 | (c & 0x3FF);
         }
-        if (_elemAttrPtr >= attrBuffer.length) {
-            attrBuffer = _attrCollector.valueBufferFull();
+        if (_elemNsPtr >= attrBuffer.length) {
+            _nameBuffer = attrBuffer = DataUtil.growArrayBy(attrBuffer, attrBuffer.length);
         }
-        attrBuffer[_elemAttrPtr++] = (char) c;
+        attrBuffer[_elemNsPtr++] = (char) c;
         return true; // done it!
     }
     

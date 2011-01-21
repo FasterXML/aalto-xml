@@ -43,8 +43,7 @@ import com.fasterxml.aalto.util.XmlConsts;
  * specific, so there are many implementations.
  */
 public abstract class XmlScanner
-    implements XmlConsts, XMLStreamConstants,
-               NamespaceContext
+    implements XmlConsts, XMLStreamConstants, NamespaceContext
 {
 
     // // // Constants:
@@ -235,9 +234,9 @@ public abstract class XmlScanner
      * order, and they specifically do NOT represent actual namespace
      * declarations parsed from xml content.
      */
-    NsBinding[] _nsBindings;
+    protected NsBinding[] _nsBindings;
 
-    int _nsBindingCount = 0;
+    protected int _nsBindingCount = 0;
 
     /**
      * Although unbound pname instances can be easily and safely reused,
@@ -246,9 +245,9 @@ public abstract class XmlScanner
      * only after certain number of cache misses (to avoid overhead for
      * tiny documents, or documents with few or no namespace prefixes).
      */
-    PName[] _nsBindingCache = null;
+    protected PName[] _nsBindingCache = null;
 
-    int _nsBindMisses = 0;
+    protected int _nsBindMisses = 0;
 
     /*
     /**********************************************************************

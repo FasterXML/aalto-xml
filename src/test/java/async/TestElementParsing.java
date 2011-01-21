@@ -69,7 +69,8 @@ public class TestElementParsing extends AsyncTestBase
     {
         AsyncXMLInputFactory f = new InputFactoryImpl();
         AsyncXMLStreamReader sr = f.createAsyncXMLStreamReader();
-        final String XML = SPC+"<root attr='1&amp;2'><leaf xmlns='abc' a   ='3'\rb=''  /></root>";
+//        final String XML = SPC+"<root attr='1&amp;2'><leaf xmlns='abc' a   ='3'\rb=''  /></root>";
+        final String XML = SPC+"<root attr='1&amp;2'><leaf xmlns='abc' a   ='3'\rxmlns:foo='bar'  b=''  /></root>";
         AsyncReaderWrapper reader = new AsyncReaderWrapper(sr, chunkSize, XML);
 
         // should start with START_DOCUMENT, but for now skip
@@ -86,6 +87,7 @@ public class TestElementParsing extends AsyncTestBase
         assertEquals("leaf", sr.getLocalName());
         assertEquals("abc", sr.getNamespaceURI());
         assertEquals(2, sr.getAttributeCount());
+        assertEquals(2, sr.getNamespaceCount());
 
         assertEquals("a", sr.getAttributeLocalName(0));
         assertEquals("", sr.getAttributeNamespace(0));
@@ -93,6 +95,11 @@ public class TestElementParsing extends AsyncTestBase
         assertEquals("b", sr.getAttributeLocalName(1));
         assertEquals("", sr.getAttributeNamespace(1));
         assertEquals("", sr.getAttributeValue(1));
+
+        assertEquals("", sr.getNamespacePrefix(0));
+        assertEquals("abc", sr.getNamespaceURI(0));
+        assertEquals("foo", sr.getNamespacePrefix(1));
+        assertEquals("bar", sr.getNamespaceURI(1));
         
         assertTokenType(END_ELEMENT, reader.nextToken());
         assertEquals("leaf", sr.getLocalName());

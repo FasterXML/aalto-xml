@@ -251,7 +251,17 @@ public abstract class AsyncByteScanner
 
     protected PName _elemAttrName;
 
+    /**
+     * Pointer for the next character of currently being parsed value
+     * within attribute value buffer
+     */
     protected int _elemAttrPtr;
+
+    /**
+     * Pointer for the next character of currently being parsed namespace
+     * URI for the current namespace declaration
+     */
+    protected int _elemNsPtr;
     
     /*
     /**********************************************************************
@@ -1198,6 +1208,7 @@ public abstract class AsyncByteScanner
         _tokenName = elemName;
         _currElem = new ElementScope(elemName, _currElem);
         _attrCount = 0;
+        _currNsCount = 0;
         _elemAttrPtr = 0;
         _state = STATE_SE_SPACE_OR_END;
     }
@@ -1228,7 +1239,8 @@ public abstract class AsyncByteScanner
         if (nsDecl) {
             _state = STATE_SE_ATTR_VALUE_NSDECL;
             // Ns decls use name buffer transiently
-            _elemAttrPtr = 0;
+            _elemNsPtr = 0;
+            ++_currNsCount;
         } else {
             _state = STATE_SE_ATTR_VALUE_NORMAL;
             // Regular attributes are appended, shouldn't reset ptr
