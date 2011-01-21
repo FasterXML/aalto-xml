@@ -114,11 +114,9 @@ public abstract class AsyncByteScanner
     final static int STATE_SE_ATTR_VALUE_NORMAL = 7;
     final static int STATE_SE_ATTR_VALUE_NSDECL = 8;
     final static int STATE_SE_SEEN_SLASH = 9;
-    final static int STATE_SE_ENTITY = 10;
 
     // For END_ELEMENT, default means we are parsing name
     final static int STATE_EE_NEED_GT = 1;
-
 
     final static int STATE_ENT_SEEN_HASH = 1; // seen &#
     final static int STATE_ENT_SEEN_HASHX = 2; // seen &#x
@@ -140,9 +138,14 @@ public abstract class AsyncByteScanner
     final static int PENDING_STATE_COMMENT_HYPHEN1 = -3;
     final static int PENDING_STATE_COMMENT_HYPHEN2 = -4;
 
-    final static int PENDING_STATE_CDATA_BRACKET1 = -3;
-    final static int PENDING_STATE_CDATA_BRACKET2 = -4;    
+    final static int PENDING_STATE_CDATA_BRACKET1 = -5;
+    final static int PENDING_STATE_CDATA_BRACKET2 = -6;
 
+    // partially handled entities within attribute/ns values use pending state as well
+    final static int PENDING_STATE_ATTR_VALUE_AMP = -7;
+    final static int PENDING_STATE_ATTR_VALUE_AMPHASH = -8;
+    final static int PENDING_STATE_ATTR_VALUE_ENTITY_NAME = -9;
+    
     /*
     /**********************************************************************
     /* Input buffer handling

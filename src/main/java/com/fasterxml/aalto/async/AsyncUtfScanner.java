@@ -515,12 +515,33 @@ public class AsyncUtfScanner
     /**
      * Method called to handle entity encountered inside
      * attribute value.
+     * 
+     * @return Value of expanded character entity, if processed (which must be
+     *    1 or above); 0 for general entity, or -1 for "not enough input"
      */
     protected int handleEntityInAttributeValue()
         throws XMLStreamException
     {
-        if (true) throw new UnsupportedOperationException();
-        // !!! @TODO
+        if (_inputPtr >= _inputEnd) {
+            _pendingInput = PENDING_STATE_ATTR_VALUE_AMP;
+            return -1;
+        }
+        byte b = _inputBuffer[_inputPtr++];
+        if (b == BYTE_HASH) { // numeric character entity
+            _pendingInput = PENDING_STATE_ATTR_VALUE_AMPHASH;
+            // !!! TBI
+            if (true) throw new UnsupportedOperationException();
+        }
+        PName entityName = parseNewEntityName(b);
+        if (entityName == null) {
+            _pendingInput = PENDING_STATE_ATTR_VALUE_ENTITY_NAME;
+            return -1;
+        }
+        int ch = decodeGeneralEntity(entityName);
+        if (ch != 0) {
+            return ch;
+        }
+        _tokenName = entityName;
         return 0;
     }
     
@@ -780,21 +801,17 @@ public class AsyncUtfScanner
     protected boolean handleAttrValue()
         throws XMLStreamException
     {
+        // First; any pending input?
+        if (_pendingInput != 0) {
+            if (!handleAttrValuePending()) {
+                return false;
+            }
+            _pendingInput = 0;
+        }
+
         char[] attrBuffer = _attrCollector.continueValue();
         final int[] TYPES = _charTypes.ATTR_CHARS;
         final int quoteChar = (int) _elemAttrQuote;
-
-        // First; any pending input?
-        if (_pendingInput != 0) {
-            if (!handlePartialCR()) {
-                return false;
-            }
-            if (_elemAttrPtr >= attrBuffer.length) {
-                attrBuffer = _attrCollector.valueBufferFull();
-            }
-            // All lfs get converted to spaces, in attribute values
-            attrBuffer[_elemAttrPtr++] = ' ';
-        }
         
         value_loop:
         while (true) {
@@ -888,9 +905,10 @@ public class AsyncUtfScanner
                 throwUnexpectedChar(c, "'<' not allowed in attribute value");
             case XmlCharTypes.CT_AMP:
                 c = handleEntityInAttributeValue();
-                /* !!! TODO: may be blocking to get rest of entity name?
-                 */
-                if (c == 0) { // general entity; should never happen
+                if (c <= 0) { // general entity; should never happen
+                    if (c < 0) { // end-of-input
+                        return false;
+                    }
                     reportUnexpandedEntityInAttr(_elemAttrName, false);
                 }
                 // Ok; does it need a surrogate though? (over 16 bits)
@@ -918,6 +936,73 @@ public class AsyncUtfScanner
         return true; // yeah, we're done!
     }
 
+    /**
+     * 
+     * @return True if the partial information was succesfully handled;
+     *    false if not
+     */
+    private final boolean handleAttrValuePending() throws XMLStreamException
+    {
+        if (_pendingInput == PENDING_STATE_CR) {
+            if (!handlePartialCR()) {
+                return false;
+            }
+            char[] attrBuffer = _attrCollector.continueValue();
+            if (_elemAttrPtr >= attrBuffer.length) {
+                attrBuffer = _attrCollector.valueBufferFull();
+            }
+            // All lfs get converted to spaces, in attribute values
+            attrBuffer[_elemAttrPtr++] = ' ';
+            return true;
+        }
+        // otherwise must be related to entity handling within attribute value
+        if (_inputPtr >= _inputEnd) {
+            return false;
+        }
+        PName entityName;
+        if (_pendingInput == PENDING_STATE_ATTR_VALUE_AMP) {
+            byte b = _inputBuffer[_inputPtr++];
+            if (b == BYTE_HASH) { // numeric character entity
+                _pendingInput = PENDING_STATE_ATTR_VALUE_AMPHASH;
+                // !!! TBI
+                if (true) throw new UnsupportedOperationException();
+            }
+            entityName = parseNewEntityName(b);
+        } else if (_pendingInput == PENDING_STATE_ATTR_VALUE_AMPHASH) {
+            // !!! TBI
+            if (true) throw new UnsupportedOperationException();
+        } else if (_pendingInput == PENDING_STATE_ATTR_VALUE_ENTITY_NAME) {
+            entityName = parseEntityName();
+        } else {
+            throwInternal();
+            entityName = null; // never gets here, but compiler complains if we don't do it
+        }
+        if (entityName == null) {
+            _pendingInput = PENDING_STATE_ATTR_VALUE_ENTITY_NAME;
+            return false;
+        }        
+        int c = decodeGeneralEntity(entityName);
+        if (c == 0) { // can't have general entities within attribute values
+            _tokenName = entityName;
+            reportUnexpandedEntityInAttr(_elemAttrName, false);
+        }
+        char[] attrBuffer = _attrCollector.continueValue();
+        // Ok; does it need a surrogate though? (over 16 bits)
+        if ((c >> 16) != 0) {
+            c -= 0x10000;
+            if (_elemAttrPtr >= attrBuffer.length) {
+                attrBuffer = _attrCollector.valueBufferFull();
+            }
+            attrBuffer[_elemAttrPtr++] = (char) (0xD800 | (c >> 10));
+            c = 0xDC00 | (c & 0x3FF);
+        }
+        if (_elemAttrPtr >= attrBuffer.length) {
+            attrBuffer = _attrCollector.valueBufferFull();
+        }
+        attrBuffer[_elemAttrPtr++] = (char) c;
+        return true; // done it!
+    }
+    
     protected boolean handleNsDecl()
         throws XMLStreamException
     {
@@ -1030,9 +1115,10 @@ public class AsyncUtfScanner
                 throwUnexpectedChar(c, "'<' not allowed in attribute value");
             case XmlCharTypes.CT_AMP:
                 c = handleEntityInAttributeValue();
-                /* !!! TODO: may be blocking to get rest of entity name?
-                 */
-                if (c == 0) { // general entity; should never happen
+                if (c <= 0) { // general entity; should never happen
+                    if (c < 0) { // end-of-input
+                        return false;
+                    }
                     reportUnexpandedEntityInAttr(_elemAttrName, true);
                 }
                 // Ok; does it need a surrogate though? (over 16 bits)

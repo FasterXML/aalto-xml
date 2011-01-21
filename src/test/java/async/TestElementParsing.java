@@ -81,7 +81,7 @@ public class TestElementParsing extends AsyncTestBase
         assertEquals("1&2", sr.getAttributeValue(0));
         assertEquals("attr", sr.getAttributeLocalName(0));
         assertEquals("", sr.getAttributeNamespace(0));
-        assertTokenType(START_ELEMENT, t);
+        assertTokenType(START_ELEMENT, reader.nextToken());
         assertEquals("leaf", sr.getLocalName());
         assertEquals("abc", sr.getNamespaceURI());
         assertEquals(2, sr.getAttributeCount());
