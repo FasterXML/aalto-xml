@@ -1,10 +1,7 @@
-# Maven stuff
+# Skip maven 'target' directory
 target
 
-# Eclipse
+# plus eclipse crap
 .classpath
 .project
 .settings
-
-# Legacy ant
-build
