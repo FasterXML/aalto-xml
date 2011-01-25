@@ -865,6 +865,7 @@ public abstract class AsyncByteScanner
             return parseCDataContents();
 
         case STATE_CDATA_CONTENT_BRACKET: // seen one ']' in content
+            if (true) throw new UnsupportedOperationException();
 //            if (b == )
         }
         return throwInternal();
