@@ -7,5 +7,6 @@ Two major design goals for Aalto are:
 * Ultra-high performance parsing by making the Common Case Fast (similar to original RISC manifesto). This may mean limiting functionality, but never compromising correctness. XML 1.0 compliancy is not sacrificed for speed.
 * Allowing non-block, asynchronous parsing: it should be possible to "feed" more input and incrementally get more XML events out, without forcing the current thread to block on I/O read operation. 
 
-
 Aalto is licensed under Apache License 2.0 (AL 2.0)
+
+Aalto home page can found at: http://wiki.fasterxml.com/AaltoHome
