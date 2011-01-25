@@ -91,8 +91,6 @@ public abstract class AsyncByteScanner
     final static int STATE_CDATA_CDA = 4; // "<![CDA"
     final static int STATE_CDATA_CDAT = 5; // "<![CDAT"
     final static int STATE_CDATA_CDATA = 6; // "<![CDATA"
-    final static int STATE_CDATA_CONTENT_BRACKET = 7; // contents and single ']'
-    final static int STATE_CDATA_CONTENT_BRACKET2 = 8; // contents and ']]'
     
     // For PIs, default means that '<?' has been seen, nothing else
 
@@ -861,12 +859,7 @@ public abstract class AsyncByteScanner
             if (_inputPtr >= _inputEnd) {
                 return EVENT_INCOMPLETE;
             }
-            b = _inputBuffer[_inputPtr++];
             return parseCDataContents();
-
-        case STATE_CDATA_CONTENT_BRACKET: // seen one ']' in content
-            if (true) throw new UnsupportedOperationException();
-//            if (b == )
         }
         return throwInternal();
     }

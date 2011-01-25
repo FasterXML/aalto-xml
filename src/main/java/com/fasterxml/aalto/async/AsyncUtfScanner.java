@@ -1403,7 +1403,7 @@ public class AsyncUtfScanner
         main_loop:
         while (true) {
             int c;
-            // Then the tight ascii non-funny-char loop:
+            // Then the tight ASCII non-funny-char loop:
             ascii_loop:
             while (true) {
                 if (_inputPtr >= _inputEnd) {
@@ -1481,6 +1481,7 @@ public class AsyncUtfScanner
                             break main_loop;
                         }
                         if (_inputBuffer[_inputPtr] == BYTE_GT) {
+                            ++_inputPtr;
                             _textBuilder.setCurrentLength(outPtr);
                             _state = STATE_DEFAULT;
                             _nextEvent = EVENT_INCOMPLETE;
