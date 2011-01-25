@@ -57,6 +57,8 @@ public class TestCDataParsing extends AsyncTestBase
         assertEquals("root", sr.getLocalName());
         assertEquals("", sr.getNamespaceURI());
 
+        assertTokenType(XMLStreamConstants.END_DOCUMENT, reader.nextToken());
+        
         assertFalse(sr.hasNext());
     }
     
