@@ -25,7 +25,7 @@ public class TestCommentParsing extends AsyncTestBase
     
     private void _testComments(String spaces, int chunkSize) throws Exception
     {
-        String XML = spaces+"<!--comments&s\r\ntuf-fy>--><root><!----></root><!--\nHi - ho!->-->";
+        String XML = spaces+"<!--comments&s\r\ntuf-fy>--><root><!----></root><!--\nHi - "+UNICODE_SEGMENT+" - ho->-->";
         AsyncXMLInputFactory f = new InputFactoryImpl();
         AsyncXMLStreamReader sr = f.createAsyncXMLStreamReader();
         AsyncReaderWrapper reader = new AsyncReaderWrapper(sr, chunkSize, XML);
@@ -39,7 +39,7 @@ public class TestCommentParsing extends AsyncTestBase
         assertTokenType(END_ELEMENT, reader.nextToken());
         assertEquals("root", sr.getLocalName());
         assertTokenType(COMMENT, reader.nextToken());
-        assertEquals("\nHi - ho!->", sr.getText());
+        assertEquals("\nHi - "+UNICODE_SEGMENT+" - ho->", sr.getText());
         assertTokenType(END_DOCUMENT, reader.nextToken());
     }
     

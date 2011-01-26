@@ -32,7 +32,7 @@ public class TestCDataParsing extends AsyncTestBase
         AsyncXMLInputFactory f = new InputFactoryImpl();
         AsyncXMLStreamReader sr = f.createAsyncXMLStreamReader();
         AsyncReaderWrapper reader = new AsyncReaderWrapper(sr, chunkSize, 
-            SPC+"<root><![CDATA[cdata\r\n&] ]] stuff]]>...<![CDATA[this\r\r and that!]]></root>");
+            SPC+"<root><![CDATA[cdata\r\n&] ]] stuff]]>...<![CDATA[this\r\r and Unicode: "+UNICODE_SEGMENT+"!]]></root>");
 
         int t = _verifyStart(reader);
         assertTokenType(START_ELEMENT, t);
@@ -51,7 +51,7 @@ public class TestCDataParsing extends AsyncTestBase
 
         assertTokenType(XMLStreamConstants.CDATA, reader.currentToken());
         str = collectAsyncText(reader, CDATA);
-        assertEquals("this\n\n and that!", str);
+        assertEquals("this\n\n and Unicode: "+UNICODE_SEGMENT+"!", str);
         
         assertTokenType(XMLStreamConstants.END_ELEMENT, reader.currentToken());
         assertEquals("root", sr.getLocalName());

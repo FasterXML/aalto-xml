@@ -10,6 +10,11 @@ import com.fasterxml.aalto.AsyncXMLStreamReader;
 abstract class AsyncTestBase extends base.BaseTestCase
 {
     final static String SPACES = "                ";
+
+    protected final static char UNICODE_2BYTES = (char) 167; // law symbol
+    protected final static char UNICODE_3BYTES = (char) 0x4567;
+
+    protected final static String UNICODE_SEGMENT = "["+UNICODE_2BYTES+"/"+UNICODE_3BYTES+"]";
     
     public static String spaces(int count) 
     {

@@ -93,11 +93,8 @@ public final class InputCharTypes
         return sLatin1CharTypes;
     }
 
-    public static void fillInUtf8Chars(int[] textChars,
-                                       int[] attrChars,
-                                       int[] nameChars,
-                                       int[] dtdChars,
-                                       int[] otherChars)
+    public static void fillInUtf8Chars(int[] textChars, int[] attrChars, int[] nameChars,
+            int[] dtdChars, int[] otherChars)
     {
         // text chars
         fillIn8BitTextRange(textChars);
@@ -119,7 +116,8 @@ public final class InputCharTypes
         fillInMultiByteTextRange(dtdChars);
 
         // ... lotsa matching to do here
-        otherChars['['] = CT_LBRACKET;
+        // 25-Jan-2011, tatu: Can't remember why LBRACKET would be needed:
+//        otherChars['['] = CT_LBRACKET;
         otherChars[']'] = CT_RBRACKET;
         otherChars['>'] = CT_GT;
 

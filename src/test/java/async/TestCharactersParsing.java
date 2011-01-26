@@ -41,7 +41,7 @@ public class TestCharactersParsing extends AsyncTestBase
     {
         AsyncXMLInputFactory f = new InputFactoryImpl();
         AsyncXMLStreamReader sr = f.createAsyncXMLStreamReader();
-        final String XML = SPC+"<root>\rFirst\r\nSecond\nThird</root>";
+        final String XML = SPC+"<root>\rFirst\r\nSecond\nThird: "+UNICODE_SEGMENT+"</root>";
         AsyncReaderWrapper reader = new AsyncReaderWrapper(sr, chunkSize, XML);
 
         assertTokenType(START_ELEMENT, _verifyStart(reader));
@@ -50,7 +50,7 @@ public class TestCharactersParsing extends AsyncTestBase
 
         assertTokenType(CHARACTERS, reader.nextToken());
         String str = collectAsyncText(reader, CHARACTERS); // moves to end-element
-        assertEquals("\nFirst\nSecond\nThird", str);
+        assertEquals("\nFirst\nSecond\nThird: "+UNICODE_SEGMENT, str);
 
         assertTokenType(END_ELEMENT, reader.currentToken());
         assertEquals("root", sr.getLocalName());

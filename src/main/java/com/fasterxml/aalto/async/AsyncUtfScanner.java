@@ -1292,12 +1292,36 @@ public class AsyncUtfScanner
                 markLF();
                 break;
             case XmlCharTypes.CT_MULTIBYTE_2:
+                if (_inputPtr >= _inputEnd) {
+                    _pendingInput = c;
+                    break main_loop;
+                }
                 c = decodeUtf8_2(c);
                 break;
             case XmlCharTypes.CT_MULTIBYTE_3:
+                if ((_inputEnd - _inputPtr) < 2) {
+                    if (_inputEnd > _inputPtr) { // 2 bytes available
+                        int d = (int) _inputBuffer[_inputPtr++] & 0xFF;
+                        c |= (d << 8);
+                    }
+                    _pendingInput = c;
+                    break main_loop;
+                }
                 c = decodeUtf8_3(c);
                 break;
             case XmlCharTypes.CT_MULTIBYTE_4:
+                if ((_inputEnd - _inputPtr) < 3) {
+                    if (_inputEnd > _inputPtr) { // at least 2 bytes?
+                        int d = (int) _inputBuffer[_inputPtr++] & 0xFF;
+                        c |= (d << 8);
+                        if (_inputEnd > _inputPtr) { // 3 bytes?
+                            d = (int) _inputBuffer[_inputPtr++] & 0xFF;
+                            c |= (d << 16);
+                        }
+                    }
+                    _pendingInput = c;
+                    break main_loop;
+                }
                 c = decodeUtf8_4(c);
                 // Let's add first part right away:
                 outputBuffer[outPtr++] = (char) (0xD800 | (c >> 10));
@@ -1449,12 +1473,36 @@ public class AsyncUtfScanner
                 markLF();
                 break;
             case XmlCharTypes.CT_MULTIBYTE_2:
+                if (_inputPtr >= _inputEnd) {
+                    _pendingInput = c;
+                    break main_loop;
+                }
                 c = decodeUtf8_2(c);
                 break;
             case XmlCharTypes.CT_MULTIBYTE_3:
+                if ((_inputEnd - _inputPtr) < 2) {
+                    if (_inputEnd > _inputPtr) { // 2 bytes available
+                        int d = (int) _inputBuffer[_inputPtr++] & 0xFF;
+                        c |= (d << 8);
+                    }
+                    _pendingInput = c;
+                    break main_loop;
+                }
                 c = decodeUtf8_3(c);
                 break;
             case XmlCharTypes.CT_MULTIBYTE_4:
+                if ((_inputEnd - _inputPtr) < 3) {
+                    if (_inputEnd > _inputPtr) { // at least 2 bytes?
+                        int d = (int) _inputBuffer[_inputPtr++] & 0xFF;
+                        c |= (d << 8);
+                        if (_inputEnd > _inputPtr) { // 3 bytes?
+                            d = (int) _inputBuffer[_inputPtr++] & 0xFF;
+                            c |= (d << 16);
+                        }
+                    }
+                    _pendingInput = c;
+                    break main_loop;
+                }
                 c = decodeUtf8_4(c);
                 // Let's add first part right away:
                 outputBuffer[outPtr++] = (char) (0xD800 | (c >> 10));
@@ -1633,12 +1681,36 @@ public class AsyncUtfScanner
                 markLF();
                 break;
             case XmlCharTypes.CT_MULTIBYTE_2:
+                if (_inputPtr >= _inputEnd) {
+                    _pendingInput = c;
+                    break main_loop;
+                }
                 c = decodeUtf8_2(c);
                 break;
             case XmlCharTypes.CT_MULTIBYTE_3:
+                if ((_inputEnd - _inputPtr) < 2) {
+                    if (_inputEnd > _inputPtr) { // 2 bytes available
+                        int d = (int) _inputBuffer[_inputPtr++] & 0xFF;
+                        c |= (d << 8);
+                    }
+                    _pendingInput = c;
+                    break main_loop;
+                }
                 c = decodeUtf8_3(c);
                 break;
             case XmlCharTypes.CT_MULTIBYTE_4:
+                if ((_inputEnd - _inputPtr) < 3) {
+                    if (_inputEnd > _inputPtr) { // at least 2 bytes?
+                        int d = (int) _inputBuffer[_inputPtr++] & 0xFF;
+                        c |= (d << 8);
+                        if (_inputEnd > _inputPtr) { // 3 bytes?
+                            d = (int) _inputBuffer[_inputPtr++] & 0xFF;
+                            c |= (d << 16);
+                        }
+                    }
+                    _pendingInput = c;
+                    break main_loop;
+                }
                 c = decodeUtf8_4(c);
                 // Let's add first part right away:
                 outputBuffer[outPtr++] = (char) (0xD800 | (c >> 10));
