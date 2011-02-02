@@ -86,7 +86,14 @@ public abstract class XmlScanner
     protected final static int INT_EQ = (int) '=';
 
     protected final static int INT_A = (int) 'A';
+    protected final static int INT_F = (int) 'F';
 
+    protected final static int INT_a = (int) 'a';
+    protected final static int INT_f = (int) 'f';
+
+    protected final static int INT_0 = (int) '0';
+    protected final static int INT_9 = (int) '9';
+    
     // // // Config for bound PName cache:
 
     /**
@@ -1268,9 +1275,9 @@ public abstract class XmlScanner
     }
 
     /*
-    ///////////////////////////////////////////////////
-    // Helper methods for sub-classes, input data
-    ///////////////////////////////////////////////////
+    /**********************************************************************
+    /* Helper methods for sub-classes, input data
+    /**********************************************************************
      */
 
     /**
@@ -1285,14 +1292,39 @@ public abstract class XmlScanner
         }
     }
 
-    protected final void loadMoreGuaranteed(int tt)
-        throws XMLStreamException
+    protected final void loadMoreGuaranteed(int tt) throws XMLStreamException
     {
         if (!loadMore()) {
             reportInputProblem("Unexpected end-of-input when trying to parse "+ErrorConsts.tokenTypeDesc(tt));
         }
     }
 
+    /*
+    /**********************************************************************
+    /* Helper methods for sub-classes, character validity checks
+    /**********************************************************************
+     */
+
+    protected final void verifyXmlChar(int value) throws XMLStreamException
+    {
+        // Ok, and then need to check result is a valid XML content char:
+        if (value >= 0xD800) { // note: checked for overflow earlier
+            if (value < 0xE000) { // no surrogates via entity expansion
+                reportInvalidXmlChar(value);
+            }
+            if (value == 0xFFFE || value == 0xFFFF) {
+                reportInvalidXmlChar(value);
+            }
+        } else if (value < 32) {
+            // XML 1.1 allows most other chars; 1.0 does not:
+            if (value != INT_LF && value != INT_CR && value != INT_TAB) {
+                if (!_xml11 || value == 0) {
+                    reportInvalidXmlChar(value);
+                }
+            }
+        }
+    }
+    
     /*
     /**********************************************************************
     /* Helper methods for sub-classes, error reporting

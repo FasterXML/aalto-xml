@@ -60,7 +60,8 @@ public abstract class AsyncByteScanner
     final static int STATE_TREE_SEEN_AMP = 2; // "&" seen
     final static int STATE_TREE_SEEN_EXCL = 3; // "<!" seen
     final static int STATE_TREE_SEEN_SLASH = 4; // "</" seen
-    final static int STATE_TREE_SEEN_ENTITY_START = 5; // "&" and part of name
+    final static int STATE_TREE_NUMERIC_ENTITY_START = 5; // "&#" and part of value
+    final static int STATE_TREE_NAMED_ENTITY_START = 6; // "&" and part of name
 
     // // // States within event types (STATE_DEFAULT is shared):
 
@@ -75,7 +76,7 @@ public abstract class AsyncByteScanner
     // just seen "&"
     final static int STATE_TEXT_AMP = 4;
     // just seen "&#"
-    final static int STATE_TEXT_AMP_AND_HASH = 5;
+//    final static int STATE_TEXT_AMP_AND_HASH = 5;
     // seen '&' and partial name:
     final static int STATE_TEXT_AMP_NAME = 6;
 
@@ -116,12 +117,6 @@ public abstract class AsyncByteScanner
     // For END_ELEMENT, default means we are parsing name
     final static int STATE_EE_NEED_GT = 1;
 
-    final static int STATE_ENT_SEEN_HASH = 1; // seen &#
-    final static int STATE_ENT_SEEN_HASHX = 2; // seen &#x
-    final static int STATE_ENT_IN_DEC_DIGIT = 3; // seen &# and 1 or more decimals
-    final static int STATE_ENT_IN_HEX_DIGIT = 4; // seen &#x and 1 or more hex digits
-    final static int STATE_ENT_IN_NAME = 5; // seen & and part of the name
-
     /*
     /**********************************************************************
     /* Markers to use for 'pending' character, if
@@ -143,6 +138,12 @@ public abstract class AsyncByteScanner
     final static int PENDING_STATE_ATTR_VALUE_AMP = -7;
     final static int PENDING_STATE_ATTR_VALUE_AMPHASH = -8;
     final static int PENDING_STATE_ATTR_VALUE_ENTITY_NAME = -9;
+
+    final static int PENDING_STATE_ENT_SEEN_HASH = 1; // seen &#
+    final static int PENDING_STATE_ENT_SEEN_HASH_X = 2; // seen &#x
+    final static int PENDING_STATE_ENT_IN_DEC_DIGIT = 3; // seen &# and 1 or more decimals
+    final static int PENDING_STATE_ENT_IN_HEX_DIGIT = 4; // seen &#x and 1 or more hex digits
+//    final static int PENDING_STATE_ENT_IN_NAME = 5; // seen & and part of the name
     
     /*
     /**********************************************************************
@@ -215,7 +216,7 @@ public abstract class AsyncByteScanner
     
     /*
     /**********************************************************************
-    /* Name parsing state
+    /* Name/entity parsing state
     /**********************************************************************
      */
 
@@ -235,6 +236,11 @@ public abstract class AsyncByteScanner
      */
     protected int _currQuadBytes = 0;
 
+    /**
+     * Entity value accumulated so far
+     */
+    protected int _entityValue = 0;
+    
     /*
     /**********************************************************************
     /* (Start) element parsing state
@@ -520,8 +526,12 @@ public abstract class AsyncByteScanner
                 }
             } else if (_state == STATE_TREE_SEEN_AMP) {
                 return handleEntityStartingToken();
-            } else if (_state == STATE_TREE_SEEN_ENTITY_START) {
-                return handleEntityStartingToken2();
+            } else if (_state == STATE_TREE_NAMED_ENTITY_START) {
+                return handleNamedEntityStartingToken();
+            } else if (_state == STATE_TREE_NUMERIC_ENTITY_START) {
+                return handleNumericEntityStartingToken();
+            } else {
+                throwInternal();
             }
                 
             if (_state == STATE_TREE_SEEN_EXCL) {
@@ -885,23 +895,22 @@ public abstract class AsyncByteScanner
     protected int handleEntityStartingToken()
         throws XMLStreamException
     {
+        _textBuilder.resetWithEmpty();
         byte b = _inputBuffer[_inputPtr++]; // we know one is available
         if (b == BYTE_HASH) { // numeric character entity
-            _nextEvent = CHARACTERS;
+            _textBuilder.resetWithEmpty();
+            _state = STATE_TREE_NUMERIC_ENTITY_START;
+            _pendingInput = PENDING_STATE_ENT_SEEN_HASH;
             if (_inputPtr >= _inputEnd) { // but no more content to parse yet
-                _textBuilder.resetWithEmpty();
-                _state = STATE_TEXT_AMP_AND_HASH;
                 return (_nextEvent = EVENT_INCOMPLETE);
             }
-            // !!! TBI
-            return handleNonCharEntity();
+            return handleNumericEntityStartingToken();
         }
         PName n = parseNewEntityName(b);
         // null if incomplete; non-null otherwise
         if (n == null) {
             // Not sure if it's a char entity or general one; so we don't yet know type
-            _textBuilder.resetWithEmpty();
-            _state = STATE_TREE_SEEN_ENTITY_START;
+            _state = STATE_TREE_NAMED_ENTITY_START;
             return (_nextEvent = EVENT_INCOMPLETE);
         }
         int ch = decodeGeneralEntity(n);
@@ -928,7 +937,7 @@ public abstract class AsyncByteScanner
      * @return
      * @throws XMLStreamException
      */
-    protected int handleEntityStartingToken2()
+    protected int handleNamedEntityStartingToken()
         throws XMLStreamException
     {
         PName n = parseEntityName();
@@ -958,12 +967,90 @@ public abstract class AsyncByteScanner
      * a character entity (or one of 4 pre-defined general entities that
      * act like character entities)
      */
-    protected int handleNonCharEntity()
+    protected int handleNumericEntityStartingToken()
         throws XMLStreamException
     {
-        if (true) throw new UnsupportedOperationException();
-        // !!! TBI
-        return 0;
+        byte b = _inputBuffer[_inputPtr++]; // we know one is available
+        if (_pendingInput == PENDING_STATE_ENT_SEEN_HASH) {
+            if (b == BYTE_x) { // 'x' marks hex
+                _pendingInput = PENDING_STATE_ENT_SEEN_HASH_X;
+            } else { // if not 'x', must be a digit
+                int ch = (int) b;
+                if (ch < INT_0 || ch > INT_9) { // invalid entity
+                    throwUnexpectedChar(decodeCharForError(b), " expected a digit (0 - 9) for character entity");
+                }
+                _entityValue = ch - INT_0;
+                _pendingInput = PENDING_STATE_ENT_IN_DEC_DIGIT;
+            }
+            if (_inputPtr >= _inputEnd) {
+                return _nextEvent; // incomplete
+            }
+            b = _inputBuffer[_inputPtr++];
+        }
+        if (_pendingInput == PENDING_STATE_ENT_SEEN_HASH_X) {
+            int ch = (int) b;
+            if (ch <= INT_9 && ch >= INT_0) {
+                _entityValue = ch - INT_0;
+            } else if (ch <= INT_F && ch >= INT_A) {
+                _entityValue = 10 + (ch - INT_A);
+            } else  if (ch <= INT_f && ch >= INT_a) {
+                _entityValue = 10 + (ch - INT_a);
+            } else {
+                throwUnexpectedChar(decodeCharForError(b), " expected a digit (0 - 9) for character entity");
+            }
+            _pendingInput = PENDING_STATE_ENT_IN_HEX_DIGIT;
+            if (_inputPtr >= _inputEnd) {
+                return _nextEvent; // incomplete
+            }
+            b = _inputBuffer[_inputPtr++];
+        }
+        // Ok: either hex or dec entity; handle...
+        boolean hex = (_pendingInput == PENDING_STATE_ENT_IN_HEX_DIGIT);
+        int value = _entityValue;
+        while (true) {
+            if (b == BYTE_SEMICOLON) {
+                _entityValue = value;
+                break;
+            }
+            if (hex) {
+                int ch = (int) b;
+                if (ch <= INT_9 && ch >= INT_0) {
+                    ch -= INT_0;
+                } else if (ch <= INT_F && ch >= INT_A) {
+                    ch = 10 + (ch - INT_A);
+                } else  if (ch <= INT_f && ch >= INT_a) {
+                    ch = 10 + (ch - INT_a);
+                } else {
+                    throwUnexpectedChar(decodeCharForError(b), " expected a digit (0 - 9) for character entity");
+                }
+                value = (value << 4) + ch;
+            } else {
+                int ch = ((int) b) - INT_0;
+                if (ch < 0 || ch > 9) { // invalid entity
+                    throwUnexpectedChar(decodeCharForError(b), " expected a digit (0 - 9) for character entity");
+                }
+                value = (value * 10) + ch;
+            }
+            if (value > MAX_UNICODE_CHAR) { // Overflow?
+                _entityValue = value;
+                reportEntityOverflow();
+            }
+            if (_inputPtr >= _inputEnd) {
+                _entityValue = value;
+                return _nextEvent; // incomplete
+            }
+            b = _inputBuffer[_inputPtr++];
+        }
+        // and now we have the full value
+        verifyAndAppendEntityCharacter(_entityValue);
+        _currToken = CHARACTERS;
+        if (_cfgLazyParsing) {
+            _tokenIncomplete = true;
+        } else {
+            finishCharacters();
+        }
+        _pendingInput = 0;
+        return _currToken;
     }
 
     /**
@@ -1868,27 +1955,21 @@ public abstract class AsyncByteScanner
     protected abstract PName addPName(int hash, int[] quads, int qlen, int lastQuadBytes)
         throws XMLStreamException;
 
-    /*
-    /**********************************************************************
-    /* methods from base class, error reporting
-    /**********************************************************************
+    /**
+     * Method called to verify validity of given character (from entity) and
+     * append it to the text buffer
      */
-
-    protected int decodeCharForError(byte b)
+    protected void verifyAndAppendEntityCharacter(int charFromEntity)
         throws XMLStreamException
     {
-        // !!! TBI
-        return (int) b;
-    }
-
-    private void checkPITargetName(PName targetName)
-        throws XMLStreamException
-    {
-        String ln = targetName.getLocalName();
-        if (ln.length() == 3 && ln.equalsIgnoreCase("xml") &&
-            !targetName.hasPrefix()) {
-            reportInputProblem(ErrorConsts.ERR_WF_PI_XML_TARGET);
+        verifyXmlChar(charFromEntity);
+        // Ok; does it need a surrogate though? (over 16 bits)
+        if ((charFromEntity >> 16) != 0) {
+            charFromEntity -= 0x10000;
+            _textBuilder.append((char) (0xD800 | (charFromEntity >> 10)));
+            charFromEntity = 0xDC00 | (charFromEntity & 0x3FF);
         }
+        _textBuilder.append((char) charFromEntity);
     }
 
     /*
@@ -1928,6 +2009,23 @@ public abstract class AsyncByteScanner
     /* Internal methods, error handling
     /**********************************************************************
      */
+
+    protected int decodeCharForError(byte b)
+        throws XMLStreamException
+    {
+        // !!! TBI
+        return (int) b;
+    }
+
+    private void checkPITargetName(PName targetName)
+        throws XMLStreamException
+    {
+        String ln = targetName.getLocalName();
+        if (ln.length() == 3 && ln.equalsIgnoreCase("xml") &&
+            !targetName.hasPrefix()) {
+            reportInputProblem(ErrorConsts.ERR_WF_PI_XML_TARGET);
+        }
+    }
 
     protected int throwInternal()
     {
