@@ -537,8 +537,6 @@ public abstract class AsyncByteScanner
                 return handleNamedEntityStartingToken();
             } else if (_state == STATE_TREE_NUMERIC_ENTITY_START) {
                 return handleNumericEntityStartingToken();
-            } else {
-                throwInternal();
             }
                 
             if (_state == STATE_TREE_SEEN_EXCL) {

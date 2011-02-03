@@ -25,6 +25,9 @@ public class TestElementParsing extends AsyncTestBase
             _testEmptyRoot(5, SPC+"<root />");
             _testEmptyRoot(5, SPC+"<root/>");
             _testEmptyRoot(5, SPC+"<root></root>");
+            _testEmptyRoot(8, SPC+"<root />");
+            _testEmptyRoot(8, SPC+"<root/>");
+            _testEmptyRoot(8, SPC+"<root></root>");
         }
     }
 
@@ -37,6 +40,8 @@ public class TestElementParsing extends AsyncTestBase
             _testElements(2, SPC);
             _testElements(3, SPC);
             _testElements(5, SPC);
+            _testElements(8, SPC);
+            _testElements(15, SPC);
         }
     }
     
