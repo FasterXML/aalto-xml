@@ -139,11 +139,18 @@ public abstract class AsyncByteScanner
     final static int PENDING_STATE_ATTR_VALUE_AMPHASH = -8;
     final static int PENDING_STATE_ATTR_VALUE_ENTITY_NAME = -9;
 
-    final static int PENDING_STATE_ENT_SEEN_HASH = 1; // seen &#
-    final static int PENDING_STATE_ENT_SEEN_HASH_X = 2; // seen &#x
-    final static int PENDING_STATE_ENT_IN_DEC_DIGIT = 3; // seen &# and 1 or more decimals
-    final static int PENDING_STATE_ENT_IN_HEX_DIGIT = 4; // seen &#x and 1 or more hex digits
-//    final static int PENDING_STATE_ENT_IN_NAME = 5; // seen & and part of the name
+    final static int PENDING_STATE_ENT_SEEN_HASH = -10; // seen &#
+    final static int PENDING_STATE_ENT_SEEN_HASH_X = -11; // seen &#x
+    final static int PENDING_STATE_ENT_IN_DEC_DIGIT = -12; // seen &# and 1 or more decimals
+    final static int PENDING_STATE_ENT_IN_HEX_DIGIT = -13; // seen &#x and 1 or more hex digits
+//    final static int PENDING_STATE_ENT_IN_NAME = -; // seen & and part of the name
+
+    final static int PENDING_STATE_TEXT_SEEN_AMP = -15; // seen &
+    final static int PENDING_STATE_TEXT_SEEN_AMP_HASH = -16; // seen &#
+    final static int PENDING_STATE_TEXT_SEEN_AMP_HASH_X = -17; // seen &#x
+    final static int PENDING_STATE_TEXT_IN_DEC_DIGIT = -18; // seen &# and 1 or more decimals
+    final static int PENDING_STATE_TEXT_IN_HEX_DIGIT = -19; // seen &#x and 1 or more hex digits
+//    final static int PENDING_STATE_TEXT_IN_NAME = -; // seen & and part of the name
     
     /*
     /**********************************************************************
@@ -902,7 +909,7 @@ public abstract class AsyncByteScanner
             _state = STATE_TREE_NUMERIC_ENTITY_START;
             _pendingInput = PENDING_STATE_ENT_SEEN_HASH;
             if (_inputPtr >= _inputEnd) { // but no more content to parse yet
-                return (_nextEvent = EVENT_INCOMPLETE);
+                return _nextEvent;
             }
             return handleNumericEntityStartingToken();
         }
@@ -911,7 +918,7 @@ public abstract class AsyncByteScanner
         if (n == null) {
             // Not sure if it's a char entity or general one; so we don't yet know type
             _state = STATE_TREE_NAMED_ENTITY_START;
-            return (_nextEvent = EVENT_INCOMPLETE);
+            return _nextEvent;
         }
         int ch = decodeGeneralEntity(n);
         if (ch == 0) { // not a character entity
@@ -996,7 +1003,7 @@ public abstract class AsyncByteScanner
             } else  if (ch <= INT_f && ch >= INT_a) {
                 _entityValue = 10 + (ch - INT_a);
             } else {
-                throwUnexpectedChar(decodeCharForError(b), " expected a digit (0 - 9) for character entity");
+                throwUnexpectedChar(decodeCharForError(b), " expected a hex digit (0-9a-fA-F) for character entity");
             }
             _pendingInput = PENDING_STATE_ENT_IN_HEX_DIGIT;
             if (_inputPtr >= _inputEnd) {
@@ -1021,7 +1028,7 @@ public abstract class AsyncByteScanner
                 } else  if (ch <= INT_f && ch >= INT_a) {
                     ch = 10 + (ch - INT_a);
                 } else {
-                    throwUnexpectedChar(decodeCharForError(b), " expected a digit (0 - 9) for character entity");
+                    throwUnexpectedChar(decodeCharForError(b), " expected a hex digit (0-9a-fA-F) for character entity");
                 }
                 value = (value << 4) + ch;
             } else {

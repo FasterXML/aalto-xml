@@ -370,6 +370,7 @@ public class AsyncUtfScanner
                 c = handleEntityInCharacters();
                 if (c == 0) { // not a succesfully expanded char entity
                     // _inputPtr set by entity expansion method
+                    --_inputPtr;
                     break main_loop;
                 }
                 // Ok; does it need a surrogate though? (over 16 bits)
@@ -425,7 +426,6 @@ public class AsyncUtfScanner
             // We know there's room for one more:
             outputBuffer[outPtr++] = (char) c;
         }
-
         _textBuilder.setCurrentLength(outPtr);
     }
 
@@ -448,22 +448,25 @@ public class AsyncUtfScanner
     /**
      * Method called to handle entity encountered inside
      * CHARACTERS segment, when trying to complete a non-coalescing text segment.
+     * 
+     * @return Expanded (character) entity, if positive number; 0 if incomplete
      */
-    protected int handleEntityInCharacters()
-        throws XMLStreamException
+    protected int handleEntityInCharacters() throws XMLStreamException
     {
         /* Thing that simplifies processing here is that handling
          * is pretty much optional: if there isn't enough data, we
          * just return 0 and are done with it.
          * 
-         * Also: we need at least 3 more characters for any character entiyt
+         * Also: we need at least 3 more characters for any character entity
          */
         int ptr = _inputPtr;
         if ((ptr  + 3) <= _inputEnd) {
             byte b = _inputBuffer[ptr++];
             if (b == BYTE_HASH) { // numeric character entity
-                // !!! TBI
-                if (true) throw new UnsupportedOperationException();
+                if (_inputBuffer[ptr] == BYTE_x) {
+                    return handleHexEntityInCharacters(ptr+1);
+                }
+                return handleDecEntityInCharacters(ptr);
             }
             // general entity; maybe one of pre-defined ones
             if (b == BYTE_a) { // amp or apos?
@@ -507,11 +510,64 @@ public class AsyncUtfScanner
                 }
             }
         }
-        // couldn't handle; push back ampersand, bail out
-        --_inputPtr;
+        // couldn't handle:
         return 0;
     }
 
+    protected int handleDecEntityInCharacters(int ptr) throws XMLStreamException
+    {
+        byte b = _inputBuffer[ptr++];
+        final int end = _inputEnd;
+        int value = 0;
+        do {
+            int ch = (int) b;
+            if (ch > INT_9 || ch < INT_0) {
+                throwUnexpectedChar(decodeCharForError(b), " expected a digit (0 - 9) for character entity");
+            }
+            value = (value * 10) + (ch - INT_0);
+            if (value > MAX_UNICODE_CHAR) { // Overflow?
+                reportEntityOverflow();
+            }
+            if (ptr >= end) {
+                return 0;
+            }
+            b = _inputBuffer[ptr++];
+        } while (b != BYTE_SEMICOLON);
+        _inputPtr = ptr;
+        verifyXmlChar(value);
+        return value;
+    }
+    
+    protected int handleHexEntityInCharacters(int ptr) throws XMLStreamException
+    {
+        byte b = _inputBuffer[ptr++];
+        final int end = _inputEnd;
+        int value = 0;
+        do {
+            int ch = (int) b;
+            if (ch <= INT_9 && ch >= INT_0) {
+                ch -= INT_0;
+            } else if (ch <= INT_F && ch >= INT_A) {
+                ch = 10 + (ch - INT_A);
+            } else  if (ch <= INT_f && ch >= INT_a) {
+                ch = 10 + (ch - INT_a);
+            } else {
+                throwUnexpectedChar(decodeCharForError(b), " expected a hex digit (0-9a-fA-F) for character entity");
+            }
+            value = (value << 4) + ch;
+            if (value > MAX_UNICODE_CHAR) { // Overflow?
+                reportEntityOverflow();
+            }
+            if (ptr >= end) {
+                return 0;
+            }
+            b = _inputBuffer[ptr++];
+        } while (b != BYTE_SEMICOLON);
+        _inputPtr = ptr;
+        verifyXmlChar(value);
+        return value;
+    }
+    
     /**
      * Method called to handle entity encountered inside
      * attribute value.

@@ -9,7 +9,6 @@ import com.fasterxml.aalto.stax.InputFactoryImpl;
 
 public class TestCharactersParsing extends AsyncTestBase
 {
-    /*
     public void testLinefeeds() throws Exception
     {
         // let's try with different chunking, addition (or not) of space
@@ -33,7 +32,6 @@ public class TestCharactersParsing extends AsyncTestBase
             _testTextWithEntities(8, spaces(spaces));
         }
     }
-    */
 
     public void testTextWithNumericEntities() throws Exception
     {
@@ -101,7 +99,7 @@ public class TestCharactersParsing extends AsyncTestBase
     {
         AsyncXMLInputFactory f = new InputFactoryImpl();
         AsyncXMLStreamReader sr = f.createAsyncXMLStreamReader();
-        final String XML = SPC+"<root>&#60;tag&#x3E;!</root>";
+        final String XML = SPC+"<root>&#60;tag&#x3e;!</root>";
         AsyncReaderWrapper reader = new AsyncReaderWrapper(sr, chunkSize, XML);
 
         // should start with START_DOCUMENT, but for now skip
