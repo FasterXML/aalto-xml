@@ -136,20 +136,23 @@ public abstract class AsyncByteScanner
 
     // partially handled entities within attribute/ns values use pending state as well
     final static int PENDING_STATE_ATTR_VALUE_AMP = -7;
-    final static int PENDING_STATE_ATTR_VALUE_AMPHASH = -8;
-    final static int PENDING_STATE_ATTR_VALUE_ENTITY_NAME = -9;
+    final static int PENDING_STATE_ATTR_VALUE_AMP_HASH = -8;
+    final static int PENDING_STATE_ATTR_VALUE_AMP_HASH_X = -9;
+    final static int PENDING_STATE_ATTR_VALUE_ENTITY_NAME = -10;
+    final static int PENDING_STATE_ATTR_VALUE_DEC_DIGIT = -11; // 
+    final static int PENDING_STATE_ATTR_VALUE_HEX_DIGIT = -12;
 
-    final static int PENDING_STATE_ENT_SEEN_HASH = -10; // seen &#
-    final static int PENDING_STATE_ENT_SEEN_HASH_X = -11; // seen &#x
-    final static int PENDING_STATE_ENT_IN_DEC_DIGIT = -12; // seen &# and 1 or more decimals
-    final static int PENDING_STATE_ENT_IN_HEX_DIGIT = -13; // seen &#x and 1 or more hex digits
+    final static int PENDING_STATE_ENT_SEEN_HASH = -13; // seen &#
+    final static int PENDING_STATE_ENT_SEEN_HASH_X = -14; // seen &#x
+    final static int PENDING_STATE_ENT_IN_DEC_DIGIT = -15; // seen &# and 1 or more decimals
+    final static int PENDING_STATE_ENT_IN_HEX_DIGIT = -16; // seen &#x and 1 or more hex digits
 //    final static int PENDING_STATE_ENT_IN_NAME = -; // seen & and part of the name
 
-    final static int PENDING_STATE_TEXT_SEEN_AMP = -15; // seen &
-    final static int PENDING_STATE_TEXT_SEEN_AMP_HASH = -16; // seen &#
-    final static int PENDING_STATE_TEXT_SEEN_AMP_HASH_X = -17; // seen &#x
-    final static int PENDING_STATE_TEXT_IN_DEC_DIGIT = -18; // seen &# and 1 or more decimals
-    final static int PENDING_STATE_TEXT_IN_HEX_DIGIT = -19; // seen &#x and 1 or more hex digits
+    final static int PENDING_STATE_TEXT_SEEN_AMP = -17; // seen &
+    final static int PENDING_STATE_TEXT_SEEN_AMP_HASH = -18; // seen &#
+    final static int PENDING_STATE_TEXT_SEEN_AMP_HASH_X = -19; // seen &#x
+    final static int PENDING_STATE_TEXT_IN_DEC_DIGIT = -20; // seen &# and 1 or more decimals
+    final static int PENDING_STATE_TEXT_IN_HEX_DIGIT = -21; // seen &#x and 1 or more hex digits
 //    final static int PENDING_STATE_TEXT_IN_NAME = -; // seen & and part of the name
     
     /*
@@ -1603,24 +1606,28 @@ public abstract class AsyncByteScanner
         throws XMLStreamException
     {
         // !!! TBI
+        if (true) throw new UnsupportedOperationException();
     }
 
     protected void skipComment()
         throws XMLStreamException
     {
         // !!! TBI
+        if (true) throw new UnsupportedOperationException();
     }
 
     protected void skipPI()
         throws XMLStreamException
     {
         // !!! TBI
+        if (true) throw new UnsupportedOperationException();
     }
 
     protected void skipSpace()
         throws XMLStreamException
     {
         // !!! TBI
+        if (true) throw new UnsupportedOperationException();
     }
 
     protected boolean loadMore()

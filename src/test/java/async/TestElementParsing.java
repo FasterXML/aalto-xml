@@ -44,6 +44,20 @@ public class TestElementParsing extends AsyncTestBase
             _testElements(15, SPC);
         }
     }
+
+    // Bit more stuff with attributes
+    public void testElementsWithAttrs() throws Exception
+    {
+        for (int spaces = 0; spaces < 3; ++spaces) {
+            String SPC = "  ".substring(0, spaces);
+            _testElementsWithAttrs(1, SPC);
+            _testElementsWithAttrs(2, SPC);
+            _testElementsWithAttrs(3, SPC);
+            _testElementsWithAttrs(5, SPC);
+            _testElementsWithAttrs(8, SPC);
+            _testElementsWithAttrs(15, SPC);
+        }
+    }
     
     /*
     /**********************************************************************
@@ -109,6 +123,30 @@ public class TestElementParsing extends AsyncTestBase
         assertTokenType(END_ELEMENT, reader.nextToken());
         assertEquals("leaf", sr.getLocalName());
         assertEquals("abc", sr.getNamespaceURI());
+        assertTokenType(END_ELEMENT, reader.nextToken());
+        assertEquals("root", sr.getLocalName());
+        assertEquals("", sr.getNamespaceURI());
+        assertTokenType(XMLStreamConstants.END_DOCUMENT, reader.nextToken());
+        assertFalse(sr.hasNext());
+    }
+
+    private void _testElementsWithAttrs(int chunkSize, String SPC) throws Exception
+    {
+        AsyncXMLInputFactory f = new InputFactoryImpl();
+        AsyncXMLStreamReader sr = f.createAsyncXMLStreamReader();
+//        final String XML = SPC+"<root attr='1&amp;2'><leaf xmlns='abc' a   ='3'\rb=''  /></root>";
+        final String XML = SPC+"<root attr='1&#62;2, 2&#x3C;1' />";
+        AsyncReaderWrapper reader = new AsyncReaderWrapper(sr, chunkSize, XML);
+
+        // should start with START_DOCUMENT, but for now skip
+        int t = this._verifyStart(reader);
+        assertTokenType(START_ELEMENT, t);
+        assertEquals("root", sr.getLocalName());
+        assertEquals("", sr.getNamespaceURI());
+        assertEquals(1, sr.getAttributeCount());
+        assertEquals("1>2, 2<1", sr.getAttributeValue(0));
+        assertEquals("attr", sr.getAttributeLocalName(0));
+        assertEquals("", sr.getAttributeNamespace(0));
         assertTokenType(END_ELEMENT, reader.nextToken());
         assertEquals("root", sr.getLocalName());
         assertEquals("", sr.getNamespaceURI());
