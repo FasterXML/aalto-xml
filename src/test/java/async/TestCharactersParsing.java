@@ -17,6 +17,7 @@ public class TestCharactersParsing extends AsyncTestBase
             _testLinefeeds(2, spaces(spaces));
             _testLinefeeds(3, spaces(spaces));
             _testLinefeeds(5, spaces(spaces));
+            _testLinefeeds(8, spaces(spaces));
         }
     }
 
@@ -28,9 +29,22 @@ public class TestCharactersParsing extends AsyncTestBase
             _testTextWithEntities(2, spaces(spaces));
             _testTextWithEntities(3, spaces(spaces));
             _testTextWithEntities(5, spaces(spaces));
+            _testTextWithEntities(8, spaces(spaces));
         }
     }
 
+    public void testTextWithNumericEntities() throws Exception
+    {
+        // let's try with different chunking, addition (or not) of space
+        for (int spaces = 0; spaces < 3; ++spaces) {
+            _testTextWithNumericEntities(1, spaces(spaces));
+            _testTextWithNumericEntities(2, spaces(spaces));
+            _testTextWithNumericEntities(3, spaces(spaces));
+            _testTextWithNumericEntities(5, spaces(spaces));
+            _testTextWithNumericEntities(8, spaces(spaces));
+        }
+    }
+    
     /*
     /**********************************************************************
     /* Secondary test methods
@@ -74,6 +88,28 @@ public class TestCharactersParsing extends AsyncTestBase
         assertTokenType(CHARACTERS, reader.nextToken());
         String str = collectAsyncText(reader, CHARACTERS); // moves to end-element
         assertEquals("a<b\nMOT", str);
+        assertTokenType(END_ELEMENT, reader.currentToken());
+        assertEquals("root", sr.getLocalName());
+        assertEquals("", sr.getNamespaceURI());
+        assertTokenType(XMLStreamConstants.END_DOCUMENT, reader.nextToken());
+        assertFalse(sr.hasNext());
+    }
+
+    private void _testTextWithNumericEntities(int chunkSize, String SPC) throws Exception
+    {
+        AsyncXMLInputFactory f = new InputFactoryImpl();
+        AsyncXMLStreamReader sr = f.createAsyncXMLStreamReader();
+        final String XML = SPC+"<root>&#60;tag&#x3e;!</root>";
+        AsyncReaderWrapper reader = new AsyncReaderWrapper(sr, chunkSize, XML);
+
+        // should start with START_DOCUMENT, but for now skip
+        int t = _verifyStart(reader);
+        assertTokenType(START_ELEMENT, t);
+        assertEquals("root", sr.getLocalName());
+        assertEquals("", sr.getNamespaceURI());
+        assertTokenType(CHARACTERS, reader.nextToken());
+        String str = collectAsyncText(reader, CHARACTERS); // moves to end-element
+        assertEquals("<tag>!", str);
         assertTokenType(END_ELEMENT, reader.currentToken());
         assertEquals("root", sr.getLocalName());
         assertEquals("", sr.getNamespaceURI());

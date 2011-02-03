@@ -370,6 +370,7 @@ public class AsyncUtfScanner
                 c = handleEntityInCharacters();
                 if (c == 0) { // not a succesfully expanded char entity
                     // _inputPtr set by entity expansion method
+                    --_inputPtr;
                     break main_loop;
                 }
                 // Ok; does it need a surrogate though? (over 16 bits)
@@ -425,7 +426,6 @@ public class AsyncUtfScanner
             // We know there's room for one more:
             outputBuffer[outPtr++] = (char) c;
         }
-
         _textBuilder.setCurrentLength(outPtr);
     }
 
@@ -448,22 +448,25 @@ public class AsyncUtfScanner
     /**
      * Method called to handle entity encountered inside
      * CHARACTERS segment, when trying to complete a non-coalescing text segment.
+     * 
+     * @return Expanded (character) entity, if positive number; 0 if incomplete
      */
-    protected int handleEntityInCharacters()
-        throws XMLStreamException
+    protected int handleEntityInCharacters() throws XMLStreamException
     {
         /* Thing that simplifies processing here is that handling
          * is pretty much optional: if there isn't enough data, we
          * just return 0 and are done with it.
          * 
-         * Also: we need at least 3 more characters for any character entiyt
+         * Also: we need at least 3 more characters for any character entity
          */
         int ptr = _inputPtr;
         if ((ptr  + 3) <= _inputEnd) {
             byte b = _inputBuffer[ptr++];
             if (b == BYTE_HASH) { // numeric character entity
-                // !!! TBI
-                if (true) throw new UnsupportedOperationException();
+                if (_inputBuffer[ptr] == BYTE_x) {
+                    return handleHexEntityInCharacters(ptr+1);
+                }
+                return handleDecEntityInCharacters(ptr);
             }
             // general entity; maybe one of pre-defined ones
             if (b == BYTE_a) { // amp or apos?
@@ -507,42 +510,62 @@ public class AsyncUtfScanner
                 }
             }
         }
-        // couldn't handle; push back ampersand, bail out
-        --_inputPtr;
+        // couldn't handle:
         return 0;
     }
 
-    /**
-     * Method called to handle entity encountered inside
-     * attribute value.
-     * 
-     * @return Value of expanded character entity, if processed (which must be
-     *    1 or above); 0 for general entity, or -1 for "not enough input"
-     */
-    protected int handleEntityInAttributeValue()
-        throws XMLStreamException
+    protected int handleDecEntityInCharacters(int ptr) throws XMLStreamException
     {
-        if (_inputPtr >= _inputEnd) {
-            _pendingInput = PENDING_STATE_ATTR_VALUE_AMP;
-            return -1;
-        }
-        byte b = _inputBuffer[_inputPtr++];
-        if (b == BYTE_HASH) { // numeric character entity
-            _pendingInput = PENDING_STATE_ATTR_VALUE_AMPHASH;
-            // !!! TBI
-            if (true) throw new UnsupportedOperationException();
-        }
-        PName entityName = parseNewEntityName(b);
-        if (entityName == null) {
-            _pendingInput = PENDING_STATE_ATTR_VALUE_ENTITY_NAME;
-            return -1;
-        }
-        int ch = decodeGeneralEntity(entityName);
-        if (ch != 0) {
-            return ch;
-        }
-        _tokenName = entityName;
-        return 0;
+        byte b = _inputBuffer[ptr++];
+        final int end = _inputEnd;
+        int value = 0;
+        do {
+            int ch = (int) b;
+            if (ch > INT_9 || ch < INT_0) {
+                throwUnexpectedChar(decodeCharForError(b), " expected a digit (0 - 9) for character entity");
+            }
+            value = (value * 10) + (ch - INT_0);
+            if (value > MAX_UNICODE_CHAR) { // Overflow?
+                reportEntityOverflow();
+            }
+            if (ptr >= end) {
+                return 0;
+            }
+            b = _inputBuffer[ptr++];
+        } while (b != BYTE_SEMICOLON);
+        _inputPtr = ptr;
+        verifyXmlChar(value);
+        return value;
+    }
+    
+    protected int handleHexEntityInCharacters(int ptr) throws XMLStreamException
+    {
+        byte b = _inputBuffer[ptr++];
+        final int end = _inputEnd;
+        int value = 0;
+        do {
+            int ch = (int) b;
+            if (ch <= INT_9 && ch >= INT_0) {
+                ch -= INT_0;
+            } else if (ch <= INT_F && ch >= INT_A) {
+                ch = 10 + (ch - INT_A);
+            } else  if (ch <= INT_f && ch >= INT_a) {
+                ch = 10 + (ch - INT_a);
+            } else {
+                throwUnexpectedChar(decodeCharForError(b), " expected a hex digit (0-9a-fA-F) for character entity");
+            }
+            value = (value << 4) + ch;
+            if (value > MAX_UNICODE_CHAR) { // Overflow?
+                reportEntityOverflow();
+            }
+            if (ptr >= end) {
+                return 0;
+            }
+            b = _inputBuffer[ptr++];
+        } while (b != BYTE_SEMICOLON);
+        _inputPtr = ptr;
+        verifyXmlChar(value);
+        return value;
     }
     
     /**
@@ -958,50 +981,215 @@ public class AsyncUtfScanner
         if (_inputPtr >= _inputEnd) {
             return false;
         }
-        PName entityName;
+        int ch;
+
         if (_pendingInput == PENDING_STATE_ATTR_VALUE_AMP) {
             byte b = _inputBuffer[_inputPtr++];
             if (b == BYTE_HASH) { // numeric character entity
-                _pendingInput = PENDING_STATE_ATTR_VALUE_AMPHASH;
-                // !!! TBI
-                if (true) throw new UnsupportedOperationException();
+                _pendingInput = PENDING_STATE_ATTR_VALUE_AMP_HASH;
+                if (_inputPtr >= _inputEnd) {
+                    return false;
+                }
+                if (_inputBuffer[_inputPtr] == BYTE_x) {
+                    _pendingInput = PENDING_STATE_ATTR_VALUE_AMP_HASH_X;
+                    ++_inputPtr;
+                    if (_inputPtr >= _inputEnd) {
+                        return false;
+                    }
+                    ch = handleHexEntityInAttribute(true);
+                } else {
+                    ch = handleDecEntityInAttribute(true);
+                }
+            } else {
+                PName entityName = parseNewEntityName(b);
+                if (entityName == null) {
+                    _pendingInput = PENDING_STATE_ATTR_VALUE_ENTITY_NAME;
+                    return false;
+                }   
+                ch = decodeGeneralEntity(entityName);
+                if (ch == 0) { // can't have general entities within attribute values
+                    _tokenName = entityName;
+                    reportUnexpandedEntityInAttr(_elemAttrName, false);
+                }
             }
-            entityName = parseNewEntityName(b);
-        } else if (_pendingInput == PENDING_STATE_ATTR_VALUE_AMPHASH) {
-            // !!! TBI
-            if (true) throw new UnsupportedOperationException();
+        } else if (_pendingInput == PENDING_STATE_ATTR_VALUE_AMP_HASH) {
+            if (_inputBuffer[_inputPtr] == BYTE_x) {
+                _pendingInput = PENDING_STATE_ATTR_VALUE_AMP_HASH_X;
+                ++_inputPtr;
+                if (_inputPtr >= _inputEnd) {
+                    return false;
+                }
+                ch = handleHexEntityInAttribute(true);
+            } else {
+                ch = handleDecEntityInAttribute(true);
+            }
+        } else if (_pendingInput == PENDING_STATE_ATTR_VALUE_AMP_HASH_X) {
+            ch = handleHexEntityInAttribute(true);
         } else if (_pendingInput == PENDING_STATE_ATTR_VALUE_ENTITY_NAME) {
-            entityName = parseEntityName();
+            PName entityName = parseEntityName();
+            if (entityName == null) {
+                return false;
+            }   
+            ch = decodeGeneralEntity(entityName);
+            if (ch == 0) { // can't have general entities within attribute values
+                _tokenName = entityName;
+                reportUnexpandedEntityInAttr(_elemAttrName, false);
+            }
+        } else if (_pendingInput == PENDING_STATE_ATTR_VALUE_DEC_DIGIT) {
+            ch = handleDecEntityInAttribute(false);
+        } else if (_pendingInput == PENDING_STATE_ATTR_VALUE_HEX_DIGIT) {
+            ch = handleHexEntityInAttribute(false);
         } else {
             throwInternal();
-            entityName = null; // never gets here, but compiler complains if we don't do it
+            ch = 0; // never gets here
         }
-        if (entityName == null) {
-            _pendingInput = PENDING_STATE_ATTR_VALUE_ENTITY_NAME;
+        if (ch == 0) { // wasn't resolved
             return false;
-        }        
-        int c = decodeGeneralEntity(entityName);
-        if (c == 0) { // can't have general entities within attribute values
-            _tokenName = entityName;
-            reportUnexpandedEntityInAttr(_elemAttrName, false);
         }
+
         char[] attrBuffer = _attrCollector.continueValue();
         // Ok; does it need a surrogate though? (over 16 bits)
-        if ((c >> 16) != 0) {
-            c -= 0x10000;
+        if ((ch >> 16) != 0) {
+            ch -= 0x10000;
             if (_elemAttrPtr >= attrBuffer.length) {
                 attrBuffer = _attrCollector.valueBufferFull();
             }
-            attrBuffer[_elemAttrPtr++] = (char) (0xD800 | (c >> 10));
-            c = 0xDC00 | (c & 0x3FF);
+            attrBuffer[_elemAttrPtr++] = (char) (0xD800 | (ch >> 10));
+            ch = 0xDC00 | (ch & 0x3FF);
         }
         if (_elemAttrPtr >= attrBuffer.length) {
             attrBuffer = _attrCollector.valueBufferFull();
         }
-        attrBuffer[_elemAttrPtr++] = (char) c;
+        attrBuffer[_elemAttrPtr++] = (char) ch;
         return true; // done it!
     }
 
+    private final int handleDecEntityInAttribute(boolean starting)
+        throws XMLStreamException
+    {
+        byte b = _inputBuffer[_inputPtr++]; // we know one is available
+        if (starting) {
+            int ch = (int) b;
+            if (ch < INT_0 || ch > INT_9) { // invalid entity
+                throwUnexpectedChar(decodeCharForError(b), " expected a digit (0 - 9) for character entity");
+            }
+            _pendingInput = PENDING_STATE_ATTR_VALUE_DEC_DIGIT;
+            _entityValue = ch - INT_0;
+            if (_inputPtr >= _inputEnd) {
+                return 0;
+            }
+            b = _inputBuffer[_inputPtr++];
+        }
+        while (b != BYTE_SEMICOLON) {
+            int ch = ((int) b) - INT_0;
+            if (ch < 0 || ch > 9) { // invalid entity
+                throwUnexpectedChar(decodeCharForError(b), " expected a digit (0 - 9) for character entity");
+            }
+            int value = (_entityValue * 10) + ch;
+            _entityValue = value;
+            if (value > MAX_UNICODE_CHAR) { // Overflow?
+                reportEntityOverflow();
+            }
+            if (_inputPtr >= _inputEnd) {
+                return 0;
+            }
+            b = _inputBuffer[_inputPtr++];
+        }
+        verifyXmlChar(_entityValue);
+        _pendingInput = 0;
+        return _entityValue;
+    }
+
+    private final int handleHexEntityInAttribute(boolean starting)
+        throws XMLStreamException
+    {
+        byte b = _inputBuffer[_inputPtr++]; // we know one is available
+        if (starting) {
+            int ch = (int) b;
+            if (ch < INT_0 || ch > INT_9) { // invalid entity
+                throwUnexpectedChar(decodeCharForError(b), " expected a hex digit (0-9a-fA-F) for character entity");
+            }
+            _pendingInput = PENDING_STATE_ATTR_VALUE_HEX_DIGIT;
+            _entityValue = ch - INT_0;
+            if (_inputPtr >= _inputEnd) {
+                return 0;
+            }
+            b = _inputBuffer[_inputPtr++];
+        }
+        while (b != BYTE_SEMICOLON) {
+            int ch = (int) b;
+            if (ch <= INT_9 && ch >= INT_0) {
+                ch -= INT_0;
+            } else if (ch <= INT_F && ch >= INT_A) {
+                ch = 10 + (ch - INT_A);
+            } else  if (ch <= INT_f && ch >= INT_a) {
+                ch = 10 + (ch - INT_a);
+            } else {
+                throwUnexpectedChar(decodeCharForError(b), " expected a hex digit (0-9a-fA-F) for character entity");
+            }
+            int value = (_entityValue << 4) + ch;
+            _entityValue = value;
+            if (value > MAX_UNICODE_CHAR) { // Overflow?
+                reportEntityOverflow();
+            }
+            if (_inputPtr >= _inputEnd) {
+                return 0;
+            }
+            b = _inputBuffer[_inputPtr++];
+        }
+        verifyXmlChar(_entityValue);
+        _pendingInput = 0;
+        return _entityValue;
+    }
+
+    /**
+     * Method called to handle entity encountered inside attribute value.
+     * 
+     * @return Value of expanded character entity, if processed (which must be
+     *    1 or above); 0 for general entity, or -1 for "not enough input"
+     */
+    protected int handleEntityInAttributeValue()
+        throws XMLStreamException
+    {
+        if (_inputPtr >= _inputEnd) {
+            _pendingInput = PENDING_STATE_ATTR_VALUE_AMP;
+            return -1;
+        }
+        byte b = _inputBuffer[_inputPtr++];
+        if (b == BYTE_HASH) { // numeric character entity
+            _pendingInput = PENDING_STATE_ATTR_VALUE_AMP_HASH;
+            if (_inputPtr >= _inputEnd) {
+                return -1;
+            }
+            int ch;
+            if (_inputBuffer[_inputPtr] == BYTE_x) {
+                _pendingInput = PENDING_STATE_ATTR_VALUE_AMP_HASH_X;
+                ++_inputPtr;
+                if (_inputPtr >= _inputEnd) {
+                    return -1;
+                }
+                ch = handleHexEntityInAttribute(true);
+            } else {
+                ch = handleDecEntityInAttribute(true);
+            }
+            if (ch == 0) {
+                return -1;
+            }
+            return ch;
+        }
+        PName entityName = parseNewEntityName(b);
+        if (entityName == null) {
+            _pendingInput = PENDING_STATE_ATTR_VALUE_ENTITY_NAME;
+            return -1;
+        }
+        int ch = decodeGeneralEntity(entityName);
+        if (ch != 0) {
+            return ch;
+        }
+        _tokenName = entityName;
+        return 0;
+    }
+    
     protected boolean handleNsDecl()
         throws XMLStreamException
     {
@@ -1174,47 +1362,88 @@ public class AsyncUtfScanner
         if (_inputPtr >= _inputEnd) {
             return false;
         }
-        PName entityName;
+
+        int ch;
+
         if (_pendingInput == PENDING_STATE_ATTR_VALUE_AMP) {
             byte b = _inputBuffer[_inputPtr++];
             if (b == BYTE_HASH) { // numeric character entity
-                _pendingInput = PENDING_STATE_ATTR_VALUE_AMPHASH;
-                // !!! TBI
-                if (true) throw new UnsupportedOperationException();
+                _pendingInput = PENDING_STATE_ATTR_VALUE_AMP_HASH;
+                if (_inputPtr >= _inputEnd) {
+                    return false;
+                }
+                if (_inputBuffer[_inputPtr] == BYTE_x) {
+                    _pendingInput = PENDING_STATE_ATTR_VALUE_AMP_HASH_X;
+                    ++_inputPtr;
+                    if (_inputPtr >= _inputEnd) {
+                        return false;
+                    }
+                    ch = handleHexEntityInAttribute(true);
+                } else {
+                    ch = handleDecEntityInAttribute(true);
+                }
+            } else {
+                PName entityName = parseNewEntityName(b);
+                if (entityName == null) {
+                    _pendingInput = PENDING_STATE_ATTR_VALUE_ENTITY_NAME;
+                    return false;
+                }   
+                ch = decodeGeneralEntity(entityName);
+                if (ch == 0) { // can't have general entities within attribute values
+                    _tokenName = entityName;
+                    reportUnexpandedEntityInAttr(_elemAttrName, false);
+                }
             }
-            entityName = parseNewEntityName(b);
-        } else if (_pendingInput == PENDING_STATE_ATTR_VALUE_AMPHASH) {
-            // !!! TBI
-            if (true) throw new UnsupportedOperationException();
+        } else if (_pendingInput == PENDING_STATE_ATTR_VALUE_AMP_HASH) {
+            if (_inputBuffer[_inputPtr] == BYTE_x) {
+                _pendingInput = PENDING_STATE_ATTR_VALUE_AMP_HASH_X;
+                ++_inputPtr;
+                if (_inputPtr >= _inputEnd) {
+                    return false;
+                }
+                ch = handleHexEntityInAttribute(true);
+            } else {
+                ch = handleDecEntityInAttribute(true);
+            }
+        } else if (_pendingInput == PENDING_STATE_ATTR_VALUE_AMP_HASH_X) {
+            ch = handleHexEntityInAttribute(true);
         } else if (_pendingInput == PENDING_STATE_ATTR_VALUE_ENTITY_NAME) {
-            entityName = parseEntityName();
+            PName entityName = parseEntityName();
+            if (entityName == null) {
+                return false;
+            }   
+            ch = decodeGeneralEntity(entityName);
+            if (ch == 0) { // can't have general entities within attribute values
+                _tokenName = entityName;
+                reportUnexpandedEntityInAttr(_elemAttrName, false);
+            }
+        } else if (_pendingInput == PENDING_STATE_ATTR_VALUE_DEC_DIGIT) {
+            ch = handleDecEntityInAttribute(false);
+        } else if (_pendingInput == PENDING_STATE_ATTR_VALUE_HEX_DIGIT) {
+            ch = handleHexEntityInAttribute(false);
         } else {
             throwInternal();
-            entityName = null; // never gets here, but compiler complains if we don't do it
+            ch = 0; // never gets here
         }
-        if (entityName == null) {
-            _pendingInput = PENDING_STATE_ATTR_VALUE_ENTITY_NAME;
+        if (ch == 0) { // wasn't resolved
             return false;
-        }        
-        int c = decodeGeneralEntity(entityName);
-        if (c == 0) { // can't have general entities within attribute values
-            _tokenName = entityName;
-            reportUnexpandedEntityInAttr(_elemAttrName, false);
         }
+        
+        
         char[] attrBuffer = _attrCollector.continueValue();
         // Ok; does it need a surrogate though? (over 16 bits)
-        if ((c >> 16) != 0) {
-            c -= 0x10000;
+        if ((ch >> 16) != 0) {
+            ch -= 0x10000;
             if (_elemNsPtr >= attrBuffer.length) {
                 _nameBuffer = attrBuffer = DataUtil.growArrayBy(attrBuffer, attrBuffer.length);
             }
-            attrBuffer[_elemNsPtr++] = (char) (0xD800 | (c >> 10));
-            c = 0xDC00 | (c & 0x3FF);
+            attrBuffer[_elemNsPtr++] = (char) (0xD800 | (ch >> 10));
+            ch = 0xDC00 | (ch & 0x3FF);
         }
         if (_elemNsPtr >= attrBuffer.length) {
             _nameBuffer = attrBuffer = DataUtil.growArrayBy(attrBuffer, attrBuffer.length);
         }
-        attrBuffer[_elemNsPtr++] = (char) c;
+        attrBuffer[_elemNsPtr++] = (char) ch;
         return true; // done it!
     }
     

@@ -555,23 +555,7 @@ public abstract class StreamScanner
                 b = _inputBuffer[_inputPtr++];
             }
         }
-
-        // Ok, and then need to check result is a valid XML content char:
-        if (value >= 0xD800) { // note: checked for overflow earlier
-            if (value < 0xE000) { // no surrogates via entity expansion
-                reportInvalidXmlChar(value);
-            }
-            if (value == 0xFFFE || value == 0xFFFF) {
-                reportInvalidXmlChar(value);
-            }
-        } else if (value < 32) {
-            // XML 1.1 allows most other chars; 1.0 does not:
-            if (value != INT_LF && value != INT_CR && value != INT_TAB) {
-                if (!_xml11 || value == 0) {
-                    reportInvalidXmlChar(value);
-                }
-            }
-        }
+        verifyXmlChar(value);
         return value;
     }
 
