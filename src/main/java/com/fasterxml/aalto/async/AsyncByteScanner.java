@@ -23,6 +23,7 @@ import com.fasterxml.aalto.AsyncXMLStreamReader;
 import com.fasterxml.aalto.impl.ErrorConsts;
 import com.fasterxml.aalto.in.*;
 import com.fasterxml.aalto.util.DataUtil;
+import com.fasterxml.aalto.util.XmlConsts;
 
 /**
  * This is the base class for asynchronous (non-blocking) XML
@@ -51,8 +52,9 @@ public abstract class AsyncByteScanner
     /**
      * State in which a less-than sign has been seen
      */
-    final static int STATE_PROLOG_SEEN_LT = 1; // "<" seen
-    final static int STATE_PROLOG_DECL = 2; // "<!" seen
+    final static int STATE_PROLOG_INITIAL = 1; // State before document when we may get xml declaration
+    final static int STATE_PROLOG_SEEN_LT = 2; // "<" seen after xml declaration
+    final static int STATE_PROLOG_DECL = 3; // "<!" seen after xml declaration
 
     // // // States for in-tree major state:
 
@@ -119,40 +121,79 @@ public abstract class AsyncByteScanner
 
     /*
     /**********************************************************************
+    /* Markers for sub-states (state within state)
+    /**********************************************************************
+     */
+    
+    // Parsing of possible XML declaration
+    final static int SUB_STATE_XMLDECL_LT = 1; // "<" at start of doc
+    final static int SUB_STATE_XMLDECL_LTQ = 2; // "<?" at start of doc
+    final static int SUB_STATE_XMLDECL_TARGET = 3; // "<?" at start of doc, part of name
+    final static int SUB_STATE_XMLDECL_AFTER_XML = 4; // "<?xml", need space
+    final static int SUB_STATE_XMLDECL_BEFORE_VERSION = 5; // "<?xml ", can have more spaces
+    final static int SUB_STATE_XMLDECL_VERSION = 6; // "<?xml ", part of "version"
+    final static int SUB_STATE_XMLDECL_AFTER_VERSION = 7; // "<?xml version", need space or '='
+    final static int SUB_STATE_XMLDECL_VERSION_EQ = 8; // "<?xml version=", need space or quote
+    final static int SUB_STATE_XMLDECL_VERSION_EQ_QUOTE = 9; // "<?xml version='", need version value
+    final static int SUB_STATE_XMLDECL_VERSION_VALUE = 10; // parsing version value
+    final static int SUB_STATE_XMLDECL_AFTER_VERSION_VALUE = 11; // version got; need space or '?'
+    final static int SUB_STATE_XMLDECL_BEFORE_ENCODING = 12; // version, value, space got, need '?' or 'e'
+    final static int SUB_STATE_XMLDECL_ENCODING = 13; // parsing "encoding"
+    final static int SUB_STATE_XMLDECL_AFTER_ENCODING = 14; // 'encoding' got, need space or '='
+    final static int SUB_STATE_XMLDECL_ENCODING_EQ = 15; // "encoding="
+    final static int SUB_STATE_XMLDECL_ENCODING_EQ_QUOTE = 16; // "encoding='"
+    final static int SUB_STATE_XMLDECL_ENCODING_VALUE = 17; // parsing encoding value
+    final static int SUB_STATE_XMLDECL_AFTER_ENCODING_VALUE = 18; // encoding+value gotten; need space or '?'
+    final static int SUB_STATE_XMLDECL_BEFORE_STANDALONE = 19; // after encoding+value+space; get '?' or 's'
+    final static int SUB_STATE_XMLDECL_STANDALONE = 20; // parsing "standalone"
+    final static int SUB_STATE_XMLDECL_AFTER_STANDALONE = 21; // 'standalone' got, need space or '='
+    final static int SUB_STATE_XMLDECL_STANDALONE_EQ = 22; // "standalone="
+    final static int SUB_STATE_XMLDECL_STANDALONE_EQ_QUOTE = 23; // "standalone='"; parsing 
+    final static int SUB_STATE_XMLDECL_STANDALONE_VALUE = 24; // encoding+value gotten; need space or '?'
+    final static int SUB_STATE_XMLDECL_AFTER_STANDALONE_VALUE = 25; // encoding+value gotten; need space or '?'
+
+    /*
+    /**********************************************************************
     /* Markers to use for 'pending' character, if
     /* not multi-byte UTF character
     /**********************************************************************
      */
 
+    // Marker when dealing with general CR+LF pair
     final static int PENDING_STATE_CR = -1;
 
-    final static int PENDING_STATE_PI_QMARK = -2;
+    final static int SUB_STATE_XMLDECL_END_QMARK = -25; // got '?' that should be part of '?>'
+    
+    // Processing Instruction parsing:
+    final static int PENDING_STATE_PI_QMARK = -30;
 
-    final static int PENDING_STATE_COMMENT_HYPHEN1 = -3;
-    final static int PENDING_STATE_COMMENT_HYPHEN2 = -4;
+    // Comment parsing
+    final static int PENDING_STATE_COMMENT_HYPHEN1 = -40;
+    final static int PENDING_STATE_COMMENT_HYPHEN2 = -41;
 
-    final static int PENDING_STATE_CDATA_BRACKET1 = -5;
-    final static int PENDING_STATE_CDATA_BRACKET2 = -6;
+    // CData parsing
+    final static int PENDING_STATE_CDATA_BRACKET1 = -50;
+    final static int PENDING_STATE_CDATA_BRACKET2 = -51;
 
     // partially handled entities within attribute/ns values use pending state as well
-    final static int PENDING_STATE_ATTR_VALUE_AMP = -7;
-    final static int PENDING_STATE_ATTR_VALUE_AMP_HASH = -8;
-    final static int PENDING_STATE_ATTR_VALUE_AMP_HASH_X = -9;
-    final static int PENDING_STATE_ATTR_VALUE_ENTITY_NAME = -10;
-    final static int PENDING_STATE_ATTR_VALUE_DEC_DIGIT = -11; // 
-    final static int PENDING_STATE_ATTR_VALUE_HEX_DIGIT = -12;
+    final static int PENDING_STATE_ATTR_VALUE_AMP = -60;
+    final static int PENDING_STATE_ATTR_VALUE_AMP_HASH = -61;
+    final static int PENDING_STATE_ATTR_VALUE_AMP_HASH_X = -62;
+    final static int PENDING_STATE_ATTR_VALUE_ENTITY_NAME = -63;
+    final static int PENDING_STATE_ATTR_VALUE_DEC_DIGIT = -64;
+    final static int PENDING_STATE_ATTR_VALUE_HEX_DIGIT = -65;
 
-    final static int PENDING_STATE_ENT_SEEN_HASH = -13; // seen &#
-    final static int PENDING_STATE_ENT_SEEN_HASH_X = -14; // seen &#x
-    final static int PENDING_STATE_ENT_IN_DEC_DIGIT = -15; // seen &# and 1 or more decimals
-    final static int PENDING_STATE_ENT_IN_HEX_DIGIT = -16; // seen &#x and 1 or more hex digits
+    final static int PENDING_STATE_ENT_SEEN_HASH = -70; // seen &#
+    final static int PENDING_STATE_ENT_SEEN_HASH_X = -71; // seen &#x
+    final static int PENDING_STATE_ENT_IN_DEC_DIGIT = -72; // seen &# and 1 or more decimals
+    final static int PENDING_STATE_ENT_IN_HEX_DIGIT = -73; // seen &#x and 1 or more hex digits
 //    final static int PENDING_STATE_ENT_IN_NAME = -; // seen & and part of the name
 
-    final static int PENDING_STATE_TEXT_SEEN_AMP = -17; // seen &
-    final static int PENDING_STATE_TEXT_SEEN_AMP_HASH = -18; // seen &#
-    final static int PENDING_STATE_TEXT_SEEN_AMP_HASH_X = -19; // seen &#x
-    final static int PENDING_STATE_TEXT_IN_DEC_DIGIT = -20; // seen &# and 1 or more decimals
-    final static int PENDING_STATE_TEXT_IN_HEX_DIGIT = -21; // seen &#x and 1 or more hex digits
+    final static int PENDING_STATE_TEXT_SEEN_AMP = -80; // seen &
+    final static int PENDING_STATE_TEXT_SEEN_AMP_HASH = -81; // seen &#
+    final static int PENDING_STATE_TEXT_SEEN_AMP_HASH_X = -82; // seen &#x
+    final static int PENDING_STATE_TEXT_IN_DEC_DIGIT = -83; // seen &# and 1 or more decimals
+    final static int PENDING_STATE_TEXT_IN_HEX_DIGIT = -84; // seen &#x and 1 or more hex digits
 //    final static int PENDING_STATE_TEXT_IN_NAME = -; // seen & and part of the name
     
     /*
@@ -191,8 +232,13 @@ public abstract class AsyncByteScanner
      * In addition to the event type, there is need for additional
      * state information
      */
-    protected int _state = STATE_DEFAULT;
+    protected int _state;
 
+    /**
+     * And oftentimes we also have sub-states
+     */
+    protected int _subState;
+    
     /**
      * For token/state combinations that are 'shared' between
      * events (or embedded in them), this is where the surrounding
@@ -286,6 +332,8 @@ public abstract class AsyncByteScanner
     public AsyncByteScanner(ReaderConfig cfg)
     {
         super(cfg);
+        // must start by checking if there's XML declaration...
+        _state = STATE_PROLOG_INITIAL;
     }
 
     @Override
@@ -382,6 +430,36 @@ public abstract class AsyncByteScanner
         }
         // Ok, do we know which event it will be?
         if (_nextEvent == EVENT_INCOMPLETE) { // nope
+            // The very first thing: XML declaration handling
+            if (_state == STATE_PROLOG_INITIAL) {
+                if (_inputPtr >= _inputEnd) {
+                    return _currToken;
+                }
+                // Ok: see if we have what looks like XML declaration; process:
+                if (_subState != 0) { // already parsing (potential) XML declaration
+                    if (handleXmlDeclaration()) { // is or may be XML declaration, so:
+                        return _nextEvent;
+                    }
+                    if (_nextEvent == PROCESSING_INSTRUCTION) {
+                        return handlePI();
+                    }
+                } else if (_inputBuffer[_inputPtr] == BYTE_LT) { // first byte, see if it could be XML declaration
+                    ++_inputPtr;
+                    _subState = SUB_STATE_XMLDECL_LT;
+                    if (handleXmlDeclaration()) {
+                        return _nextEvent;
+                    }
+                    if (_nextEvent == PROCESSING_INSTRUCTION) {
+                        return handlePI();
+                    }
+                } else {
+                    // nope; not XML declaration, move to regular prolog handling
+                    _subState = STATE_DEFAULT;
+                    _state = STATE_DEFAULT;
+                }
+                // regardless, is not XML declaration, fall through
+            }
+
             // First: did we have a lone CR at the end of the buffer?
             if (_pendingInput != 0) { // yup
                 if (!handlePartialCR()) {
@@ -417,7 +495,6 @@ public abstract class AsyncByteScanner
                     reportPrologUnexpChar(isProlog, decodeCharForError(b), null);
                 }
             }
-
             if (_state == STATE_PROLOG_SEEN_LT) {
                 if (_inputPtr >= _inputEnd) {
                     return _currToken;
@@ -452,7 +529,7 @@ public abstract class AsyncByteScanner
             return handlePI();
         case COMMENT:
             return handleComment();
-        case DTD:
+        case DTD:                
             return handleDTD();
         }
         return throwInternal(); // should never get here
@@ -600,11 +677,15 @@ public abstract class AsyncByteScanner
      */
 
     /**
+     * Method to skip whatever space can be skipped.
+     *<p>
+     * NOTE: if available content ends with a CR, method will set
+     * <code>_pendingInput</code> to <code>PENDING_STATE_CR</code>.
+     * 
      * @return True, if was able to skip through the space and find
      *   a non-space byte; false if reached end-of-buffer
      */
-    private boolean asyncSkipSpace()
-        throws XMLStreamException
+    private boolean asyncSkipSpace() throws XMLStreamException
     {
         while (_inputPtr < _inputEnd) {
             byte b = _inputBuffer[_inputPtr];
@@ -634,7 +715,248 @@ public abstract class AsyncByteScanner
         }
         return false;
     }
+    
+    /**
+     * Whopper of a method which includes fully expanded parsing for XML declaration.
+     * 
+     * @return True if what we see is (or may be) XML declaration; false if not
+     */
+    private final boolean handleXmlDeclaration() throws XMLStreamException
+    {
+        // First: left-over CRs?
+        if (_pendingInput == PENDING_STATE_CR) {
+            if (!handlePartialCR()) {
+                return true;
+            }
+        }
+        
+        while (_inputPtr < _inputEnd) {
+            switch (_subState) {
+            case SUB_STATE_XMLDECL_LT: // "<" at start of doc
+                if (_inputBuffer[_inputPtr] != BYTE_QMARK) { // some other 
+                    _state = STATE_PROLOG_SEEN_LT;
+                    return false;
+                }
+                ++_inputPtr;
+                _subState = SUB_STATE_XMLDECL_LTQ;
+                if (_inputPtr >= _inputEnd) {
+                    break;
+                }
+                // fall through
+            case SUB_STATE_XMLDECL_LTQ: // "<?" at start of doc
+                _tokenName = parseNewName(_inputBuffer[_inputPtr++]);
+                if (_tokenName == null) { // incomplete
+                    _subState = SUB_STATE_XMLDECL_TARGET;
+                    return true;
+                }
+                // xml or not?
+                if (!"xml".equals(_tokenName.getPrefixedName())) { // nope: some other PI
+                    _state = STATE_PI_AFTER_TARGET;
+                    _nextEvent = PROCESSING_INSTRUCTION;
+                    checkPITargetName(_tokenName);
+                    return false;
+                }
+                _pendingInput = SUB_STATE_XMLDECL_AFTER_XML;
+                break;
+            case SUB_STATE_XMLDECL_TARGET: // "<?" at start of doc, part of name
+                if ((_tokenName = parsePName()) == null) { // incomplete
+                    return true;
+                }
+                if (!"xml".equals(_tokenName.getPrefixedName())) {
+                    _state = STATE_PI_AFTER_TARGET;
+                    _nextEvent = PROCESSING_INSTRUCTION;
+                    checkPITargetName(_tokenName);
+                    return false;
+                }
+                _subState = SUB_STATE_XMLDECL_AFTER_XML;
+                if (_inputPtr >= _inputEnd) {
+                    break;
+                }
+                // fall through
+            case SUB_STATE_XMLDECL_AFTER_XML: // "<?xml", need space
+                {
+                    byte b = _inputBuffer[_inputPtr++];
+                    if (b == BYTE_SPACE || b == BYTE_CR || b == BYTE_LF || b == BYTE_TAB) {
+                        _subState = SUB_STATE_XMLDECL_BEFORE_VERSION;
+                    } else {
+                        reportPrologUnexpChar(true, decodeCharForError(b), " (expected space after 'xml' in xml declaration)");
+                    }
+                }
+                if (_inputPtr >= _inputEnd) {
+                    break;
+                }
+                // fall through
+            case SUB_STATE_XMLDECL_BEFORE_VERSION:
+                if (!asyncSkipSpace()) { // not enough input
+                    return true;
+                }
+                if ((_tokenName = parseNewName(_inputBuffer[_inputPtr++])) == null) { // incomplete
+                    return true;
+                }
+                if (!_tokenName.hasPrefixedName("version")) {
+                    reportInputProblem("Unexpected keyword '"+_tokenName.getPrefixedName()+"' in XML declaration: expected 'version'");
+                }
+                _subState = SUB_STATE_XMLDECL_AFTER_VERSION;
+                break;
+            case SUB_STATE_XMLDECL_VERSION: // "<?xml ", part of "version"
+                if ((_tokenName = parsePName()) == null) { // incomplete
+                    return true;
+                }
+                if (!_tokenName.hasPrefixedName("version")) {
+                    this.reportInputProblem("Unexpected keyword '"+_tokenName.getPrefixedName()+"' in XML declaration: expected 'version'");
+                }
+                _subState = SUB_STATE_XMLDECL_AFTER_VERSION;
+                if (_inputPtr >= _inputEnd) {
+                    break;
+                }
+                // fall through
+            case SUB_STATE_XMLDECL_AFTER_VERSION: // "<?xml version", need space or '='
+                if (!asyncSkipSpace()) { // not enough input
+                    return true;
+                }
+                {
+                    byte b = _inputBuffer[_inputPtr++];
+                    if (b != BYTE_EQ) {
+                        reportPrologUnexpChar(true, decodeCharForError(b), " (expected '=' after 'version' in xml declaration)");
+                    }
+                }
+                _subState = SUB_STATE_XMLDECL_VERSION_EQ;
+                if (_inputPtr >= _inputEnd) {
+                    break;
+                }
+                // fall through
+            case SUB_STATE_XMLDECL_VERSION_EQ: // "<?xml version=", need space or quote
+                {
+                    _elemAttrQuote = _inputBuffer[_inputPtr++];
+                    if (_elemAttrQuote != BYTE_QUOT && _elemAttrQuote != BYTE_APOS) {
+                        reportPrologUnexpChar(true, decodeCharForError(_elemAttrQuote), " (expected '\"' or ''' in xml declaration for version value)");
+                    }
+                }
+                _subState = SUB_STATE_XMLDECL_VERSION_EQ_QUOTE;
+                if (_inputPtr >= _inputEnd) {
+                    break;
+                }
+                // fall through
+            case SUB_STATE_XMLDECL_VERSION_EQ_QUOTE: // "<?xml version='", need version value
+            case SUB_STATE_XMLDECL_VERSION_VALUE: // parsing version value
+            case SUB_STATE_XMLDECL_AFTER_VERSION_VALUE: // version got; need space or '?'
 
+            case SUB_STATE_XMLDECL_BEFORE_ENCODING: // version, value, space got, need '?' or 'e'
+                if (!asyncSkipSpace()) { // not enough input
+                    return true;
+                }
+                if ((_tokenName = parseNewName(_inputBuffer[_inputPtr++])) == null) { // incomplete
+                    return true;
+                }
+                if (!_tokenName.hasPrefixedName("encoding")) {
+                    reportInputProblem("Unexpected keyword '"+_tokenName.getPrefixedName()+"' in XML declaration: expected 'encoding'");
+                }
+                _subState = SUB_STATE_XMLDECL_AFTER_ENCODING;
+                break;
+            case SUB_STATE_XMLDECL_ENCODING: // parsing "encoding"
+                if ((_tokenName = parsePName()) == null) { // incomplete
+                    return true;
+                }
+                if (!_tokenName.hasPrefixedName("encoding")) {
+                    reportInputProblem("Unexpected keyword 'encoding' in XML declaration: expected 'encoding'");
+                }
+                _subState = SUB_STATE_XMLDECL_AFTER_ENCODING;
+                if (_inputPtr >= _inputEnd) {
+                    break;
+                }
+                // fall through
+            case SUB_STATE_XMLDECL_AFTER_ENCODING: // got "encoding"; must get ' ' or '='
+                if (!asyncSkipSpace()) { // not enough input
+                    return true;
+                }
+                {
+                    byte b = _inputBuffer[_inputPtr++];
+                    if (b != BYTE_EQ) {
+                        reportPrologUnexpChar(true, decodeCharForError(b), " (expected '=' after 'encoding' in xml declaration)");
+                    }
+                }
+                _subState = SUB_STATE_XMLDECL_ENCODING_EQ;
+                if (_inputPtr >= _inputEnd) {
+                    break;
+                }
+                // fall through
+            case SUB_STATE_XMLDECL_ENCODING_EQ: // "encoding="
+                {
+                    _elemAttrQuote = _inputBuffer[_inputPtr++];
+                    if (_elemAttrQuote != BYTE_QUOT && _elemAttrQuote != BYTE_APOS) {
+                        reportPrologUnexpChar(true, decodeCharForError(_elemAttrQuote), " (expected '\"' or ''' in xml declaration for encoding value)");
+                    }
+                }
+                _subState = SUB_STATE_XMLDECL_ENCODING_EQ_QUOTE;
+                if (_inputPtr >= _inputEnd) {
+                    break;
+                }
+                // fall through
+            case SUB_STATE_XMLDECL_ENCODING_EQ_QUOTE: // "encoding='"
+            case SUB_STATE_XMLDECL_ENCODING_VALUE: // parsing encoding value
+            case SUB_STATE_XMLDECL_AFTER_ENCODING_VALUE: // encoding+value gotten; need space or '?'
+            case SUB_STATE_XMLDECL_BEFORE_STANDALONE: // after encoding+value+space; get '?' or 's'
+                if (!asyncSkipSpace()) { // not enough input
+                    return true;
+                }
+                if ((_tokenName = parseNewName(_inputBuffer[_inputPtr++])) == null) { // incomplete
+                    return true;
+                }
+                if (!_tokenName.hasPrefixedName("standalone")) {
+                    reportInputProblem("Unexpected keyword '"+_tokenName.getPrefixedName()+"' in XML declaration: expected 'standalone'");
+                }
+                _subState = SUB_STATE_XMLDECL_AFTER_STANDALONE;
+                break;
+            case SUB_STATE_XMLDECL_STANDALONE: // parsing "standalone"
+                if ((_tokenName = parsePName()) == null) { // incomplete
+                    return true;
+                }
+                if (!_tokenName.hasPrefixedName("standalone")) {
+                    reportInputProblem("Unexpected keyword 'encoding' in XML declaration: expected 'standalone'");
+                }
+                _subState = SUB_STATE_XMLDECL_AFTER_STANDALONE;
+                if (_inputPtr >= _inputEnd) {
+                    break;
+                }
+                // fall through
+            case SUB_STATE_XMLDECL_AFTER_STANDALONE: // got "standalone"; must get ' ' or '='
+                if (!asyncSkipSpace()) { // not enough input
+                    return true;
+                }
+                {
+                    byte b = _inputBuffer[_inputPtr++];
+                    if (b != BYTE_EQ) {
+                        reportPrologUnexpChar(true, decodeCharForError(b), " (expected '=' after 'standalone' in xml declaration)");
+                    }
+                }
+                _subState = SUB_STATE_XMLDECL_STANDALONE_EQ;
+                if (_inputPtr >= _inputEnd) {
+                    break;
+                }
+                // fall through
+            case SUB_STATE_XMLDECL_STANDALONE_EQ: // "standalone="
+                {
+                    _elemAttrQuote = _inputBuffer[_inputPtr++];
+                    if (_elemAttrQuote != BYTE_QUOT && _elemAttrQuote != BYTE_APOS) {
+                        reportPrologUnexpChar(true, decodeCharForError(_elemAttrQuote), " (expected '\"' or ''' in xml declaration for standalone value)");
+                    }
+                }
+                _subState = SUB_STATE_XMLDECL_STANDALONE_EQ_QUOTE;
+                if (_inputPtr >= _inputEnd) {
+                    break;
+                }
+                // fall through
+            case SUB_STATE_XMLDECL_STANDALONE_EQ_QUOTE: // "standalone='"; parsing 
+            case SUB_STATE_XMLDECL_STANDALONE_VALUE: // encoding+value gotten; need space or '?'
+            case SUB_STATE_XMLDECL_AFTER_STANDALONE_VALUE: // encoding+value gotten; need space or '?'
+            default:
+                throwInternal();
+            }
+        }
+        // ran out of input, so:
+        return true;
+    }
+    
     private final int handlePrologDeclStart(boolean isProlog)
         throws XMLStreamException
     {

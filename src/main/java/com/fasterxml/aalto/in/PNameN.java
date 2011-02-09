@@ -39,9 +39,9 @@ public final class PNameN
 
     public PName createBoundName(NsBinding nsb)
     {
-        PNameN newName = new PNameN(mPrefixedName, mPrefix, mLocalName, mHash,
+        PNameN newName = new PNameN(_prefixedName, _prefix, _localName, mHash,
                                     mQuads, mQuadLen);
-        newName.mNsBinding = nsb;
+        newName._namespaceBinding = nsb;
         return newName;
     }
 

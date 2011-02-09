@@ -43,8 +43,8 @@ public final class PNameC
 
     public PName createBoundName(NsBinding nsb)
     {
-        PNameC newName = new PNameC(mPrefixedName, mPrefix, mLocalName, mHash);
-        newName.mNsBinding = nsb;
+        PNameC newName = new PNameC(_prefixedName, _prefix, _localName, mHash);
+        newName._namespaceBinding = nsb;
         return newName;
     }
 
@@ -77,7 +77,7 @@ public final class PNameC
         if (hash != mHash) {
             return false;
         }
-        String pname = mPrefixedName;
+        String pname = _prefixedName;
         int plen = pname.length();
         if (len != plen) {
             return false;

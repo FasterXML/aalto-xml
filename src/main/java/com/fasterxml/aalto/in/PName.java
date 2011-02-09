@@ -18,35 +18,34 @@ package com.fasterxml.aalto.in;
 import javax.xml.namespace.QName;
 
 /**
- * Prefixed Name is similar to {@link javax.xml.namespace.QName}
- * (qualified name), but
- * only contains information about local name optionally prefixed by
+ * Prefixed Name is similar to {@link javax.xml.namespace.QName} (qualified name),
+ * but only contains information about local name optionally prefixed by
  * a prefix and colon, without namespace binding information.
  */
 public abstract class PName
 {
-    protected final String mPrefixedName;
-    protected final String mPrefix;
-    protected final String mLocalName;
+    protected final String _prefixedName;
+    protected final String _prefix;
+    protected final String _localName;
 
     /**
      * Binding of this qualified/prefixed name. Null if there is no
      * prefix; in which case name is either bound to the default namespace
      * (when element name), or no namespace (when other name, like attribute)
      */
-    protected NsBinding mNsBinding = null;
+    protected NsBinding _namespaceBinding = null;
 
     /*
-    //////////////////////////////////////////////////////////
-    // Life-cycle
-    //////////////////////////////////////////////////////////
+    /**********************************************************************
+    /* Life-cycle
+    /**********************************************************************
      */
 
     protected PName(String pname, String prefix, String ln)
     {
-        mPrefixedName = pname;
-        mPrefix = prefix;
-        mLocalName = ln;
+        _prefixedName = pname;
+        _prefix = prefix;
+        _localName = ln;
     }
 
     public abstract PName createBoundName(NsBinding nsb);
@@ -63,34 +62,35 @@ public abstract class PName
     */
 
     /*
-    //////////////////////////////////////////////////////////
-    // Accessors
-    //////////////////////////////////////////////////////////
+    /**********************************************************************
+    /* Accessors
+    /**********************************************************************
      */
 
-    public final String getPrefixedName() { return mPrefixedName; }
+    public final String getPrefixedName() { return _prefixedName; }
 
     /**
      * @return Prefix of this name, if it has one; null if not.
      */
-    public final String getPrefix() { return mPrefix; }
-    public final String getLocalName() { return mLocalName; }
+    public final String getPrefix() { return _prefix; }
+    public final String getLocalName() { return _localName; }
 
-    public boolean hasPrefix() { return mPrefix != null; }
+    public boolean hasPrefix() { return _prefix != null; }
+    public boolean hasPrefixedName(String n) { return _prefixedName.equals(n); }
 
-    public final NsBinding getNsBinding() { return mNsBinding; }
+    public final NsBinding getNsBinding() { return _namespaceBinding; }
 
     public final String getNsUri() {
-        return (mNsBinding == null) ? null : mNsBinding.mURI;
+        return (_namespaceBinding == null) ? null : _namespaceBinding.mURI;
     }
 
     public final QName constructQName()
     {
-        String pr = mPrefix;
-        String uri = (mNsBinding == null) ? null : mNsBinding.mURI;
+        String pr = _prefix;
+        String uri = (_namespaceBinding == null) ? null : _namespaceBinding.mURI;
         // Stupid QName: some impls barf on nulls...
         return new QName((uri == null) ? "" : uri,
-                         mLocalName,
+                         _localName,
                          (pr == null) ? "" : pr);
     }
 
@@ -102,26 +102,26 @@ public abstract class PName
      */
     public final QName constructQName(NsBinding defaultNs)
     {
-        String pr = mPrefix;
+        String pr = _prefix;
         if (pr == null) { // QName barfs on nulls
             pr = "";
         }
         // Do we have a local binding?
-        if (mNsBinding != null) {
-            String uri = mNsBinding.mURI;
+        if (_namespaceBinding != null) {
+            String uri = _namespaceBinding.mURI;
             if (uri != null) { // yup
-                return new QName(uri,  mLocalName, pr);
+                return new QName(uri,  _localName, pr);
             }
         }
         // Nope. Default ns?
         String uri = defaultNs.mURI;
-        return new QName((uri == null) ? "" : uri,  mLocalName, pr);
+        return new QName((uri == null) ? "" : uri,  _localName, pr);
     }
 
     /*
-    //////////////////////////////////////////////////////////
-    // Namespace binding
-    //////////////////////////////////////////////////////////
+    /**********************************************************************
+    /* Namespace binding
+    /**********************************************************************
      */
 
     /**
@@ -129,7 +129,7 @@ public abstract class PName
      *    one (has prefix)
      */
     public final boolean needsBinding() {
-        return (mPrefix != null) && (mNsBinding == null);
+        return (_prefix != null) && (_namespaceBinding == null);
     }
 
     /**
@@ -140,7 +140,7 @@ public abstract class PName
      */
     public final boolean isBound()
     {
-        return (mNsBinding == null) || (mNsBinding.mURI != null);
+        return (_namespaceBinding == null) || (_namespaceBinding.mURI != null);
     }
 
     /**
@@ -149,7 +149,7 @@ public abstract class PName
      */
     public final boolean boundEquals(PName other)
     {
-        if (other == null || other.mLocalName != mLocalName) {
+        if (other == null || other._localName != _localName) {
             return false;
         }
         // Let's assume URIs are canonicalized at least on per-doc basis?
@@ -158,12 +158,12 @@ public abstract class PName
 
     public final boolean unboundEquals(PName other)
     {
-        return (other.mPrefixedName == mPrefixedName);
+        return (other._prefixedName == _prefixedName);
     }
 
     public final boolean boundEquals(String nsUri, String ln)
     {
-        if (!mLocalName.equals(ln)) {
+        if (!_localName.equals(ln)) {
             return false;
         }
         String thisUri = getNsUri();
@@ -175,7 +175,7 @@ public abstract class PName
 
     public final int unboundHashCode()
     {
-        return mPrefixedName.hashCode();
+        return _prefixedName.hashCode();
     }
 
     public final int boundHashCode()
@@ -183,7 +183,7 @@ public abstract class PName
         /* How often do we have same local name, but differing URI?
          * Probably not often... thus, let's only use local name's hash.
          */
-        return mLocalName.hashCode();
+        return _localName.hashCode();
     }
 
     public static int boundHashCode(String nsURI, String localName)
@@ -192,12 +192,12 @@ public abstract class PName
     }
 
     /*
-    //////////////////////////////////////////////////////////
-    // Redefined standard methods
-    //////////////////////////////////////////////////////////
+    /**********************************************************************
+    /* Redefined standard methods
+    /**********************************************************************
      */
 
-    public final String toString() { return mPrefixedName; }
+    public final String toString() { return _prefixedName; }
 
     public final boolean equals(Object o)
     {
@@ -212,13 +212,13 @@ public abstract class PName
          * so let's compare separately. Can use identity comparison with
          * those though:
          */
-        return (other.mPrefix == mPrefix) && (other.mLocalName == mLocalName);
+        return (other._prefix == _prefix) && (other._localName == _localName);
     }
 
     /*
-    //////////////////////////////////////////////////////////
-    // Methods for package/core parser
-    //////////////////////////////////////////////////////////
+    /**********************************************************************
+    /* Methods for package/core parser
+    /**********************************************************************
      */
 
     /* Note: These 3 methods really should be in the byte-based sub-class...

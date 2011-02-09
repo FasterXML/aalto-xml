@@ -32,25 +32,25 @@ public abstract class InputBootstrapper
     implements XmlConsts
 {
     /*
-    ////////////////////////////////////////////////////////////
-    // Shared string consts
-    ////////////////////////////////////////////////////////////
+    /**********************************************************************
+    /* Shared string consts
+    /**********************************************************************
      */
 
-    protected final static String ERR_XMLDECL_KW_VERSION = "; expected keyword '"+XmlConsts.XML_DECL_KW_VERSION+"'";
-    protected final static String ERR_XMLDECL_KW_ENCODING = "; expected keyword '"+XmlConsts.XML_DECL_KW_ENCODING+"'";
-    protected final static String ERR_XMLDECL_KW_STANDALONE = "; expected keyword '"+XmlConsts.XML_DECL_KW_STANDALONE+"'";
+    public final static String ERR_XMLDECL_KW_VERSION = "; expected keyword '"+XmlConsts.XML_DECL_KW_VERSION+"'";
+    public final static String ERR_XMLDECL_KW_ENCODING = "; expected keyword '"+XmlConsts.XML_DECL_KW_ENCODING+"'";
+    public final static String ERR_XMLDECL_KW_STANDALONE = "; expected keyword '"+XmlConsts.XML_DECL_KW_STANDALONE+"'";
 
-    protected final static String ERR_XMLDECL_END_MARKER = "; expected \"?>\" end marker";
+    public final static String ERR_XMLDECL_END_MARKER = "; expected \"?>\" end marker";
 
-    protected final static String ERR_XMLDECL_EXP_SPACE = "; expected a white space";
-    protected final static String ERR_XMLDECL_EXP_EQ = "; expected '=' after ";
-    protected final static String ERR_XMLDECL_EXP_ATTRVAL = "; expected a quote character enclosing value for ";
+    public final static String ERR_XMLDECL_EXP_SPACE = "; expected a white space";
+    public final static String ERR_XMLDECL_EXP_EQ = "; expected '=' after ";
+    public final static String ERR_XMLDECL_EXP_ATTRVAL = "; expected a quote character enclosing value for ";
 
     /*
-    ////////////////////////////////////////////////////////////
-    // Input location data
-    ////////////////////////////////////////////////////////////
+    /**********************************************************************
+    /* Input location data
+    /**********************************************************************
      */
 
     /**
@@ -77,18 +77,18 @@ public abstract class InputBootstrapper
     protected int _inputRowStart = 0;
 
     /*
-    ////////////////////////////////////////
-    // Info passed by the caller
-    ////////////////////////////////////////
-    */
+    /**********************************************************************
+    /* Info passed by the caller
+    /**********************************************************************
+     */
 
     final ReaderConfig _config;
 
     /*
-    ////////////////////////////////////////
-    // Info from XML declaration
-    ////////////////////////////////////////
-    */
+    /**********************************************************************
+    /* Info from XML declaration
+    /**********************************************************************
+     */
 
     //boolean mHadDeclaration = false;
 
@@ -106,9 +106,9 @@ public abstract class InputBootstrapper
     String mStandalone;
 
     /*
-    ////////////////////////////////////////
-    // Temporary data
-    ////////////////////////////////////////
+    /**********************************************************************
+    //* Temporary data
+    /**********************************************************************
     */
 
     /**
@@ -120,10 +120,10 @@ public abstract class InputBootstrapper
     final char[] mKeyword;
 
     /*
-    ////////////////////////////////////////
-    // Life-cycle
-    ////////////////////////////////////////
-    */
+    /**********************************************************************
+    /* Life-cycle
+    /**********************************************************************
+     */
 
     protected InputBootstrapper(ReaderConfig cfg)
     {
@@ -152,9 +152,9 @@ public abstract class InputBootstrapper
         throws IOException, XMLStreamException;
 
     /*
-    ////////////////////////////////////////
-    // Package methods, parsing
-    ////////////////////////////////////////
+    /**********************************************************************
+    /* Package methods, parsing
+    /**********************************************************************
     */
 
     /**
@@ -338,10 +338,10 @@ public abstract class InputBootstrapper
     }
 
     /*
-    ////////////////////////////////////////////////////////
-    // Abstract parsing methods for sub-classes to implement
-    ////////////////////////////////////////////////////////
-    */
+    /**********************************************************************
+    /* Abstract parsing methods for sub-classes to implement
+    /**********************************************************************
+     */
 
     protected abstract void pushback();
 
@@ -364,10 +364,10 @@ public abstract class InputBootstrapper
     protected abstract Location getLocation();
 
     /*
-    ////////////////////////////////////////////////////////
-    // Error reporting
-    ////////////////////////////////////////////////////////
-    */
+    /**********************************************************************
+    /* Error reporting
+    /**********************************************************************
+     */
 
     protected void reportXmlProblem(String msg)
         throws XMLStreamException
