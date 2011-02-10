@@ -22,13 +22,6 @@ public class TestPIParsing extends AsyncTestBase
     /* Helper methods
     /**********************************************************************
      */
-
-    private int _verifyStart(AsyncReaderWrapper reader) throws Exception
-    {
-        // !!! TODO: should not start with START_DOCUMENT; but should get it right away
-        int t = reader.nextToken();
-        return t;
-    }
     
     private void _testPI(String spaces, int chunkSize) throws Exception
     {
@@ -36,7 +29,7 @@ public class TestPIParsing extends AsyncTestBase
         AsyncXMLInputFactory f = new InputFactoryImpl();
         AsyncXMLStreamReader sr = f.createAsyncXMLStreamReader();
         AsyncReaderWrapper reader = new AsyncReaderWrapper(sr, chunkSize, XML);
-        int t = _verifyStart(reader);
+        int t = verifyStart(reader);
         assertTokenType(PROCESSING_INSTRUCTION, t);
         assertEquals("p", sr.getPITarget());
         assertEquals("i ", sr.getPIData());

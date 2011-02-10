@@ -20,6 +20,13 @@ abstract class AsyncTestBase extends base.BaseTestCase
     {
         return SPACES.substring(0, Math.min(SPACES.length(), count));
     }
+
+    protected int verifyStart(AsyncReaderWrapper reader) throws Exception
+    {
+        assertTokenType(AsyncXMLStreamReader.EVENT_INCOMPLETE, reader.currentToken());
+        assertTokenType(START_DOCUMENT, reader.nextToken());
+        return reader.nextToken();
+    }
     
     /**
      * Helper class used with async parser

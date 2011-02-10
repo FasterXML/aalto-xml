@@ -228,6 +228,22 @@ public final class ReaderConfig
         }
     }
 
+    public final void setXmlVersion(String version) {
+        mXmlDeclVersion = version;
+    }
+
+    public final void setXmlEncoding(String enc) {
+        mXmlDeclEncoding = enc;
+    }
+
+    public final void setXmlStandalone(Boolean b) {
+        if (b == null) {
+            mXmlDeclStandalone = STANDALONE_UNKNOWN;
+        } else {
+            mXmlDeclStandalone = b.booleanValue() ? STANDALONE_YES : STANDALONE_NO;
+        }
+    }
+    
     // // // Explicit property setters
 
     // // Stax:

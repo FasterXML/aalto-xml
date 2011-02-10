@@ -358,7 +358,7 @@ public final class TextBuilder
 
     public int contentsToArray(int srcStart, char[] dst, int dstStart, int len) {
         /* Could also check if we have array, but that'd only help with
-         * braindead clients that get full array first, then segments...
+         * brain dead clients that get full array first, then segments...
          * which hopefully aren't that common
          */
         // Copying from segmented array is bit more involved:

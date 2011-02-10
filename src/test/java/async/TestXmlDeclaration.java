@@ -9,7 +9,7 @@ import static com.fasterxml.aalto.AsyncXMLStreamReader.EVENT_INCOMPLETE;
 public class TestXmlDeclaration extends AsyncTestBase
 {
     private final int[] CHUNK_SIZES = new int[] { 1, 2, 3, 5, 9, 33 };
-    
+
     public void testNoDeclaration() throws Exception
     {
         // first, with empty root elem
@@ -34,7 +34,7 @@ public class TestXmlDeclaration extends AsyncTestBase
 
     public void testVersionOnlyDeclaration() throws Exception
     {
-        String XML = "<?xml version='1.0' ?>";
+        String XML = "<?xml version='1.0' ?><root />";
         AsyncXMLInputFactory f = new InputFactoryImpl();
 
         for (int chunkSize : CHUNK_SIZES) {
@@ -54,7 +54,7 @@ public class TestXmlDeclaration extends AsyncTestBase
     
     public void testEncodingDeclaration() throws Exception
     {
-        String XML = "<?xml version= \"1.0\"   encoding='UTF-8' ?>";
+        String XML = "<?xml version= \"1.0\"   encoding='UTF-8' ?><root/>";
         AsyncXMLInputFactory f = new InputFactoryImpl();
 
         for (int chunkSize : CHUNK_SIZES) {
@@ -74,7 +74,7 @@ public class TestXmlDeclaration extends AsyncTestBase
 
     public void testStandAloneDeclaration() throws Exception
     {
-        String XML = "<?xml version  ='1.0' encoding=\"UTF-8\"  standalone='yes' ?>";
+        String XML = "<?xml version  ='1.0' encoding=\"UTF-8\"  standalone='yes' ?>  <root />";
         AsyncXMLInputFactory f = new InputFactoryImpl();
 
         for (int chunkSize : CHUNK_SIZES) {
@@ -92,5 +92,4 @@ public class TestXmlDeclaration extends AsyncTestBase
             assertEquals("root", sr.getLocalName());
         }
     }
-
 }

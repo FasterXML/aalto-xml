@@ -58,7 +58,7 @@ public class TestCharactersParsing extends AsyncTestBase
         final String XML = SPC+"<root>\rFirst\r\nSecond\nThird: "+UNICODE_SEGMENT+"</root>";
         AsyncReaderWrapper reader = new AsyncReaderWrapper(sr, chunkSize, XML);
 
-        assertTokenType(START_ELEMENT, _verifyStart(reader));
+        assertTokenType(START_ELEMENT, verifyStart(reader));
         assertEquals("root", sr.getLocalName());
         assertEquals("", sr.getNamespaceURI());
 
@@ -81,7 +81,7 @@ public class TestCharactersParsing extends AsyncTestBase
         AsyncReaderWrapper reader = new AsyncReaderWrapper(sr, chunkSize, XML);
 
         // should start with START_DOCUMENT, but for now skip
-        int t = _verifyStart(reader);
+        int t = verifyStart(reader);
         assertTokenType(START_ELEMENT, t);
         assertEquals("root", sr.getLocalName());
         assertEquals("", sr.getNamespaceURI());
@@ -103,7 +103,7 @@ public class TestCharactersParsing extends AsyncTestBase
         AsyncReaderWrapper reader = new AsyncReaderWrapper(sr, chunkSize, XML);
 
         // should start with START_DOCUMENT, but for now skip
-        int t = _verifyStart(reader);
+        int t = verifyStart(reader);
         assertTokenType(START_ELEMENT, t);
         assertEquals("root", sr.getLocalName());
         assertEquals("", sr.getNamespaceURI());
@@ -132,12 +132,4 @@ public class TestCharactersParsing extends AsyncTestBase
         }
         return sb.toString();
     }
-    
-    private int _verifyStart(AsyncReaderWrapper reader) throws Exception
-    {
-        // !!! TODO: should not start with START_DOCUMENT; but should get it right away
-        int t = reader.nextToken();
-        return t;
-    }
-
 }

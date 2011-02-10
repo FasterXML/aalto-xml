@@ -90,6 +90,7 @@ public abstract class XmlScanner
 
     protected final static int INT_a = (int) 'a';
     protected final static int INT_f = (int) 'f';
+    protected final static int INT_z = (int) 'z';
 
     protected final static int INT_0 = (int) '0';
     protected final static int INT_9 = (int) '9';
@@ -1334,9 +1335,8 @@ public abstract class XmlScanner
     protected void reportInputProblem(String msg)
         throws XMLStreamException
     {
-        /* 29-Mar-2008, tatus: Not sure if these are all
-         *  Well-Formedness Constraint (WFC) violations? They should
-         *  be... ?
+        /* 29-Mar-2008, tatus: Not sure if these are all Well-Formedness
+         *   Constraint (WFC) violations? They should be... ?
          */
         throw new WFCException(msg, getCurrentLocation());
     }

@@ -34,7 +34,7 @@ public class TestCDataParsing extends AsyncTestBase
         AsyncReaderWrapper reader = new AsyncReaderWrapper(sr, chunkSize, 
             SPC+"<root><![CDATA[cdata\r\n&] ]] stuff]]>...<![CDATA[this\r\r and Unicode: "+UNICODE_SEGMENT+"!]]></root>");
 
-        int t = _verifyStart(reader);
+        int t = verifyStart(reader);
         assertTokenType(START_ELEMENT, t);
         assertEquals("root", sr.getLocalName());
         assertEquals("", sr.getNamespaceURI());
@@ -67,13 +67,6 @@ public class TestCDataParsing extends AsyncTestBase
     /* Helper methods
     /**********************************************************************
      */
-
-    private int _verifyStart(AsyncReaderWrapper reader) throws Exception
-    {
-        // !!! TODO: should not start with START_DOCUMENT; but should get it right away
-        int t = reader.nextToken();
-        return t;
-    }
 
     protected String collectAsyncText(AsyncReaderWrapper reader, int tt) throws XMLStreamException
     {

@@ -41,10 +41,10 @@ public final class ByteSourceBootstrapper
 
 
     /*
-    ////////////////////////////////////////
-    // Configuration
-    ////////////////////////////////////////
-    */
+    /**********************************************************************
+    /* Configuration
+    /**********************************************************************
+     */
 
     /**
      * Underlying InputStream to use for reading content.
@@ -52,10 +52,10 @@ public final class ByteSourceBootstrapper
     final InputStream _in;
 
     /*
-    ///////////////////////////////////////////////////////////////
-    // Input buffering
-    ///////////////////////////////////////////////////////////////
-    */
+    /**********************************************************************
+    /* Input buffering
+    /**********************************************************************
+     */
 
     final byte[] _inputBuffer;
 
@@ -64,10 +64,10 @@ public final class ByteSourceBootstrapper
     private int _inputLen;
 
     /*
-    ///////////////////////////////////////////////////////////////
-    // Data gathered
-    ///////////////////////////////////////////////////////////////
-    */
+    /**********************************************************************
+    /* Data gathered
+    /**********************************************************************
+     */
 
     boolean mBigEndian = true;
     int mBytesPerChar = 0; // 0 means "dunno yet"
@@ -76,9 +76,9 @@ public final class ByteSourceBootstrapper
     boolean mByteSizeFound = false;
 
     /*
-    ////////////////////////////////////////////////////
-    // Life-cycle
-    ////////////////////////////////////////////////////
+    /**********************************************************************
+    /* Life-cycle
+    /**********************************************************************
      */
 
     private ByteSourceBootstrapper(ReaderConfig cfg, InputStream in)
@@ -185,9 +185,9 @@ public final class ByteSourceBootstrapper
     }
 
     /*
-    ////////////////////////////////////////////////////
+    /**********************************************************************
     // Internal methods, main xml decl processing
-    ////////////////////////////////////////////////////
+    /**********************************************************************
      */
 
     /**
@@ -394,11 +394,11 @@ public final class ByteSourceBootstrapper
     }
 
     /*
-    /////////////////////////////////////////////////////
-    // Internal methods, loading input data
-    /////////////////////////////////////////////////////
-    */
-
+    /**********************************************************************
+    /* Internal methods, loading input data
+    /**********************************************************************
+     */
+ 
     protected boolean ensureLoaded(int minimum)
         throws IOException
     {
@@ -441,10 +441,10 @@ public final class ByteSourceBootstrapper
     }
 
     /*
-    /////////////////////////////////////////////////////
-    // Implementations of abstract parsing methods
-    /////////////////////////////////////////////////////
-    */
+    /**********************************************************************
+    /* Implementations of abstract parsing methods
+    /**********************************************************************
+     */
 
     protected void pushback() {
         _inputPtr -= mBytesPerChar;
@@ -563,10 +563,10 @@ public final class ByteSourceBootstrapper
     }
 
     /*
-    /////////////////////////////////////////////////////
-    // Internal methods, single-byte access methods
-    /////////////////////////////////////////////////////
-    */
+    /**********************************************************************
+    /* Internal methods, single-byte access methods
+    /**********************************************************************
+     */
 
     protected byte nextByte()
         throws IOException, XMLStreamException
@@ -639,10 +639,10 @@ public final class ByteSourceBootstrapper
     }
 
     /*
-    /////////////////////////////////////////////////////
-    // Internal methods, multi-byte access/checks
-    /////////////////////////////////////////////////////
-    */
+    /**********************************************************************
+    /* Internal methods, multi-byte access/checks
+    /**********************************************************************
+     */
 
     protected int nextMultiByte()
         throws IOException, XMLStreamException
@@ -740,10 +740,10 @@ public final class ByteSourceBootstrapper
     }
 
     /*
-    ////////////////////////////////////////
-    // Other private methods:
-    ////////////////////////////////////////
-    */
+    /**********************************************************************
+    /* Other private methods:
+    /**********************************************************************
+     */
 
     private void verifyEncoding(String id, int bpc)
         throws XMLStreamException

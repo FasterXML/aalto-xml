@@ -29,7 +29,7 @@ public class TestCommentParsing extends AsyncTestBase
         AsyncXMLInputFactory f = new InputFactoryImpl();
         AsyncXMLStreamReader sr = f.createAsyncXMLStreamReader();
         AsyncReaderWrapper reader = new AsyncReaderWrapper(sr, chunkSize, XML);
-        int t = _verifyStart(reader);
+        int t = verifyStart(reader);
         assertTokenType(COMMENT, t);
         assertEquals("comments&s\ntuf-fy>", sr.getText());
         assertTokenType(START_ELEMENT, reader.nextToken());
@@ -41,13 +41,5 @@ public class TestCommentParsing extends AsyncTestBase
         assertTokenType(COMMENT, reader.nextToken());
         assertEquals("\nHi - "+UNICODE_SEGMENT+" - ho->", sr.getText());
         assertTokenType(END_DOCUMENT, reader.nextToken());
-    }
-    
-
-    private int _verifyStart(AsyncReaderWrapper reader) throws Exception
-    {
-        // !!! TODO: should not start with START_DOCUMENT; but should get it right away
-        int t = reader.nextToken();
-        return t;
     }
 }
