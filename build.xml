@@ -260,6 +260,11 @@
        <!-- showoutput 'yes' to allow outputting debug msgs... -->
         <junit fork="no" printsummary="yes" haltonfailure="no"
          showoutput="yes">
+            <sysproperty key="javax.xml.stream.XMLInputFactory" value="com.fasterxml.aalto.stax.InputFactoryImpl"/>
+            <sysproperty key="javax.xml.stream.XMLOutputFactory" value="com.fasterxml.aalto.stax.OutputFactoryImpl"/>
+            <sysproperty key="javax.xml.stream.XMLEventFactory" value="com.fasterxml.aalto.stax.EventFactoryImpl" />
+            <sysproperty key="" value=""/>
+
             <batchtest fork="no" todir="${TestXmlResultsDir}">
                 <fileset dir="${StaxTestClassesDir}">
                     <!-- Need to exclude inner classes... -->
