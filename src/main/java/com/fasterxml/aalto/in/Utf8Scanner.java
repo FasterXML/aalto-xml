@@ -26,7 +26,7 @@ import com.fasterxml.aalto.util.XmlChars;
 /**
  * Scanner for tokenizing xml content from a byte stream encoding using
  * UTF-8 encoding, or something suitably close it for decoding purposes
- * (including ISO-Latin1 and US-Ascii).
+ * (including ISO-Latin1 and US-ASCII).
  */
 public final class Utf8Scanner
     extends StreamScanner
@@ -1034,7 +1034,7 @@ public final class Utf8Scanner
      * Our first take is as simple (simplistic) as possible: we'll just
      * hunt for the closing ']' '>' combination
      */
-    protected final void skipDTD()
+    private final void skipDTD()
         throws XMLStreamException
     {
         final int[] TYPES = _charTypes.DTD_CHARS;

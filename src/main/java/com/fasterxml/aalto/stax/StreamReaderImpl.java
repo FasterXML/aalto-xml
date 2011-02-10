@@ -1474,7 +1474,10 @@ public class StreamReaderImpl
     }
 
     public final String getDTDRootName() {
-        return (_currToken == DTD) ? _currName.getPrefixedName() : null;
+        if (_currToken != DTD) {
+            return null;
+        }
+        return (_currName == null) ? null : _currName.getPrefixedName();
     }
 
     public final String getDTDPublicId()

@@ -30,24 +30,24 @@ public final class ReaderScanner
      * Although java chars are basically UTF-16 in memory, the closest
      * match for char types is Latin1.
      */
-    final static XmlCharTypes mCharTypes = InputCharTypes.getLatin1CharTypes();
+    private final static XmlCharTypes sCharTypes = InputCharTypes.getLatin1CharTypes();
 
     /*
-    ////////////////////////////////////////
-    // Configuration
-    ////////////////////////////////////////
-    */
+    /**********************************************************************
+    /* Configuration
+    /**********************************************************************
+     */
 
     /**
      * Underlying InputStream to use for reading content.
      */
-    Reader _in;
+    protected Reader _in;
 
     /*
-    ///////////////////////////////////////////////////////////////
-    // Input buffering
-    ///////////////////////////////////////////////////////////////
-    */
+    /**********************************************************************
+    /* Input buffering
+    /**********************************************************************
+     */
 
     protected char[] _inputBuffer;
 
@@ -62,22 +62,22 @@ public final class ReaderScanner
     protected int mTmpChar = INT_NULL;
 
     /*
-    ////////////////////////////////////////
-    // Symbol handling
-    ////////////////////////////////////////
+    /**********************************************************************
+    /* Symbol handling
+    /**********************************************************************
     */
 
     /**
      * For now, symbol table contains prefixed names. In future it is
      * possible that they may be split into prefixes and local names?
      */
-    final CharBasedPNameTable _symbols;
+    protected final CharBasedPNameTable _symbols;
 
     /*
-    ///////////////////////////////////////////////////////////////
-    // Location info
-    ///////////////////////////////////////////////////////////////
-    */
+    /**********************************************************************
+    /* Location info
+    /**********************************************************************
+     */
 
     /**
      * Number of bytes that were read and processed before the contents
@@ -93,9 +93,9 @@ public final class ReaderScanner
     protected int mRowStartOffset;
 
     /*
-    ////////////////////////////////////////////////
-    // Life-cycle
-    ////////////////////////////////////////////////
+    /**********************************************************************
+    /* Life-cycle
+    /**********************************************************************
      */
 
     public ReaderScanner(ReaderConfig cfg, Reader r,
@@ -156,9 +156,9 @@ public final class ReaderScanner
     }
 
     /*
-    ////////////////////////////////////////////////
-    // Public scanner interface (1st level parsing)
-    ////////////////////////////////////////////////
+    /**********************************************************************
+    /* Public scanner interface (1st level parsing)
+    /**********************************************************************
      */
 
     // // // First, main iteration methods
@@ -169,52 +169,58 @@ public final class ReaderScanner
         if (_tokenIncomplete) { // left-overs from last thingy?
             skipToken();
         }
-        // Any more data? Just need a single byte
-        if (_inputPtr >= _inputEnd) {
-            if (!loadMore()) {
-                return TOKEN_EOI;
+        // Ok: we should get a WS or '<'. So, let's skip through WS
+        while (true) {
+            // Any more data? Just need a single byte
+            if (_inputPtr >= _inputEnd) {
+                if (!loadMore()) {
+                    return TOKEN_EOI;
+                }
             }
+            int c = _inputBuffer[_inputPtr++] & 0xFF;
+
+            // Really should get white space or '<'...
+            if (c == '<') {
+                break;
+            }
+            if (c != ' ') {
+                if (c == '\n') {
+                    markLF();
+                } else if (c == '\r') {
+                    if (_inputPtr >= _inputEnd) {
+                        if (!loadMore()) {
+                            markLF();
+                            return TOKEN_EOI;
+                        }
+                    }
+                    if (_inputBuffer[_inputPtr] == '\n') {
+                        ++_inputPtr;
+                    }
+                    markLF();
+                } else if (c != '\t') {
+                    reportPrologUnexpChar(isProlog, c, null);
+                }
+            }
+        }
+
+        // Ok, got LT:
+        if (_inputPtr >= _inputEnd) {
+            loadMoreGuaranteed(COMMENT);
         }
         char c = _inputBuffer[_inputPtr++];
-
-        /* Really should get white space or '<'... anything else is
-         * pretty much an error.
-         */
-        if (c == '<') { // root element, comment, proc instr?
-            if (_inputPtr >= _inputEnd) {
-                loadMoreGuaranteed(COMMENT);
-            }
-            c = _inputBuffer[_inputPtr++];
-            if (c == '!') { // comment/DOCTYPE? (CDATA not legal)
-                return handlePrologDeclStart(isProlog);
-            }
-            if (c == '?') {
-                return handlePIStart();
-            }
-            /* End tag not allowed if no open tree; and only one root
-             * element (one root-level start tag)
-             */
-            if (c == '/' || !isProlog) {
-                reportPrologUnexpChar(isProlog, c, " (unbalanced start/end tags?)");
-            }
-            return handleStartElement(c);
-        } else if (c == ' ' || c == '\r'
-                   || c == '\n' || c == '\t') {
-            /* Could handle updates etc. here, but it may be best to just
-             * see if we need the content, or just skip it. We can then
-             * check linefeeds etc. too.
-             */
-            mTmpChar = c;
-            if (_cfgLazyParsing) {
-                _tokenIncomplete = true;
-            } else {
-                finishSpace();
-            }
-            return (_currToken = SPACE);
-        } else {
-            reportPrologUnexpChar(isProlog, c, null);
+        if (c == '!') { // comment/DOCTYPE? (CDATA not legal)
+            return handlePrologDeclStart(isProlog);
         }
-        return TOKEN_EOI; // never gets here
+        if (c == '?') {
+            return handlePIStart();
+        }
+        /* End tag not allowed if no open tree; and only one root
+         * element (one root-level start tag)
+         */
+        if (c == '/' || !isProlog) {
+            reportPrologUnexpChar(isProlog, c, " (unbalanced start/end tags?)");
+        }
+        return handleStartElement(c);
     }
 
     public final int nextFromTree()
@@ -306,9 +312,9 @@ public final class ReaderScanner
     }
 
     /*
-    ////////////////////////////////////////////////
-    // 2nd level parsing
-    ////////////////////////////////////////////////
+    /**********************************************************************
+    /* 2nd level parsing
+    /**********************************************************************
      */
 
     protected final int handlePrologDeclStart(boolean isProlog)
@@ -804,7 +810,7 @@ public final class ReaderScanner
         throws XMLStreamException
     {
         char[] attrBuffer = _attrCollector.startNewValue(attrName, attrPtr);
-        final int[] TYPES = mCharTypes.ATTR_CHARS;
+        final int[] TYPES = sCharTypes.ATTR_CHARS;
         
         value_loop:
         while (true) {
@@ -1154,7 +1160,7 @@ public final class ReaderScanner
             start = "";
         }
 
-        final int[] TYPES = mCharTypes.NAME_CHARS;
+        final int[] TYPES = sCharTypes.NAME_CHARS;
 
         /* All righty: we have the beginning of the name, plus the first
          * char too. So let's see what we can do with it.
@@ -1234,7 +1240,7 @@ public final class ReaderScanner
     protected final void finishComment()
         throws XMLStreamException
     {
-        final int[] TYPES = mCharTypes.OTHER_CHARS;
+        final int[] TYPES = sCharTypes.OTHER_CHARS;
         final char[] inputBuffer = _inputBuffer;
         char[] outputBuffer = _textBuilder.resetWithEmpty();
         int outPtr = 0;
@@ -1338,7 +1344,7 @@ public final class ReaderScanner
     protected final void finishPI()
         throws XMLStreamException
     {
-        final int[] TYPES = mCharTypes.OTHER_CHARS;
+        final int[] TYPES = sCharTypes.OTHER_CHARS;
         final char[] inputBuffer = _inputBuffer;
         char[] outputBuffer = _textBuilder.resetWithEmpty();
         int outPtr = 0;
@@ -1438,7 +1444,7 @@ public final class ReaderScanner
             _textBuilder.resetWithEmpty() : null;
         int outPtr = 0;
 
-        final int[] TYPES = mCharTypes.DTD_CHARS;
+        final int[] TYPES = sCharTypes.DTD_CHARS;
         boolean inDecl = false; // in declaration/directive?
         int quoteChar = 0; // inside quoted string?
 
@@ -1570,7 +1576,7 @@ public final class ReaderScanner
     protected final void finishCData()
         throws XMLStreamException
     {
-        final int[] TYPES = mCharTypes.OTHER_CHARS;
+        final int[] TYPES = sCharTypes.OTHER_CHARS;
         final char[] inputBuffer = _inputBuffer;
         char[] outputBuffer = _textBuilder.resetWithEmpty();
         int outPtr = 0;
@@ -1742,7 +1748,7 @@ public final class ReaderScanner
             }
         }
 
-        final int[] TYPES = mCharTypes.TEXT_CHARS;
+        final int[] TYPES = sCharTypes.TEXT_CHARS;
         final char[] inputBuffer = _inputBuffer;
 
         main_loop:
@@ -1966,9 +1972,9 @@ public final class ReaderScanner
     }
 
     /*
-    ////////////////////////////////////////////////
-    // 2nd level parsing for coalesced text
-    ////////////////////////////////////////////////
+    /**********************************************************************
+    /* 2nd level parsing for coalesced text
+    /**********************************************************************
      */
 
     /**
@@ -2030,7 +2036,7 @@ public final class ReaderScanner
     protected final void finishCoalescedCData()
         throws XMLStreamException
     {
-        final int[] TYPES = mCharTypes.OTHER_CHARS;
+        final int[] TYPES = sCharTypes.OTHER_CHARS;
         final char[] inputBuffer = _inputBuffer;
 
         char[] outputBuffer = _textBuilder.getBufferWithoutReset();
@@ -2165,7 +2171,7 @@ public final class ReaderScanner
     {
         // first char can't be from (char) entity (wrt finishCharacters)
 
-        final int[] TYPES = mCharTypes.TEXT_CHARS;
+        final int[] TYPES = sCharTypes.TEXT_CHARS;
         final char[] inputBuffer = _inputBuffer;
 
         char[] outputBuffer = _textBuilder.getBufferWithoutReset();
@@ -2366,15 +2372,15 @@ public final class ReaderScanner
     }
 
     /*
-    ////////////////////////////////////////////////
-    // 2nd level parsing for coalesced text
-    ////////////////////////////////////////////////
+    /**********************************************************************
+    /* 2nd level parsing for skipping content
+    /**********************************************************************
      */
 
     protected final void skipComment()
         throws XMLStreamException
     {
-        final int[] TYPES = mCharTypes.OTHER_CHARS;
+        final int[] TYPES = sCharTypes.OTHER_CHARS;
         final char[] inputBuffer = _inputBuffer;
 
         while (true) {
@@ -2449,7 +2455,7 @@ public final class ReaderScanner
     protected final void skipPI()
         throws XMLStreamException
     {
-        final int[] TYPES = mCharTypes.OTHER_CHARS;
+        final int[] TYPES = sCharTypes.OTHER_CHARS;
         final char[] inputBuffer = _inputBuffer;
 
         while (true) {
@@ -2523,7 +2529,7 @@ public final class ReaderScanner
     protected final boolean skipCharacters()
         throws XMLStreamException
     {
-        final int[] TYPES = mCharTypes.TEXT_CHARS;
+        final int[] TYPES = sCharTypes.TEXT_CHARS;
         final char[] inputBuffer = _inputBuffer;
 
         while (true) {
@@ -2623,7 +2629,7 @@ public final class ReaderScanner
     protected final void skipCData()
         throws XMLStreamException
     {
-        final int[] TYPES = mCharTypes.OTHER_CHARS;
+        final int[] TYPES = sCharTypes.OTHER_CHARS;
         final char[] inputBuffer = _inputBuffer;
 
         while (true) {
@@ -2754,9 +2760,9 @@ public final class ReaderScanner
     }
 
     /*
-    ////////////////////////////////////////////////
-    // Entity/name handling
-    ////////////////////////////////////////////////
+    /**********************************************************************
+    /* Entity/name handling
+    /**********************************************************************
      */
 
     /**
@@ -3094,7 +3100,7 @@ public final class ReaderScanner
         char[] outputBuffer = _nameBuffer;
         int outPtr = 0;
         // attribute types are closest matches, so let's use them
-        final int[] TYPES = mCharTypes.ATTR_CHARS;
+        final int[] TYPES = sCharTypes.ATTR_CHARS;
         //boolean spaceToAdd = false;
 
         main_loop:
@@ -3139,9 +3145,9 @@ public final class ReaderScanner
     }
 
     /*
-    ////////////////////////////////////////////////
-    // Other parsing helper methods
-    ////////////////////////////////////////////////
+    /**********************************************************************
+    /* Other parsing helper methods
+    /**********************************************************************
      */
 
     /**
@@ -3231,9 +3237,9 @@ public final class ReaderScanner
     }
 
     /*
-    ////////////////////////////////////////////////
-    // Location handling
-    ////////////////////////////////////////////////
+    /**********************************************************************
+    /* Location handling
+    /**********************************************************************
      */
 
     /**
@@ -3269,9 +3275,9 @@ public final class ReaderScanner
     }
 
     /*
-    ////////////////////////////////////////////////
-    // Input loading
-    ////////////////////////////////////////////////
+    /**********************************************************************
+    /* Input loading
+    /**********************************************************************
      */
 
     protected final boolean loadMore()

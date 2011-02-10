@@ -162,7 +162,6 @@ public abstract class StreamScanner
                     reportPrologUnexpChar(isProlog, decodeCharForError((byte)c), null);
                 }
             }
-            
         }
 
         // Ok, got LT:
