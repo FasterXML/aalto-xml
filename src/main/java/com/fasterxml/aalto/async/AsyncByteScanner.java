@@ -1114,9 +1114,8 @@ public abstract class AsyncByteScanner
 
         return EVENT_INCOMPLETE;
     }
-
-    private int handleDTD()
-        throws XMLStreamException
+    
+    private int handleDTD() throws XMLStreamException
     {
         // First: left-over CRs?
         if (_pendingInput == PENDING_STATE_CR) {
@@ -1124,6 +1123,10 @@ public abstract class AsyncByteScanner
                 return EVENT_INCOMPLETE;
             }
         }
+        if (_state == STATE_DTD_INT_SUBSET) {
+            return handleDTDInternalSubset();
+        }
+        
         main_loop:
         while (_inputPtr < _inputEnd) {
             switch (_state) {
@@ -1352,11 +1355,7 @@ public abstract class AsyncByteScanner
                 if (_inputPtr >= _inputEnd) {
                     break;
                 }
-                // fall through
-    
-            case STATE_DTD_INT_SUBSET: 
-                // !!! TBI
-                this.throwInternal();
+                return handleDTDInternalSubset();
                 
             case STATE_DTD_EXPECT_CLOSING_GT:
                 {
@@ -1368,11 +1367,21 @@ public abstract class AsyncByteScanner
                 _state = STATE_DEFAULT;
                 _nextEvent = EVENT_INCOMPLETE;
                 return DTD;
+            default:
+                throwInternal();
             }
         }
         return _currToken;
     }
 
+    private int handleDTDInternalSubset() throws XMLStreamException
+    {
+        // fall through
+        // !!! TBI
+        this.throwInternal();
+        return EVENT_INCOMPLETE;
+    }
+    
     private final boolean parseDtdId(char[] buffer, int ptr) throws XMLStreamException
     {
         final int quote = (int) _elemAttrQuote;
