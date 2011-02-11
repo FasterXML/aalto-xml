@@ -142,7 +142,7 @@ public class StreamReaderImpl
      * Prefixed root-name DOCTYPE declaration gave us, if any (note: also
      * serves as a marker to know if we have seen DOCTYPE yet)
      */
-    protected String _dtdRootName;
+    protected PName _dtdRootName;
     
     /*
     /**********************************************************************
@@ -756,7 +756,7 @@ public class StreamReaderImpl
                 if (_dtdRootName != null) { // dup DOCTYPEs not allowed
                     throwWfe("Duplicate DOCTYPE declaration");
                 }
-                _dtdRootName = _scanner.getName().getPrefixedName();
+                _dtdRootName = _scanner.getName();
             }
         } else if (_parseState == STATE_EPILOG) {
             type = _scanner.nextFromProlog(false);

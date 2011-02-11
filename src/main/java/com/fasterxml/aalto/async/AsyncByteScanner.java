@@ -91,13 +91,14 @@ public abstract class AsyncByteScanner
     private final static int STATE_XMLDECL_ENDQ = 20; // "?" at the end of declaration
 
     // DOCTYPE declaration parsing
-    private final static int SUB_STATE_DTD_D = 1; // "<!D"
-    private final static int SUB_STATE_DTD_DO = 2; // "<!DO"
-    private final static int SUB_STATE_DTD_DOC = 3; // "<!DOC"
-    private final static int SUB_STATE_DTD_DOCT = 4; // "<!DOCT"
-    private final static int SUB_STATE_DTD_DOCTY = 5; // "<!DOCTY"
-    private final static int SUB_STATE_DTD_DOCTYP = 6; // "<!DOCTYP"
-    private final static int SUB_STATE_DTD_DOCTYPE = 7; // "<!DOCTYPE"
+    private final static int STATE_DTD_DOCTYPE = 1; // part of "DOCTYPE"
+    private final static int STATE_DTD_AFTER_DOCTYPE = 2; // "DOCTYPE", need space
+    private final static int STATE_DTD_BEFORE_ROOT_NAME = 3; // optional space before root name
+    private final static int STATE_DTD_ROOT_NAME = 4; // part of root name
+    private final static int STATE_DTD_AFTER_ROOT_NAME = 5; // root name gotten; need a space or '>'
+    private final static int STATE_DTD_BEFORE_IDS = 6; // before "PUBLIC" or "SYSTEM" token
+
+    private final static int STATE_DTD_EXPECT_CLOSING_GT = 50; // ']' gotten that should be followed by '>'
     
     // For CHARACTERS, default is the basic state
     /**
@@ -167,15 +168,15 @@ public abstract class AsyncByteScanner
     private final static int PENDING_STATE_XMLDECL_TARGET = -7; // "<?" at start of doc, part of name
     
     // Processing Instruction parsing:
-    final static int PENDING_STATE_PI_QMARK = -10;
+    final static int PENDING_STATE_PI_QMARK = -15;
 
     // Comment parsing
-    final static int PENDING_STATE_COMMENT_HYPHEN1 = -15;
-    final static int PENDING_STATE_COMMENT_HYPHEN2 = -16;
+    final static int PENDING_STATE_COMMENT_HYPHEN1 = -20;
+    final static int PENDING_STATE_COMMENT_HYPHEN2 = -21;
 
     // CData parsing
-    final static int PENDING_STATE_CDATA_BRACKET1 = -20;
-    final static int PENDING_STATE_CDATA_BRACKET2 = -21;
+    final static int PENDING_STATE_CDATA_BRACKET1 = -30;
+    final static int PENDING_STATE_CDATA_BRACKET2 = -31;
 
     // partially handled entities within attribute/ns values use pending state as well
     final static int PENDING_STATE_ATTR_VALUE_AMP = -60;
@@ -1202,7 +1203,7 @@ public abstract class AsyncByteScanner
         }
         if (b == BYTE_D) {
             _nextEvent = DTD;
-            _state = SUB_STATE_DTD_D;
+            _state = STATE_DEFAULT;
             return handleDTD();
         }
         reportPrologUnexpChar(isProlog, decodeCharForError(b), " (expected '-' for COMMENT)");
@@ -1440,20 +1441,103 @@ public abstract class AsyncByteScanner
         // First: left-over CRs?
         if (_pendingInput == PENDING_STATE_CR) {
             if (!handlePartialCR()) {
-                return _currToken;
+                return EVENT_INCOMPLETE;
             }
         }
-        /*
         main_loop:
-        while (true) {
-           if (_inputPtr >= _inputEnd) {
-               break;
-           }
+        while (_inputPtr < _inputEnd) {
             switch (_state) {
-            case SUB_STATE_XMLDECL_LT: // "<" at start of doc
+            case STATE_DEFAULT: // seen 'D'
+                _tokenName = parseNewName(BYTE_D);
+                if (_tokenName == null) {
+                    _state = STATE_DTD_DOCTYPE;
+                    return EVENT_INCOMPLETE;
+                }
+                if (!"DOCTYPE".equals(_tokenName.getPrefixedName())) {
+                    reportPrologProblem(true, "expected 'DOCTYPE'");
+                }
+                _state = STATE_DTD_AFTER_DOCTYPE;
+                continue main_loop;
+            case STATE_DTD_DOCTYPE:
+                _tokenName = parsePName();
+                if (_tokenName == null) {
+                    _state = STATE_DTD_DOCTYPE;
+                    return EVENT_INCOMPLETE;
+                }
+                if (!"DOCTYPE".equals(_tokenName.getPrefixedName())) {
+                    reportPrologProblem(true, "expected 'DOCTYPE'");
+                }
+                if (_inputPtr >= _inputEnd) {
+                    break;
+                }
+                // fall through
+            case STATE_DTD_AFTER_DOCTYPE:
+                {
+                    byte b = _inputBuffer[_inputPtr++];
+                    if (b == BYTE_SPACE || b == BYTE_CR || b == BYTE_LF || b == BYTE_TAB) {
+                        _state = STATE_DTD_BEFORE_ROOT_NAME;
+                    } else {
+                        reportPrologUnexpChar(true, decodeCharForError(b), " (expected space after 'DOCTYPE')");
+                    }
+                }
+                if (_inputPtr >= _inputEnd) {
+                    break;
+                }
+                // fall through
+            case STATE_DTD_BEFORE_ROOT_NAME:
+                if (!asyncSkipSpace()) { // not enough input
+                    break;
+                }
+                if ((_tokenName = parseNewName(_inputBuffer[_inputPtr++])) == null) { // incomplete
+                    _state = STATE_DTD_ROOT_NAME;
+                    break;
+                }
+                _state = STATE_DTD_ROOT_NAME;
+                continue main_loop;
+            case STATE_DTD_ROOT_NAME:
+                if ((_tokenName = parsePName()) == null) { // incomplete
+                    break;
+                }
+                _state = STATE_DTD_AFTER_ROOT_NAME;
+                if (_inputPtr >= _inputEnd) {
+                    break;
+                }
+                // fall through
+            case STATE_DTD_AFTER_ROOT_NAME:
+                {
+                    byte b = _inputBuffer[_inputPtr++];
+                    if (b == BYTE_GT) {
+                        _state = STATE_DEFAULT;
+                        _nextEvent = EVENT_INCOMPLETE;
+                        return DTD;
+                    }
+                    if (b == BYTE_SPACE || b == BYTE_CR || b == BYTE_LF || b == BYTE_TAB) {
+                        _state = STATE_DTD_BEFORE_IDS;
+                    } else {
+                        reportPrologUnexpChar(true, decodeCharForError(b), " (expected space after root name in DOCTYPE declaration)");
+                    }
+                }
+                if (_inputPtr >= _inputEnd) {
+                    break;
+                }
+                // fall through
+            case STATE_DTD_BEFORE_IDS:
+
+                // !!! TBI: check out 'SYSTEM' or 'PUBLIC'
+                throwInternal();
+            
+            case STATE_DTD_EXPECT_CLOSING_GT:
+                {
+                    byte b = _inputBuffer[_inputPtr++];
+                    if (b != BYTE_GT) {
+                        reportPrologUnexpChar(true, b, "expected '>' to end DTD");
+                    }
+                }
+                _state = STATE_DEFAULT;
+                _nextEvent = EVENT_INCOMPLETE;
+                return DTD;
             }
         }
-            */
         return _currToken;
     }
 

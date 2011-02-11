@@ -1355,8 +1355,7 @@ public abstract class XmlScanner
     protected void reportPrologUnexpChar(boolean isProlog, int ch, String msg)
         throws XMLStreamException
     {
-        String fullMsg = isProlog ? ErrorConsts.SUFFIX_IN_PROLOG
-            : ErrorConsts.SUFFIX_IN_EPILOG;
+        String fullMsg = isProlog ? ErrorConsts.SUFFIX_IN_PROLOG : ErrorConsts.SUFFIX_IN_EPILOG;
         if (msg == null) {
             if (ch == '&') {
                 throwUnexpectedChar(ch, fullMsg+"; no entities allowed");
@@ -1367,6 +1366,13 @@ public abstract class XmlScanner
         throwUnexpectedChar(ch, fullMsg);
     }
 
+    protected void reportPrologProblem(boolean isProlog, String msg)
+        throws XMLStreamException
+    {
+        String prefix = isProlog ? ErrorConsts.SUFFIX_IN_PROLOG : ErrorConsts.SUFFIX_IN_EPILOG;
+        reportInputProblem(prefix+": "+msg);
+    }
+    
     protected void reportTreeUnexpChar(int ch, String msg)
         throws XMLStreamException
     {
