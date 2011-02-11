@@ -1,6 +1,8 @@
 package async;
 
-import async.AsyncTestBase.AsyncReaderWrapper;
+import javax.xml.stream.XMLStreamException;
+
+//import async.AsyncTestBase.AsyncReaderWrapper;
 
 import com.fasterxml.aalto.AsyncXMLInputFactory;
 import com.fasterxml.aalto.AsyncXMLStreamReader;
@@ -25,11 +27,11 @@ public class TestDoctypeParsing extends AsyncTestBase
     {
         for (int spaces = 0; spaces < 3; ++spaces) {
             String SPC = spaces(spaces);
-            _testWithSystemId(SPC, 1);
-            _testWithSystemId(SPC, 2);
-            _testWithSystemId(SPC, 3);
-            _testWithSystemId(SPC, 6);
-            _testWithSystemId(SPC, 900);
+            _testWithIds(SPC, 1);
+            _testWithIds(SPC, 2);
+            _testWithIds(SPC, 3);
+            _testWithIds(SPC, 6);
+            _testWithIds(SPC, 900);
         }
     }
 
@@ -44,7 +46,19 @@ public class TestDoctypeParsing extends AsyncTestBase
             _testFull(SPC, 900);
         }
     }
-    
+
+    public void testInvalidDup() throws Exception
+    {
+        for (int spaces = 0; spaces < 3; ++spaces) {
+            String SPC = spaces(spaces);
+            _testInvalidDup(SPC, 1);
+            _testInvalidDup(SPC, 2);
+            _testInvalidDup(SPC, 3);
+            _testInvalidDup(SPC, 6);
+            _testInvalidDup(SPC, 900);
+        }
+    }
+
     /*
     /**********************************************************************
     /* Helper methods
@@ -65,33 +79,65 @@ public class TestDoctypeParsing extends AsyncTestBase
         assertTokenType(END_ELEMENT, reader.nextToken());
     }
 
-    private void _testWithSystemId(String spaces, int chunkSize) throws Exception
+    private void _testWithIds(String spaces, int chunkSize) throws Exception
     {
-        String XML = spaces+"<!DOCTYPE root>  <root />";
+        final String PUBLIC_ID = "some-id";
+        final String SYSTEM_ID = "file:/something";
+        String XML = spaces+"<!DOCTYPE root PUBLIC '"+PUBLIC_ID+"' \""+SYSTEM_ID+"\"></root>";
         AsyncXMLInputFactory f = new InputFactoryImpl();
         AsyncXMLStreamReader sr = f.createAsyncXMLStreamReader();
         AsyncReaderWrapper reader = new AsyncReaderWrapper(sr, chunkSize, XML);
         int t = verifyStart(reader);
         assertTokenType(DTD, t);
-        // as per Stax API, can't call getLocalName (ugh), but Stax2 gives us this:
         assertEquals("root", sr.getPrefixedName());
+
+        assertEquals(PUBLIC_ID, sr.getDTDInfo().getDTDPublicId());
+        assertEquals(SYSTEM_ID, sr.getDTDInfo().getDTDSystemId());
+
         assertTokenType(START_ELEMENT, reader.nextToken());
         assertTokenType(END_ELEMENT, reader.nextToken());
+        sr.close();
     }
 
     private void _testFull(String spaces, int chunkSize) throws Exception
     {
-        String XML = spaces+"<!DOCTYPE root>  <root />";
+        final String INTERNAL_SUBSET = "<!--My dtd-->\n"
+            +"<!ELEMENT html (head, body)>"
+            +"<!ATTLIST head title CDATA #IMPLIED>"
+            ;
+        final String SYSTEM_ID = "file:/something";
+        String XML = spaces+"<!DOCTYPE root SYSTEM '"+SYSTEM_ID+"' ["+INTERNAL_SUBSET+"]>\nroot";
         AsyncXMLInputFactory f = new InputFactoryImpl();
         AsyncXMLStreamReader sr = f.createAsyncXMLStreamReader();
         AsyncReaderWrapper reader = new AsyncReaderWrapper(sr, chunkSize, XML);
         int t = verifyStart(reader);
         assertTokenType(DTD, t);
-        // as per Stax API, can't call getLocalName (ugh), but Stax2 gives us this:
+        assertNull(sr.getDTDInfo().getDTDPublicId());
+        assertEquals(SYSTEM_ID, sr.getDTDInfo().getDTDSystemId());
         assertEquals("root", sr.getPrefixedName());
+        assertEquals(INTERNAL_SUBSET, sr.getText());
         assertTokenType(START_ELEMENT, reader.nextToken());
         assertTokenType(END_ELEMENT, reader.nextToken());
+        sr.close();
     }
 
+    private void _testInvalidDup(String spaces, int chunkSize) throws Exception
+    {
+        String XML = spaces+"<!DOCTYPE root> <!DOCTYPE root> <root />";
+        AsyncXMLInputFactory f = new InputFactoryImpl();
+        AsyncXMLStreamReader sr = f.createAsyncXMLStreamReader();
+        AsyncReaderWrapper reader = new AsyncReaderWrapper(sr, chunkSize, XML);
+        int t = verifyStart(reader);
+        assertTokenType(DTD, t);
+        assertEquals("root", sr.getPrefixedName());
+
+        // so far so good, but not any more:
+        try {
+            reader.nextToken();
+        } catch (XMLStreamException e) {
+            verifyException(e, "Duplicate DOCTYPE declaration");
+        }
+        sr.close();
+    }
 
 }

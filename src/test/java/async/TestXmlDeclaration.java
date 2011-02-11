@@ -12,23 +12,22 @@ public class TestXmlDeclaration extends AsyncTestBase
 
     public void testNoDeclaration() throws Exception
     {
-        // first, with empty root elem
-        String XML = "   <root />";
         AsyncXMLInputFactory f = new InputFactoryImpl();
-
-        for (int chunkSize : CHUNK_SIZES) {
-            AsyncXMLStreamReader sr = f.createAsyncXMLStreamReader();
-            AsyncReaderWrapper reader = new AsyncReaderWrapper(sr, chunkSize, XML);
-            assertEquals(EVENT_INCOMPLETE, reader.currentToken());
-            assertTokenType(START_DOCUMENT, reader.nextToken());
-            // no info, however; except for encoding auto-detection
-            assertNull(sr.getCharacterEncodingScheme());
-            assertEquals("UTF-8", sr.getEncoding());
-            assertNull(sr.getVersion());
-            assertFalse(sr.standaloneSet());
-
-            assertTokenType(START_ELEMENT, reader.nextToken());
-            assertEquals("root", sr.getLocalName());
+        for (String XML : new String[] { "   <root />", "<root/>" }) {
+            for (int chunkSize : CHUNK_SIZES) {
+                AsyncXMLStreamReader sr = f.createAsyncXMLStreamReader();
+                AsyncReaderWrapper reader = new AsyncReaderWrapper(sr, chunkSize, XML);
+                assertEquals(EVENT_INCOMPLETE, reader.currentToken());
+                assertTokenType(START_DOCUMENT, reader.nextToken());
+                // no info, however; except for encoding auto-detection
+                assertNull(sr.getCharacterEncodingScheme());
+                assertEquals("UTF-8", sr.getEncoding());
+                assertNull(sr.getVersion());
+                assertFalse(sr.standaloneSet());
+    
+                assertTokenType(START_ELEMENT, reader.nextToken());
+                assertEquals("root", sr.getLocalName());
+            }
         }
     }
 
@@ -51,7 +50,7 @@ public class TestXmlDeclaration extends AsyncTestBase
             assertEquals("root", sr.getLocalName());
         }
     }
-    
+
     public void testEncodingDeclaration() throws Exception
     {
         String XML = "<?xml version= \"1.0\"   encoding='UTF-8' ?><root/>";

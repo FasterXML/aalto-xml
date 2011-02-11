@@ -1025,95 +1025,6 @@ public final class Utf8Scanner
         }
     }
 
-    /**
-     * Eventually, we should properly parse the internal subset for
-     * rough well-formedness checks. For now, though, let's just try
-     * to match well-formed internal subset correctly, without worrying
-     * about possible deviations
-     *<p>
-     * Our first take is as simple (simplistic) as possible: we'll just
-     * hunt for the closing ']' '>' combination
-     */
-    private final void skipDTD()
-        throws XMLStreamException
-    {
-        final int[] TYPES = _charTypes.DTD_CHARS;
-        int nesting = 1; // for brackets
-
-        main_loop:
-        while (true) {
-            int c;
-
-            /* First we'll have a quickie loop for speeding through
-             * uneventful chars...
-             */
-            ascii_loop:
-            while (true) {
-                int ptr = _inputPtr;
-                int max = _inputEnd;
-                if (ptr >= max) {
-                    loadMoreGuaranteed();
-                    ptr = _inputPtr;
-                    max = _inputEnd;
-                }
-                while (ptr < max) {
-                    c = (int) _inputBuffer[ptr++] & 0xFF;
-                    if (TYPES[c] != 0) {
-                        _inputPtr = ptr;
-                        break ascii_loop;
-                    }
-                }
-                _inputPtr = ptr;
-            }
-
-            switch (TYPES[c]) {
-            case XmlCharTypes.CT_INVALID:
-                throwInvalidXmlChar(c);
-            case XmlCharTypes.CT_WS_CR:
-                if (_inputPtr >= _inputEnd) {
-                    loadMoreGuaranteed();
-                }
-                if (_inputBuffer[_inputPtr] == BYTE_LF) {
-                    ++_inputPtr;
-                }
-                markLF();
-                break;
-            case XmlCharTypes.CT_WS_LF:
-                markLF();
-                break;
-            case XmlCharTypes.CT_LBRACKET:
-                ++nesting;
-                break;
-            case XmlCharTypes.CT_RBRACKET:
-                --nesting;
-                if (nesting == 0) { // end
-                    break main_loop;
-                }
-                break;
-            case XmlCharTypes.CT_MULTIBYTE_2:
-                skipUtf8_2(c);
-                break;
-            case XmlCharTypes.CT_MULTIBYTE_3:
-                skipUtf8_3(c);
-                break;
-            case XmlCharTypes.CT_MULTIBYTE_4:
-                skipUtf8_4(c);
-                break;
-            case XmlCharTypes.CT_MULTIBYTE_N:
-                reportInvalidInitial(c);
-                
-            // default:
-                // Other types are not important here...
-            }
-        }
-
-        // Ok, need to get '>' to close DTD int. subset
-        byte b = skipInternalWs(false, null);
-        if (b != BYTE_GT) {
-            throwUnexpectedChar(decodeCharForError(b), " expected '>' after the internal subset");
-        }
-    }
-
     protected final void skipPI()
         throws XMLStreamException
     {
@@ -1831,8 +1742,7 @@ public final class Utf8Scanner
     protected final void finishDTD(boolean copyContents)
         throws XMLStreamException
     {
-        char[] outputBuffer = copyContents ?
-            _textBuilder.resetWithEmpty() : null;
+        char[] outputBuffer = copyContents ? _textBuilder.resetWithEmpty() : null;
         int outPtr = 0;
 
         final int[] TYPES = _charTypes.DTD_CHARS;

@@ -17,6 +17,14 @@ public class TestDTDSkimming extends base.BaseTestCase
         _doTestSimple("UTF-8", true);
     }
 
+    public void testInvalidDup() throws Exception
+    {
+        _doTestInvalidDup(null, false);
+        _doTestInvalidDup(null, true);
+        _doTestInvalidDup("UTF-8", false);
+        _doTestInvalidDup("UTF-8", true);
+    }
+    
     /*
     /**********************************************************************
     /* Helper methods
@@ -43,7 +51,28 @@ public class TestDTDSkimming extends base.BaseTestCase
         assertEquals("root", sr.getLocalName());
         assertTokenType(END_DOCUMENT, sr.next());
         sr.close();
-        
+    }
+
+    private void _doTestInvalidDup(String encoding, boolean skip)
+        throws IOException, XMLStreamException
+    {
+        String DOC = "<?xml version='1.0'?><!DOCTYPE root>  <!DOCTYPE root>";
+        XMLStreamReader2 sr = createReader(DOC, encoding);
+        assertTokenType(START_DOCUMENT, sr.getEventType());
+        int t = sr.next();
+        assertTokenType(DTD, t);
+        if (!skip) {
+            assertEquals("root", sr.getPrefixedName());
+            sr.getText(); // just to force its parsing
+        }
+        // But second one should fail
+        try {
+            t = sr.next(); // to get second DTD
+            fail("Should fail on invalid DOCTYPE declaration: instead got "+t);
+        } catch (XMLStreamException e) {
+            verifyException(e, "Duplicate DOCTYPE declaration");
+        }
+        sr.close();
     }
     
     private XMLStreamReader2 createReader(String content, String enc)

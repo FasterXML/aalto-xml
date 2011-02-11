@@ -123,10 +123,10 @@ public class StreamReaderImpl
      * element binary content.
      */
     protected CharArrayBase64Decoder _base64Decoder = null;
-
+    
     /*
     /**********************************************************************
-    /* Collected XML declaration info
+    /* Collected other information
     /**********************************************************************
      */
 
@@ -138,6 +138,12 @@ public class StreamReaderImpl
 
     //final String mInputEncoding;
 
+    /**
+     * Prefixed root-name DOCTYPE declaration gave us, if any (note: also
+     * serves as a marker to know if we have seen DOCTYPE yet)
+     */
+    protected String _dtdRootName;
+    
     /*
     /**********************************************************************
     /* Life-cycle:
@@ -746,6 +752,11 @@ public class StreamReaderImpl
             if (type == START_ELEMENT) {
                 _parseState = STATE_TREE;
                 _attrCount = _scanner.getAttrCount();
+            } else if (type == DTD) {
+                if (_dtdRootName != null) { // dup DOCTYPEs not allowed
+                    throwWfe("Duplicate DOCTYPE declaration");
+                }
+                _dtdRootName = _scanner.getName().getPrefixedName();
             }
         } else if (_parseState == STATE_EPILOG) {
             type = _scanner.nextFromProlog(false);
@@ -1659,8 +1670,7 @@ public class StreamReaderImpl
      * Throws generic parse error with specified message and current parsing
      * location.
      */
-    protected void throwWfe(String msg)
-        throws XMLStreamException
+    protected void throwWfe(String msg) throws XMLStreamException
     {
         throw new WFCException(msg, getLastCharLocation());
     }
@@ -1677,14 +1687,12 @@ public class StreamReaderImpl
                                         +ErrorConsts.tokenTypeDesc(_currToken));
     }
 
-    protected void throwFromIOE(IOException ioe)
-        throws XMLStreamException
+    protected void throwFromIOE(IOException ioe) throws XMLStreamException
     {
         throw new IoStreamException(ioe);
     }
 
-    protected void throwUnexpectedEOI(String msg)
-        throws XMLStreamException
+    protected void throwUnexpectedEOI(String msg) throws XMLStreamException
     {
         throwWfe("Unexpected End-of-input"+msg);
     }
