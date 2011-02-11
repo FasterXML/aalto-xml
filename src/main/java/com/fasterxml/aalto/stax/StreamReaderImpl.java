@@ -1493,11 +1493,11 @@ public class StreamReaderImpl
 
     public final String getDTDPublicId()
     {
-        return _scanner.getDtdPublicId();
+        return _scanner.getDTDPublicId();
     }
 
     public final String getDTDSystemId() {
-        return _scanner.getDtdSystemId();
+        return _scanner.getDTDSystemId();
     }
 
     /**

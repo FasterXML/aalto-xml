@@ -26,7 +26,7 @@ public class TestDoctypeParsing extends AsyncTestBase
     public void testWithSystemId() throws Exception
     {
         for (int spaces = 0; spaces < 3; ++spaces) {
-            String SPC = spaces(spaces);
+            String SPC = spaces(spaces);            
             _testWithIds(SPC, 1);
             _testWithIds(SPC, 2);
             _testWithIds(SPC, 3);
@@ -83,16 +83,16 @@ public class TestDoctypeParsing extends AsyncTestBase
     {
         final String PUBLIC_ID = "some-id";
         final String SYSTEM_ID = "file:/something";
-        String XML = spaces+"<!DOCTYPE root PUBLIC '"+PUBLIC_ID+"' \""+SYSTEM_ID+"\"></root>";
+        String XML = spaces+"<!DOCTYPE root PUBLIC '"+PUBLIC_ID+"' \""+SYSTEM_ID+"\"><root/>";
         AsyncXMLInputFactory f = new InputFactoryImpl();
         AsyncXMLStreamReader sr = f.createAsyncXMLStreamReader();
         AsyncReaderWrapper reader = new AsyncReaderWrapper(sr, chunkSize, XML);
         int t = verifyStart(reader);
         assertTokenType(DTD, t);
+        assertTokenType(DTD, sr.getEventType());
         assertEquals("root", sr.getPrefixedName());
-
-        assertEquals(PUBLIC_ID, sr.getDTDInfo().getDTDPublicId());
         assertEquals(SYSTEM_ID, sr.getDTDInfo().getDTDSystemId());
+        assertEquals(PUBLIC_ID, sr.getDTDInfo().getDTDPublicId());
 
         assertTokenType(START_ELEMENT, reader.nextToken());
         assertTokenType(END_ELEMENT, reader.nextToken());
@@ -106,7 +106,7 @@ public class TestDoctypeParsing extends AsyncTestBase
             +"<!ATTLIST head title CDATA #IMPLIED>"
             ;
         final String SYSTEM_ID = "file:/something";
-        String XML = spaces+"<!DOCTYPE root SYSTEM '"+SYSTEM_ID+"' ["+INTERNAL_SUBSET+"]>\nroot";
+        String XML = spaces+"<!DOCTYPE root SYSTEM '"+SYSTEM_ID+"' ["+INTERNAL_SUBSET+"]>\n<root/>";
         AsyncXMLInputFactory f = new InputFactoryImpl();
         AsyncXMLStreamReader sr = f.createAsyncXMLStreamReader();
         AsyncReaderWrapper reader = new AsyncReaderWrapper(sr, chunkSize, XML);

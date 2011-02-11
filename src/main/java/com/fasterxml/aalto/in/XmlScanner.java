@@ -528,20 +528,14 @@ public abstract class XmlScanner
         return _tokenName.constructQName(_defaultNs);
     }
 
-    public final String getDtdPublicId()
+    public final String getDTDPublicId()
     {
-        if (_currToken == DTD) {
-            return _publicId;
-        }
-        return null;
+        return _publicId;
     }
 
-    public final String getDtdSystemId()
+    public final String getDTDSystemId()
     {
-        if (_currToken == DTD) {
-            return _systemId;
-        }
-        return null;
+        return _systemId;
     }
 
     /*

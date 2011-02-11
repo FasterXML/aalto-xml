@@ -97,6 +97,16 @@ public abstract class AsyncByteScanner
     private final static int STATE_DTD_ROOT_NAME = 4; // part of root name
     private final static int STATE_DTD_AFTER_ROOT_NAME = 5; // root name gotten; need a space or '>'
     private final static int STATE_DTD_BEFORE_IDS = 6; // before "PUBLIC" or "SYSTEM" token
+    private final static int STATE_DTD_PUBLIC_OR_SYSTEM = 7; // parsing "PUBLIC" or "SYSTEM"
+    private final static int STATE_DTD_AFTER_PUBLIC = 8; // "PUBLIC" found, need space
+    private final static int STATE_DTD_AFTER_SYSTEM = 9; // "SYSTEM" found, need space
+    private final static int STATE_DTD_BEFORE_PUBLIC_ID = 10; // after "PUBLIC", space, need quoted public id
+    private final static int STATE_DTD_PUBLIC_ID = 11; // parsing public ID
+    private final static int STATE_DTD_AFTER_PUBLIC_ID = 12; // public ID parsed, need space
+    private final static int STATE_DTD_BEFORE_SYSTEM_ID = 13; // about to parse quoted system id
+    private final static int STATE_DTD_SYSTEM_ID = 14; // parsing system ID
+    private final static int STATE_DTD_AFTER_SYSTEM_ID = 15; // after system ID, optional space, '>' or int subset
+    private final static int STATE_DTD_INT_SUBSET = 16; // parsing internal subset
 
     private final static int STATE_DTD_EXPECT_CLOSING_GT = 50; // ']' gotten that should be followed by '>'
     
@@ -690,48 +700,30 @@ public abstract class AsyncByteScanner
 
     /*
     /**********************************************************************
-    /* Second-level parsing
+    /* Second-level parsing, prolog (XML declaration, DOCTYPE)
     /**********************************************************************
      */
 
-    /**
-     * Method to skip whatever space can be skipped.
-     *<p>
-     * NOTE: if available content ends with a CR, method will set
-     * <code>_pendingInput</code> to <code>PENDING_STATE_CR</code>.
-     * 
-     * @return True, if was able to skip through the space and find
-     *   a non-space byte; false if reached end-of-buffer
-     */
-    private boolean asyncSkipSpace() throws XMLStreamException
+    private final int handlePrologDeclStart(boolean isProlog)
+        throws XMLStreamException
     {
-        while (_inputPtr < _inputEnd) {
-            byte b = _inputBuffer[_inputPtr];
-            if ((b & 0xFF) > INT_SPACE) {
-                // hmmmh. Shouldn't this be handled someplace else?
-                if (_pendingInput == PENDING_STATE_CR) {
-                    markLF();
-                    _pendingInput = 0;
-                }
-                return true;
-            }
-            ++_inputPtr;
-            if (b == BYTE_LF) {
-                markLF();
-            } else if (b == BYTE_CR) {
-                if (_inputPtr >= _inputEnd) {
-                    _pendingInput = PENDING_STATE_CR;
-                    break;
-                }
-                if (_inputBuffer[_inputPtr] == BYTE_LF) {
-                    ++_inputPtr;
-                }
-                markLF();
-            } else if (b != BYTE_SPACE && b != BYTE_TAB) {
-                throwInvalidSpace(b);
-            }
+        if (_inputPtr >= _inputEnd) { // nothing we can do?
+            return EVENT_INCOMPLETE;
         }
-        return false;
+        byte b = _inputBuffer[_inputPtr++];
+        // So far, we have seen "<!", need to know if it's DTD or COMMENT 
+        if (b == BYTE_HYPHEN) {
+            _nextEvent = COMMENT;
+            _state = STATE_DEFAULT;
+            return handleComment();
+        }
+        if (b == BYTE_D) {
+            _nextEvent = DTD;
+            _state = STATE_DEFAULT;
+            return handleDTD();
+        }
+        reportPrologUnexpChar(isProlog, decodeCharForError(b), " (expected '-' for COMMENT)");
+        return EVENT_INCOMPLETE; // never gets here
     }
     
     /**
@@ -1122,7 +1114,288 @@ public abstract class AsyncByteScanner
 
         return EVENT_INCOMPLETE;
     }
+
+    private int handleDTD()
+        throws XMLStreamException
+    {
+        // First: left-over CRs?
+        if (_pendingInput == PENDING_STATE_CR) {
+            if (!handlePartialCR()) {
+                return EVENT_INCOMPLETE;
+            }
+        }
+        main_loop:
+        while (_inputPtr < _inputEnd) {
+            switch (_state) {
+            case STATE_DEFAULT: // seen 'D'
+                _tokenName = parseNewName(BYTE_D);
+                if (_tokenName == null) {
+                    _state = STATE_DTD_DOCTYPE;
+                    return EVENT_INCOMPLETE;
+                }
+                if (!"DOCTYPE".equals(_tokenName.getPrefixedName())) {
+                    reportPrologProblem(true, "expected 'DOCTYPE'");
+                }
+                _state = STATE_DTD_AFTER_DOCTYPE;
+                continue main_loop;
+            case STATE_DTD_DOCTYPE:
+                _tokenName = parsePName();
+                if (_tokenName == null) {
+                    _state = STATE_DTD_DOCTYPE;
+                    return EVENT_INCOMPLETE;
+                }
+                if (!"DOCTYPE".equals(_tokenName.getPrefixedName())) {
+                    reportPrologProblem(true, "expected 'DOCTYPE'");
+                }
+                if (_inputPtr >= _inputEnd) {
+                    break;
+                }
+                // fall through
+            case STATE_DTD_AFTER_DOCTYPE:
+                {
+                    byte b = _inputBuffer[_inputPtr++];
+                    if (b == BYTE_SPACE || b == BYTE_CR || b == BYTE_LF || b == BYTE_TAB) {
+                        _state = STATE_DTD_BEFORE_ROOT_NAME;
+                    } else {
+                        reportPrologUnexpChar(true, decodeCharForError(b), " (expected space after 'DOCTYPE')");
+                    }
+                }
+                // fall through (ok to skip bounds checks, async-skip does it)
+            case STATE_DTD_BEFORE_ROOT_NAME:
+                if (!asyncSkipSpace()) { // not enough input
+                    break;
+                }
+                if ((_tokenName = parseNewName(_inputBuffer[_inputPtr++])) == null) { // incomplete
+                    _state = STATE_DTD_ROOT_NAME;
+                    break;
+                }
+                _state = STATE_DTD_ROOT_NAME;
+                continue main_loop;
+            case STATE_DTD_ROOT_NAME:
+                if ((_tokenName = parsePName()) == null) { // incomplete
+                    break;
+                }
+                _state = STATE_DTD_AFTER_ROOT_NAME;
+                if (_inputPtr >= _inputEnd) {
+                    break;
+                }
+                // fall through
+            case STATE_DTD_AFTER_ROOT_NAME:
+                {
+                    byte b = _inputBuffer[_inputPtr++];
+                    if (b == BYTE_GT) {
+                        _state = STATE_DEFAULT;
+                        _nextEvent = EVENT_INCOMPLETE;
+                        return DTD;
+                    }
+                    if (b == BYTE_SPACE || b == BYTE_CR || b == BYTE_LF || b == BYTE_TAB) {
+                        _state = STATE_DTD_BEFORE_IDS;
+                    } else {
+                        reportPrologUnexpChar(true, decodeCharForError(b), " (expected space after root name in DOCTYPE declaration)");
+                    }
+                }
+                // fall through (ok to skip bounds checks, async-skip does it)
+            case STATE_DTD_BEFORE_IDS:
+                if (!asyncSkipSpace()) { // not enough input
+                    break;
+                }
+                {
+                    byte b = _inputBuffer[_inputPtr++];
+                    if (b == BYTE_GT) {
+                        _state = STATE_DEFAULT;
+                        _nextEvent = EVENT_INCOMPLETE;
+                        return DTD;
+                    }
+                    PName name;
+                    if ((name = parseNewName(b)) == null) {
+                        _state = STATE_DTD_PUBLIC_OR_SYSTEM;
+                        break;
+                    }
+                    String str = name.getPrefixedName();
+                    if ("PUBLIC".equals(str)) {
+                        _state = STATE_DTD_AFTER_PUBLIC;
+                    } else if ("SYSTEM".equals(str)) {
+                        _state = STATE_DTD_AFTER_SYSTEM;
+                    } else {
+                        reportPrologProblem(true, "unexpected token '"+str+"': expected either PUBLIC or SYSTEM");
+                    }
+                }
+                continue main_loop;
     
+            case STATE_DTD_PUBLIC_OR_SYSTEM: 
+                {
+                    PName name;
+                    if ((name = parsePName()) == null) {
+                        _state = STATE_DTD_PUBLIC_OR_SYSTEM;
+                        break;
+                    }
+                    String str = name.getPrefixedName();
+                    if ("PUBLIC".equals(str)) {
+                        _state = STATE_DTD_AFTER_PUBLIC;
+                    } else if ("SYSTEM".equals(str)) {
+                        _state = STATE_DTD_AFTER_SYSTEM;
+                    } else {
+                        reportPrologProblem(true, "unexpected token '"+str+"': expected either PUBLIC or SYSTEM");
+                    }
+                }
+                continue main_loop;
+                    
+            case STATE_DTD_AFTER_PUBLIC: 
+                {
+                    byte b = _inputBuffer[_inputPtr++];
+                    if (b == BYTE_SPACE || b == BYTE_CR || b == BYTE_LF || b == BYTE_TAB) {
+                        _state = STATE_DTD_BEFORE_PUBLIC_ID;
+                    } else {
+                        reportPrologUnexpChar(true, decodeCharForError(b), " (expected space after PUBLIC keyword)");
+                    }
+                }
+                continue main_loop;
+    
+            case STATE_DTD_AFTER_SYSTEM: 
+                {
+                    byte b = _inputBuffer[_inputPtr++];
+                    if (b == BYTE_SPACE || b == BYTE_CR || b == BYTE_LF || b == BYTE_TAB) {
+                        _state = STATE_DTD_BEFORE_SYSTEM_ID;
+                    } else {
+                        reportPrologUnexpChar(true, decodeCharForError(b), " (expected space after SYSTEM keyword)");
+                    }
+                }
+                continue main_loop;
+    
+            case STATE_DTD_BEFORE_PUBLIC_ID: 
+                if (!asyncSkipSpace()) {
+                    break;
+                }
+                _elemAttrQuote = _inputBuffer[_inputPtr++];
+                if (_elemAttrQuote != BYTE_QUOT && _elemAttrQuote != BYTE_APOS) {
+                    reportPrologUnexpChar(true, decodeCharForError(_elemAttrQuote), " (expected '\"' or ''' for PUBLIC ID)");
+                }
+                {
+                    char[] buf = _textBuilder.resetWithEmpty();
+                    if (_inputPtr >= _inputEnd || !parseDtdId(buf, 0)) {
+                        _state = STATE_DTD_PUBLIC_ID;
+                        break;
+                    }
+                }
+                verifyAndSetPublicId();
+                _state = STATE_DTD_AFTER_PUBLIC_ID;
+                continue main_loop;
+    
+            case STATE_DTD_PUBLIC_ID: 
+                if (!parseDtdId(_textBuilder.getBufferWithoutReset(), _textBuilder.getCurrentLength())) {
+                    break;
+                }
+                verifyAndSetPublicId();
+                _state = STATE_DTD_AFTER_PUBLIC_ID;
+                if (_inputPtr >= _inputEnd) {
+                    break;
+                }
+                // fall through
+            case STATE_DTD_AFTER_PUBLIC_ID: 
+                {
+                    byte b = _inputBuffer[_inputPtr++];
+                    if (b == BYTE_SPACE || b == BYTE_CR || b == BYTE_LF || b == BYTE_TAB) {
+                        _state = STATE_DTD_BEFORE_SYSTEM_ID;
+                    } else {
+                        reportPrologUnexpChar(true, decodeCharForError(b), " (expected space after PUBLIC ID)");
+                    }
+                }
+                // fall through (ok to skip bounds checks, async-skip does it)
+    
+            case STATE_DTD_BEFORE_SYSTEM_ID: 
+                if (!asyncSkipSpace()) {
+                    break;
+                }
+                _elemAttrQuote = _inputBuffer[_inputPtr++];
+                if (_elemAttrQuote != BYTE_QUOT && _elemAttrQuote != BYTE_APOS) {
+                    reportPrologUnexpChar(true, decodeCharForError(_elemAttrQuote), " (expected '\"' or ''' for SYSTEM ID)");
+                }
+                {
+                    char[] buf = _textBuilder.resetWithEmpty();
+                    if (_inputPtr >= _inputEnd || !parseDtdId(buf, 0)) {
+                        _state = STATE_DTD_SYSTEM_ID;
+                        break;
+                    }
+                }
+                verifyAndSetSystemId();
+                _state = STATE_DTD_AFTER_SYSTEM_ID;
+                continue main_loop;
+
+            case STATE_DTD_SYSTEM_ID: 
+                if (!parseDtdId(_textBuilder.getBufferWithoutReset(), _textBuilder.getCurrentLength())) {
+                    break;
+                }
+                verifyAndSetSystemId();
+                _state = STATE_DTD_AFTER_SYSTEM_ID;
+                if (_inputPtr >= _inputEnd) {
+                    break;
+                }
+                // fall through
+    
+            case STATE_DTD_AFTER_SYSTEM_ID:
+                if (!asyncSkipSpace()) {
+                    break;
+                }
+                {
+                    byte b = _inputBuffer[_inputPtr++];
+                    if (b == BYTE_GT) {
+                        _state = STATE_DEFAULT;
+                        _nextEvent = EVENT_INCOMPLETE;
+                        return DTD;
+                    }
+                    if (b != BYTE_LBRACKET) {
+                        reportPrologUnexpChar(true, decodeCharForError(_elemAttrQuote), " (expected either '[' for internal subset, or '>' to end DOCTYPE)");
+                    }
+                }
+                _state = STATE_DTD_INT_SUBSET;
+                _textBuilder.resetWithEmpty();
+                if (_inputPtr >= _inputEnd) {
+                    break;
+                }
+                // fall through
+    
+            case STATE_DTD_INT_SUBSET: 
+                // !!! TBI
+                this.throwInternal();
+                
+            case STATE_DTD_EXPECT_CLOSING_GT:
+                {
+                    byte b = _inputBuffer[_inputPtr++];
+                    if (b != BYTE_GT) {
+                        reportPrologUnexpChar(true, b, "expected '>' to end DTD");
+                    }
+                }
+                _state = STATE_DEFAULT;
+                _nextEvent = EVENT_INCOMPLETE;
+                return DTD;
+            }
+        }
+        return _currToken;
+    }
+
+    private final boolean parseDtdId(char[] buffer, int ptr) throws XMLStreamException
+    {
+        final int quote = (int) _elemAttrQuote;
+        while (_inputPtr < _inputEnd) {
+            int ch = _inputBuffer[_inputPtr++] & 0xFF;
+            if (ch == quote) {
+                _textBuilder.setCurrentLength(ptr);
+                return true;
+            }
+            // this is not exact check; but does work for all legal (valid) characters:
+            if (ch <= INT_SPACE || ch > 0x7E) {
+                reportPrologUnexpChar(true, decodeCharForError((byte) ch), " (not valid in PUBLIC or SYSTEM ID)");
+            }
+            if (ptr >= buffer.length) {
+                buffer = _textBuilder.finishCurrentSegment();
+                ptr = 0;
+            }
+            buffer[ptr++] = (char) ch;
+        }
+        _textBuilder.setCurrentLength(ptr);
+        return false;
+    }
+     
     /**
      * Method called to try to parse an XML pseudo-attribute value. This is relatively
      * simple, since we can't have linefeeds or entities; and although there are exact
@@ -1187,29 +1460,127 @@ public abstract class AsyncByteScanner
             reportInputProblem("Invalid standalone value '"+_textBuilder.contentsAsString()+"': can only use 'yes' and 'no'");
         }
     }
-    
-    private final int handlePrologDeclStart(boolean isProlog)
-        throws XMLStreamException
+
+    private final void verifyAndSetPublicId() throws XMLStreamException
     {
-        if (_inputPtr >= _inputEnd) { // nothing we can do?
-            return EVENT_INCOMPLETE;
-        }
-        byte b = _inputBuffer[_inputPtr++];
-        // So far, we have seen "<!", need to know if it's DTD or COMMENT 
-        if (b == BYTE_HYPHEN) {
-            _nextEvent = COMMENT;
-            _state = STATE_DEFAULT;
-            return handleComment();
-        }
-        if (b == BYTE_D) {
-            _nextEvent = DTD;
-            _state = STATE_DEFAULT;
-            return handleDTD();
-        }
-        reportPrologUnexpChar(isProlog, decodeCharForError(b), " (expected '-' for COMMENT)");
-        return EVENT_INCOMPLETE; // never gets here
+        _publicId = _textBuilder.contentsAsString();
     }
 
+    private final void verifyAndSetSystemId() throws XMLStreamException
+    {
+        _systemId = _textBuilder.contentsAsString();
+    }
+
+    /*
+    /**********************************************************************
+    /* Second-level parsing; character content (in tree)
+    /**********************************************************************
+     */
+
+    /**
+     * Method called to initialize state for CHARACTERS event, after
+     * just a single byte has been seen. What needs to be done next
+     * depends on whether coalescing mode is set or not: if it is not
+     * set, just a single character needs to be decoded, after which
+     * current event will be incomplete, but defined as CHARACTERS.
+     * In coalescing mode, the whole content must be read before
+     * current event can be defined. The reason for difference is
+     * that when <code>XMLStreamReader.next()</code> returns, no
+     * blocking can occur when calling other methods.
+     *
+     * @return Event type detected; either CHARACTERS, if at least
+     *   one full character was decoded (and can be returned),
+     *   EVENT_INCOMPLETE if not (part of a multi-byte character
+     *   split across input buffer boundary)
+     */
+    protected abstract int startCharacters(byte b)
+        throws XMLStreamException;
+
+    private int handleCData() throws XMLStreamException
+    {
+        if (_state == STATE_CDATA_CONTENT) {
+            return parseCDataContents();
+        }
+        if (_inputPtr >= _inputEnd) {
+            return EVENT_INCOMPLETE;
+        }
+        return handleCDataStartMarker(_inputBuffer[_inputPtr++]);
+    }
+    
+    private int handleCDataStartMarker(byte b)
+        throws XMLStreamException
+    {
+        switch (_state) {
+        case STATE_DEFAULT:
+            if (b != BYTE_C) {
+                reportTreeUnexpChar(decodeCharForError(b), " (expected 'C' for CDATA)");
+            }
+            _state = STATE_CDATA_C;
+            if (_inputPtr >= _inputEnd) {
+                return EVENT_INCOMPLETE;
+            }
+            b = _inputBuffer[_inputPtr++];
+            // fall through
+        case STATE_CDATA_C:
+            if (b != BYTE_D) {
+                reportTreeUnexpChar(decodeCharForError(b), " (expected 'D' for CDATA)");
+            }
+            _state = STATE_CDATA_CD;
+            if (_inputPtr >= _inputEnd) {
+                return EVENT_INCOMPLETE;
+            }
+            b = _inputBuffer[_inputPtr++];
+            // fall through
+        case STATE_CDATA_CD:
+            if (b != BYTE_A) {
+                reportTreeUnexpChar(decodeCharForError(b), " (expected 'A' for CDATA)");
+            }
+            _state = STATE_CDATA_CDA;
+            if (_inputPtr >= _inputEnd) {
+                return EVENT_INCOMPLETE;
+            }
+            b = _inputBuffer[_inputPtr++];
+            // fall through
+        case STATE_CDATA_CDA:
+            if (b != BYTE_T) {
+                reportTreeUnexpChar(decodeCharForError(b), " (expected 'T' for CDATA)");
+            }
+            _state = STATE_CDATA_CDAT;
+            if (_inputPtr >= _inputEnd) {
+                return EVENT_INCOMPLETE;
+            }
+            b = _inputBuffer[_inputPtr++];
+            // fall through
+        case STATE_CDATA_CDAT:
+            if (b != BYTE_A) {
+                reportTreeUnexpChar(decodeCharForError(b), " (expected 'A' for CDATA)");
+            }
+            _state = STATE_CDATA_CDATA;
+            if (_inputPtr >= _inputEnd) {
+                return EVENT_INCOMPLETE;
+            }
+            b = _inputBuffer[_inputPtr++];
+            // fall through
+        case STATE_CDATA_CDATA:
+            if (b != BYTE_LBRACKET) {
+                reportTreeUnexpChar(decodeCharForError(b), " (expected '[' for CDATA)");
+            }
+            _textBuilder.resetWithEmpty();
+            _state = STATE_CDATA_CONTENT;
+            if (_inputPtr >= _inputEnd) {
+                return EVENT_INCOMPLETE;
+            }
+            return parseCDataContents();
+        }
+        return throwInternal();
+    }
+    
+    /*
+    /**********************************************************************
+    /* Second-level parsing; other (PI, Comment)
+    /**********************************************************************
+     */
+    
     private int handlePI()
         throws XMLStreamException
     {
@@ -1336,209 +1707,51 @@ public abstract class AsyncByteScanner
         }
         return throwInternal();
     }
+    
+    /*
+    /**********************************************************************
+    /* Second-level parsing; helper methods
+    /**********************************************************************
+     */
 
     /**
-     * Method called to initialize state for CHARACTERS event, after
-     * just a single byte has been seen. What needs to be done next
-     * depends on whether coalescing mode is set or not: if it is not
-     * set, just a single character needs to be decoded, after which
-     * current event will be incomplete, but defined as CHARACTERS.
-     * In coalescing mode, the whole content must be read before
-     * current event can be defined. The reason for difference is
-     * that when <code>XMLStreamReader.next()</code> returns, no
-     * blocking can occur when calling other methods.
-     *
-     * @return Event type detected; either CHARACTERS, if at least
-     *   one full character was decoded (and can be returned),
-     *   EVENT_INCOMPLETE if not (part of a multi-byte character
-     *   split across input buffer boundary)
+     * Method to skip whatever space can be skipped.
+     *<p>
+     * NOTE: if available content ends with a CR, method will set
+     * <code>_pendingInput</code> to <code>PENDING_STATE_CR</code>.
+     * 
+     * @return True, if was able to skip through the space and find
+     *   a non-space byte; false if reached end-of-buffer
      */
-    protected abstract int startCharacters(byte b)
-        throws XMLStreamException;
-
-    private int handleCData() throws XMLStreamException
+    private boolean asyncSkipSpace() throws XMLStreamException
     {
-        if (_state == STATE_CDATA_CONTENT) {
-            return parseCDataContents();
-        }
-        if (_inputPtr >= _inputEnd) {
-            return EVENT_INCOMPLETE;
-        }
-        return handleCDataStartMarker(_inputBuffer[_inputPtr++]);
-    }
-    
-    private int handleCDataStartMarker(byte b)
-        throws XMLStreamException
-    {
-        switch (_state) {
-        case STATE_DEFAULT:
-            if (b != BYTE_C) {
-                reportTreeUnexpChar(decodeCharForError(b), " (expected 'C' for CDATA)");
-            }
-            _state = STATE_CDATA_C;
-            if (_inputPtr >= _inputEnd) {
-                return EVENT_INCOMPLETE;
-            }
-            b = _inputBuffer[_inputPtr++];
-            // fall through
-        case STATE_CDATA_C:
-            if (b != BYTE_D) {
-                reportTreeUnexpChar(decodeCharForError(b), " (expected 'D' for CDATA)");
-            }
-            _state = STATE_CDATA_CD;
-            if (_inputPtr >= _inputEnd) {
-                return EVENT_INCOMPLETE;
-            }
-            b = _inputBuffer[_inputPtr++];
-            // fall through
-        case STATE_CDATA_CD:
-            if (b != BYTE_A) {
-                reportTreeUnexpChar(decodeCharForError(b), " (expected 'A' for CDATA)");
-            }
-            _state = STATE_CDATA_CDA;
-            if (_inputPtr >= _inputEnd) {
-                return EVENT_INCOMPLETE;
-            }
-            b = _inputBuffer[_inputPtr++];
-            // fall through
-        case STATE_CDATA_CDA:
-            if (b != BYTE_T) {
-                reportTreeUnexpChar(decodeCharForError(b), " (expected 'T' for CDATA)");
-            }
-            _state = STATE_CDATA_CDAT;
-            if (_inputPtr >= _inputEnd) {
-                return EVENT_INCOMPLETE;
-            }
-            b = _inputBuffer[_inputPtr++];
-            // fall through
-        case STATE_CDATA_CDAT:
-            if (b != BYTE_A) {
-                reportTreeUnexpChar(decodeCharForError(b), " (expected 'A' for CDATA)");
-            }
-            _state = STATE_CDATA_CDATA;
-            if (_inputPtr >= _inputEnd) {
-                return EVENT_INCOMPLETE;
-            }
-            b = _inputBuffer[_inputPtr++];
-            // fall through
-        case STATE_CDATA_CDATA:
-            if (b != BYTE_LBRACKET) {
-                reportTreeUnexpChar(decodeCharForError(b), " (expected '[' for CDATA)");
-            }
-            _textBuilder.resetWithEmpty();
-            _state = STATE_CDATA_CONTENT;
-            if (_inputPtr >= _inputEnd) {
-                return EVENT_INCOMPLETE;
-            }
-            return parseCDataContents();
-        }
-        return throwInternal();
-    }
-
-    private int handleDTD()
-        throws XMLStreamException
-    {
-        // First: left-over CRs?
-        if (_pendingInput == PENDING_STATE_CR) {
-            if (!handlePartialCR()) {
-                return EVENT_INCOMPLETE;
-            }
-        }
-        main_loop:
         while (_inputPtr < _inputEnd) {
-            switch (_state) {
-            case STATE_DEFAULT: // seen 'D'
-                _tokenName = parseNewName(BYTE_D);
-                if (_tokenName == null) {
-                    _state = STATE_DTD_DOCTYPE;
-                    return EVENT_INCOMPLETE;
+            byte b = _inputBuffer[_inputPtr];
+            if ((b & 0xFF) > INT_SPACE) {
+                // hmmmh. Shouldn't this be handled someplace else?
+                if (_pendingInput == PENDING_STATE_CR) {
+                    markLF();
+                    _pendingInput = 0;
                 }
-                if (!"DOCTYPE".equals(_tokenName.getPrefixedName())) {
-                    reportPrologProblem(true, "expected 'DOCTYPE'");
-                }
-                _state = STATE_DTD_AFTER_DOCTYPE;
-                continue main_loop;
-            case STATE_DTD_DOCTYPE:
-                _tokenName = parsePName();
-                if (_tokenName == null) {
-                    _state = STATE_DTD_DOCTYPE;
-                    return EVENT_INCOMPLETE;
-                }
-                if (!"DOCTYPE".equals(_tokenName.getPrefixedName())) {
-                    reportPrologProblem(true, "expected 'DOCTYPE'");
-                }
+                return true;
+            }
+            ++_inputPtr;
+            if (b == BYTE_LF) {
+                markLF();
+            } else if (b == BYTE_CR) {
                 if (_inputPtr >= _inputEnd) {
+                    _pendingInput = PENDING_STATE_CR;
                     break;
                 }
-                // fall through
-            case STATE_DTD_AFTER_DOCTYPE:
-                {
-                    byte b = _inputBuffer[_inputPtr++];
-                    if (b == BYTE_SPACE || b == BYTE_CR || b == BYTE_LF || b == BYTE_TAB) {
-                        _state = STATE_DTD_BEFORE_ROOT_NAME;
-                    } else {
-                        reportPrologUnexpChar(true, decodeCharForError(b), " (expected space after 'DOCTYPE')");
-                    }
+                if (_inputBuffer[_inputPtr] == BYTE_LF) {
+                    ++_inputPtr;
                 }
-                if (_inputPtr >= _inputEnd) {
-                    break;
-                }
-                // fall through
-            case STATE_DTD_BEFORE_ROOT_NAME:
-                if (!asyncSkipSpace()) { // not enough input
-                    break;
-                }
-                if ((_tokenName = parseNewName(_inputBuffer[_inputPtr++])) == null) { // incomplete
-                    _state = STATE_DTD_ROOT_NAME;
-                    break;
-                }
-                _state = STATE_DTD_ROOT_NAME;
-                continue main_loop;
-            case STATE_DTD_ROOT_NAME:
-                if ((_tokenName = parsePName()) == null) { // incomplete
-                    break;
-                }
-                _state = STATE_DTD_AFTER_ROOT_NAME;
-                if (_inputPtr >= _inputEnd) {
-                    break;
-                }
-                // fall through
-            case STATE_DTD_AFTER_ROOT_NAME:
-                {
-                    byte b = _inputBuffer[_inputPtr++];
-                    if (b == BYTE_GT) {
-                        _state = STATE_DEFAULT;
-                        _nextEvent = EVENT_INCOMPLETE;
-                        return DTD;
-                    }
-                    if (b == BYTE_SPACE || b == BYTE_CR || b == BYTE_LF || b == BYTE_TAB) {
-                        _state = STATE_DTD_BEFORE_IDS;
-                    } else {
-                        reportPrologUnexpChar(true, decodeCharForError(b), " (expected space after root name in DOCTYPE declaration)");
-                    }
-                }
-                if (_inputPtr >= _inputEnd) {
-                    break;
-                }
-                // fall through
-            case STATE_DTD_BEFORE_IDS:
-
-                // !!! TBI: check out 'SYSTEM' or 'PUBLIC'
-                throwInternal();
-            
-            case STATE_DTD_EXPECT_CLOSING_GT:
-                {
-                    byte b = _inputBuffer[_inputPtr++];
-                    if (b != BYTE_GT) {
-                        reportPrologUnexpChar(true, b, "expected '>' to end DTD");
-                    }
-                }
-                _state = STATE_DEFAULT;
-                _nextEvent = EVENT_INCOMPLETE;
-                return DTD;
+                markLF();
+            } else if (b != BYTE_SPACE && b != BYTE_TAB) {
+                throwInvalidSpace(b);
             }
         }
-        return _currToken;
+        return false;
     }
 
     /**

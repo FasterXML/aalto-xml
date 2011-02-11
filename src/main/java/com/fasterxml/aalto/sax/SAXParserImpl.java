@@ -490,8 +490,8 @@ class SAXParserImpl
         case XMLStreamConstants.DTD:
             if (_lexicalHandler != null) {
                 PName n = _scanner.getName();
-                _lexicalHandler.startDTD(n.getPrefixedName(), _scanner.getDtdPublicId(),
-                                         _scanner.getDtdSystemId());
+                _lexicalHandler.startDTD(n.getPrefixedName(), _scanner.getDTDPublicId(),
+                        _scanner.getDTDSystemId());
                 _lexicalHandler.endDTD();
             }
             break;
