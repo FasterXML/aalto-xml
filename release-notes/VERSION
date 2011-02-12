@@ -1,10 +1,11 @@
 Version: 0.9.7
 
-Release date: 
+Release date: 11-Feb-2011
 
 Description:
   First version with complete non-blocking (async) parser API and
   implementation -- so this is very close to the 1.0 release!
+  (but expect a few bugs to be discovered, fixed, before that)
 
 == History: ==
 
