@@ -1124,7 +1124,11 @@ public abstract class AsyncByteScanner
             }
         }
         if (_state == STATE_DTD_INT_SUBSET) {
-            return handleDTDInternalSubset();
+            if (handleDTDInternalSubset(false)) { // got it!
+                _state = STATE_DTD_EXPECT_CLOSING_GT;
+            } else {
+                return EVENT_INCOMPLETE;
+            }
         }
         
         main_loop:
@@ -1351,13 +1355,17 @@ public abstract class AsyncByteScanner
                     }
                 }
                 _state = STATE_DTD_INT_SUBSET;
-                _textBuilder.resetWithEmpty();
-                if (_inputPtr >= _inputEnd) {
-                    break;
+                if (handleDTDInternalSubset(true)) {
+                    _state = STATE_DTD_EXPECT_CLOSING_GT;
+                } else {
+                    return EVENT_INCOMPLETE;
                 }
-                return handleDTDInternalSubset();
+                // fall through
                 
             case STATE_DTD_EXPECT_CLOSING_GT:
+                if (!asyncSkipSpace()) {
+                    break;
+                }
                 {
                     byte b = _inputBuffer[_inputPtr++];
                     if (b != BYTE_GT) {
@@ -1374,13 +1382,12 @@ public abstract class AsyncByteScanner
         return _currToken;
     }
 
-    private int handleDTDInternalSubset() throws XMLStreamException
-    {
-        // fall through
-        // !!! TBI
-        this.throwInternal();
-        return EVENT_INCOMPLETE;
-    }
+    /**
+     * @param init Whether this is the first call (and state needs to be initialized) or not
+     *
+     * @return True if parsing was completed; false if not.
+     */
+    protected abstract boolean handleDTDInternalSubset(boolean init) throws XMLStreamException;
     
     private final boolean parseDtdId(char[] buffer, int ptr) throws XMLStreamException
     {

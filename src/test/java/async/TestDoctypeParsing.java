@@ -115,7 +115,8 @@ public class TestDoctypeParsing extends AsyncTestBase
         assertNull(sr.getDTDInfo().getDTDPublicId());
         assertEquals(SYSTEM_ID, sr.getDTDInfo().getDTDSystemId());
         assertEquals("root", sr.getPrefixedName());
-        assertEquals(INTERNAL_SUBSET, sr.getText());
+        String subset = sr.getText();
+        assertEquals(INTERNAL_SUBSET, subset);
         assertTokenType(START_ELEMENT, reader.nextToken());
         assertTokenType(END_ELEMENT, reader.nextToken());
         sr.close();

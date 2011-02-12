@@ -35,6 +35,18 @@ public class AsyncUtfScanner
 
     /*
     /**********************************************************************
+    /* Additional state
+    /**********************************************************************
+     */
+    
+    /**
+     * Flag that indicates whether we are inside a declaration during parsing
+     * of internal DTD subset.
+     */
+    protected boolean _inDtdDeclaration;
+    
+    /*
+    /**********************************************************************
     /* Instance construction
     /**********************************************************************
      */
@@ -1452,7 +1464,156 @@ public class AsyncUtfScanner
     /* Implementation of parsing API, other events
     /**********************************************************************
      */
+    
+    protected final boolean handleDTDInternalSubset(boolean init) throws XMLStreamException
+    {
+        char[] outputBuffer;
+        int outPtr;
 
+        if (init) { // first time around
+            outputBuffer = _textBuilder.resetWithEmpty();
+            outPtr = 0;
+            _elemAttrQuote = 0;
+            _inDtdDeclaration = false;
+        } else {
+            if (_pendingInput != 0) {
+                if (!handleAndAppendPending()) {
+                    return false;
+                }
+            }        
+            outputBuffer = _textBuilder.getBufferWithoutReset();
+            outPtr = _textBuilder.getCurrentLength();
+        }
+
+        final int[] TYPES = _charTypes.DTD_CHARS;
+        final byte[] inputBuffer = _inputBuffer;
+        
+        main_loop:
+        while (true) {
+            int c;
+            // Then the tight ASCII non-funny-char loop:
+            ascii_loop:
+            while (true) {
+                if (_inputPtr >= _inputEnd) {
+                    break main_loop;
+                }
+                if (outPtr >= outputBuffer.length) {
+                    outputBuffer = _textBuilder.finishCurrentSegment();
+                    outPtr = 0;
+                }
+                int max = _inputEnd;
+                {
+                    int max2 = _inputPtr + (outputBuffer.length - outPtr);
+                    if (max2 < max) {
+                        max = max2;
+                    }
+                }
+                while (_inputPtr < max) {
+                    c = (int) inputBuffer[_inputPtr++] & 0xFF;
+                    if (TYPES[c] != 0) {
+                        break ascii_loop;
+                    }
+                    outputBuffer[outPtr++] = (char) c;
+                }
+            }
+
+            switch (TYPES[c]) {
+            case XmlCharTypes.CT_INVALID:
+                throwInvalidXmlChar(c);
+            case XmlCharTypes.CT_WS_CR:
+                if (_inputPtr >= _inputEnd) {
+                    _pendingInput = PENDING_STATE_CR;
+                    break main_loop;
+                }
+                if (inputBuffer[_inputPtr] == BYTE_LF) {
+                    ++_inputPtr;
+                }
+                markLF();
+                c = INT_LF;
+                break;
+            case XmlCharTypes.CT_WS_LF:
+                markLF();
+                break;
+            case XmlCharTypes.CT_MULTIBYTE_2:
+                if (_inputPtr >= _inputEnd) {
+                    _pendingInput = c;
+                    break main_loop;
+                }
+                c = decodeUtf8_2(c);
+                break;
+            case XmlCharTypes.CT_MULTIBYTE_3:
+                if ((_inputEnd - _inputPtr) < 2) {
+                    if (_inputEnd > _inputPtr) { // 2 bytes available
+                        int d = (int) _inputBuffer[_inputPtr++] & 0xFF;
+                        c |= (d << 8);
+                    }
+                    _pendingInput = c;
+                    break main_loop;
+                }
+                c = decodeUtf8_3(c);
+                break;
+            case XmlCharTypes.CT_MULTIBYTE_4:
+                if ((_inputEnd - _inputPtr) < 3) {
+                    if (_inputEnd > _inputPtr) { // at least 2 bytes?
+                        int d = (int) _inputBuffer[_inputPtr++] & 0xFF;
+                        c |= (d << 8);
+                        if (_inputEnd > _inputPtr) { // 3 bytes?
+                            d = (int) _inputBuffer[_inputPtr++] & 0xFF;
+                            c |= (d << 16);
+                        }
+                    }
+                    _pendingInput = c;
+                    break main_loop;
+                }
+                c = decodeUtf8_4(c);
+                // Let's add first part right away:
+                outputBuffer[outPtr++] = (char) (0xD800 | (c >> 10));
+                if (outPtr >= outputBuffer.length) {
+                    outputBuffer = _textBuilder.finishCurrentSegment();
+                    outPtr = 0;
+                }
+                c = 0xDC00 | (c & 0x3FF);
+                // And let the other char output down below
+                break;
+            case XmlCharTypes.CT_MULTIBYTE_N:
+                reportInvalidInitial(c);
+
+            case XmlCharTypes.CT_DTD_QUOTE: // apos or quot
+                if (_elemAttrQuote == 0) {
+                    _elemAttrQuote = (byte) c;
+                } else {
+                    if (_elemAttrQuote == c) {
+                        _elemAttrQuote = 0;
+                    }
+                }
+                break;
+
+            case XmlCharTypes.CT_DTD_LT:
+                if (!_inDtdDeclaration) {
+                    _inDtdDeclaration = true;
+                }
+                break;
+            case XmlCharTypes.CT_DTD_GT:
+                if (_elemAttrQuote == 0) {
+                    _inDtdDeclaration = false;
+                }
+                break;
+            case XmlCharTypes.CT_DTD_RBRACKET:
+                if (!_inDtdDeclaration && _elemAttrQuote == 0) {
+                    _textBuilder.setCurrentLength(outPtr);
+                    return true;
+                }
+                break;
+            // default:
+                // Other types are not important here...
+            }
+            // Ok, can output the char (we know there's room for one more)
+            outputBuffer[outPtr++] = (char) c;
+        }
+        _textBuilder.setCurrentLength(outPtr);
+        return false;
+    }
+    
     protected final int parseCommentContents()
         throws XMLStreamException
     {
@@ -1475,7 +1636,7 @@ public class AsyncUtfScanner
         main_loop:
         while (true) {
             int c;
-            // Then the tight ascii non-funny-char loop:
+            // Then the tight ASCII non-funny-char loop:
             ascii_loop:
             while (true) {
                 if (_inputPtr >= _inputEnd) {
