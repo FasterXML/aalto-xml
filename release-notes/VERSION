@@ -3,83 +3,92 @@ Version: 0.9.7
 Release date: 
 
 Description:
-  ...
-
-  The last remaining part to complete for official 1.0 release is
-  to complete non-blocking parser implementation; need to define API,
-  implement xml declaration handling.
+  First version with complete non-blocking (async) parser API and
+  implementation -- so this is very close to the 1.0 release!
 
 == History: ==
 
+0.9.7 [11-Feb-2011]
+
+New features:
+
+* Finally complete non-blocking ("async") parser interface (with
+  AsyncXMLInputFactory, AsyncXMLStreamReader) and implementation
+  (only missing coalescing mode, and some aspects of entity handling)
+
 0.9.6 [11-Oct-2010]
 
-  * Build system converted to use Maven for easier deployment; OSGi bundle,
-    moved home page to [http://wiki.fasterxml.com/AaltoHome]
+Refactoring:
+
+* Build system converted to use Maven for easier deployment; OSGi bundle,
+  moved home page to [http://wiki.fasterxml.com/AaltoHome]
 
 0.9.5 [20-Mar-2009]
 
-  * Licensing change to basic Apache License 2.0
-  * Moved code under "com.fasterxml.aalto" Java package.
+Refactoring:
+
+* Licensing change to basic Apache License 2.0
+* Moved code under "com.fasterxml.aalto" Java package.
 
 0.9.4 [04-Feb-2009]
 
-  Improvements:
+Improvements:
 
-  * Namespace-repairing mode for stream writers implemented.
-  * Coalescing mode implemented for blocking parsers (can not implement
-    for non-blocking, as coalescing requires blocking).
-  * Partial implementation of Stax2 Validation API for stream writers.
+* Namespace-repairing mode for stream writers implemented.
+* Coalescing mode implemented for blocking parsers (can not implement
+  for non-blocking, as coalescing requires blocking).
+* Partial implementation of Stax2 Validation API for stream writers.
 
 0.9.3 [21-Jan-2009]
 
-  Problems fixed:
+Problems fixed:
 
-  * A problem with comments content skipping (when underlying scanner
-    is Readers based) fixed: would surface parts of comment content as
-    regular text.
-  * Auto-closing (XMLInputFactory2#P_AUTO_CLOSE_INPUT and
-    XMLOutputFactory2#P_AUTO_CLOSE_OUTPUT) wasn't working properly, now is.
-  * An IndexOutOfBounds problem with character (Writer) backed
-    XMLStreamWriter, writeCharacters(char[],int,int) fixed.
+* A problem with comments content skipping (when underlying scanner
+  is Readers based) fixed: would surface parts of comment content as
+  regular text.
+* Auto-closing (XMLInputFactory2#P_AUTO_CLOSE_INPUT and
+  XMLOutputFactory2#P_AUTO_CLOSE_OUTPUT) wasn't working properly, now is.
+* An IndexOutOfBounds problem with character (Writer) backed
+  XMLStreamWriter, writeCharacters(char[],int,int) fixed.
 
-  Improvements:
+Improvements:
 
-  * Complete implementation of Stax2 3.0 Typed Access API.
+* Complete implementation of Stax2 3.0 Typed Access API.
 
 0.9.2 [08-May-2008]
 
-  Problems fixed:
+Problems fixed:
 
-  * Fixed stax conformance issue wrt. returning of no prefix/namespace URI;
-    now returns "" as expected instead of nulls.
-  * XMLStreamReader2.getDepth() was off by one for END_ELEMENT events.
-  * Character escaping was not fully working for attribute values.
-  * Whitespace was reported in prolog: now gets properly stripped off
-    (could implement Stax2 REPORT_WS_IN_PROLOG in future if needed)
-  * Now disables lazy parsing for event readers, SAX reader, to improve
-    accuracy of error reporting (and possible minor performance benefit too)
+* Fixed stax conformance issue wrt. returning of no prefix/namespace URI;
+  now returns "" as expected instead of nulls.
+* XMLStreamReader2.getDepth() was off by one for END_ELEMENT events.
+* Character escaping was not fully working for attribute values.
+* Whitespace was reported in prolog: now gets properly stripped off
+  (could implement Stax2 REPORT_WS_IN_PROLOG in future if needed)
+* Now disables lazy parsing for event readers, SAX reader, to improve
+  accuracy of error reporting (and possible minor performance benefit too)
 
-  New features:
+New features:
 
-  * Added stax2test unit test suite from Woodstox, for additional
-    test coverage via stax2 API.
-  * Implemented first (incomplete) version of Stax2 3.0 Typed Access API
-    (using Stax2 reference implementation's support): readers and writers
-    for int, long, boolean.
+* Added stax2test unit test suite from Woodstox, for additional
+  test coverage via stax2 API.
+* Implemented first (incomplete) version of Stax2 3.0 Typed Access API
+  (using Stax2 reference implementation's support): readers and writers
+  for int, long, boolean.
 
 0.9.1 [13-Mar-2008]
 
-  Problems fixed:
+Problems fixed:
 
-  * XMLStreamReader (blocking) implementation:
-    * Implemented non-lazy parsing functionality (still defaults to lazy
-      parsing so that skipping can be done efficiently).
-    * Minor performance improvements to name parsing.
-    * Minor performance improvements to namespace URI handling.
-  * AsyncByteScanner:
-    * Location information was not properly updated when input was being
-      added, leading to useless location info for error messages.
-    * Handling of comments, PIs was incomplete, completed.
+* XMLStreamReader (blocking) implementation:
+  * Implemented non-lazy parsing functionality (still defaults to lazy
+    parsing so that skipping can be done efficiently).
+  * Minor performance improvements to name parsing.
+  * Minor performance improvements to namespace URI handling.
+* AsyncByteScanner:
+  * Location information was not properly updated when input was being
+    added, leading to useless location info for error messages.
+  * Handling of comments, PIs was incomplete, completed.
 
 0.9.0 [21-Feb-2008]
 

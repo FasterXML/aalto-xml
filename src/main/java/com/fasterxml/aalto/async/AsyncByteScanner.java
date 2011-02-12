@@ -921,21 +921,31 @@ public abstract class AsyncByteScanner
                         _state = STATE_XMLDECL_ENCODING;
                         break;
                     }
-                    if (!_tokenName.hasPrefixedName("encoding")) {
+                    // Can actually also get "standalone" instead...
+                    if (_tokenName.hasPrefixedName("encoding")) {
+                        _state = STATE_XMLDECL_AFTER_ENCODING;
+                    } else if (_tokenName.hasPrefixedName("standalone")) {
+                        _state = STATE_XMLDECL_AFTER_STANDALONE;
+                        continue main_loop;
+                    } else {
                         reportInputProblem("Unexpected keyword '"+_tokenName.getPrefixedName()+"' in XML declaration: expected 'encoding'");
                     }
                 }
-                _state = STATE_XMLDECL_AFTER_ENCODING;
                 continue main_loop;
     
             case STATE_XMLDECL_ENCODING: // parsing "encoding"
                 if ((_tokenName = parsePName()) == null) { // incomplete
                     break;
                 }
-                if (!_tokenName.hasPrefixedName("encoding")) {
-                    reportInputProblem("Unexpected keyword 'encoding' in XML declaration: expected 'encoding'");
+                // Can actually also get "standalone" instead...
+                if (_tokenName.hasPrefixedName("encoding")) {
+                    _state = STATE_XMLDECL_AFTER_ENCODING;
+                } else if (_tokenName.hasPrefixedName("standalone")) {
+                    _state = STATE_XMLDECL_AFTER_STANDALONE;
+                    continue main_loop;
+                } else {
+                    reportInputProblem("Unexpected keyword '"+_tokenName.getPrefixedName()+"' in XML declaration: expected 'encoding'");
                 }
-                _state = STATE_XMLDECL_AFTER_ENCODING;
                 if (_inputPtr >= _inputEnd) {
                     break;
                 }
@@ -1773,10 +1783,6 @@ public abstract class AsyncByteScanner
     /**
      * Method called when a new token (within tree) starts with an
      * entity.
-     * 
-     * @param surroundingEvent Context (next event at the time
-     *   ampersand was encountered) in which entity is found. Will
-     *   often be the next event set after entity is resolved.
      *   
      * @return Type of event to return
      */
@@ -1821,9 +1827,6 @@ public abstract class AsyncByteScanner
     /**
      * Method called when we see an entity that is starting a new token,
      * and part of its name has been decoded (but not all)
-     * 
-     * @return
-     * @throws XMLStreamException
      */
     protected int handleNamedEntityStartingToken()
         throws XMLStreamException

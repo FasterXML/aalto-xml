@@ -1,6 +1,5 @@
 <?xml version="1.0" standalone='yes'?>
-
-    <project name="Aalto XML processor" basedir="." default="readme">
+<project name="Aalto XML processor" basedir="." default="readme">
 
     <!-- Source directories -->
     <property name="dir.src" location="${basedir}/src" />
@@ -70,22 +69,22 @@
     <!-- supported by this ant build file                                    -->
     <!--*********************************************************************-->
     <target name="readme">
-        <echo message = "${ant.project.name}'s Available Targets" />
-        <echo message = "---------------------------------------------------" />
-        <echo message = "1)  readme - Displays this information (default target)." />
-        <echo message = "2)  clean - Remove any generated files/directories." />
-        <echo message = "3)  compile - Compile all non-test ${ProjectName} code." />
-        <echo message = "4)  jars - Compile and create all jars for non-test ${ProjectName} code (see below for specific ones)." />
-        <echo message = "4a)  jar.aalto.gpl - Compile and create jar for non-test ${ProjectName} cod, under GPL 3.0 license." />
-        <echo message = "4b)  jar.j2me - Compile and create minimal non-test jar of ${ProjectName}, that implements J2ME subset of StAX." />
-        <echo message = "5)  javadoc - Generate ${ProjectName} code documentation." />
-        <echo message = "6)  test.compile - Compile ${ProjectName} code and test code" />
-        <echo message = "       for JUnit tests." />
-        <echo message = "7a)  test - Run impl-specific JUnit tests." />
-        <echo message = "7b)  staxtest - Run generic StAX JUnit tests." />
-        <echo message = "8)  dist - Create distribution directory and copy necessary files there" />
-        <echo message = "9) all - Run the clean, compile, javadoc," />
-        <echo message = "         test and dist targets." />  
+        <echo message="${ant.project.name}'s Available Targets" />
+        <echo message="---------------------------------------------------" />
+        <echo message="1)  readme - Displays this information (default target)." />
+        <echo message="2)  clean - Remove any generated files/directories." />
+        <echo message="3)  compile - Compile all non-test ${ProjectName} code." />
+        <echo message="4)  jars - Compile and create all jars for non-test ${ProjectName} code (see below for specific ones)." />
+        <echo message="4a)  jar.aalto.gpl - Compile and create jar for non-test ${ProjectName} cod, under GPL 3.0 license." />
+        <echo message="4b)  jar.j2me - Compile and create minimal non-test jar of ${ProjectName}, that implements J2ME subset of StAX." />
+        <echo message="5)  javadoc - Generate ${ProjectName} code documentation." />
+        <echo message="6)  test.compile - Compile ${ProjectName} code and test code" />
+        <echo message="       for JUnit tests." />
+        <echo message="7a)  test - Run impl-specific JUnit tests." />
+        <echo message="7b)  staxtest - Run generic StAX JUnit tests." />
+        <echo message="8)  dist - Create distribution directory and copy necessary files there" />
+        <echo message="9) all - Run the clean, compile, javadoc," />
+        <echo message="         test and dist targets." />  
     </target>
 
     <target name="prepare">
@@ -136,8 +135,7 @@
 
     <target name="copy-resources" depends="prepare">
         <mkdir dir="${dir.build.classes}/META-INF/services" />
-        <copy toDir="${dir.build.classes}/META-INF/services">    		
-            <fileset dir="${dir.resources}">
+        <copy toDir="${dir.build.classes}/META-INF/services">    		            <fileset dir="${dir.resources}">
                 <include name="javax.xml.stream.*" />
             </fileset>           	
         </copy>

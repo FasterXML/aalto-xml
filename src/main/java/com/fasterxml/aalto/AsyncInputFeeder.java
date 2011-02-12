@@ -32,7 +32,7 @@ public interface AsyncInputFeeder
      * @param offset Offset within array where input data to process starts
      * @param len Length of input data within array to process.
      * 
-     * @throw XMLStreamException if the state is such that this method should not be called
+     * @throws XMLStreamException if the state is such that this method should not be called
      *   (has not yet consumed existing input data, or has been marked as closed)
      */
     public void feedInput(byte[] data, int offset, int len) throws XMLStreamException;

@@ -91,4 +91,25 @@ public class TestXmlDeclaration extends AsyncTestBase
             assertEquals("root", sr.getLocalName());
         }
     }
+
+    public void testStandAloneDeclaration2() throws Exception
+    {
+        String XML = "<?xml version=\"1.0\" standalone='yes'?>\n<root/>";
+        AsyncXMLInputFactory f = new InputFactoryImpl();
+
+        for (int chunkSize : CHUNK_SIZES) {
+            AsyncXMLStreamReader sr = f.createAsyncXMLStreamReader();
+            AsyncReaderWrapper reader = new AsyncReaderWrapper(sr, chunkSize, XML);
+            assertEquals(EVENT_INCOMPLETE, reader.currentToken());
+            assertTokenType(START_DOCUMENT, reader.nextToken());
+            assertEquals("UTF-8", sr.getEncoding());
+            assertNull(sr.getCharacterEncodingScheme());
+            assertEquals("1.0", sr.getVersion());
+            assertTrue(sr.standaloneSet());
+            assertTrue(sr.isStandalone());
+
+            assertTokenType(START_ELEMENT, reader.nextToken());
+            assertEquals("root", sr.getLocalName());
+        }
+    }
 }
