@@ -11,7 +11,7 @@
     <groupId>com.fasterxml</groupId>
     <artifactId>aalto-xml</artifactId>
     <packaging>bundle</packaging>
-    <version>0.9.7</version>
+    <version>0.9.8-SNAPSHOT</version>
     <name>aalto-xml</name>
   <description>Ultra-high performance non-blocking XML processor (Stax/Stax2,
 SAX/SAX2)
