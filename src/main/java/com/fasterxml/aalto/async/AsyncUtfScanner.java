@@ -587,7 +587,7 @@ public class AsyncUtfScanner
      * @return True, if split character was completely handled; false
      *    if not
      */
-    private boolean handleAndAppendPending()
+    private final boolean handleAndAppendPending()
         throws XMLStreamException
     {
         // First, need to have at least one more byte:
@@ -690,7 +690,9 @@ public class AsyncUtfScanner
         throws XMLStreamException
     {
         if (_pendingInput != 0) {
-            throwInternal();
+            if (!skipPending()) {
+                return false;
+            }
         }
 
         final int[] TYPES = _charTypes.TEXT_CHARS;
@@ -772,15 +774,15 @@ public class AsyncUtfScanner
                 reportInvalidInitial(c);
             case XmlCharTypes.CT_LT:
                 --_inputPtr;
-                return false;
+                return true;
             case XmlCharTypes.CT_AMP:
                 c = handleEntityInCharacters();
-                if (c == 0) { // not a succesfully expanded char entity
+                if (c == 0) { // not a successfully expanded char entity
                     return true; // did bump into general entity
                 }
                 break;
             case XmlCharTypes.CT_RBRACKET: // ']]>'?
-                /* !!! 09-Mar-2007, tatus: This will not give 100% coverage,
+                /* !!! 09-Mar-2007, tatu: This will not give 100% coverage,
                  *  for it may be split across input buffer boundary.
                  *  For now this will have to suffice though.
                  */
@@ -812,6 +814,91 @@ public class AsyncUtfScanner
         return false;
     }
 
+    private final boolean skipPending() throws XMLStreamException
+    {
+        // First, need to have at least one more byte:
+        if (_inputPtr >= _inputEnd) {
+            return false;
+        }
+        int c = _pendingInput;
+        _pendingInput = 0;
+    
+        // Possible \r\n linefeed?
+        if (c < 0) { // markers are all negative
+            if (c == PENDING_STATE_CR) {
+                if (_inputBuffer[_inputPtr] == BYTE_LF) {
+                    ++_inputPtr;
+                }
+                markLF();
+                return true;
+            }
+            throwInternal();
+        }
+    
+        // Nah, a multi-byte UTF-8 char:
+        // Let's just re-test the first pending byte (in LSB):
+        switch (_charTypes.TEXT_CHARS[c & 0xFF]) {
+        case XmlCharTypes.CT_MULTIBYTE_2:
+            // Easy: must have just one byte, did get another one:
+            decodeUtf8_2(c);
+            break;
+    
+        case XmlCharTypes.CT_MULTIBYTE_3:
+            {
+                // Ok... so do we have one or two pending bytes?
+                int next = _inputBuffer[_inputPtr++] & 0xFF;
+                int c2 = (c >> 8);
+                if (c2 == 0) { // just one; need two more
+                    if (_inputPtr >= _inputEnd) { // but got only one
+                        _pendingInput = c | (next << 8);
+                        return false;
+                    }
+                    int c3 = _inputBuffer[_inputPtr++] & 0xFF;
+                    decodeUtf8_3(c, next, c3);
+                } else { // had two, got one, bueno:
+                    decodeUtf8_3((c & 0xFF), c2, next);
+                }
+            }
+            break;
+        case XmlCharTypes.CT_MULTIBYTE_4:
+            {
+                int next = (int) _inputBuffer[_inputPtr++] & 0xFF;
+                // Only had one?
+                if ((c >> 8) == 0) { // ok, so need 3 more
+                    if (_inputPtr >= _inputEnd) { // just have 1
+                        _pendingInput = c | (next << 8);
+                        return false;
+                    }
+                    int c2 = _inputBuffer[_inputPtr++] & 0xFF;
+                    if (_inputPtr >= _inputEnd) { // almost, got 2
+                        _pendingInput = c | (next << 8) | (c2 << 16);
+                        return false;
+                    }
+                    int c3 = _inputBuffer[_inputPtr++] & 0xFF;
+                    decodeUtf8_4(c, next, c2, c3);
+                } else { // had two or three
+                    int c2 = (c >> 8) & 0xFF;
+                    int c3 = (c >> 16);
+                    
+                    if (c3 == 0) { // just two
+                        if (_inputPtr >= _inputEnd) { // one short
+                            _pendingInput = c | (next << 16);
+                            return false;
+                        }
+                        c3 = _inputBuffer[_inputPtr++] & 0xFF;
+                        decodeUtf8_4((c & 0xFF), c2, next, c3);
+                    } else { // had three, got last
+                        decodeUtf8_4((c & 0xFF), c2, c3, next);
+                    }
+                } 
+            }
+            break;
+        default: // should never occur:
+            throwInternal();
+        }
+        return true;
+    }
+    
     /**
      * Coalescing mode is (and will) not be implemented for non-blocking
      * parsers, so this method should never get called.

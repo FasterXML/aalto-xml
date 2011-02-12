@@ -584,13 +584,15 @@ public abstract class AsyncByteScanner
                 }
             }
 
-            /* Only CHARACTERS can remain incomplete: this happens iff
+            /* Only CHARACTERS can remain incomplete: this happens if
              * first character is decoded, but coalescing mode is NOT
              * set. Skip can not therefore block, nor will add pending
-             * input.
+             * input. Can also occur when we have run out of input
              */
             if (_tokenIncomplete) {
-                skipCharacters();
+                if (!skipCharacters()) { // couldn't complete skipping
+                    return EVENT_INCOMPLETE;
+                }
                 _tokenIncomplete = false;
             }
             _currToken = _nextEvent = EVENT_INCOMPLETE;
@@ -2485,6 +2487,10 @@ public abstract class AsyncByteScanner
 
     // // token-skip methods
 
+    /**
+     * @return True if the whole characters segment was succesfully
+     *   skipped; false if not
+     */
     protected abstract boolean skipCharacters()
         throws XMLStreamException;
 

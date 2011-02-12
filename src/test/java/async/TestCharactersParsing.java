@@ -13,35 +13,77 @@ public class TestCharactersParsing extends AsyncTestBase
     {
         // let's try with different chunking, addition (or not) of space
         for (int spaces = 0; spaces < 3; ++spaces) {
-            _testLinefeeds(1, spaces(spaces));
-            _testLinefeeds(2, spaces(spaces));
-            _testLinefeeds(3, spaces(spaces));
-            _testLinefeeds(5, spaces(spaces));
-            _testLinefeeds(8, spaces(spaces));
+            _testLinefeeds(1, true, spaces(spaces));
+            _testLinefeeds(2, true, spaces(spaces));
+            _testLinefeeds(3, true, spaces(spaces));
+            _testLinefeeds(5, true, spaces(spaces));
+            _testLinefeeds(8, true, spaces(spaces));
+            _testLinefeeds(99, true, spaces(spaces));
         }
     }
 
+    public void testSkipLinefeeds() throws Exception
+    {
+        // let's try with different chunking, addition (or not) of space
+        for (int spaces = 0; spaces < 3; ++spaces) {
+            _testLinefeeds(1, false, spaces(spaces));
+            _testLinefeeds(2, false, spaces(spaces));
+            _testLinefeeds(3, false, spaces(spaces));
+            _testLinefeeds(5, false, spaces(spaces));
+            _testLinefeeds(8, false, spaces(spaces));
+            _testLinefeeds(99, false, spaces(spaces));
+        }
+    }
+    
     public void testTextWithEntities() throws Exception
     {
         // let's try with different chunking, addition (or not) of space
         for (int spaces = 0; spaces < 3; ++spaces) {
-            _testTextWithEntities(1, spaces(spaces));
-            _testTextWithEntities(2, spaces(spaces));
-            _testTextWithEntities(3, spaces(spaces));
-            _testTextWithEntities(5, spaces(spaces));
-            _testTextWithEntities(8, spaces(spaces));
+            _testTextWithEntities(1, true, spaces(spaces));
+            _testTextWithEntities(2, true, spaces(spaces));
+            _testTextWithEntities(3, true, spaces(spaces));
+            _testTextWithEntities(5, true, spaces(spaces));
+            _testTextWithEntities(11, true, spaces(spaces));
+            _testTextWithEntities(999, true, spaces(spaces));
         }
     }
 
+    public void testSkipTextWithEntities() throws Exception
+    {
+        // let's try with different chunking, addition (or not) of space
+        for (int spaces = 0; spaces < 3; ++spaces) {
+            _testTextWithEntities(1, false, spaces(spaces));
+            _testTextWithEntities(2, false, spaces(spaces));
+            _testTextWithEntities(3, false, spaces(spaces));
+            _testTextWithEntities(5, false, spaces(spaces));
+            _testTextWithEntities(11, false, spaces(spaces));
+            _testTextWithEntities(999, false, spaces(spaces));
+        }
+    }
+    
     public void testTextWithNumericEntities() throws Exception
     {
         // let's try with different chunking, addition (or not) of space
         for (int spaces = 0; spaces < 3; ++spaces) {
-            _testTextWithNumericEntities(1, spaces(spaces));
-            _testTextWithNumericEntities(2, spaces(spaces));
-            _testTextWithNumericEntities(3, spaces(spaces));
-            _testTextWithNumericEntities(5, spaces(spaces));
-            _testTextWithNumericEntities(8, spaces(spaces));
+            _testTextWithNumericEntities(1, true, spaces(spaces));
+            _testTextWithNumericEntities(2, true, spaces(spaces));
+            _testTextWithNumericEntities(3, true, spaces(spaces));
+            _testTextWithNumericEntities(5, true, spaces(spaces));
+            _testTextWithNumericEntities(9, true, spaces(spaces));
+            _testTextWithNumericEntities(99, true, spaces(spaces));
+        }
+    }
+
+    public void testSkipTextWithNumericEntities() throws Exception
+    {
+        // let's try with different chunking, addition (or not) of space
+        for (int spaces = 0; spaces < 3; ++spaces) {
+            _testTextWithNumericEntities(1, false, spaces(spaces));
+            _testTextWithNumericEntities(2, false, spaces(spaces));
+            _testTextWithNumericEntities(3, false, spaces(spaces));
+            _testTextWithNumericEntities(5, false, spaces(spaces));
+            _testTextWithNumericEntities(9, false, spaces(spaces));
+            _testTextWithNumericEntities(99, false, spaces(spaces));
         }
     }
     
@@ -51,7 +93,7 @@ public class TestCharactersParsing extends AsyncTestBase
     /**********************************************************************
      */
     
-    private void _testLinefeeds(int chunkSize, String SPC) throws Exception
+    private void _testLinefeeds(int chunkSize, boolean checkValues, String SPC) throws Exception
     {
         AsyncXMLInputFactory f = new InputFactoryImpl();
         AsyncXMLStreamReader sr = f.createAsyncXMLStreamReader();
@@ -59,21 +101,29 @@ public class TestCharactersParsing extends AsyncTestBase
         AsyncReaderWrapper reader = new AsyncReaderWrapper(sr, chunkSize, XML);
 
         assertTokenType(START_ELEMENT, verifyStart(reader));
-        assertEquals("root", sr.getLocalName());
-        assertEquals("", sr.getNamespaceURI());
+        if (checkValues) {
+            assertEquals("root", sr.getLocalName());
+            assertEquals("", sr.getNamespaceURI());
+        }
 
         assertTokenType(CHARACTERS, reader.nextToken());
-        String str = collectAsyncText(reader, CHARACTERS); // moves to end-element
-        assertEquals("\nFirst\nSecond\nThird: "+UNICODE_SEGMENT, str);
+        if (checkValues) {
+            String str = collectAsyncText(reader, CHARACTERS); // moves to end-element
+            assertEquals("\nFirst\nSecond\nThird: "+UNICODE_SEGMENT, str);
+        } else {
+            reader.nextToken();
+        }
 
         assertTokenType(END_ELEMENT, reader.currentToken());
-        assertEquals("root", sr.getLocalName());
-        assertEquals("", sr.getNamespaceURI());
+        if (checkValues) {
+            assertEquals("root", sr.getLocalName());
+            assertEquals("", sr.getNamespaceURI());
+        }
         assertTokenType(XMLStreamConstants.END_DOCUMENT, reader.nextToken());
         assertFalse(sr.hasNext());
     }
 
-    private void _testTextWithEntities(int chunkSize, String SPC) throws Exception
+    private void _testTextWithEntities(int chunkSize, boolean checkValues, String SPC) throws Exception
     {
         AsyncXMLInputFactory f = new InputFactoryImpl();
         AsyncXMLStreamReader sr = f.createAsyncXMLStreamReader();
@@ -83,19 +133,27 @@ public class TestCharactersParsing extends AsyncTestBase
         // should start with START_DOCUMENT, but for now skip
         int t = verifyStart(reader);
         assertTokenType(START_ELEMENT, t);
-        assertEquals("root", sr.getLocalName());
-        assertEquals("", sr.getNamespaceURI());
+        if (checkValues) {
+            assertEquals("root", sr.getLocalName());
+            assertEquals("", sr.getNamespaceURI());
+        }
         assertTokenType(CHARACTERS, reader.nextToken());
-        String str = collectAsyncText(reader, CHARACTERS); // moves to end-element
-        assertEquals("a<b\nMOT", str);
+        if (checkValues) {
+            String str = collectAsyncText(reader, CHARACTERS); // moves to end-element
+            assertEquals("a<b\nMOT", str);
+        } else {
+            reader.nextToken();
+        }
         assertTokenType(END_ELEMENT, reader.currentToken());
-        assertEquals("root", sr.getLocalName());
-        assertEquals("", sr.getNamespaceURI());
+        if (checkValues) {
+            assertEquals("root", sr.getLocalName());
+            assertEquals("", sr.getNamespaceURI());
+        }
         assertTokenType(XMLStreamConstants.END_DOCUMENT, reader.nextToken());
         assertFalse(sr.hasNext());
     }
 
-    private void _testTextWithNumericEntities(int chunkSize, String SPC) throws Exception
+    private void _testTextWithNumericEntities(int chunkSize, boolean checkValues, String SPC) throws Exception
     {
         AsyncXMLInputFactory f = new InputFactoryImpl();
         AsyncXMLStreamReader sr = f.createAsyncXMLStreamReader();
@@ -105,14 +163,22 @@ public class TestCharactersParsing extends AsyncTestBase
         // should start with START_DOCUMENT, but for now skip
         int t = verifyStart(reader);
         assertTokenType(START_ELEMENT, t);
-        assertEquals("root", sr.getLocalName());
-        assertEquals("", sr.getNamespaceURI());
+        if (checkValues) {
+            assertEquals("root", sr.getLocalName());
+            assertEquals("", sr.getNamespaceURI());
+        }
         assertTokenType(CHARACTERS, reader.nextToken());
-        String str = collectAsyncText(reader, CHARACTERS); // moves to end-element
-        assertEquals("<tag>!", str);
+        if (checkValues) {
+            String str = collectAsyncText(reader, CHARACTERS); // moves to end-element
+            assertEquals("<tag>!", str);
+        } else {
+            reader.nextToken();
+        }
         assertTokenType(END_ELEMENT, reader.currentToken());
-        assertEquals("root", sr.getLocalName());
-        assertEquals("", sr.getNamespaceURI());
+        if (checkValues) {
+            assertEquals("root", sr.getLocalName());
+            assertEquals("", sr.getNamespaceURI());
+        }
         assertTokenType(XMLStreamConstants.END_DOCUMENT, reader.nextToken());
         assertFalse(sr.hasNext());
     }

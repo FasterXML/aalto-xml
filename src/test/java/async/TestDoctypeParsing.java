@@ -35,18 +35,30 @@ public class TestDoctypeParsing extends AsyncTestBase
         }
     }
 
-    public void testFull() throws Exception
+    public void testParseFull() throws Exception
     {
         for (int spaces = 0; spaces < 3; ++spaces) {
             String SPC = spaces(spaces);
-            _testFull(SPC, 1);
-            _testFull(SPC, 2);
-            _testFull(SPC, 3);
-            _testFull(SPC, 6);
-            _testFull(SPC, 900);
+            _testFull(SPC, true, 1);
+            _testFull(SPC, true, 2);
+            _testFull(SPC, true, 3);
+            _testFull(SPC, true, 6);
+            _testFull(SPC, true, 900);
         }
     }
 
+    public void testSkipFull() throws Exception
+    {
+        for (int spaces = 0; spaces < 3; ++spaces) {
+            String SPC = spaces(spaces);
+            _testFull(SPC, false, 1);
+            _testFull(SPC, false, 2);
+            _testFull(SPC, false, 3);
+            _testFull(SPC, false, 6);
+            _testFull(SPC, false, 900);
+        }
+    }
+    
     public void testInvalidDup() throws Exception
     {
         for (int spaces = 0; spaces < 3; ++spaces) {
@@ -99,7 +111,7 @@ public class TestDoctypeParsing extends AsyncTestBase
         sr.close();
     }
 
-    private void _testFull(String spaces, int chunkSize) throws Exception
+    private void _testFull(String spaces, boolean checkValue, int chunkSize) throws Exception
     {
         final String INTERNAL_SUBSET = "<!--My dtd-->\n"
             +"<!ELEMENT html (head, body)>"
@@ -112,13 +124,17 @@ public class TestDoctypeParsing extends AsyncTestBase
         AsyncReaderWrapper reader = new AsyncReaderWrapper(sr, chunkSize, XML);
         int t = verifyStart(reader);
         assertTokenType(DTD, t);
-        assertNull(sr.getDTDInfo().getDTDPublicId());
-        assertEquals(SYSTEM_ID, sr.getDTDInfo().getDTDSystemId());
-        assertEquals("root", sr.getPrefixedName());
-        String subset = sr.getText();
-        assertEquals(INTERNAL_SUBSET, subset);
+        if (checkValue) {
+            assertNull(sr.getDTDInfo().getDTDPublicId());
+            assertEquals(SYSTEM_ID, sr.getDTDInfo().getDTDSystemId());
+            assertEquals("root", sr.getPrefixedName());
+            String subset = sr.getText();
+            assertEquals(INTERNAL_SUBSET, subset);
+        }
         assertTokenType(START_ELEMENT, reader.nextToken());
         assertTokenType(END_ELEMENT, reader.nextToken());
+        assertTokenType(END_DOCUMENT, reader.nextToken());
+        assertFalse(sr.hasNext());
         sr.close();
     }
 

@@ -46,16 +46,31 @@ public class TestElementParsing extends AsyncTestBase
     }
 
     // Bit more stuff with attributes
-    public void testElementsWithAttrs() throws Exception
+    public void testParseElementsWithAttrs() throws Exception
     {
         for (int spaces = 0; spaces < 3; ++spaces) {
             String SPC = "  ".substring(0, spaces);
-            _testElementsWithAttrs(1, SPC);
-            _testElementsWithAttrs(2, SPC);
-            _testElementsWithAttrs(3, SPC);
-            _testElementsWithAttrs(5, SPC);
-            _testElementsWithAttrs(8, SPC);
-            _testElementsWithAttrs(15, SPC);
+            _testElementsWithAttrs(1, true, SPC);
+            _testElementsWithAttrs(2, true, SPC);
+            _testElementsWithAttrs(3, true, SPC);
+            _testElementsWithAttrs(5, true, SPC);
+            _testElementsWithAttrs(8, true, SPC);
+            _testElementsWithAttrs(15, true, SPC);
+            _testElementsWithAttrs(999, true, SPC);
+        }
+    }
+
+    public void testSkipElementsWithAttrs() throws Exception
+    {
+        for (int spaces = 0; spaces < 3; ++spaces) {
+            String SPC = "  ".substring(0, spaces);
+            _testElementsWithAttrs(1, false, SPC);
+            _testElementsWithAttrs(2, false, SPC);
+            _testElementsWithAttrs(3, false, SPC);
+            _testElementsWithAttrs(5, false, SPC);
+            _testElementsWithAttrs(8, false, SPC);
+            _testElementsWithAttrs(15, false, SPC);
+            _testElementsWithAttrs(999, false, SPC);
         }
     }
     
@@ -130,7 +145,7 @@ public class TestElementParsing extends AsyncTestBase
         assertFalse(sr.hasNext());
     }
 
-    private void _testElementsWithAttrs(int chunkSize, String SPC) throws Exception
+    private void _testElementsWithAttrs(int chunkSize, boolean checkValues, String SPC) throws Exception
     {
         AsyncXMLInputFactory f = new InputFactoryImpl();
         AsyncXMLStreamReader sr = f.createAsyncXMLStreamReader();
@@ -141,15 +156,19 @@ public class TestElementParsing extends AsyncTestBase
         // should start with START_DOCUMENT, but for now skip
         int t = verifyStart(reader);
         assertTokenType(START_ELEMENT, t);
-        assertEquals("root", sr.getLocalName());
-        assertEquals("", sr.getNamespaceURI());
-        assertEquals(1, sr.getAttributeCount());
-        assertEquals("1>2, 2<1", sr.getAttributeValue(0));
-        assertEquals("attr", sr.getAttributeLocalName(0));
-        assertEquals("", sr.getAttributeNamespace(0));
+        if (checkValues) {
+            assertEquals("root", sr.getLocalName());
+            assertEquals("", sr.getNamespaceURI());
+            assertEquals(1, sr.getAttributeCount());
+            assertEquals("1>2, 2<1", sr.getAttributeValue(0));
+            assertEquals("attr", sr.getAttributeLocalName(0));
+            assertEquals("", sr.getAttributeNamespace(0));
+        }
         assertTokenType(END_ELEMENT, reader.nextToken());
-        assertEquals("root", sr.getLocalName());
-        assertEquals("", sr.getNamespaceURI());
+        if (checkValues) {
+            assertEquals("root", sr.getLocalName());
+            assertEquals("", sr.getNamespaceURI());
+        }
         assertTokenType(XMLStreamConstants.END_DOCUMENT, reader.nextToken());
         assertFalse(sr.hasNext());
     }
