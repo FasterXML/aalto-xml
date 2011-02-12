@@ -1627,8 +1627,11 @@ public abstract class AsyncByteScanner
                     _state = STATE_PI_IN_TARGET;
                     return EVENT_INCOMPLETE;
                 }
-                checkPITargetName(_tokenName);
                 _state = STATE_PI_AFTER_TARGET;
+                checkPITargetName(_tokenName);
+                if (_inputPtr >= _inputEnd) {
+                    return EVENT_INCOMPLETE;
+                }
                 // fall through
             case STATE_PI_AFTER_TARGET:
                 // Need ws or "?>"
@@ -1650,6 +1653,7 @@ public abstract class AsyncByteScanner
                             _state = STATE_PI_AFTER_TARGET_WS;
                             return EVENT_INCOMPLETE;
                         }
+                        _textBuilder.resetWithEmpty();
                         // Quick check, perhaps we'll see end marker?
                         if ((_inputPtr+1) < _inputEnd
                             && _inputBuffer[_inputPtr] == BYTE_QMARK
@@ -1659,7 +1663,6 @@ public abstract class AsyncByteScanner
                         }
                         // If not, we'll move to 'data' portion of PI
                         _state = STATE_PI_IN_DATA;
-                        _textBuilder.resetWithEmpty();
                         return parsePIData();
                     }
                     // Otherwise, it's an error
