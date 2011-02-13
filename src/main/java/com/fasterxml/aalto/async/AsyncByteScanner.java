@@ -110,13 +110,7 @@ public abstract class AsyncByteScanner
 
     private final static int STATE_DTD_EXPECT_CLOSING_GT = 50; // ']' gotten that should be followed by '>'
     
-    // For CHARACTERS, default is the basic state
-    /**
-     * This state is set when an entity is being handled
-     */
-    final static int STATE_TEXT_ENTITY = 1;
-    final static int STATE_TEXT_BRACKET1 = 2;
-    final static int STATE_TEXT_BRACKET2 = 3;
+    // For CHARACTERS, default is the basic (and only)
 
     // just seen "&"
     final static int STATE_TEXT_AMP = 4;
@@ -188,26 +182,11 @@ public abstract class AsyncByteScanner
     final static int PENDING_STATE_CDATA_BRACKET1 = -30;
     final static int PENDING_STATE_CDATA_BRACKET2 = -31;
 
-    // partially handled entities within attribute/ns values use pending state as well
-    final static int PENDING_STATE_ATTR_VALUE_AMP = -60;
-    final static int PENDING_STATE_ATTR_VALUE_AMP_HASH = -61;
-    final static int PENDING_STATE_ATTR_VALUE_AMP_HASH_X = -62;
-    final static int PENDING_STATE_ATTR_VALUE_ENTITY_NAME = -63;
-    final static int PENDING_STATE_ATTR_VALUE_DEC_DIGIT = -64;
-    final static int PENDING_STATE_ATTR_VALUE_HEX_DIGIT = -65;
-
     final static int PENDING_STATE_ENT_SEEN_HASH = -70; // seen &#
     final static int PENDING_STATE_ENT_SEEN_HASH_X = -71; // seen &#x
     final static int PENDING_STATE_ENT_IN_DEC_DIGIT = -72; // seen &# and 1 or more decimals
     final static int PENDING_STATE_ENT_IN_HEX_DIGIT = -73; // seen &#x and 1 or more hex digits
 //    final static int PENDING_STATE_ENT_IN_NAME = -; // seen & and part of the name
-
-    final static int PENDING_STATE_TEXT_SEEN_AMP = -80; // seen &
-    final static int PENDING_STATE_TEXT_SEEN_AMP_HASH = -81; // seen &#
-    final static int PENDING_STATE_TEXT_SEEN_AMP_HASH_X = -82; // seen &#x
-    final static int PENDING_STATE_TEXT_IN_DEC_DIGIT = -83; // seen &# and 1 or more decimals
-    final static int PENDING_STATE_TEXT_IN_HEX_DIGIT = -84; // seen &#x and 1 or more hex digits
-//    final static int PENDING_STATE_TEXT_IN_NAME = -; // seen & and part of the name
     
     /*
     /**********************************************************************
@@ -1801,7 +1780,7 @@ public abstract class AsyncByteScanner
             _state = STATE_TREE_NUMERIC_ENTITY_START;
             _pendingInput = PENDING_STATE_ENT_SEEN_HASH;
             if (_inputPtr >= _inputEnd) { // but no more content to parse yet
-                return _nextEvent;
+                return EVENT_INCOMPLETE;
             }
             return handleNumericEntityStartingToken();
         }
@@ -1810,7 +1789,7 @@ public abstract class AsyncByteScanner
         if (n == null) {
             // Not sure if it's a char entity or general one; so we don't yet know type
             _state = STATE_TREE_NAMED_ENTITY_START;
-            return _nextEvent;
+            return EVENT_INCOMPLETE;
         }
         int ch = decodeGeneralEntity(n);
         if (ch == 0) { // not a character entity
@@ -1866,76 +1845,27 @@ public abstract class AsyncByteScanner
     protected int handleNumericEntityStartingToken()
         throws XMLStreamException
     {
-        byte b = _inputBuffer[_inputPtr++]; // we know one is available
         if (_pendingInput == PENDING_STATE_ENT_SEEN_HASH) {
+            byte b = _inputBuffer[_inputPtr]; // we know one is available
+            _entityValue = 0;
             if (b == BYTE_x) { // 'x' marks hex
-                _pendingInput = PENDING_STATE_ENT_SEEN_HASH_X;
+                _pendingInput = PENDING_STATE_ENT_IN_HEX_DIGIT;
+                if (++_inputPtr >= _inputEnd) {
+                    return EVENT_INCOMPLETE;
+                }
             } else { // if not 'x', must be a digit
-                int ch = (int) b;
-                if (ch < INT_0 || ch > INT_9) { // invalid entity
-                    throwUnexpectedChar(decodeCharForError(b), " expected a digit (0 - 9) for character entity");
-                }
-                _entityValue = ch - INT_0;
                 _pendingInput = PENDING_STATE_ENT_IN_DEC_DIGIT;
+                // let's just keep byte for calculation
             }
-            if (_inputPtr >= _inputEnd) {
-                return _nextEvent; // incomplete
-            }
-            b = _inputBuffer[_inputPtr++];
         }
-        if (_pendingInput == PENDING_STATE_ENT_SEEN_HASH_X) {
-            int ch = (int) b;
-            if (ch <= INT_9 && ch >= INT_0) {
-                _entityValue = ch - INT_0;
-            } else if (ch <= INT_F && ch >= INT_A) {
-                _entityValue = 10 + (ch - INT_A);
-            } else  if (ch <= INT_f && ch >= INT_a) {
-                _entityValue = 10 + (ch - INT_a);
-            } else {
-                throwUnexpectedChar(decodeCharForError(b), " expected a hex digit (0-9a-fA-F) for character entity");
+        if (_pendingInput == PENDING_STATE_ENT_IN_HEX_DIGIT) {
+            if (!decodeHexEntity()) {
+                return EVENT_INCOMPLETE;
             }
-            _pendingInput = PENDING_STATE_ENT_IN_HEX_DIGIT;
-            if (_inputPtr >= _inputEnd) {
-                return _nextEvent; // incomplete
+        } else {
+            if (!decodeDecEntity()) {
+                return EVENT_INCOMPLETE;
             }
-            b = _inputBuffer[_inputPtr++];
-        }
-        // Ok: either hex or dec entity; handle...
-        boolean hex = (_pendingInput == PENDING_STATE_ENT_IN_HEX_DIGIT);
-        int value = _entityValue;
-        while (true) {
-            if (b == BYTE_SEMICOLON) {
-                _entityValue = value;
-                break;
-            }
-            if (hex) {
-                int ch = (int) b;
-                if (ch <= INT_9 && ch >= INT_0) {
-                    ch -= INT_0;
-                } else if (ch <= INT_F && ch >= INT_A) {
-                    ch = 10 + (ch - INT_A);
-                } else  if (ch <= INT_f && ch >= INT_a) {
-                    ch = 10 + (ch - INT_a);
-                } else {
-                    throwUnexpectedChar(decodeCharForError(b), " expected a hex digit (0-9a-fA-F) for character entity");
-                }
-                value = (value << 4) + ch;
-            } else {
-                int ch = ((int) b) - INT_0;
-                if (ch < 0 || ch > 9) { // invalid entity
-                    throwUnexpectedChar(decodeCharForError(b), " expected a digit (0 - 9) for character entity");
-                }
-                value = (value * 10) + ch;
-            }
-            if (value > MAX_UNICODE_CHAR) { // Overflow?
-                _entityValue = value;
-                reportEntityOverflow();
-            }
-            if (_inputPtr >= _inputEnd) {
-                _entityValue = value;
-                return _nextEvent; // incomplete
-            }
-            b = _inputBuffer[_inputPtr++];
         }
         // and now we have the full value
         verifyAndAppendEntityCharacter(_entityValue);
@@ -1948,6 +1878,66 @@ public abstract class AsyncByteScanner
         _pendingInput = 0;
         return _currToken;
     }
+
+    /**
+     * @return True if entity was decoded (and value assigned to <code>_entityValue</code>;
+     *    false otherwise
+     */
+    protected final boolean decodeHexEntity() throws XMLStreamException
+    {
+        int value = _entityValue;
+        while (_inputPtr < _inputEnd) {
+            byte b = _inputBuffer[_inputPtr++];
+            if (b == BYTE_SEMICOLON) {
+                _entityValue = value;
+                return true;
+            }
+            int ch = (int) b;
+            if (ch <= INT_9 && ch >= INT_0) {
+                ch -= INT_0;
+            } else if (ch <= INT_F && ch >= INT_A) {
+                ch = 10 + (ch - INT_A);
+            } else  if (ch <= INT_f && ch >= INT_a) {
+                ch = 10 + (ch - INT_a);
+            } else {
+                throwUnexpectedChar(decodeCharForError(b), " expected a hex digit (0-9a-fA-F) for character entity");
+            }
+            value = (value << 4) + ch;
+            if (value > MAX_UNICODE_CHAR) { // Overflow?
+                _entityValue = value;
+                reportEntityOverflow();
+            }
+        }
+        _entityValue = value;
+        return false;
+    }        
+
+    /**
+     * @return True if entity was decoded (and value assigned to <code>_entityValue</code>;
+     *    false otherwise
+     */
+    protected final boolean decodeDecEntity() throws XMLStreamException
+    {
+        int value = _entityValue;
+        while (_inputPtr < _inputEnd) {
+            byte b = _inputBuffer[_inputPtr++];
+            if (b == BYTE_SEMICOLON) {
+                _entityValue = value;
+                return true;
+            }
+            int ch = ((int) b) - INT_0;
+            if (ch < 0 || ch > 9) { // invalid entity
+                throwUnexpectedChar(decodeCharForError(b), " expected a digit (0 - 9) for character entity");
+            }
+            value = (value * 10) + ch;
+            if (value > MAX_UNICODE_CHAR) { // Overflow?
+                _entityValue = value;
+                reportEntityOverflow();
+            }
+        }
+        _entityValue = value;
+        return false;
+    }        
 
     /**
      * 

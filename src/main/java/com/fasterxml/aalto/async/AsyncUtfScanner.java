@@ -35,6 +35,28 @@ public class AsyncUtfScanner
 
     /*
     /**********************************************************************
+    /* Local state constants only used in this class
+    /**********************************************************************
+     */
+    
+    // partially handled entities within attribute/ns values use pending state as well
+    private final static int PENDING_STATE_ATTR_VALUE_AMP = -60;
+    private final static int PENDING_STATE_ATTR_VALUE_AMP_HASH = -61;
+   final static int PENDING_STATE_ATTR_VALUE_AMP_HASH_X = -62;
+    private final static int PENDING_STATE_ATTR_VALUE_ENTITY_NAME = -63;
+    private final static int PENDING_STATE_ATTR_VALUE_DEC_DIGIT = -64;
+    private final static int PENDING_STATE_ATTR_VALUE_HEX_DIGIT = -65;
+
+    private final static int PENDING_STATE_TEXT_AMP = -80; // seen &
+    private final static int PENDING_STATE_TEXT_AMP_HASH = -81; // seen &#
+    private final static int PENDING_STATE_TEXT_DEC_ENTITY = -82; // seen &# and 1 or more decimals
+    private final static int PENDING_STATE_TEXT_HEX_ENTITY = -83; // seen &#x and 1 or more hex digits
+    private final static int PENDING_STATE_TEXT_IN_ENTITY = -84; // seen & and part of entity name
+    private final static int PENDING_STATE_TEXT_BRACKET1 = -85; // seen ]
+    private final static int PENDING_STATE_TEXT_BRACKET2 = -86; // seen ]]
+
+    /*
+    /**********************************************************************
     /* Additional state
     /**********************************************************************
      */
@@ -461,7 +483,7 @@ public class AsyncUtfScanner
      * Method called to handle entity encountered inside
      * CHARACTERS segment, when trying to complete a non-coalescing text segment.
      * 
-     * @return Expanded (character) entity, if positive number; 0 if incomplete
+     * @return Expanded (character) entity, if positive number; 0 if incomplete.
      */
     protected int handleEntityInCharacters() throws XMLStreamException
     {
@@ -677,6 +699,12 @@ public class AsyncUtfScanner
         return true;
     }
 
+    /*
+    /**********************************************************************
+    /* Implementation of parsing API, skipping remainder CHARACTERS section
+    /**********************************************************************
+     */
+    
     /**
      * Method that will be called to skip all possible characters
      * from the input buffer, but without blocking. Partial
@@ -776,9 +804,16 @@ public class AsyncUtfScanner
                 --_inputPtr;
                 return true;
             case XmlCharTypes.CT_AMP:
-                c = handleEntityInCharacters();
+                c = skipEntityInCharacters();
                 if (c == 0) { // not a successfully expanded char entity
-                    return true; // did bump into general entity
+                    _pendingInput = PENDING_STATE_TEXT_AMP;
+                    // but we may have input to skip nonetheless..
+                    if (_inputPtr < _inputEnd) {
+                        if (skipPending()) {
+                            return true;
+                        }
+                    }
+                    return false;
                 }
                 break;
             case XmlCharTypes.CT_RBRACKET: // ']]>'?
@@ -820,27 +855,127 @@ public class AsyncUtfScanner
         if (_inputPtr >= _inputEnd) {
             return false;
         }
-        int c = _pendingInput;
-        _pendingInput = 0;
-    
+        
         // Possible \r\n linefeed?
-        if (c < 0) { // markers are all negative
-            if (c == PENDING_STATE_CR) {
-                if (_inputBuffer[_inputPtr] == BYTE_LF) {
+        if (_pendingInput < 0) { // markers are all negative
+            while (true) {
+                switch (_pendingInput) {
+                case PENDING_STATE_CR:
+                    _pendingInput = 0;
+                    if (_inputBuffer[_inputPtr] == BYTE_LF) {
+                        ++_inputPtr;
+                    }
+                    markLF();
+                    return true;
+                case PENDING_STATE_TEXT_AMP:
+                    {
+                        byte b = _inputBuffer[_inputPtr++];
+                        if (b == BYTE_HASH) {
+                            _pendingInput = PENDING_STATE_TEXT_AMP_HASH;
+                            break;
+                        }
+                        PName n = parseNewEntityName(b);
+                        if (n == null) {
+                            _pendingInput = PENDING_STATE_TEXT_IN_ENTITY;
+                            return false;
+                        }
+                        int ch = decodeGeneralEntity(n);
+                        if (ch == 0) {
+                            _tokenName = n;
+                            _nextEvent = ENTITY_REFERENCE;
+                        }
+                    }
+                    _pendingInput = 0;
+                    return true; // no matter what, we are done
+                case PENDING_STATE_TEXT_AMP_HASH:
+                    _entityValue = 0;
+                    if (_inputBuffer[_inputPtr] == BYTE_x) {
+                        ++_inputPtr;
+                        if (decodeHexEntity()) {
+                            _pendingInput = 0;
+                            return true;
+                        }
+                        _pendingInput = PENDING_STATE_TEXT_HEX_ENTITY;
+                        return false;
+                    }
+                    if (decodeDecEntity()) {
+                        _pendingInput = 0;
+                        return true;
+                    }
+                    _pendingInput = PENDING_STATE_TEXT_DEC_ENTITY;
+                    return false;
+
+                case PENDING_STATE_TEXT_DEC_ENTITY:
+                    if (decodeDecEntity()) {
+                        _pendingInput = 0;
+                        return true;
+                    }
+                    return false;
+                    
+                case PENDING_STATE_TEXT_HEX_ENTITY:
+                    if (decodeHexEntity()) {
+                        _pendingInput = 0;
+                        return true;
+                    }
+                    return false;
+
+                case PENDING_STATE_TEXT_IN_ENTITY:
+                    {
+                        PName n = parseEntityName();
+                        if (n == null) {
+                            return false;
+                        }
+                        int ch = decodeGeneralEntity(n);
+                        if (ch == 0) {
+                            _tokenName = n;
+                            _nextEvent = ENTITY_REFERENCE;
+                        }
+                    }
+                    _pendingInput = 0;
+                    return true;
+
+                case PENDING_STATE_TEXT_BRACKET1:
+                    if (_inputBuffer[_inputPtr] != BYTE_RBRACKET) {
+                        _pendingInput = 0;
+                        return true;
+                    }
                     ++_inputPtr;
+                    _pendingInput = PENDING_STATE_TEXT_BRACKET2;
+                    break;
+
+                case PENDING_STATE_TEXT_BRACKET2:
+                    // may get sequence...
+                    {
+                        byte b = _inputBuffer[_inputPtr];
+                        if (b == BYTE_RBRACKET) {
+                            ++_inputPtr;
+                            break;
+                        }
+                        if (b == BYTE_GT) { // problem!
+                            ++_inputPtr;
+                            reportInputProblem("Encountered ']]>' in text segment");
+                        }
+                    }
+                    // nope, something else, reprocess
+                    _pendingInput = 0;
+                    return true;
+                default:
+                    throwInternal();
                 }
-                markLF();
-                return true;
+
+                if (_inputPtr >= _inputEnd) {
+                    return false;
+                }
             }
-            throwInternal();
         }
     
         // Nah, a multi-byte UTF-8 char:
         // Let's just re-test the first pending byte (in LSB):
+        int c = _pendingInput;
         switch (_charTypes.TEXT_CHARS[c & 0xFF]) {
         case XmlCharTypes.CT_MULTIBYTE_2:
             // Easy: must have just one byte, did get another one:
-            decodeUtf8_2(c);
+            skipUtf8_2(c);
             break;
     
         case XmlCharTypes.CT_MULTIBYTE_3:
@@ -896,7 +1031,77 @@ public class AsyncUtfScanner
         default: // should never occur:
             throwInternal();
         }
+        _pendingInput = 0;
         return true;
+    }
+
+    /**
+     * Method called to handle entity encountered inside
+     * CHARACTERS segment, when trying to complete a non-coalescing text segment.
+     * 
+     * @return Expanded (character) entity, if positive number; 0 if incomplete.
+     */
+    protected int skipEntityInCharacters() throws XMLStreamException
+    {
+        /* Thing that simplifies processing here is that handling
+         * is pretty much optional: if there isn't enough data, we
+         * just return 0 and are done with it.
+         * 
+         * Also: we need at least 3 more characters for any character entity
+         */
+        int ptr = _inputPtr;
+        if ((ptr  + 3) <= _inputEnd) {
+            byte b = _inputBuffer[ptr++];
+            if (b == BYTE_HASH) { // numeric character entity
+                if (_inputBuffer[ptr] == BYTE_x) {
+                    return handleHexEntityInCharacters(ptr+1);
+                }
+                return handleDecEntityInCharacters(ptr);
+            }
+            // general entity; maybe one of pre-defined ones
+            if (b == BYTE_a) { // amp or apos?
+                b = _inputBuffer[ptr++];
+                if (b == BYTE_m) {
+                    if ((ptr + 1) < _inputPtr
+                            && _inputBuffer[ptr] == BYTE_p
+                            && _inputBuffer[ptr+1] == BYTE_SEMICOLON) {
+                        _inputPtr = ptr + 2;
+                        return INT_AMP;
+                    }
+                } else if (b == BYTE_p) {
+                    if ((ptr + 2) < _inputPtr
+                            && _inputBuffer[ptr] == BYTE_o
+                            && _inputBuffer[ptr+1] == BYTE_s
+                            && _inputBuffer[ptr+2] == BYTE_SEMICOLON) {
+                        _inputPtr = ptr + 3;
+                        return INT_APOS;
+                    }
+                }
+            } else if (b == BYTE_g) { // gt?
+                if (_inputBuffer[ptr] == BYTE_t
+                        && _inputBuffer[ptr+1] == BYTE_SEMICOLON) {
+                    _inputPtr = ptr + 2;
+                    return INT_GT;
+                }
+            } else if (b == BYTE_l) { // lt?
+                if (_inputBuffer[ptr] == BYTE_t
+                        && _inputBuffer[ptr+1] == BYTE_SEMICOLON) {
+                    _inputPtr = ptr + 2;
+                    return INT_LT;
+                }
+            } else if (b == BYTE_q) { // quot?
+                if ((ptr + 3) < _inputPtr
+                        && _inputBuffer[ptr] == BYTE_u
+                        && _inputBuffer[ptr+1] == BYTE_o
+                        && _inputBuffer[ptr+2] == BYTE_t
+                        && _inputBuffer[ptr+3] == BYTE_SEMICOLON) {
+                    _inputPtr = ptr + 4;
+                    return INT_APOS;
+                }
+            }
+        }
+        // couldn't handle:
+        return 0;
     }
     
     /**

@@ -34,7 +34,7 @@ public class TestCharactersParsing extends AsyncTestBase
             _testLinefeeds(99, false, spaces(spaces));
         }
     }
-    
+
     public void testTextWithEntities() throws Exception
     {
         // let's try with different chunking, addition (or not) of space
@@ -73,7 +73,7 @@ public class TestCharactersParsing extends AsyncTestBase
             _testTextWithNumericEntities(99, true, spaces(spaces));
         }
     }
-
+    
     public void testSkipTextWithNumericEntities() throws Exception
     {
         // let's try with different chunking, addition (or not) of space
