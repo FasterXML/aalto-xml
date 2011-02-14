@@ -268,7 +268,9 @@
                     <!-- Need to exclude inner classes... -->
                     <exclude name="**/*$*.class"/>
                     <!-- As well as (for now) validating-writer tests and DTD handling -->
+                    <exclude name="org/codehaus/stax/test/dtd/*.class"/>
                     <exclude name="org/codehaus/stax/test/vstream/*.class"/>
+                    <exclude name="stax2/dtd/**/*.class"/>
                     <exclude name="stax2/vwstream/**/*.class"/>
                     <include name="org/codehaus/stax/test/**/Test*.class"/>
                     <include name="stax2/**/Test*.class"/>
