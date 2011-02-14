@@ -1,7 +1,6 @@
 package async;
 
 import javax.xml.stream.XMLStreamConstants;
-import javax.xml.stream.XMLStreamException;
 
 import com.fasterxml.aalto.AsyncXMLInputFactory;
 import com.fasterxml.aalto.AsyncXMLStreamReader;
@@ -181,21 +180,5 @@ public class TestCharactersParsing extends AsyncTestBase
         }
         assertTokenType(XMLStreamConstants.END_DOCUMENT, reader.nextToken());
         assertFalse(sr.hasNext());
-    }
-    
-    /*
-    /**********************************************************************
-    /* Helper methods
-    /**********************************************************************
-     */
-
-    protected String collectAsyncText(AsyncReaderWrapper reader, int tt) throws XMLStreamException
-    {
-        StringBuilder sb = new StringBuilder();
-        while (reader.currentToken() == tt) {
-            sb.append(reader.currentText());
-            reader.nextToken();
-        }
-        return sb.toString();
     }
 }

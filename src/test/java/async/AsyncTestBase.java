@@ -21,11 +21,21 @@ abstract class AsyncTestBase extends base.BaseTestCase
         return SPACES.substring(0, Math.min(SPACES.length(), count));
     }
 
-    protected int verifyStart(AsyncReaderWrapper reader) throws Exception
+    protected final int verifyStart(AsyncReaderWrapper reader) throws Exception
     {
         assertTokenType(AsyncXMLStreamReader.EVENT_INCOMPLETE, reader.currentToken());
         assertTokenType(START_DOCUMENT, reader.nextToken());
         return reader.nextToken();
+    }
+
+    protected final String collectAsyncText(AsyncReaderWrapper reader, int tt) throws XMLStreamException
+    {
+        StringBuilder sb = new StringBuilder();
+        while (reader.currentToken() == tt) {
+            sb.append(reader.currentText());
+            reader.nextToken();
+        }
+        return sb.toString();
     }
     
     /**
