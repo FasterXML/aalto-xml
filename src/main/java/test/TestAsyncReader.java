@@ -1,7 +1,6 @@
 package test;
 
 import java.io.*;
-import java.util.List;
 
 import javax.xml.stream.*;
 
@@ -20,7 +19,6 @@ public class TestAsyncReader
 {
     final static int BLOCK_SIZE = 24;
     
-    @SuppressWarnings("unchecked")
     protected int test(File file) throws Exception
     {
         int bytes = 0;

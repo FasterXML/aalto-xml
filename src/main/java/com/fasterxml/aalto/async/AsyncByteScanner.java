@@ -1940,12 +1940,22 @@ public abstract class AsyncByteScanner
     }        
 
     /**
+     * Method that verifies that given named entity is followed by 
+     * a semi-colon (meaning next byte must be available for reading);
+     * and if so, whether it is one of pre-defined general entities.
      * 
-     * @return Character of entity expanded, if character entity;
-     *   zero if not
+     * @return Character of the expanded pre-defined general entity
+     *   (if name matches one); zero if not.
      */
     protected final int decodeGeneralEntity(PName entityName)
+        throws XMLStreamException
     {
+        // First things first: verify that we got semicolon afterwards
+        byte b = _inputBuffer[_inputPtr++];
+        if (b != BYTE_SEMICOLON) {
+            throwUnexpectedChar(decodeCharForError(b), " expected ';' following entity name (\""+entityName.getPrefixedName()+"\")");
+        }
+        
         String name = entityName.getPrefixedName();
         if (name == "amp") {
             return INT_AMP;
@@ -2484,36 +2494,31 @@ public abstract class AsyncByteScanner
     protected abstract boolean skipCharacters()
         throws XMLStreamException;
 
-    protected void skipCData()
-        throws XMLStreamException
+    protected void skipCData() throws XMLStreamException
     {
-        // !!! TBI
-        if (true) throw new UnsupportedOperationException();
+        // should never be called
+        throwInternal();
     }
 
-    protected void skipComment()
-        throws XMLStreamException
+    protected void skipComment() throws XMLStreamException
     {
-        // !!! TBI
-        if (true) throw new UnsupportedOperationException();
+        // should never be called
+        throwInternal();
     }
 
-    protected void skipPI()
-        throws XMLStreamException
+    protected void skipPI() throws XMLStreamException
     {
-        // !!! TBI
-        if (true) throw new UnsupportedOperationException();
+        // should never be called
+        throwInternal();
     }
 
-    protected void skipSpace()
-        throws XMLStreamException
+    protected void skipSpace() throws XMLStreamException
     {
-        // !!! TBI
-        if (true) throw new UnsupportedOperationException();
+        // should never be called
+        throwInternal();
     }
 
-    protected boolean loadMore()
-        throws XMLStreamException
+    protected boolean loadMore() throws XMLStreamException
     {
         // should never get called
         throwInternal();
@@ -2542,19 +2547,6 @@ public abstract class AsyncByteScanner
         _currQuad = q;
         _currQuadBytes = 1;
         return parsePName();
-    }
-
-    protected PName parseNewEntityName(byte b)
-        throws XMLStreamException
-    {
-        int q = b & 0xFF;
-        if (q < INT_A) {
-            throwUnexpectedChar(q, "; expected a name start character");
-        }
-        _quadCount = 0;
-        _currQuad = q;
-        _currQuadBytes = 1;
-        return parseEntityName();
     }
 
     /**
@@ -2659,7 +2651,20 @@ public abstract class AsyncByteScanner
         }
     }
 
-    protected PName parseEntityName()
+    protected final PName parseNewEntityName(byte b)
+        throws XMLStreamException
+    {
+        int q = b & 0xFF;
+        if (q < INT_A) {
+            throwUnexpectedChar(q, "; expected a name start character");
+        }
+        _quadCount = 0;
+        _currQuad = q;
+        _currQuadBytes = 1;
+        return parseEntityName();
+    }
+    
+    protected final PName parseEntityName()
         throws XMLStreamException
     {
         int q = _currQuad;
@@ -2686,9 +2691,11 @@ public abstract class AsyncByteScanner
                         if (_quadCount == 1) {
                             q = _quadBuffer[0];
                             if (q == EntityNames.ENTITY_APOS_QUAD) {
+                                --_inputPtr;
                                 return EntityNames.ENTITY_APOS;
                             }
                             if (q == EntityNames.ENTITY_QUOT_QUAD) {
+                                --_inputPtr;
                                 return EntityNames.ENTITY_QUOT;
                             }
                         }
@@ -2725,9 +2732,11 @@ public abstract class AsyncByteScanner
                         // lt or gt?
                         if (_quadCount == 0) {
                             if (q == EntityNames.ENTITY_GT_QUAD) {
+                                --_inputPtr;
                                 return EntityNames.ENTITY_GT;
                             }
                             if (q == EntityNames.ENTITY_LT_QUAD) {
+                                --_inputPtr;
                                 return EntityNames.ENTITY_LT;
                             }
                         }
@@ -2749,6 +2758,7 @@ public abstract class AsyncByteScanner
                         // amp?
                         if (_quadCount == 0) {
                             if (q == EntityNames.ENTITY_AMP_QUAD) {
+                                --_inputPtr;
                                 return EntityNames.ENTITY_AMP;
                             }
                         }
@@ -2925,5 +2935,4 @@ public abstract class AsyncByteScanner
     {
         throw new IllegalStateException("Internal error: should never execute this code path");
     }
-
 }

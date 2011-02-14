@@ -306,7 +306,7 @@ public class AsyncUtfScanner
         main_loop:
         while (true) {
             int c;
-            // Then the tight ascii non-funny-char loop:
+            // Then the tight ASCII non-funny-char loop:
             ascii_loop:
             while (true) {
                 int ptr = _inputPtr;
@@ -482,6 +482,9 @@ public class AsyncUtfScanner
     /**
      * Method called to handle entity encountered inside
      * CHARACTERS segment, when trying to complete a non-coalescing text segment.
+     *<p>
+     * NOTE: unlike with generic parsing of named entities, where trailing semicolon
+     * needs to be left in place, here we should just process it right away.
      * 
      * @return Expanded (character) entity, if positive number; 0 if incomplete.
      */
@@ -1041,7 +1044,7 @@ public class AsyncUtfScanner
      * 
      * @return Expanded (character) entity, if positive number; 0 if incomplete.
      */
-    protected int skipEntityInCharacters() throws XMLStreamException
+    private int skipEntityInCharacters() throws XMLStreamException
     {
         /* Thing that simplifies processing here is that handling
          * is pretty much optional: if there isn't enough data, we
@@ -1065,7 +1068,7 @@ public class AsyncUtfScanner
                     if ((ptr + 1) < _inputPtr
                             && _inputBuffer[ptr] == BYTE_p
                             && _inputBuffer[ptr+1] == BYTE_SEMICOLON) {
-                        _inputPtr = ptr + 2;
+                        _inputPtr = ptr + 2; // NOTE: do skip semicolon as well
                         return INT_AMP;
                     }
                 } else if (b == BYTE_p) {
