@@ -7,6 +7,10 @@ Description:
   implementation -- so this is very close to the 1.0 release!
   (but expect a few bugs to be discovered, fixed, before that)
 
+* #4: Added SAXParserFactoryImpl.newInstance(), to reduce likelihood of getting a
+    non-Aalto factory.
+* #9: Handle SAX property "document-xml-version" properly
+
 == History: ==
 
 0.9.7 [11-Feb-2011]

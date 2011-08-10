@@ -50,9 +50,9 @@ class SAXParserImpl
      * this class is then a replacement of StreamReaderImpl, when
      * using SAX interfaces.
      */
-    XmlScanner _scanner;
+    protected XmlScanner _scanner;
 
-    AttributeCollector _attrCollector;
+    protected AttributeCollector _attrCollector;
 
     // // // Listeners attached:
 
@@ -69,9 +69,9 @@ class SAXParserImpl
     private int _attrCount;
 
     /*
-    /////////////////////////////////////////////////
-    // Life-cycle
-    /////////////////////////////////////////////////
+    /**********************************************************************
+    /* Life-cycle
+    /**********************************************************************
      */
 
     SAXParserImpl(InputFactoryImpl sf)
@@ -90,9 +90,9 @@ class SAXParserImpl
     }
 
     /*
-    /////////////////////////////////////////////////
-    // Configuration, SAXParser
-    /////////////////////////////////////////////////
+    /**********************************************************************
+    /* Configuration, SAXParser
+    /**********************************************************************
      */
 
     public boolean isNamespaceAware() {
@@ -111,6 +111,9 @@ class SAXParserImpl
             switch (stdProp) {
             case DECLARATION_HANDLER:
                 return _declHandler;
+            case DOCUMENT_XML_VERSION:
+                // as per [Issue 9], provide version info (is it ok to return potentially null?)
+                return _scanner.getConfig().getXmlDeclVersion();
             case DOM_NODE: // not implemented, won't be
                 return null;
             case LEXICAL_HANDLER:
@@ -133,6 +136,10 @@ class SAXParserImpl
             case DECLARATION_HANDLER:
                 _declHandler = (DeclHandler) value;
                 return;
+            case DOCUMENT_XML_VERSION:
+                // as per [Issue 9]:
+                _scanner.getConfig().setXmlVersion((value == null) ? null : String.valueOf(value));
+                return;
             case DOM_NODE: // not implemented, won't be
                 return;
             case LEXICAL_HANDLER:
@@ -146,9 +153,9 @@ class SAXParserImpl
     }
 
     /*
-    /////////////////////////////////////////////////
-    // Overrides, SAXParser
-    /////////////////////////////////////////////////
+    /**********************************************************************
+    /* Overrides, SAXParser
+    /**********************************************************************
      */
 
     /* Have to override some methods from SAXParser; JDK
@@ -207,10 +214,10 @@ class SAXParserImpl
     }
 
     /*
-    /////////////////////////////////////////////////////
-    // XLMReader (SAX2) implementation: cfg access
-    /////////////////////////////////////////////////////
-    */
+    /**********************************************************************
+    /* XLMReader (SAX2) implementation: cfg access
+    /**********************************************************************
+     */
 
     public ContentHandler getContentHandler()
     {
@@ -262,10 +269,10 @@ class SAXParserImpl
     //public Object getProperty(String name)
 
     /*
-    /////////////////////////////////////////////////////
-    // XLMReader (SAX2) implementation: cfg changing
-    /////////////////////////////////////////////////////
-    */
+    /**********************************************************************
+    /* XLMReader (SAX2) implementation: cfg changing
+    /**********************************************************************
+     */
 
     public void setContentHandler(ContentHandler handler)
     {
@@ -310,10 +317,10 @@ class SAXParserImpl
     //public void setProperty(String name, Object value) 
 
     /*
-    /////////////////////////////////////////////////////
-    // XLMReader (SAX2) implementation: parsing
-    /////////////////////////////////////////////////////
-    */
+    /**********************************************************************
+    /* XLMReader (SAX2) implementation: parsing
+    /**********************************************************************
+     */
 
     public void parse(InputSource input)
         throws SAXException
@@ -412,9 +419,9 @@ class SAXParserImpl
     }
 
     /*
-    /////////////////////////////////////////////////
-    // Parsing loop, helper methods
-    /////////////////////////////////////////////////
+    /**********************************************************************
+    /* Parsing loop, helper methods
+    /**********************************************************************
      */
 
     /**
@@ -528,9 +535,9 @@ class SAXParserImpl
     }
 
     /*
-    /////////////////////////////////////////////////
-    // Parser (SAX1) implementation
-    /////////////////////////////////////////////////
+    /**********************************************************************
+    /* Parser (SAX1) implementation
+    /**********************************************************************
      */
 
     // Already implemented for XMLReader:
@@ -550,10 +557,10 @@ class SAXParserImpl
     }
 
     /*
-    /////////////////////////////////////////////////////
-    // Attributes (SAX2) implementation
-    /////////////////////////////////////////////////////
-    */
+    /**********************************************************************
+    /* Attributes (SAX2) implementation
+    /**********************************************************************
+     */
 
     public int getIndex(String qName)
     {
@@ -633,10 +640,10 @@ class SAXParserImpl
     }
 
     /*
-    /////////////////////////////////////////////////////
-    // Attributes2 (SAX2) implementation
-    /////////////////////////////////////////////////////
-    */
+    /**********************************************************************
+    /* Attributes2 (SAX2) implementation
+    /**********************************************************************
+     */
 
     /* Note: for now (in absence of DTD processing), none of attributes
      * are declared, and all are specified (can not default without
@@ -674,10 +681,10 @@ class SAXParserImpl
     }
 
     /*
-    /////////////////////////////////////////////////////
-    // Locator (SAX1) implementation
-    /////////////////////////////////////////////////////
-    */
+    /**********************************************************************
+    /* Locator (SAX1) implementation
+    /**********************************************************************
+     */
 
     public int getColumnNumber()
     {
@@ -700,10 +707,10 @@ class SAXParserImpl
     }
 
     /*
-    /////////////////////////////////////////////////////
-    // Locator2 (SAX2) implementation
-    /////////////////////////////////////////////////////
-    */
+    /**********************************************************************
+    /* Locator2 (SAX2) implementation
+    /**********************************************************************
+     */
 
     public String getEncoding()
     {
@@ -724,9 +731,9 @@ class SAXParserImpl
     }
 
     /*
-    /////////////////////////////////////////////////
-    // Internal methods
-    /////////////////////////////////////////////////
+    /**********************************************************************
+    /* Internal methods
+    /**********************************************************************
      */
 
     private void throwSaxException(Exception e)
@@ -753,9 +760,9 @@ class SAXParserImpl
     }
 
     /*
-    /////////////////////////////////////////////////
-    // Helper classes for SAX1 support
-    /////////////////////////////////////////////////
+    /**********************************************************************
+    /* Helper classes for SAX1 support
+    /**********************************************************************
      */
 
     final static class DocHandlerWrapper

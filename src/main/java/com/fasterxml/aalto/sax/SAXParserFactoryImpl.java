@@ -44,6 +44,14 @@ public class SAXParserFactoryImpl
         mStaxFactory = new InputFactoryImpl();
     }
 
+    // As per [Issue#4], let's re-define this method
+    /**
+     * @since 0.9.8
+     */
+    public static SAXParserFactory newInstance() {
+        return new SAXParserFactoryImpl();
+    }
+    
     public boolean getFeature(String name)
         throws SAXNotRecognizedException, SAXNotSupportedException
     {
