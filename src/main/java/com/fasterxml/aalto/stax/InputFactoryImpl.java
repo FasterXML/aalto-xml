@@ -351,7 +351,7 @@ public final class InputFactoryImpl
                                            boolean forEventReader,
                                            boolean forceAutoClose)
     {
-        ReaderConfig cfg = _config.createNonShared(systemId, publicId, extEncoding);
+        ReaderConfig cfg = _config.createNonShared(publicId, systemId, extEncoding);
         if (forEventReader) {
             /* No point in lazy parsing for event readers: no more efficient
              * (and possible less) since all data is needed, always; and
@@ -366,7 +366,7 @@ public final class InputFactoryImpl
     }
 
     protected XMLStreamReader2 constructSR(InputStream in, String enc,
-                                           boolean forEventReader)
+            boolean forEventReader)
         throws XMLStreamException
     {
         ReaderConfig cfg = getNonSharedConfig(null, null, enc, forEventReader, false);

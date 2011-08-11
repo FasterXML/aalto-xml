@@ -9,6 +9,7 @@ Description:
 
 * #4: Added SAXParserFactoryImpl.newInstance(), to reduce likelihood of getting a
     non-Aalto factory.
+* #6: Fix ordering problem wrt public/system ids, ReaderConfig construction
 * #9: Handle SAX property "document-xml-version" properly
 
 == History: ==
