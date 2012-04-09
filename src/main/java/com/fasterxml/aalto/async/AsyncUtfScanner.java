@@ -634,9 +634,9 @@ public class AsyncUtfScanner
             }
             throwInternal();
         }
-
+        
         // Nah, a multi-byte UTF-8 char:
-        // Let's just retest the first pending byte (in LSB):
+        // Let's just re-test the first pending byte (in LSB):
         switch (_charTypes.TEXT_CHARS[c & 0xFF]) {
         case XmlCharTypes.CT_MULTIBYTE_2:
             // Easy: must have just one byte, did get another one:
@@ -1280,7 +1280,7 @@ public class AsyncUtfScanner
             if (_elemAttrPtr >= attrBuffer.length) {
                 attrBuffer = _attrCollector.valueBufferFull();
             }
-            // All lfs get converted to spaces, in attribute values
+            // All LFs get converted to spaces, in attribute values
             attrBuffer[_elemAttrPtr++] = ' ';
             return true;
         }
@@ -1346,9 +1346,10 @@ public class AsyncUtfScanner
             ch = handleDecEntityInAttribute(false);
         } else if (_pendingInput == PENDING_STATE_ATTR_VALUE_HEX_DIGIT) {
             ch = handleHexEntityInAttribute(false);
-        } else {
-            throwInternal();
-            ch = 0; // never gets here
+        } else { // nope, split UTF-8 char
+            // Nah, a multi-byte UTF-8 char. Alas, can't use shared method, as results
+            // don't go in shared text buffer...
+            ch = handleAttrValuePendingUTF8();
         }
         if (ch == 0) { // wasn't resolved
             return false;
@@ -1371,6 +1372,73 @@ public class AsyncUtfScanner
         return true; // done it!
     }
 
+    private final int handleAttrValuePendingUTF8() throws XMLStreamException
+    {
+        // note: we know there must be at least one byte available at this point
+        int c = _pendingInput;
+        _pendingInput = 0;
+        
+        // Let's just re-test the first pending byte (in LSB):
+        switch (_charTypes.TEXT_CHARS[c & 0xFF]) {
+        case XmlCharTypes.CT_MULTIBYTE_2:
+            // Easy: must have just one byte, did get another one:
+            return decodeUtf8_2(c);
+        case XmlCharTypes.CT_MULTIBYTE_3:
+            {
+                // Ok... so do we have one or two pending bytes?
+                int next = _inputBuffer[_inputPtr++] & 0xFF;
+                int c2 = (c >> 8);
+                if (c2 == 0) { // just one; need two more
+                    if (_inputPtr >= _inputEnd) { // but got only one
+                        _pendingInput = c | (next << 8);
+                        return 0;
+                    }
+                    int c3 = _inputBuffer[_inputPtr++] & 0xFF;
+                    c = decodeUtf8_3(c, next, c3);
+                } else { // had two, got one, bueno:
+                    c = decodeUtf8_3((c & 0xFF), c2, next);
+                }
+                return c;
+            }
+        case XmlCharTypes.CT_MULTIBYTE_4:
+            {
+                int next = (int) _inputBuffer[_inputPtr++] & 0xFF;
+                // Only had one?
+                if ((c >> 8) == 0) { // ok, so need 3 more
+                    if (_inputPtr >= _inputEnd) { // just have 1
+                        _pendingInput = c | (next << 8);
+                        return 0;
+                    }
+                    int c2 = _inputBuffer[_inputPtr++] & 0xFF;
+                    if (_inputPtr >= _inputEnd) { // almost, got 2
+                        _pendingInput = c | (next << 8) | (c2 << 16);
+                        return 0;
+                    }
+                    int c3 = _inputBuffer[_inputPtr++] & 0xFF;
+                    c = decodeUtf8_4(c, next, c2, c3);
+                } else { // had two or three
+                    int c2 = (c >> 8) & 0xFF;
+                    int c3 = (c >> 16);
+                    
+                    if (c3 == 0) { // just two
+                        if (_inputPtr >= _inputEnd) { // one short
+                            _pendingInput = c | (next << 16);
+                            return 0;
+                        }
+                        c3 = _inputBuffer[_inputPtr++] & 0xFF;
+                        c = decodeUtf8_4((c & 0xFF), c2, next, c3);
+                    } else { // had three, got last
+                        c = decodeUtf8_4((c & 0xFF), c2, c3, next);
+                    }
+                } 
+                return c;
+            }
+        default: // should never occur:
+            throwInternal();
+            return 0; // never gets here
+        }
+    }    
+    
     private final int handleDecEntityInAttribute(boolean starting)
         throws XMLStreamException
     {

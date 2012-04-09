@@ -1,16 +1,15 @@
-Version: 0.9.7
+Version: 0.9.8
 
-Release date: 11-Feb-2011
+Release date: 08-Apr-2012
 
 Description:
-  First version with complete non-blocking (async) parser API and
-  implementation -- so this is very close to the 1.0 release!
-  (but expect a few bugs to be discovered, fixed, before that)
+  Bug fix version; async API complete, very close to 1.0.
 
 * #4: Added SAXParserFactoryImpl.newInstance(), to reduce likelihood of getting a
     non-Aalto factory.
 * #6: Fix ordering problem wrt public/system ids, ReaderConfig construction
 * #9: Handle SAX property "document-xml-version" properly
+* #12: Fix a bug in async attribute parsing, related to multi-byte UTF-8 char handling
 
 == History: ==
 

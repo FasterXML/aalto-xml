@@ -73,6 +73,30 @@ public class TestElementParsing extends AsyncTestBase
             _testElementsWithAttrs(999, false, SPC);
         }
     }
+
+    // [Issue-12], probs with attrs, multi-byte UTF-8 chars
+    public void testParseElementsWithUTF8Attrs() throws Exception
+    {
+        for (int spaces = 0; spaces < 3; ++spaces) {
+            String SPC = "  ".substring(0, spaces);
+            _testElementsWithUTF8Attrs(1, true, SPC);
+            _testElementsWithUTF8Attrs(2, true, SPC);
+            _testElementsWithUTF8Attrs(5, true, SPC);
+            _testElementsWithAttrs(999, true, SPC);
+        }
+    }
+
+    // [Issue-12]
+    public void testSkipElementsWithUTF8Attrs() throws Exception
+    {
+        for (int spaces = 0; spaces < 3; ++spaces) {
+            String SPC = "  ".substring(0, spaces);
+            _testElementsWithUTF8Attrs(1, false, SPC);
+            _testElementsWithUTF8Attrs(2, false, SPC);
+            _testElementsWithUTF8Attrs(5, false, SPC);
+            _testElementsWithAttrs(999, false, SPC);
+        }
+    }
     
     /*
     /**********************************************************************
@@ -161,6 +185,34 @@ public class TestElementParsing extends AsyncTestBase
             assertEquals("", sr.getNamespaceURI());
             assertEquals(1, sr.getAttributeCount());
             assertEquals("1>2, 2<1", sr.getAttributeValue(0));
+            assertEquals("attr", sr.getAttributeLocalName(0));
+            assertEquals("", sr.getAttributeNamespace(0));
+        }
+        assertTokenType(END_ELEMENT, reader.nextToken());
+        if (checkValues) {
+            assertEquals("root", sr.getLocalName());
+            assertEquals("", sr.getNamespaceURI());
+        }
+        assertTokenType(XMLStreamConstants.END_DOCUMENT, reader.nextToken());
+        assertFalse(sr.hasNext());
+    }
+
+    private void _testElementsWithUTF8Attrs(int chunkSize, boolean checkValues, String SPC) throws Exception
+    {
+        AsyncXMLInputFactory f = new InputFactoryImpl();
+        AsyncXMLStreamReader sr = f.createAsyncXMLStreamReader();
+        final String VALUE = "Gr\u00e4"; 
+        final String XML = SPC+"<root attr='"+VALUE+"' />";
+        AsyncReaderWrapper reader = new AsyncReaderWrapper(sr, chunkSize, XML);
+
+        // should start with START_DOCUMENT, but for now skip
+        int t = verifyStart(reader);
+        assertTokenType(START_ELEMENT, t);
+        if (checkValues) {
+            assertEquals("root", sr.getLocalName());
+            assertEquals("", sr.getNamespaceURI());
+            assertEquals(1, sr.getAttributeCount());
+            assertEquals(VALUE, sr.getAttributeValue(0));
             assertEquals("attr", sr.getAttributeLocalName(0));
             assertEquals("", sr.getAttributeNamespace(0));
         }
