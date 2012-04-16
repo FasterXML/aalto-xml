@@ -94,7 +94,7 @@ public class AsyncUtfScanner
             int c = (int) b & 0xFF;
             switch (_charTypes.TEXT_CHARS[c]) {
             case XmlCharTypes.CT_INVALID:
-                throwInvalidXmlChar(c);
+                c = handleInvalidXmlChar(c);
             case XmlCharTypes.CT_WS_CR:
                 /* Note: can not have pending input when this method
                  * is called. No need to check that (could assert)
@@ -337,7 +337,7 @@ public class AsyncUtfScanner
             // And then fallback for funny chars / UTF-8 multibytes:
             switch (TYPES[c]) {
             case XmlCharTypes.CT_INVALID:
-                throwInvalidXmlChar(c);
+                c = handleInvalidXmlChar(c);
             case XmlCharTypes.CT_WS_CR:
                 {
                     if (_inputPtr >= _inputEnd) {
@@ -752,7 +752,7 @@ public class AsyncUtfScanner
             // And then fallback for funny chars / UTF-8 multibytes:
             switch (TYPES[c]) {
             case XmlCharTypes.CT_INVALID:
-                throwInvalidXmlChar(c);
+                c = handleInvalidXmlChar(c);
             case XmlCharTypes.CT_WS_CR:
                 {
                     if (_inputPtr >= _inputEnd) {
@@ -1173,7 +1173,7 @@ public class AsyncUtfScanner
             
             switch (TYPES[c]) {
             case XmlCharTypes.CT_INVALID:
-                throwInvalidXmlChar(c);
+                c = handleInvalidXmlChar(c);
             case XmlCharTypes.CT_WS_CR:
                 if (_inputPtr >= _inputEnd) {
                     _pendingInput = PENDING_STATE_CR;
@@ -1610,7 +1610,7 @@ public class AsyncUtfScanner
             
             switch (TYPES[c]) {
             case XmlCharTypes.CT_INVALID:
-                throwInvalidXmlChar(c);
+                c = handleInvalidXmlChar(c);
             case XmlCharTypes.CT_WS_CR:
                 if (_inputPtr >= _inputEnd) {
                     _pendingInput = PENDING_STATE_CR;
@@ -1882,7 +1882,7 @@ public class AsyncUtfScanner
 
             switch (TYPES[c]) {
             case XmlCharTypes.CT_INVALID:
-                throwInvalidXmlChar(c);
+                c = handleInvalidXmlChar(c);
             case XmlCharTypes.CT_WS_CR:
                 if (_inputPtr >= _inputEnd) {
                     _pendingInput = PENDING_STATE_CR;
@@ -2027,7 +2027,7 @@ public class AsyncUtfScanner
 
             switch (TYPES[c]) {
             case XmlCharTypes.CT_INVALID:
-                throwInvalidXmlChar(c);
+                c = handleInvalidXmlChar(c);
             case XmlCharTypes.CT_WS_CR:
                 {
                     if (_inputPtr >= _inputEnd) {
@@ -2208,7 +2208,7 @@ public class AsyncUtfScanner
     
             switch (TYPES[c]) {
             case XmlCharTypes.CT_INVALID:
-                throwInvalidXmlChar(c);
+                c = handleInvalidXmlChar(c);
             case XmlCharTypes.CT_WS_CR:
                 {
                     if (_inputPtr >= _inputEnd) {
@@ -2416,7 +2416,7 @@ public class AsyncUtfScanner
 
             switch (TYPES[c]) {
             case XmlCharTypes.CT_INVALID:
-                throwInvalidXmlChar(c);
+                c = handleInvalidXmlChar(c);
             case XmlCharTypes.CT_WS_CR:
                 {
                     if (_inputPtr >= _inputEnd) {
@@ -2584,7 +2584,7 @@ public class AsyncUtfScanner
         if (c1 >= 0xD) { // 0xD800-0xDFFF, 0xFFFE-0xFFFF illegal
             if (c >= 0xD800) { // surrogates illegal, as well as 0xFFFE/0xFFFF
                 if (c < 0xE000 || (c >= 0xFFFE && c <= 0xFFFF)) {
-                    throwInvalidXmlChar(c);
+                    c = handleInvalidXmlChar(c);
                 }
             }
         }
@@ -2605,7 +2605,7 @@ public class AsyncUtfScanner
         if (c1 >= 0xD) { // 0xD800-0xDFFF, 0xFFFE-0xFFFF illegal
             if (c >= 0xD800) { // surrogates illegal, as well as 0xFFFE/0xFFFF
                 if (c < 0xE000 || (c >= 0xFFFE && c <= 0xFFFF)) {
-                    throwInvalidXmlChar(c);
+                    c = handleInvalidXmlChar(c);
                 }
             }
         }

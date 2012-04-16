@@ -296,7 +296,7 @@ public final class Utf8Scanner
             
             switch (TYPES[c]) {
             case XmlCharTypes.CT_INVALID:
-                throwInvalidXmlChar(c);
+                c = handleInvalidXmlChar(c);
             case XmlCharTypes.CT_WS_CR:
                 if (_inputPtr >= _inputEnd) {
                     loadMoreGuaranteed();
@@ -712,7 +712,7 @@ public final class Utf8Scanner
             if (TYPES[c] != 0) {
                 switch (TYPES[c]) {
                 case XmlCharTypes.CT_INVALID:
-                    throwInvalidXmlChar(c);
+                    c = handleInvalidXmlChar(c);
                 case XmlCharTypes.CT_WS_CR:
                     if (_inputPtr >= _inputEnd) {
                         loadMoreGuaranteed();
@@ -800,7 +800,7 @@ public final class Utf8Scanner
 
             switch (TYPES[c]) {
             case XmlCharTypes.CT_INVALID:
-                throwInvalidXmlChar(c);
+                c = handleInvalidXmlChar(c);
             case XmlCharTypes.CT_WS_CR:
                 if (_inputPtr >= _inputEnd) {
                     loadMoreGuaranteed();
@@ -893,7 +893,7 @@ public final class Utf8Scanner
 
             switch (TYPES[c]) {
             case XmlCharTypes.CT_INVALID:
-                throwInvalidXmlChar(c);
+                c = handleInvalidXmlChar(c);
             case XmlCharTypes.CT_WS_CR:
                 if (_inputPtr >= _inputEnd) {
                     loadMoreGuaranteed();
@@ -970,7 +970,7 @@ public final class Utf8Scanner
 
             switch (TYPES[c]) {
             case XmlCharTypes.CT_INVALID:
-                throwInvalidXmlChar(c);
+                c = handleInvalidXmlChar(c);
             case XmlCharTypes.CT_WS_CR:
                 if (_inputPtr >= _inputEnd) {
                     loadMoreGuaranteed();
@@ -1056,7 +1056,7 @@ public final class Utf8Scanner
 
             switch (TYPES[c]) {
             case XmlCharTypes.CT_INVALID:
-                throwInvalidXmlChar(c);
+                c = handleInvalidXmlChar(c);
             case XmlCharTypes.CT_WS_CR:
                 if (_inputPtr >= _inputEnd) {
                     loadMoreGuaranteed();
@@ -1268,7 +1268,7 @@ public final class Utf8Scanner
             // 0xD800-0xDFFF, 0xFFFE-0xFFFF illegal
             if (c >= 0xD800) { // surrogates illegal, as well as 0xFFFE/0xFFFF
                 if (c < 0xE000 || (c >= 0xFFFE && c <= 0xFFFF)) {
-                    throwInvalidXmlChar(c);
+                    c = handleInvalidXmlChar(c);
                 }
             }
         } else { // no checks, can discard
@@ -1363,7 +1363,7 @@ public final class Utf8Scanner
             // And then exceptions:
             switch (TYPES[c]) {
             case XmlCharTypes.CT_INVALID:
-                throwInvalidXmlChar(c);
+                c = handleInvalidXmlChar(c);
             case XmlCharTypes.CT_WS_CR:
                 if (_inputPtr >= _inputEnd) {
                     loadMoreGuaranteed();
@@ -1523,7 +1523,7 @@ public final class Utf8Scanner
             // And then fallback for funny chars / UTF-8 multibytes:
             switch (TYPES[c]) {
             case XmlCharTypes.CT_INVALID:
-                throwInvalidXmlChar(c);
+                c = handleInvalidXmlChar(c);
             case XmlCharTypes.CT_WS_CR:
                 if (_inputPtr >= _inputEnd) {
                     loadMoreGuaranteed();
@@ -1677,7 +1677,7 @@ public final class Utf8Scanner
 
             switch (TYPES[c]) {
             case XmlCharTypes.CT_INVALID:
-                throwInvalidXmlChar(c);
+                c = handleInvalidXmlChar(c);
             case XmlCharTypes.CT_WS_CR:
                 if (_inputPtr >= _inputEnd) {
                     loadMoreGuaranteed();
@@ -1794,7 +1794,7 @@ public final class Utf8Scanner
                 // First, common types
 
             case XmlCharTypes.CT_INVALID:
-                throwInvalidXmlChar(c);
+                c = handleInvalidXmlChar(c);
             case XmlCharTypes.CT_WS_CR:
                 if (_inputPtr >= _inputEnd) {
                     loadMoreGuaranteed();
@@ -1923,7 +1923,7 @@ public final class Utf8Scanner
             // And then exceptions:
             switch (TYPES[c]) {
             case XmlCharTypes.CT_INVALID:
-                throwInvalidXmlChar(c);
+                c = handleInvalidXmlChar(c);
             case XmlCharTypes.CT_WS_CR:
                 if (_inputPtr >= _inputEnd) {
                     loadMoreGuaranteed();
@@ -2164,7 +2164,7 @@ public final class Utf8Scanner
             // And then fallback for funny chars / UTF-8 multibytes:
             switch (TYPES[c]) {
             case XmlCharTypes.CT_INVALID:
-                throwInvalidXmlChar(c);
+                c = handleInvalidXmlChar(c);
             case XmlCharTypes.CT_WS_CR:
                 if (_inputPtr >= _inputEnd) {
                     loadMoreGuaranteed();
@@ -2317,7 +2317,7 @@ public final class Utf8Scanner
             // And then exceptions:
             switch (TYPES[c]) {
             case XmlCharTypes.CT_INVALID:
-                throwInvalidXmlChar(c);
+                c = handleInvalidXmlChar(c);
             case XmlCharTypes.CT_WS_CR:
                 if (_inputPtr >= _inputEnd) {
                     loadMoreGuaranteed();
@@ -2558,7 +2558,7 @@ public final class Utf8Scanner
         if (c1 >= 0xD) { // 0xD800-0xDFFF, 0xFFFE-0xFFFF illegal
             if (c >= 0xD800) { // surrogates illegal, as well as 0xFFFE/0xFFFF
                 if (c < 0xE000 || (c >= 0xFFFE && c <= 0xFFFF)) {
-                    throwInvalidXmlChar(c);
+                    c = handleInvalidXmlChar(c);
                 }
             }
         }
@@ -2582,7 +2582,7 @@ public final class Utf8Scanner
         if (c1 >= 0xD) { // 0xD800-0xDFFF, 0xFFFE-0xFFFF illegal
             if (c >= 0xD800) { // surrogates illegal, as well as 0xFFFE/0xFFFF
                 if (c < 0xE000 || (c >= 0xFFFE && c <= 0xFFFF)) {
-                    throwInvalidXmlChar(c);
+                    c = handleInvalidXmlChar(c);
                 }
             }
         }

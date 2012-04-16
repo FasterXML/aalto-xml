@@ -30,6 +30,7 @@ import com.fasterxml.aalto.impl.ErrorConsts;
 import com.fasterxml.aalto.impl.IoStreamException;
 import com.fasterxml.aalto.util.DataUtil;
 import com.fasterxml.aalto.util.EmptyIterator;
+import com.fasterxml.aalto.util.IllegalCharHandler;
 import com.fasterxml.aalto.util.SingletonIterator;
 import com.fasterxml.aalto.util.TextBuilder;
 import com.fasterxml.aalto.util.XmlChars;
@@ -1508,9 +1509,16 @@ public abstract class XmlScanner
         reportInputProblem("Illegal character (NULL, unicode 0) encountered: not valid in any content");
     }
 
-    protected void throwInvalidXmlChar(int i)
+    protected char handleInvalidXmlChar(int i)
         throws XMLStreamException
     {
+    	
+    	final IllegalCharHandler iHandler = _config.getIllegalCharHandler();
+    	
+    	if (iHandler != null) {
+    		return iHandler.convertIllegalChar(i);
+    	}
+    	
         char c = (char) i;
         if (c == CHAR_NULL) {
             throwNullChar();
@@ -1523,6 +1531,9 @@ public abstract class XmlScanner
             }
         }
         reportInputProblem(msg);
+        
+        //will not reach this block
+        return (char) i;
     }
 
     protected void throwInvalidSpace(int i)
