@@ -24,7 +24,7 @@ import com.fasterxml.aalto.util.XmlCharTypes;
 import com.fasterxml.aalto.util.XmlChars;
 
 /**
- * Scanner for tokenizing xml content from a byte stream encoding using
+ * Scanner for tokenizing XML content from a byte stream encoding using
  * UTF-8 encoding, or something suitably close it for decoding purposes
  * (including ISO-Latin1 and US-ASCII).
  */

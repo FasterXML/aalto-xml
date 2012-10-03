@@ -453,7 +453,7 @@ public class StreamReaderImpl
         throw new IllegalStateException("Current state not START_ELEMENT, END_ELEMENT or ENTITY_REFERENCE");
     }
 
-    // // // getLocation() defined in Strea_scanner
+    // // // getLocation() defined in StreamScanner
 
     public final QName getName()
     {

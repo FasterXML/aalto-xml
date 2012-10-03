@@ -1797,15 +1797,14 @@ public class AsyncUtfScanner
         } else if (_pendingInput == PENDING_STATE_ATTR_VALUE_HEX_DIGIT) {
             ch = handleHexEntityInAttribute(false);
         } else {
-            throwInternal();
-            ch = 0; // never gets here
+	    // 05-Aug-2012, tatu: Apparently we can end up here too...
+	    ch = handleAttrValuePendingUTF8();
         }
         if (ch == 0) { // wasn't resolved
             return false;
         }
         
-        
-        char[] attrBuffer = _attrCollector.continueValue();
+        char[] attrBuffer = _nameBuffer; 
         // Ok; does it need a surrogate though? (over 16 bits)
         if ((ch >> 16) != 0) {
             ch -= 0x10000;
