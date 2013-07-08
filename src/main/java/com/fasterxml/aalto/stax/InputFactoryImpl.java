@@ -15,26 +15,35 @@
 
 package com.fasterxml.aalto.stax;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Reader;
 import java.net.URL;
 
-import org.xml.sax.InputSource;
-
-import javax.xml.stream.*;
+import javax.xml.stream.EventFilter;
+import javax.xml.stream.StreamFilter;
+import javax.xml.stream.XMLEventReader;
+import javax.xml.stream.XMLReporter;
+import javax.xml.stream.XMLResolver;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.util.XMLEventAllocator;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamSource;
 
-// stax2:
-import org.codehaus.stax2.*;
-import org.codehaus.stax2.io.Stax2Source;
+import org.codehaus.stax2.XMLEventReader2;
+import org.codehaus.stax2.XMLStreamReader2;
 import org.codehaus.stax2.io.Stax2ByteArraySource;
 import org.codehaus.stax2.io.Stax2CharArraySource;
+import org.codehaus.stax2.io.Stax2Source;
 import org.codehaus.stax2.ri.Stax2FilteredStreamReader;
 import org.codehaus.stax2.ri.Stax2ReaderAdapter;
 import org.codehaus.stax2.ri.evt.Stax2EventReaderAdapter;
 import org.codehaus.stax2.ri.evt.Stax2FilteredEventReader;
+import org.xml.sax.InputSource;
 
 import com.fasterxml.aalto.AsyncXMLInputFactory;
 import com.fasterxml.aalto.AsyncXMLStreamReader;
@@ -44,7 +53,10 @@ import com.fasterxml.aalto.dom.DOMReaderImpl;
 import com.fasterxml.aalto.evt.EventAllocatorImpl;
 import com.fasterxml.aalto.evt.EventReaderImpl;
 import com.fasterxml.aalto.impl.IoStreamException;
-import com.fasterxml.aalto.in.*;
+import com.fasterxml.aalto.in.ByteSourceBootstrapper;
+import com.fasterxml.aalto.in.CharSourceBootstrapper;
+import com.fasterxml.aalto.in.ReaderConfig;
+import com.fasterxml.aalto.util.IllegalCharHandler;
 import com.fasterxml.aalto.util.URLUtil;
 
 /**
@@ -318,11 +330,21 @@ public final class InputFactoryImpl
     @Override
     public AsyncXMLStreamReader createAsyncXMLStreamReader()
     {
-        // TODO: pass system and/or public ids?
-        ReaderConfig cfg = getNonSharedConfig(null, null, null, false, false);
-        cfg.setActualEncoding("UTF-8");
-        return new AsyncStreamReaderImpl(new AsyncUtfScanner(cfg));
+    	// TODO: pass system and/or public ids?
+    	ReaderConfig cfg = getNonSharedConfig(null, null, null, false, false);
+    	cfg.setActualEncoding("UTF-8");
+    	return new AsyncStreamReaderImpl(new AsyncUtfScanner(cfg));
     }
+    
+    public AsyncXMLStreamReader createAsyncXMLStreamReader(final IllegalCharHandler illegalCharHandler)
+    {
+    	// TODO: pass system and/or public ids?
+    	ReaderConfig cfg = getNonSharedConfig(null, null, null, false, false);
+    	cfg.setActualEncoding("UTF-8");
+    	cfg.setIllegalCharHandler(illegalCharHandler);
+    	return new AsyncStreamReaderImpl(new AsyncUtfScanner(cfg));
+    }
+    
 
     @Override
     public AsyncXMLStreamReader createAsyncXMLStreamReader(byte[] input) {

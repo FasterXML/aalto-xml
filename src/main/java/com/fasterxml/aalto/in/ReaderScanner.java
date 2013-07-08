@@ -852,7 +852,7 @@ public final class ReaderScanner
             if (c <= 0xFF) {
                 switch (TYPES[c]) {
                 case XmlCharTypes.CT_INVALID:
-                    throwInvalidXmlChar(c);
+                    c = handleInvalidXmlChar(c);
                 case XmlCharTypes.CT_WS_CR:
                     if (_inputPtr >= _inputEnd) {
                         loadMoreGuaranteed();
@@ -907,7 +907,7 @@ public final class ReaderScanner
                     }
                     c = d;
                 } else if (c >= 0xFFFE) {
-                    throwInvalidXmlChar(c);
+                    c = handleInvalidXmlChar(c);
                 }
             }
             // We know there's room for at least one more char
@@ -1201,7 +1201,7 @@ public final class ReaderScanner
                     ok = (cix == 0) ? XmlChars.is10NameStartChar(value)
                         : XmlChars.is10NameChar(value);
                 } else if (c >= 0xFFFE) {
-                    throwInvalidXmlChar(c);
+                    c = handleInvalidXmlChar(c);
                     ok = false; // never gets here
                 } else {
                     ok = true;
@@ -1287,7 +1287,7 @@ public final class ReaderScanner
             if (c <= 0xFF) {
                 switch (TYPES[c]) {
                 case XmlCharTypes.CT_INVALID:
-                    throwInvalidXmlChar(c);
+                    c = handleInvalidXmlChar(c);
                 case XmlCharTypes.CT_WS_CR:
                     {
                         if (_inputPtr >= _inputEnd) {
@@ -1332,7 +1332,7 @@ public final class ReaderScanner
                     }
                     c = d;
                 } else if (c >= 0xFFFE) {
-                    throwInvalidXmlChar(c);
+                    c = handleInvalidXmlChar(c);
                 }
             }
             // We know there's room for one more:
@@ -1428,7 +1428,7 @@ public final class ReaderScanner
                     }
                     c = d;
                 } else if (c >= 0xFFFE) {
-                    throwInvalidXmlChar(c);
+                    c = handleInvalidXmlChar(c);
                 }
             }
             // We know there's room for one more:
@@ -1496,7 +1496,7 @@ public final class ReaderScanner
             if (c <= 0xFF) {
                 switch (TYPES[c]) {
                 case XmlCharTypes.CT_INVALID:
-                    throwInvalidXmlChar(c);
+                    c = handleInvalidXmlChar(c);
                 case XmlCharTypes.CT_WS_CR:
                     {
                         if (_inputPtr >= _inputEnd) {
@@ -1554,7 +1554,7 @@ public final class ReaderScanner
                     }
                     c = d;
                 } else if (c >= 0xFFFE) {
-                    throwInvalidXmlChar(c);
+                    c = handleInvalidXmlChar(c);
                 }
             }
 
@@ -1625,7 +1625,7 @@ public final class ReaderScanner
             if (c <= 0xFF) {
                 switch (TYPES[c]) {
                 case XmlCharTypes.CT_INVALID:
-                    throwInvalidXmlChar(c);
+                    c = handleInvalidXmlChar(c);
                 case XmlCharTypes.CT_WS_CR:
                     {
                         if (_inputPtr >= _inputEnd) {
@@ -1694,7 +1694,7 @@ public final class ReaderScanner
                     }
                     c = d;
                 } else if (c >= 0xFFFE) {
-                    throwInvalidXmlChar(c);
+                    c = handleInvalidXmlChar(c);
                 }
             }
             // Ok, can output the char; there's room for one char at least
@@ -1793,7 +1793,7 @@ public final class ReaderScanner
             if (c <= 0xFF) {
                 switch (TYPES[c]) {
                 case XmlCharTypes.CT_INVALID:
-                    throwInvalidXmlChar(c);
+                    c = handleInvalidXmlChar(c);
                 case XmlCharTypes.CT_WS_CR:
                     {
                         int ptr = _inputPtr;
@@ -1884,7 +1884,7 @@ public final class ReaderScanner
                     }
                     c = d;
                 } else if (c >= 0xFFFE) {
-                    throwInvalidXmlChar(c);
+                    c = handleInvalidXmlChar(c);
                 }
             }
             outputBuffer[outPtr++] = c;
@@ -2086,7 +2086,7 @@ public final class ReaderScanner
             if (c <= 0xFF) {
                 switch (TYPES[c]) {
                 case XmlCharTypes.CT_INVALID:
-                    throwInvalidXmlChar(c);
+                    c = handleInvalidXmlChar(c);
                 case XmlCharTypes.CT_WS_CR:
                     {
                         if (_inputPtr >= _inputEnd) {
@@ -2155,7 +2155,7 @@ public final class ReaderScanner
                     }
                     c = d;
                 } else if (c >= 0xFFFE) {
-                    throwInvalidXmlChar(c);
+                    c = handleInvalidXmlChar(c);
                 }
             }
             // Ok, can output the char; there's room for one char at least
@@ -2218,7 +2218,7 @@ public final class ReaderScanner
             if (c <= 0xFF) {
                 switch (TYPES[c]) {
                 case XmlCharTypes.CT_INVALID:
-                    throwInvalidXmlChar(c);
+                    c = handleInvalidXmlChar(c);
                 case XmlCharTypes.CT_WS_CR:
                     {
                         int ptr = _inputPtr;
@@ -2309,7 +2309,7 @@ public final class ReaderScanner
                     }
                     c = d;
                 } else if (c >= 0xFFFE) {
-                    throwInvalidXmlChar(c);
+                    c = handleInvalidXmlChar(c);
                 }
             }
             outputBuffer[outPtr++] = c;
@@ -2414,7 +2414,7 @@ public final class ReaderScanner
             if (c <= 0xFF) {
                 switch (TYPES[c]) {
                 case XmlCharTypes.CT_INVALID:
-                    throwInvalidXmlChar(c);
+                    c = handleInvalidXmlChar(c);
                 case XmlCharTypes.CT_WS_CR:
                     {
                         if (_inputPtr >= _inputEnd) {
@@ -2519,7 +2519,7 @@ public final class ReaderScanner
                     // if ok, returns second surrogate; otherwise exception
                     /*char d =*/ checkSurrogate(c);
                 } else if (c >= 0xFFFE) {
-                    throwInvalidXmlChar(c);
+                    c = handleInvalidXmlChar(c);
                 }
             }
             // skipping, no need to output
@@ -2563,7 +2563,7 @@ public final class ReaderScanner
             if (c <= 0xFF) {
                 switch (TYPES[c]) {
                 case XmlCharTypes.CT_INVALID:
-                    throwInvalidXmlChar(c);
+                    c = handleInvalidXmlChar(c);
                 case XmlCharTypes.CT_WS_CR:
                     {
                         if (_inputPtr >= _inputEnd) {
@@ -2620,7 +2620,7 @@ public final class ReaderScanner
                     // if ok, returns second surrogate; otherwise exception
                     /*char d =*/ checkSurrogate(c);
                 } else if (c >= 0xFFFE) {
-                    throwInvalidXmlChar(c);
+                    c = handleInvalidXmlChar(c);
                 }
             }
         }
@@ -2663,7 +2663,7 @@ public final class ReaderScanner
             if (c <= 0xFF) {
                 switch (TYPES[c]) {
                 case XmlCharTypes.CT_INVALID:
-                    throwInvalidXmlChar(c);
+                    c = handleInvalidXmlChar(c);
                 case XmlCharTypes.CT_WS_CR:
                     {
                         int ptr = _inputPtr;
@@ -2713,7 +2713,7 @@ public final class ReaderScanner
                     // if ok, returns second surrogate; otherwise exception
                     /*char d =*/ checkSurrogate(c);
                 } else if (c >= 0xFFFE) {
-                    throwInvalidXmlChar(c);
+                    c = handleInvalidXmlChar(c);
                 }
             }
         }
@@ -3112,7 +3112,7 @@ public final class ReaderScanner
             if (TYPES[c] != 0) {
                 switch (TYPES[c]) {
                 case XmlCharTypes.CT_INVALID:
-                    throwInvalidXmlChar(c);
+                    c = handleInvalidXmlChar(c);
                 case XmlCharTypes.CT_WS_CR:
                     {
                         if (_inputPtr >= _inputEnd) {
