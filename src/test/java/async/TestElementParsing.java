@@ -5,6 +5,7 @@ import javax.xml.stream.XMLStreamConstants;
 import com.fasterxml.aalto.AsyncXMLInputFactory;
 import com.fasterxml.aalto.AsyncXMLStreamReader;
 import com.fasterxml.aalto.stax.InputFactoryImpl;
+import com.fasterxml.aalto.util.IllegalCharHandler;
 
 public class TestElementParsing extends AsyncTestBase
 {
@@ -95,6 +96,17 @@ public class TestElementParsing extends AsyncTestBase
             _testElementsWithUTF8Attrs(2, false, SPC);
             _testElementsWithUTF8Attrs(5, false, SPC);
             _testElementsWithAttrs(999, false, SPC);
+        }
+    }
+    
+    public void testParseElementsWithIllegalChars() throws Exception
+    {
+        for (int spaces = 0; spaces < 3; ++spaces) {
+            String SPC = "  ".substring(0, spaces);
+            _testElementsWithIllegalChars(1, true, SPC);
+            _testElementsWithIllegalChars(2, true, SPC);
+            _testElementsWithIllegalChars(5, true, SPC);
+            _testElementsWithAttrs(999, true, SPC);
         }
     }
     
@@ -224,4 +236,36 @@ public class TestElementParsing extends AsyncTestBase
         assertTokenType(XMLStreamConstants.END_DOCUMENT, reader.nextToken());
         assertFalse(sr.hasNext());
     }
+    
+    private void _testElementsWithIllegalChars(int chunkSize, boolean checkValues, String SPC) throws Exception
+    {
+    	char replaced = ' ';
+    	InputFactoryImpl f = new InputFactoryImpl();
+        AsyncXMLStreamReader sr = f.createAsyncXMLStreamReader(new IllegalCharHandler.ReplacingIllegalCharHandler(replaced));
+        char illegal = 22;
+        final String VALUE = "Gr" + illegal; 
+        final String VALUE_REPL  = "Gr" + replaced;
+        final String XML = SPC+"<root attr='"+VALUE+"' />";
+        AsyncReaderWrapper reader = new AsyncReaderWrapper(sr, chunkSize, XML);
+
+        // should start with START_DOCUMENT, but for now skip
+        int t = verifyStart(reader);
+        assertTokenType(START_ELEMENT, t);
+        if (checkValues) {
+            assertEquals("root", sr.getLocalName());
+            assertEquals("", sr.getNamespaceURI());
+            assertEquals(1, sr.getAttributeCount());
+            assertEquals(VALUE_REPL, sr.getAttributeValue(0));
+            assertEquals("attr", sr.getAttributeLocalName(0));
+            assertEquals("", sr.getAttributeNamespace(0));
+        }
+        assertTokenType(END_ELEMENT, reader.nextToken());
+        if (checkValues) {
+            assertEquals("root", sr.getLocalName());
+            assertEquals("", sr.getNamespaceURI());
+        }
+        assertTokenType(XMLStreamConstants.END_DOCUMENT, reader.nextToken());
+        assertFalse(sr.hasNext());
+    }
+    
 }

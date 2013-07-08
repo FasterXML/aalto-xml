@@ -11,6 +11,7 @@ import org.codehaus.stax2.XMLInputFactory2;
 import com.fasterxml.aalto.impl.CommonConfig;
 import com.fasterxml.aalto.util.BufferRecycler;
 import com.fasterxml.aalto.util.CharsetNames;
+import com.fasterxml.aalto.util.IllegalCharHandler;
 import com.fasterxml.aalto.util.UriCanonicalizer;
 import com.fasterxml.aalto.util.XmlCharTypes;
 import com.fasterxml.aalto.util.XmlConsts;
@@ -142,6 +143,7 @@ public final class ReaderConfig
     private XMLReporter mReporter;
     private XMLResolver mResolver;
 
+    private IllegalCharHandler illegalCharHandler;
     /*
     /**********************************************************************
     /* Buffer recycling:
@@ -789,4 +791,12 @@ public final class ReaderConfig
             mGeneralTable.mergeFromChild(sym);
         }
     }
+
+	public void setIllegalCharHandler(IllegalCharHandler illegalCharHandler) {
+		this.illegalCharHandler = illegalCharHandler;
+	}
+	
+	public IllegalCharHandler getIllegalCharHandler() {
+		return this.illegalCharHandler;
+	}
 }
