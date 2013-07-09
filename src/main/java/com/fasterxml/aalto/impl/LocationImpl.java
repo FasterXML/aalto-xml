@@ -45,32 +45,38 @@ public class LocationImpl
     public static LocationImpl getEmptyLocation() {
         return sEmptyLocation;
     }
-    
+
+    @Override
     public int getCharacterOffset() { return mCharOffset; }
+    @Override
     public int getColumnNumber() { return mCol; }
+    @Override
     public int getLineNumber() { return mRow; }
     
+    @Override
     public String getPublicId() { return mPublicId; }
+    @Override
     public String getSystemId() { return mSystemId; }
 
     /*
-    ////////////////////////////////////////////////////////
-    // Stax2 API
-    ////////////////////////////////////////////////////////
+    /**********************************************************************
+    /* Stax2 API
+    /**********************************************************************
      */
 
-    public XMLStreamLocation2 getContext()
-    {
+    @Override
+    public XMLStreamLocation2 getContext() {
         // !!! TBI
         return null;
     }
 
     /*
-    ////////////////////////////////////////////////////////
-    // Overridden standard methods
-    ////////////////////////////////////////////////////////
+    /**********************************************************************
+    /* Overridden standard methods
+    /**********************************************************************
      */
-    
+
+    @Override
     public String toString()
     {
         if (mDesc == null) {
@@ -82,9 +88,9 @@ public class LocationImpl
     }
 
     /*
-    ////////////////////////////////////////////////////////
-    // Internal methods:
-    ////////////////////////////////////////////////////////
+    /**********************************************************************
+    /* Internal methods
+    /**********************************************************************
      */
 
     private void appendDesc(StringBuffer sb)

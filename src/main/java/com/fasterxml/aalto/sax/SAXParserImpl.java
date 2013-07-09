@@ -785,20 +785,18 @@ class SAXParserImpl
             mDocHandler = h;
         }
 
-        public void characters(char[] ch, int start, int length)
-            throws SAXException
-        {
+        @Override
+        public void characters(char[] ch, int start, int length) throws SAXException {
             mDocHandler.characters(ch, start, length);
         }
 
-        public void endDocument()
-            throws SAXException
-        {
+        @Override
+        public void endDocument() throws SAXException {
             mDocHandler.endDocument();
         }
 
-        public void endElement(String uri, String localName, String qName)
-            throws SAXException
+        @Override
+        public void endElement(String uri, String localName, String qName) throws SAXException
         {
             if (qName == null) {
                 qName = localName;
@@ -806,41 +804,42 @@ class SAXParserImpl
             mDocHandler.endElement(qName);
         }
 
-        public void endPrefixMapping(String prefix)
-        {
+        @Override
+        public void endPrefixMapping(String prefix) {
             // no equivalent in SAX1, ignore
         }
 
-        public void ignorableWhitespace(char[] ch, int start, int length)
-            throws SAXException
+        @Override
+        public void ignorableWhitespace(char[] ch, int start, int length) throws SAXException
         {
             mDocHandler.ignorableWhitespace(ch, start, length);
         }
 
+        @Override
         public void processingInstruction(String target, String data)
-            throws SAXException
-        {
+            throws SAXException {
             mDocHandler.processingInstruction(target, data);
         }
 
-        public void setDocumentLocator(Locator locator)
-        {
+        @Override
+        public void setDocumentLocator(Locator locator) {
             mDocHandler.setDocumentLocator(locator);
         }
 
-        public void skippedEntity(String name)
-        {
+        @Override
+        public void skippedEntity(String name) {
             // no equivalent in SAX1, ignore
         }
 
-        public void startDocument()
-            throws SAXException
+        @Override
+        public void startDocument() throws SAXException
         {
             mDocHandler.startDocument();
         }
 
+        @Override
         public void startElement(String uri, String localName, String qName,
-                                 Attributes attrs)
+                Attributes attrs)
             throws SAXException
         {
             if (qName == null) {
@@ -851,8 +850,8 @@ class SAXParserImpl
             mDocHandler.startElement(qName, mAttrWrapper);
         }
 
-        public void startPrefixMapping(String prefix, String uri)
-        {
+        @Override
+        public void startPrefixMapping(String prefix, String uri) {
             // no equivalent in SAX1, ignore
         }
     }
@@ -868,34 +867,34 @@ class SAXParserImpl
             mAttrs = a;
         }
 
-        public int getLength()
-        {
+        @Override
+        public int getLength() {
             return mAttrs.getLength();
         }
 
-        public String getName(int i)
-        {
+        @Override
+        public String getName(int i) {
             String n = mAttrs.getQName(i);
             return (n == null) ? mAttrs.getLocalName(i) : n;
         }
 
-        public String getType(int i)
-        {
+        @Override
+        public String getType(int i) {
             return mAttrs.getType(i);
         }
 
-        public String getType(String name)
-        {
+        @Override
+        public String getType(String name) {
             return mAttrs.getType(name);
         }
 
-        public String getValue(int i)
-        {
+        @Override
+        public String getValue(int i) {
             return mAttrs.getValue(i);
         }
 
-        public String getValue(String name)     
-        {
+        @Override
+        public String getValue(String name) {
             return mAttrs.getValue(name);
         }
     }

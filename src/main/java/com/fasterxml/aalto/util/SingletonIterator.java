@@ -10,26 +10,29 @@ import java.util.NoSuchElementException;
 public final class SingletonIterator
     implements Iterator<String>
 {
-    private final String mValue;
+    private final String _value;
 
-    private boolean mDone = false;
+    private boolean _done = false;
 
     public SingletonIterator(String value) {
-        mValue = value;
+        _value = value;
     }
 
+    @Override
     public boolean hasNext() {
-        return !mDone;
+        return !_done;
     }
 
+    @Override
     public String next() {
-        if (mDone) {
+        if (_done) {
             throw new NoSuchElementException();
         }
-        mDone = true;
-        return mValue;
+        _done = true;
+        return _value;
     }
 
+    @Override
     public void remove() {
         throw new UnsupportedOperationException();
     }

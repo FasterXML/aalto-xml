@@ -35,36 +35,35 @@ public final class EventReaderImpl
     }
 
     /*
-    //////////////////////////////////////////////////////
-    // Impl of abstract methods
-    //////////////////////////////////////////////////////
+    /**********************************************************************
+    /* Impl of abstract methods
+    /**********************************************************************
      */
 
-    protected String getErrorDesc(int errorType, int currEvent)
-    {
+    @Override
+    protected String getErrorDesc(int errorType, int currEvent) {
         // For now, defaults are ok, can improve as necessary
         return null;
     }
 
-    public boolean isPropertySupported(String name)
-    {
+    @Override
+    public boolean isPropertySupported(String name) {
         return ((XMLStreamReader2)getStreamReader()).isPropertySupported(name);
     }
 
-    public boolean setProperty(String name, Object value)
-    {
+    @Override
+    public boolean setProperty(String name, Object value) {
         return ((XMLStreamReader2)getStreamReader()).setProperty(name, value);
     }
 
     /*
-    //////////////////////////////////////////////////////
-    // Overrides
-    //////////////////////////////////////////////////////
+    /**********************************************************************
+    /* Overrides
+    /**********************************************************************
      */
 
-    // @Override
-    protected void reportProblem(String msg, Location loc)
-        throws XMLStreamException
+    @Override
+    protected void reportProblem(String msg, Location loc) throws XMLStreamException
     {
         /* Should probably have a specific exception for Writer
          * side? For now, let's at least use base class we

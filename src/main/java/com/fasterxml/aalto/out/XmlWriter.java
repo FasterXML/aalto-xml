@@ -51,31 +51,31 @@ public abstract class XmlWriter
     protected final static int DEFAULT_COPYBUFFER_LEN = 512;
 
     /*
-    ///////////////////////////////////////////////////////
-    // Basic configuration
-    ///////////////////////////////////////////////////////
+    /**********************************************************************
+    /* Basic configuration
+    /**********************************************************************
      */
 
-    final WriterConfig _config;
+    final protected WriterConfig _config;
 
     /**
      * Intermediate buffer, in which content (esp. Strings) can be
      * copied to, before being output.
      */
-    char[] mCopyBuffer;
+    protected char[] _copyBuffer;
 
     /**
      * Indicates whether output is to be compliant; if false, is to be
      * xml 1.0 compliant, if true, xml 1.1 compliant.
      */
-    protected boolean mXml11 = false;
+    protected boolean _xml11 = false;
 
     protected final boolean mCfgNsAware;
 
     /*
-    ///////////////////////////////////////////////////////
-    // Output location info
-    ///////////////////////////////////////////////////////
+    /**********************************************************************
+    /* Output location info
+    /**********************************************************************
      */
 
     /**
@@ -110,7 +110,7 @@ public abstract class XmlWriter
     protected XmlWriter(WriterConfig cfg)
     {
         _config = cfg;
-        mCopyBuffer = cfg.allocMediumCBuffer(DEFAULT_COPYBUFFER_LEN);
+        _copyBuffer = cfg.allocMediumCBuffer(DEFAULT_COPYBUFFER_LEN);
 
         mCfgNsAware = cfg.isNamespaceAware();
         mCheckContent = cfg.willCheckContent();
@@ -118,25 +118,27 @@ public abstract class XmlWriter
     }
 
     /*
-    ///////////////////////////////////////////////////////
-    // Abstract methods for WNameFactory
-    ///////////////////////////////////////////////////////
+    /**********************************************************************
+    /* Abstract methods for WNameFactory
+    /**********************************************************************
      */
 
+    @Override
     public abstract WName constructName(String localName)
         throws XMLStreamException;
 
+    @Override
     public abstract WName constructName(String prefix, String localName)
         throws XMLStreamException;
 
     /*
-    ////////////////////////////////////////////////////
-    // Extra configuration
-    ////////////////////////////////////////////////////
+    /**********************************************************************
+    /* Extra configuration
+    /**********************************************************************
      */
 
     public void enableXml11() {
-        mXml11 = true;
+        _xml11 = true;
     }
 
     protected abstract int getOutputPtr();
@@ -171,9 +173,9 @@ public abstract class XmlWriter
 
     public void _releaseBuffers()
     {
-        char[] buf = mCopyBuffer;
+        char[] buf = _copyBuffer;
         if (buf != null) {
-            mCopyBuffer = null;
+            _copyBuffer = null;
             _config.freeMediumCBuffer(buf);
         }
     }
@@ -438,7 +440,7 @@ public abstract class XmlWriter
         }
         if (c < ' ' || (c >= 0x7F && c <= 0x9F)) {
             String msg = "Invalid white space character (0x"+Integer.toHexString(c)+") in text to output";
-            if (mXml11) {
+            if (_xml11) {
                 msg += " (can only be output using character entity)";
             }
             reportNwfContent(msg);

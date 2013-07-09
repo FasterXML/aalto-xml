@@ -350,7 +350,7 @@ public final class CharXmlWriter
         int offset = 0;
 
         while (len > 0) {
-            char[] buf = mCopyBuffer;
+            char[] buf = _copyBuffer;
             final int blen = buf.length;
             int len2 = (len < blen) ? len : blen;
             data.getChars(offset, offset+len2, buf, 0);
@@ -455,7 +455,7 @@ public final class CharXmlWriter
         int offset = 0;
 
         while (len > 0) {
-            char[] buf = mCopyBuffer;
+            char[] buf = _copyBuffer;
             final int blen = buf.length;
             int len2 = (len < blen) ? len : blen;
             text.getChars(offset, offset+len2, buf, 0);
@@ -553,7 +553,7 @@ public final class CharXmlWriter
         // !!! TODO: could just copy straight to output buffer
 
         while (len > 0) {
-            char[] buf = mCopyBuffer;
+            char[] buf = _copyBuffer;
             final int blen = buf.length;
             int len2 = (len < blen) ? len : blen;
             data.getChars(offset, offset+len2, buf, 0);
@@ -612,7 +612,7 @@ public final class CharXmlWriter
         int cix = -1;
 
         while (len > 0) {
-            char[] buf = mCopyBuffer;
+            char[] buf = _copyBuffer;
             int blen = buf.length;
 
             // Can write all the rest?
@@ -799,7 +799,7 @@ public final class CharXmlWriter
             
             // !!! TODO: copy straight to output buffer
             while (len > 0) {
-                char[] buf = mCopyBuffer;
+                char[] buf = _copyBuffer;
                 int blen = buf.length;
                 
                 // Can write all the rest?
@@ -1010,7 +1010,7 @@ public final class CharXmlWriter
         int offset = 0;
 
         while (len > 0) {
-            char[] buf = mCopyBuffer;
+            char[] buf = _copyBuffer;
             final int blen = buf.length;
             int len2 = (len < blen) ? len : blen;
             value.getChars(offset, offset+len2, buf, 0);

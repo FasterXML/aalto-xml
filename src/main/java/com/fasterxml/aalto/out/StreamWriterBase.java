@@ -684,6 +684,7 @@ public abstract class StreamWriterBase
      * no namespaces are bound ever). As such we do not have to
      * distinguish between repairing and non-repairing modes.
      */
+    @Override
     public void writeStartElement(String localName)
         throws XMLStreamException
     {
@@ -695,9 +696,11 @@ public abstract class StreamWriterBase
         _writeStartTag(name, false);
     }
 
+    @Override
     public abstract void writeStartElement(String nsURI, String localName)
         throws XMLStreamException;
 
+    @Override
     public abstract void writeStartElement(String prefix, String localName,
                                            String nsURI)
         throws XMLStreamException;
@@ -708,6 +711,7 @@ public abstract class StreamWriterBase
     /**********************************************************************
      */
 
+    @Override
     public String getNamespaceURI(String prefix)
     {
         String uri = _currElem.getNamespaceURI(prefix);
@@ -719,6 +723,7 @@ public abstract class StreamWriterBase
         return uri;
     }
 
+    @Override
     public String getPrefix(String uri)
     {
         String prefix = _currElem.getPrefix(uri);
@@ -730,6 +735,7 @@ public abstract class StreamWriterBase
         return prefix;
     }
 
+    @Override
     public Iterator<String> getPrefixes(String uri)
     {
         return _currElem.getPrefixes(uri, _rootNsContext);
@@ -744,36 +750,42 @@ public abstract class StreamWriterBase
 
     // // // Typed element content write methods
 
+    @Override
     public void writeBoolean(boolean b)
         throws XMLStreamException
     {
         writeTypedElement(valueEncoderFactory().getScalarEncoder(b ? "true" : "false"));
     }
 
+    @Override
     public void writeInt(int value)
         throws XMLStreamException
     {
         writeTypedElement(valueEncoderFactory().getEncoder(value));
     }
 
+    @Override
     public void writeLong(long value)
         throws XMLStreamException
     {
         writeTypedElement(valueEncoderFactory().getEncoder(value));
     }
 
+    @Override
     public void writeFloat(float value)
         throws XMLStreamException
     {
         writeTypedElement(valueEncoderFactory().getEncoder(value));
     }
 
+    @Override
     public void writeDouble(double value)
         throws XMLStreamException
     {
         writeTypedElement(valueEncoderFactory().getEncoder(value));
     }
 
+    @Override
     public void writeInteger(BigInteger value)
         throws XMLStreamException
     {
@@ -781,6 +793,7 @@ public abstract class StreamWriterBase
         writeTypedElement(valueEncoderFactory().getScalarEncoder(value.toString()));
     }
 
+    @Override
     public void writeDecimal(BigDecimal value)
         throws XMLStreamException
     {
@@ -788,36 +801,42 @@ public abstract class StreamWriterBase
         writeTypedElement(valueEncoderFactory().getScalarEncoder(value.toString()));
     }
 
+    @Override
     public void writeQName(QName value)
         throws XMLStreamException
     {
         writeTypedElement(valueEncoderFactory().getScalarEncoder(_serializeQName(value)));
     }
 
+    @Override
     public final void writeIntArray(int[] value, int from, int length)
         throws XMLStreamException
     {
         writeTypedElement(valueEncoderFactory().getEncoder(value, from, length));
     }
 
+    @Override
     public void writeLongArray(long[] value, int from, int length)
         throws XMLStreamException
     {
         writeTypedElement(valueEncoderFactory().getEncoder(value, from, length));
     }
 
+    @Override
     public void writeFloatArray(float[] value, int from, int length)
         throws XMLStreamException
     {
         writeTypedElement(valueEncoderFactory().getEncoder(value, from, length));
     }
 
+    @Override
     public void writeDoubleArray(double[] value, int from, int length)
         throws XMLStreamException
     {
         writeTypedElement(valueEncoderFactory().getEncoder(value, from, length));
     }
 
+    @Override
     public void writeBinary(byte[] value, int from, int length)
         throws XMLStreamException
     {
@@ -825,6 +844,7 @@ public abstract class StreamWriterBase
         writeTypedElement(valueEncoderFactory().getEncoder(v, value, from, length));
     }
 
+    @Override
     public void writeBinary(Base64Variant v, byte[] value, int from, int length)
         throws XMLStreamException
     {
@@ -847,6 +867,7 @@ public abstract class StreamWriterBase
 
     // // // Typed attribute value write methods
 
+    @Override
     public final void writeBooleanAttribute(String prefix, String nsURI, String localName, boolean value)
         throws XMLStreamException
     {
@@ -854,6 +875,7 @@ public abstract class StreamWriterBase
                            valueEncoderFactory().getEncoder(value));
     }
 
+    @Override
     public final void writeIntAttribute(String prefix, String nsURI, String localName, int value)
         throws XMLStreamException
     {
@@ -861,6 +883,7 @@ public abstract class StreamWriterBase
                            valueEncoderFactory().getEncoder(value));
     }
 
+    @Override
     public final void writeLongAttribute(String prefix, String nsURI, String localName, long value)
         throws XMLStreamException
     {
@@ -868,6 +891,7 @@ public abstract class StreamWriterBase
                            valueEncoderFactory().getEncoder(value));
     }
 
+    @Override
     public final void writeFloatAttribute(String prefix, String nsURI, String localName, float value)
         throws XMLStreamException
     {
@@ -875,6 +899,7 @@ public abstract class StreamWriterBase
                            valueEncoderFactory().getEncoder(value));
     }
 
+    @Override
     public final void writeDoubleAttribute(String prefix, String nsURI, String localName, double value)
         throws XMLStreamException
     {
@@ -882,6 +907,7 @@ public abstract class StreamWriterBase
                            valueEncoderFactory().getEncoder(value));
     }
 
+    @Override
     public final void writeIntegerAttribute(String prefix, String nsURI, String localName, BigInteger value)
         throws XMLStreamException
     {
@@ -889,6 +915,7 @@ public abstract class StreamWriterBase
                            valueEncoderFactory().getScalarEncoder(value.toString()));
     }
 
+    @Override
     public final void writeDecimalAttribute(String prefix, String nsURI, String localName, BigDecimal value)
         throws XMLStreamException
     {
@@ -896,6 +923,7 @@ public abstract class StreamWriterBase
                            valueEncoderFactory().getScalarEncoder(value.toString()));
     }
 
+    @Override
     public final void writeQNameAttribute(String prefix, String nsURI, String localName, QName value)
         throws XMLStreamException
     {
@@ -905,6 +933,7 @@ public abstract class StreamWriterBase
         writeAttribute(prefix, nsURI, localName, _serializeQName(value));
     }
 
+    @Override
     public void writeIntArrayAttribute(String prefix, String nsURI, String localName, int[] value)
         throws XMLStreamException
     {
@@ -912,6 +941,7 @@ public abstract class StreamWriterBase
                               valueEncoderFactory().getEncoder(value, 0, value.length));
     }
 
+    @Override
     public void writeLongArrayAttribute(String prefix, String nsURI, String localName, long[] value)
         throws XMLStreamException
     {
@@ -919,6 +949,7 @@ public abstract class StreamWriterBase
                             valueEncoderFactory().getEncoder(value, 0, value.length));
     }
 
+    @Override
     public void writeFloatArrayAttribute(String prefix, String nsURI, String localName, float[] value)
         throws XMLStreamException
     {
@@ -926,6 +957,7 @@ public abstract class StreamWriterBase
                             valueEncoderFactory().getEncoder(value, 0, value.length));
     }
 
+    @Override
     public void writeDoubleArrayAttribute(String prefix, String nsURI, String localName, double[] value)
         throws XMLStreamException
     {
@@ -933,6 +965,7 @@ public abstract class StreamWriterBase
                             valueEncoderFactory().getEncoder(value, 0, value.length));
     }
 
+    @Override
     public void writeBinaryAttribute(String prefix, String nsURI, String localName, byte[] value)
         throws XMLStreamException
     {
@@ -941,6 +974,7 @@ public abstract class StreamWriterBase
                             valueEncoderFactory().getEncoder(v, value, 0, value.length));
     }
 
+    @Override
     public void writeBinaryAttribute(Base64Variant v, String prefix, String nsURI, String localName, byte[] value)
         throws XMLStreamException
     {
@@ -966,8 +1000,8 @@ public abstract class StreamWriterBase
     /**********************************************************************
      */
 
-    public void writeSpace(String text)
-        throws XMLStreamException
+    @Override
+    public void writeSpace(String text) throws XMLStreamException
     {
         try {
             _xmlWriter.writeSpace(text);
@@ -976,8 +1010,8 @@ public abstract class StreamWriterBase
         }
     }
 
-    public void writeSpace(char[] cbuf, int offset, int len)
-        throws XMLStreamException
+    @Override
+    public void writeSpace(char[] cbuf, int offset, int len) throws XMLStreamException
     {
         try {
             _xmlWriter.writeSpace(cbuf, offset, len);
@@ -995,8 +1029,8 @@ public abstract class StreamWriterBase
     /**********************************************************************
      */
 
-    public void closeCompletely()
-        throws XMLStreamException
+    @Override
+    public void closeCompletely() throws XMLStreamException
     {
         _finishDocument(true);
     }
@@ -1009,6 +1043,7 @@ public abstract class StreamWriterBase
 
     // NOTE: getProperty() defined in Stax 1.0 interface
 
+    @Override
     public boolean isPropertySupported(String name) {
         // !!! TBI: not all these properties are really supported
         return _config.isPropertySupported(name);
@@ -1021,6 +1056,7 @@ public abstract class StreamWriterBase
      * @return True, if the specified property was <b>succesfully</b>
      *    set to specified value; false if its value was not changed
      */
+    @Override
     public boolean setProperty(String name, Object value)
     {
         /* Note: can not call local method, since it'll return false for
@@ -1029,8 +1065,8 @@ public abstract class StreamWriterBase
         return _config.setProperty(name, value);
     }
 
-    public XMLValidator validateAgainst(XMLValidationSchema schema)
-        throws XMLStreamException
+    @Override
+    public XMLValidator validateAgainst(XMLValidationSchema schema) throws XMLStreamException
     {
         XMLValidator vld = schema.createValidator(this);
 
@@ -1048,8 +1084,8 @@ public abstract class StreamWriterBase
         return vld;
     }
 
-    public XMLValidator stopValidatingAgainst(XMLValidationSchema schema)
-        throws XMLStreamException
+    @Override
+    public XMLValidator stopValidatingAgainst(XMLValidationSchema schema) throws XMLStreamException
     {
         XMLValidator[] results = new XMLValidator[2];
         XMLValidator found = null;
@@ -1064,8 +1100,8 @@ public abstract class StreamWriterBase
         return found;
     }
 
-    public XMLValidator stopValidatingAgainst(XMLValidator validator)
-        throws XMLStreamException
+    @Override
+    public XMLValidator stopValidatingAgainst(XMLValidator validator) throws XMLStreamException
     {
         XMLValidator[] results = new XMLValidator[2];
         XMLValidator found = null;
@@ -1080,6 +1116,7 @@ public abstract class StreamWriterBase
         return found;
     }
 
+    @Override
     public ValidationProblemHandler setValidationProblemHandler(ValidationProblemHandler h)
     {
         ValidationProblemHandler oldH = _vldProblemHandler;
@@ -1147,8 +1184,9 @@ public abstract class StreamWriterBase
                  info.getDTDPublicId(), info.getDTDInternalSubset());
     }
 
+    @Override
     public void writeDTD(String rootName, String systemId, String publicId,
-                         String internalSubset)
+            String internalSubset)
         throws XMLStreamException
     {
         _verifyWriteDTD();
@@ -1164,8 +1202,8 @@ public abstract class StreamWriterBase
      * Similar to {@link #writeEndElement}, but never allows implicit
      * creation of empty elements.
      */
-    public void writeFullEndElement()
-        throws XMLStreamException
+    @Override
+    public void writeFullEndElement() throws XMLStreamException
     {
         if (_stateStartElementOpen && _stateEmptyElement) {
             _stateEmptyElement = false;
@@ -1177,15 +1215,16 @@ public abstract class StreamWriterBase
         writeEndElement();
     }
 
+    @Override
     public void writeStartDocument(String version, String encoding,
-                                   boolean standAlone)
+            boolean standAlone)
         throws XMLStreamException
     {
         _writeStartDocument(version, encoding, standAlone ? "yes" : "no");
     }
 
-    public void writeRaw(String text)
-        throws XMLStreamException
+    @Override
+    public void writeRaw(String text) throws XMLStreamException
     {
         _stateAnyOutput = true;
         if (_stateStartElementOpen) {
@@ -1198,8 +1237,8 @@ public abstract class StreamWriterBase
         }
     }
 
-    public void writeRaw(String text, int start, int offset)
-        throws XMLStreamException
+    @Override
+    public void writeRaw(String text, int start, int offset) throws XMLStreamException
     {
         _stateAnyOutput = true;
         if (_stateStartElementOpen) {
@@ -1212,8 +1251,8 @@ public abstract class StreamWriterBase
         }
     }
 
-    public void writeRaw(char[] text, int offset, int length)
-        throws XMLStreamException
+    @Override
+    public void writeRaw(char[] text, int offset, int length) throws XMLStreamException
     {
         _stateAnyOutput = true;
         if (_stateStartElementOpen) {
@@ -1232,10 +1271,12 @@ public abstract class StreamWriterBase
     /**********************************************************************
      */
 
+    @Override
     public String getXmlVersion() {
         return _config.isXml11() ? "1.1" : "1.0";
     }
 
+    @Override
     public QName getCurrentElementName() {
         return _currElem.getQName();
     }
@@ -1247,16 +1288,18 @@ public abstract class StreamWriterBase
      * As of now, there is no way to specify the base URI. Could be improved
      * in future, if xml:base is supported.
      */
+    @Override
     public String getBaseUri() {
         return null;
     }
 
+    @Override
     public Location getValidationLocation() {
         return getLocation();
     }
 
-    public void reportProblem(XMLValidationProblem prob)
-        throws XMLStreamException
+    @Override
+    public void reportProblem(XMLValidationProblem prob) throws XMLStreamException
     {
         // Custom handler set? If so, it'll take care of it:
         if (_vldProblemHandler != null) {
@@ -1799,6 +1842,7 @@ public abstract class StreamWriterBase
         }
     }
 
+    @Override
     public String toString()
     {
         return "[StreamWriter: "+getClass()+", underlying outputter: "
