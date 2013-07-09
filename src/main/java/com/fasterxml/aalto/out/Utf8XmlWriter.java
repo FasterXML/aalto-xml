@@ -42,11 +42,12 @@ public final class Utf8XmlWriter
         super(cfg, out, OutputCharTypes.getUtf8CharTypes());
     }
 
-    public int getHighestEncodable()
-    {
+    @Override
+    public int getHighestEncodable() {
         return XmlConsts.MAX_UNICODE_CHAR;
     }
 
+    @Override
     public void writeRaw(char[] cbuf, int offset, int len)
         throws IOException, XMLStreamException
     {
@@ -93,6 +94,7 @@ public final class Utf8XmlWriter
         }
     }
 
+    @Override
     protected WName doConstructName(String localName)
         throws XMLStreamException
     {
@@ -105,6 +107,7 @@ public final class Utf8XmlWriter
         }
     }
 
+    @Override
     protected WName doConstructName(String prefix, String localName)
         throws XMLStreamException
     {
@@ -123,6 +126,7 @@ public final class Utf8XmlWriter
     ////////////////////////////////////////////////////
      */
 
+    @Override
     protected final void outputSurrogates(int surr1, int surr2)
         throws IOException, XMLStreamException
     {
@@ -136,6 +140,7 @@ public final class Utf8XmlWriter
         _outputBuffer[_outputPtr++] = (byte) (0x80 | (c & 0x3f));
     }
 
+    @Override
     final protected void output2ByteChar(int ch)
         throws IOException, XMLStreamException
     {
@@ -156,6 +161,7 @@ public final class Utf8XmlWriter
      *   either same as one passed in, or one more if a surrogate character
      *   was succesfully handled
      */
+    @Override
     final protected int outputMultiByteChar(int ch, char[] cbuf, int inputOffset, int inputLen)
         throws IOException, XMLStreamException
     {
@@ -185,6 +191,7 @@ public final class Utf8XmlWriter
         return inputOffset;
     }
 
+    @Override
     final protected int outputStrictMultiByteChar(int ch, char[] cbuf, int inputOffset, int inputLen)
         throws IOException, XMLStreamException
     {

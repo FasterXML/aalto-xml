@@ -112,6 +112,7 @@ public final class ByteSourceBootstrapper
         return new ByteSourceBootstrapper(cfg, inputBuffer, inputStart, inputLen);
     }
 
+    @Override
     public XmlScanner doBootstrap()
         throws IOException, XMLStreamException
     {
@@ -446,10 +447,12 @@ public final class ByteSourceBootstrapper
     /**********************************************************************
      */
 
+    @Override
     protected void pushback() {
         _inputPtr -= mBytesPerChar;
     }
 
+    @Override
     protected int getNext()
         throws IOException, XMLStreamException
     {
@@ -461,7 +464,7 @@ public final class ByteSourceBootstrapper
         return (b & 0xFF);
     }
 
-
+    @Override
     protected int getNextAfterWs(boolean reqWs)
         throws IOException, XMLStreamException
     {
@@ -490,6 +493,7 @@ public final class ByteSourceBootstrapper
      * @return First character that does not match expected, if any;
      *    CHAR_NULL if match succeeded
      */
+    @Override
     protected int checkKeyword(String exp)
         throws IOException, XMLStreamException
     {
@@ -499,6 +503,7 @@ public final class ByteSourceBootstrapper
         return checkSbKeyword(exp);
     }
 
+    @Override
     protected int readQuotedValue(char[] kw, int quoteChar)
         throws IOException, XMLStreamException
     {
@@ -543,6 +548,7 @@ public final class ByteSourceBootstrapper
         return -1;
     }
 
+    @Override
     protected Location getLocation()
     {
         /* Ok; for fixed-size multi-byte encodings, need to divide numbers

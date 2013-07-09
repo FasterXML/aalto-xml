@@ -41,6 +41,7 @@ public class TestSaxReader
     {
         public MyContentHandler() { }
 
+        @Override
         public void characters(char[] ch, int start, int length)
         {
             System.out.print("[CHARACTERS] (len "+length+"): '");
@@ -48,11 +49,13 @@ public class TestSaxReader
             System.out.println("'");
         }
 
+        @Override
         public void endDocument()
         {
             System.out.println("[END-DOCUMENT]");
         }
 
+        @Override
         public void endElement(String nsUri, String localName, String qName)
         {
             System.out.print("[END-ELEMENT] </");
@@ -65,33 +68,40 @@ public class TestSaxReader
             System.out.println(">");
         }
 
+        @Override
         public void endPrefixMapping(String prefix)
         {
             System.out.println("[UNMAP-PREFIX '"+prefix+"']");
         }
 
+        @Override
         public void ignorableWhitespace(char[] ch, int start, int length)
         {
             System.out.println("[IGN-WS] (len "+length+")");
         }
 
+        @Override
         public void processingInstruction(String target, String data)
         {
             System.out.println("[PROC-INSTR '"+target+"' ...]");
         }
 
+        @Override
         public void setDocumentLocator(Locator locator) { }
 
+        @Override
         public void skippedEntity(String name)
         {
             System.out.println("[SKIPPED-entity '"+name+"']");
         }
 
+        @Override
         public void startDocument()
         {
             System.out.println("[START-DOC]");
         }
 
+        @Override
         public void startElement(String nsUri, String localName, String qName, Attributes attrs)
         {
             System.out.print("[START-ELEMENT] (");
@@ -117,16 +127,19 @@ public class TestSaxReader
             System.out.println(">");
         }
 
+        @Override
         public void startPrefixMapping(String prefix, String uri)
         {
             System.out.println("[MAP-PREFIX '"+prefix+"'->'"+uri+"']");
         }
 
+        @Override
         public void unparsedEntityDecl(String name, String publicId, String systemId, String notationName)
         {
             System.out.println("[UNPARSED-ENTITY-DECL '"+name+"']");
         }
 
+        @Override
         public void warning(SAXParseException e)
         {
             System.out.println("[WARNING: '"+e.getMessage()+"']");
@@ -134,6 +147,7 @@ public class TestSaxReader
 
         // // // LexicalHandler:
 
+        @Override
         public void comment(char[] ch, int start, int length)
         {
             System.out.print("[COMMENT] '");
@@ -141,26 +155,31 @@ public class TestSaxReader
             System.out.println("'");
         }
 
+        @Override
         public void endCDATA()
         {
             System.out.println("[END-CDATA]");
         }
 
+        @Override
         public void endDTD()
         {
             System.out.println("[END-DTD]");
         }
 
+        @Override
         public void endEntity(String name)
         {
             System.out.println("[END-ENTITY '"+name+"']");
         }
 
+        @Override
         public void startCDATA()
         {
             System.out.println("[START-CDATA]");
         }
 
+        @Override
         public void startDTD(String name, String publicId, String systemId)
         {
             System.out.print("[START-DTD ");
@@ -168,6 +187,7 @@ public class TestSaxReader
             System.out.println("]");
         }
 
+        @Override
         public void startEntity(String name) 
         {
             System.out.println("[START-ENTITY '"+name+"']");

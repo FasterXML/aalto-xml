@@ -32,6 +32,7 @@ public final class PName3
         mQuad3 = q3;
     }
 
+    @Override
     public PName createBoundName(NsBinding nsb)
     {
         PName3 newName = new PName3(_prefixedName, _prefix, _localName, mHash,
@@ -40,12 +41,13 @@ public final class PName3
         return newName;
     }
 
-    public boolean equals(int quad1, int quad2)
-    {
+    @Override
+    public boolean equals(int quad1, int quad2) {
         // Implies quad length < 3, never matches
         return false;
     }
 
+    @Override
     public boolean equals(int[] quads, int qlen)
     {
         return (qlen == 3)
@@ -54,14 +56,17 @@ public final class PName3
             && (quads[2] == mQuad3);
     }
 
+    @Override
     public int getFirstQuad() {
         return mQuad1;
     }
 
+    @Override
     public int getLastQuad() {
         return mQuad3;
     }
 
+    @Override
     public int getQuad(int index)
     {
         if (index < 2) {
@@ -71,5 +76,6 @@ public final class PName3
         return mQuad3;
     }
 
+    @Override
     public int sizeInQuads() { return 3; }
 }

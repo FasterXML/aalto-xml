@@ -575,7 +575,7 @@ public final class TestScannerPerf
             offset += count;
             len -= count;
         }
-
+        fis.close();
         return data;
     }
 

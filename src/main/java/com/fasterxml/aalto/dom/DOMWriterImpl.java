@@ -145,7 +145,7 @@ public final class DOMWriterImpl
     //public void close() { }
     //public void flush() { }
 
-
+    @Override
     public NamespaceContext getNamespaceContext()
     {
         if (!mNsAware) {
@@ -154,6 +154,7 @@ public final class DOMWriterImpl
         return _currElem;
     }
 
+    @Override
     public String getPrefix(String uri)
     {
         if (!mNsAware) {
@@ -168,6 +169,7 @@ public final class DOMWriterImpl
         return _currElem.getPrefix(uri);
     }
 
+    @Override
     public Object getProperty(String name) {
         /* Here we don't want to throw an exception, should the property
          * not be supported; thus passing false as second arg
@@ -175,12 +177,14 @@ public final class DOMWriterImpl
         return _config.getProperty(name, false);
     }
 
+    @Override
     public void setDefaultNamespace(String uri) {
         _suggestedDefNs = (uri == null || uri.length() == 0) ? null : uri;
     }
 
     //public void setNamespaceContext(NamespaceContext context)
 
+    @Override
     public void setPrefix(String prefix, String uri)
         throws XMLStreamException
     {
@@ -229,18 +233,21 @@ public final class DOMWriterImpl
 
     }
 
+    @Override
     public void writeAttribute(String localName, String value)
         throws XMLStreamException
     {
         outputAttribute(null, null, localName, value);
     }
 
+    @Override
     public void writeAttribute(String nsURI, String localName, String value)
         throws XMLStreamException
     {
         outputAttribute(nsURI, null, localName, value);
     }
 
+    @Override
     public void writeAttribute(String prefix, String nsURI, String localName, String value)
         throws XMLStreamException
     {
@@ -252,6 +259,7 @@ public final class DOMWriterImpl
     //public void writeCharacters(String text)
     //public void writeComment(String data)
 
+    @Override
     public void writeDefaultNamespace(String nsURI)
     {
         if (_openElement == null) {
@@ -263,12 +271,14 @@ public final class DOMWriterImpl
 
     //public void writeDTD(String dtd)
 
+    @Override
     public void writeEmptyElement(String localName)
         throws XMLStreamException
     {
         writeEmptyElement(null, localName);
     }
 
+    @Override
     public void writeEmptyElement(String nsURI, String localName)
         throws XMLStreamException
     {
@@ -280,6 +290,7 @@ public final class DOMWriterImpl
         createStartElem(nsURI, null, localName, true);
     }
 
+    @Override
     public void writeEmptyElement(String prefix, String localName, String nsURI)  
         throws XMLStreamException
     {
@@ -289,11 +300,13 @@ public final class DOMWriterImpl
         createStartElem(nsURI, prefix, localName, true);
     }
 
+    @Override
     public void writeEndDocument()
     {
         _currElem = _openElement = null;
     }
 
+    @Override
     public void writeEndElement()
     {
         // Simple, just need to traverse up... if we can
@@ -304,6 +317,7 @@ public final class DOMWriterImpl
         _currElem = _currElem.getParent();
     }
 
+    @Override
     public void writeNamespace(String prefix, String nsURI) throws XMLStreamException
     {
         if (prefix == null || prefix.length() == 0) {
@@ -324,18 +338,21 @@ public final class DOMWriterImpl
     //public void writeStartDocument(String version)
     //public void writeStartDocument(String encoding, String version)
 
+    @Override
     public void writeStartElement(String localName)
         throws XMLStreamException
     {
         writeStartElement(null, localName);
     }
 
+    @Override
     public void writeStartElement(String nsURI, String localName)
         throws XMLStreamException
     {
         createStartElem(nsURI, null, localName, false);
     }
 
+    @Override
     public void writeStartElement(String prefix, String localName, String nsURI) 
         throws XMLStreamException
     {
@@ -347,12 +364,14 @@ public final class DOMWriterImpl
     ////////////////////////////////////////////////////
      */
 
+    @Override
     public boolean isPropertySupported(String name)
     {
         // !!! TBI: not all these properties are really supported
         return _config.isPropertySupported(name);
     }
 
+    @Override
     public boolean setProperty(String name, Object value)
     {
         /* Note: can not call local method, since it'll return false for
@@ -370,6 +389,7 @@ public final class DOMWriterImpl
 
     //public void writeCData(char[] text, int start, int len)
 
+    @Override
     public void writeDTD(String rootName, String systemId, String publicId,
                          String internalSubset)
         throws XMLStreamException
@@ -397,6 +417,7 @@ public final class DOMWriterImpl
     ////////////////////////////////////////////
      */
 
+    @Override
     protected void appendLeaf(Node n)
         throws IllegalStateException
     {
@@ -474,14 +495,11 @@ public final class DOMWriterImpl
                  * try to locate the prefix if got namespace.
                  */
                 if (prefix == null && nsURI != null && nsURI.length() > 0) {
-                    if (nsURI == null) {
-                        nsURI = "";
-                    }
                     prefix = (_suggestedPrefixes == null) ? null : (String) _suggestedPrefixes.get(nsURI);
                     if (prefix == null) {
                         throwOutputError("Can not find prefix for namespace \""+nsURI+"\"");
                     }
-		}
+                }
                 if (prefix != null && prefix.length() != 0) {
                     localName = prefix + ":" +localName;
                 }

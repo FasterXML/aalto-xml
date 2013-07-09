@@ -49,6 +49,7 @@ public final class Utf8Scanner
     /**********************************************************************
      */
 
+    @Override
     protected int handleStartElement(byte b)
         throws XMLStreamException
     {
@@ -461,6 +462,7 @@ public final class Utf8Scanner
      * @return 0 if a general parsed entity encountered; integer 
      *    value of a (valid) XML content character otherwise
      */
+    @Override
     protected final int handleEntityInText(boolean inAttr)
         throws XMLStreamException
     {
@@ -1317,6 +1319,7 @@ public final class Utf8Scanner
     /**********************************************************************
      */
 
+    @Override
     protected final void finishCData()
         throws XMLStreamException
     {
@@ -2406,6 +2409,7 @@ public final class Utf8Scanner
      *
      * @return True if we encountered an unexpandable entity
      */
+    @Override
     protected final boolean skipCoalescedText()
         throws XMLStreamException
     {
@@ -2734,12 +2738,14 @@ public final class Utf8Scanner
         return c;
     }
 
+    @Override
     protected void reportInvalidInitial(int mask)
         throws XMLStreamException
     {
         reportInputProblem("Invalid UTF-8 start byte 0x"+Integer.toHexString(mask));
     }
 
+    @Override
     protected void reportInvalidOther(int mask)
         throws XMLStreamException
     {

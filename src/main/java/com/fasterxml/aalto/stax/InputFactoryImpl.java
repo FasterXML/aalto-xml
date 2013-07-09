@@ -99,11 +99,13 @@ public final class InputFactoryImpl
 
     // // // Filtered reader factory methods
 
+    @Override
     public XMLEventReader createFilteredReader(XMLEventReader reader, EventFilter filter)
     {
         return new Stax2FilteredEventReader(Stax2EventReaderAdapter.wrapIfNecessary(reader), filter);
     }
 
+    @Override
     public XMLStreamReader createFilteredReader(XMLStreamReader reader, StreamFilter filter)
         throws XMLStreamException
     {
@@ -128,42 +130,49 @@ public final class InputFactoryImpl
     /**********************************************************************
      */
 
+    @Override
     public XMLEventReader createXMLEventReader(InputStream in)
         throws XMLStreamException
     {
         return createXMLEventReader(in, null);
     }
 
+    @Override
     public XMLEventReader createXMLEventReader(InputStream in, String enc)
         throws XMLStreamException
     {
         return constructER(constructSR(in, enc, true));
     }
 
+    @Override
     public XMLEventReader createXMLEventReader(Reader r)
         throws XMLStreamException
     {
         return createXMLEventReader(null, r);
     }
 
+    @Override
     public XMLEventReader createXMLEventReader(javax.xml.transform.Source source)
         throws XMLStreamException
     {
         return constructER(constructSR(source, true));
     }
 
+    @Override
     public XMLEventReader createXMLEventReader(String systemId, InputStream in)
         throws XMLStreamException
     {
         return constructER(constructSR(systemId, in, true));
     }
 
+    @Override
     public XMLEventReader createXMLEventReader(String systemId, Reader r)
         throws XMLStreamException
     {
         return constructER(constructSR(systemId, r, true));
     }
 
+    @Override
     public XMLEventReader createXMLEventReader(XMLStreamReader sr)
         throws XMLStreamException
     {
@@ -176,36 +185,42 @@ public final class InputFactoryImpl
     /**********************************************************************
      */
 
+    @Override
     public XMLStreamReader createXMLStreamReader(InputStream in)
         throws XMLStreamException
     {
         return constructSR(in, null, false);
     }
     
+    @Override
     public XMLStreamReader createXMLStreamReader(InputStream in, String enc)
         throws XMLStreamException
     {
         return constructSR(in, enc, false);
     }
 
+    @Override
     public XMLStreamReader createXMLStreamReader(Reader r)
         throws XMLStreamException
     {
         return constructSR(null, r, false);
     }
 
+    @Override
     public XMLStreamReader createXMLStreamReader(String systemId, Reader r)
         throws XMLStreamException
     {
         return constructSR(systemId, r, false);
     }
 
+    @Override
     public XMLStreamReader createXMLStreamReader(javax.xml.transform.Source src)
         throws XMLStreamException
     {
         return constructSR(src, false);
     }
 
+    @Override
     public XMLStreamReader createXMLStreamReader(String systemId, InputStream in)
         throws XMLStreamException
     {
@@ -218,45 +233,51 @@ public final class InputFactoryImpl
     /**********************************************************************
      */
 
+    @Override
     public Object getProperty(String name)
     {
         // false -> is mandatory, unrecognized will throw IllegalArgumentException
         return _config.getProperty(name, true);
     }
 
+    @Override
     public void setProperty(String propName, Object value)
     {
         _config.setProperty(propName, value);
     } 
 
+    @Override
     public XMLEventAllocator getEventAllocator() {
         return _allocator;
     }
     
+    @Override
     public XMLReporter getXMLReporter() {
         return _config.getXMLReporter();
     }
 
+    @Override
     public XMLResolver getXMLResolver() {
         return _config.getXMLResolver();
     }
 
+    @Override
     public boolean isPropertySupported(String name) {
         return _config.isPropertySupported(name);
     }
 
-    public void setEventAllocator(XMLEventAllocator allocator)
-    {
+    @Override
+    public void setEventAllocator(XMLEventAllocator allocator) {
         _allocator = allocator;
     }
 
-    public void setXMLReporter(XMLReporter r)
-    {
+    @Override
+    public void setXMLReporter(XMLReporter r) {
         _config.setXMLReporter(r);
     }
 
-    public void setXMLResolver(XMLResolver r)
-    {
+    @Override
+    public void setXMLResolver(XMLResolver r) {
         _config.setXMLResolver(r);
     }
 
@@ -266,18 +287,21 @@ public final class InputFactoryImpl
     /**********************************************************************
      */
 
+    @Override
     public XMLEventReader2 createXMLEventReader(URL src)
         throws XMLStreamException
     {
         return constructER(constructSR(src, true));
     }
 
+    @Override
     public XMLEventReader2 createXMLEventReader(File f)
         throws XMLStreamException
     {
         return constructER(constructSR(f, true));
     }
 
+    @Override
     public XMLStreamReader2 createXMLStreamReader(URL src)
         throws XMLStreamException
     {
@@ -288,6 +312,7 @@ public final class InputFactoryImpl
      * Convenience factory method that allows for parsing a document
      * stored in the specified file.
      */
+    @Override
     public XMLStreamReader2 createXMLStreamReader(File f)
         throws XMLStreamException
     {
@@ -296,26 +321,31 @@ public final class InputFactoryImpl
 
     // // // StAX2 "Profile" mutators
 
+    @Override
     public void configureForXmlConformance()
     {
         _config.configureForXmlConformance();
     }
 
+    @Override
     public void configureForConvenience()
     {
         _config.configureForConvenience();
     }
 
+    @Override
     public void configureForSpeed()
     {
         _config.configureForSpeed();
     }
 
+    @Override
     public void configureForLowMemUsage()
     {
         _config.configureForLowMemUsage();
     }
 
+    @Override
     public void configureForRoundTripping()
     {
         _config.configureForRoundTripping();

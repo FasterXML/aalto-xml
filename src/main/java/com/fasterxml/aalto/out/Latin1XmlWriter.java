@@ -43,11 +43,12 @@ public final class Latin1XmlWriter
         super(cfg, out, OutputCharTypes.getLatin1CharTypes());
     }
 
-    public int getHighestEncodable()
-    {
+    @Override
+    public int getHighestEncodable() {
         return 0xFF;
     }
 
+    @Override
     public void writeRaw(char[] cbuf, int offset, int len)
         throws IOException, XMLStreamException
     {
@@ -78,13 +79,14 @@ public final class Latin1XmlWriter
 
     /* Note: identical to that of Ascii writer implementation
      */
-
+    @Override
     protected WName doConstructName(String localName)
         throws XMLStreamException
     {
         return new ByteWName(localName, getAscii(localName));
     }
 
+    @Override
     protected WName doConstructName(String prefix, String localName)
         throws XMLStreamException
     {

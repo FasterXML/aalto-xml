@@ -4,7 +4,7 @@ import org.codehaus.stax2.XMLInputFactory2;
 import org.codehaus.stax2.XMLStreamReader2;
 
 /**
- * Extension of {@link javax.xml.stream.XMLInputFactory2}
+ * Extension of XMLInputFactory2
  * to provide factory methods for constructing non-blocking (asynchronous)
  * parsers (of type {@link AsyncXMLStreamReader}.
  */

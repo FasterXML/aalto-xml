@@ -105,6 +105,7 @@ public final class CharSourceBootstrapper
         return new CharSourceBootstrapper(cfg, buffer, start, len);
     }
 
+    @Override
     public XmlScanner doBootstrap()
         throws IOException, XMLStreamException
     {
@@ -248,18 +249,19 @@ public final class CharSourceBootstrapper
     /////////////////////////////////////////////////////
     */
 
+    @Override
     protected void pushback() {
         --_inputPtr;
     }
 
-    protected int getNext()
-        throws IOException, XMLStreamException
+    @Override
+    protected int getNext() throws IOException, XMLStreamException
     {
         return (_inputPtr < _inputLast) ?
             _inputBuffer[_inputPtr++] : nextChar();
     }
 
-
+    @Override
     protected int getNextAfterWs(boolean reqWs)
         throws IOException, XMLStreamException
     {
@@ -288,6 +290,7 @@ public final class CharSourceBootstrapper
      * @return First character that does not match expected, if any;
      *    CHAR_NULL if match succeeded
      */
+    @Override
     protected int checkKeyword(String exp)
         throws IOException, XMLStreamException
     {
@@ -308,6 +311,7 @@ public final class CharSourceBootstrapper
         return CHAR_NULL;
     }
 
+    @Override
     protected int readQuotedValue(char[] kw, int quoteChar)
         throws IOException, XMLStreamException
     {
@@ -329,9 +333,10 @@ public final class CharSourceBootstrapper
 	    if (i < len) {
 		kw[i++] = c;
 	    }
-	}
+        }
     }
 
+    @Override
     protected Location getLocation()
     {
         return LocationImpl.fromZeroBased

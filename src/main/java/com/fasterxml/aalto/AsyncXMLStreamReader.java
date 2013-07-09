@@ -3,7 +3,7 @@ package com.fasterxml.aalto;
 import org.codehaus.stax2.XMLStreamReader2;
 
 /**
- * Extension of {@link javax.xml.stream.XMLStreamReader2} used by non-blocking ("async")
+ * Extension of {@link XMLStreamReader2} used by non-blocking ("async")
  * stream readers. The main difference is addition of a token ({@link #EVENT_INCOMPLETE})
  * to indicate that there is not yet enough content to parse to tokenize next event;
  * and method to access {@link AsyncInputFeeder} that is used to provide input data

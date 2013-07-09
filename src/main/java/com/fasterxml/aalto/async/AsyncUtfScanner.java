@@ -178,6 +178,7 @@ public class AsyncUtfScanner
         return _currToken;
     }
 
+    @Override
     protected int startCharactersPending()
         throws XMLStreamException
     {
@@ -283,6 +284,7 @@ public class AsyncUtfScanner
      * needs to parse as many characters of the current text segment
      * from the current input block as possible.
      */
+    @Override
     protected final void finishCharacters()
         throws XMLStreamException
     {
@@ -463,6 +465,7 @@ public class AsyncUtfScanner
         _textBuilder.setCurrentLength(outPtr);
     }
 
+    @Override
     protected final int finishCharactersCoalescing()
         throws XMLStreamException
     {
@@ -717,6 +720,7 @@ public class AsyncUtfScanner
      * @return True, if skipping ending with an unexpanded
      *   entity; false if not
      */
+    @Override
     protected boolean skipCharacters()
         throws XMLStreamException
     {
@@ -1111,6 +1115,7 @@ public class AsyncUtfScanner
      * Coalescing mode is (and will) not be implemented for non-blocking
      * parsers, so this method should never get called.
      */
+    @Override
     protected boolean skipCoalescedText()
         throws XMLStreamException
     {
@@ -1128,6 +1133,7 @@ public class AsyncUtfScanner
      * @return True, if the whole value was read; false if
      *   only part (due to buffer ending)
      */
+    @Override
     protected boolean handleAttrValue()
         throws XMLStreamException
     {
@@ -1565,6 +1571,7 @@ public class AsyncUtfScanner
         return 0;
     }
     
+    @Override
     protected boolean handleNsDecl()
         throws XMLStreamException
     {
@@ -1826,7 +1833,8 @@ public class AsyncUtfScanner
     /* Implementation of parsing API, other events
     /**********************************************************************
      */
-    
+
+    @Override
     protected final boolean handleDTDInternalSubset(boolean init) throws XMLStreamException
     {
         char[] outputBuffer;
@@ -1975,7 +1983,8 @@ public class AsyncUtfScanner
         _textBuilder.setCurrentLength(outPtr);
         return false;
     }
-    
+
+    @Override
     protected final int parseCommentContents()
         throws XMLStreamException
     {
@@ -2158,6 +2167,7 @@ public class AsyncUtfScanner
         return handleAndAppendPending() ? 0 : EVENT_INCOMPLETE;
     }
 
+    @Override
     protected final int parseCDataContents()
         throws XMLStreamException
     {
@@ -2365,6 +2375,7 @@ public class AsyncUtfScanner
         return handleAndAppendPending() ? 0 : EVENT_INCOMPLETE;
     }
     
+    @Override
     protected final int parsePIData()
         throws XMLStreamException
     {
@@ -2664,6 +2675,7 @@ public class AsyncUtfScanner
     /**********************************************************************
      */
 
+    @Override
     protected final PName addPName(int hash, int[] quads, int qlen, int lastQuadBytes)
         throws XMLStreamException
     {
@@ -2676,6 +2688,7 @@ public class AsyncUtfScanner
     /**********************************************************************
      */
 
+    @Override
     protected void reportInvalidInitial(int mask)
         throws XMLStreamException
     {
@@ -2683,6 +2696,7 @@ public class AsyncUtfScanner
                            +Integer.toHexString(mask));
     }
 
+    @Override
     protected void reportInvalidOther(int mask)
         throws XMLStreamException
     {

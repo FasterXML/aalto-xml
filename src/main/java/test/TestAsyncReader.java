@@ -23,6 +23,7 @@ public class TestAsyncReader
     {
         int bytes = 0;
 
+        @SuppressWarnings("resource")
         InputStream in = new FileInputStream(file);
 
         AsyncXMLStreamReader asyncReader = new InputFactoryImpl().createAsyncXMLStreamReader();

@@ -37,6 +37,7 @@ public final class PNameN
         mQuadLen = quadLen;
     }
 
+    @Override
     public PName createBoundName(NsBinding nsb)
     {
         PNameN newName = new PNameN(_prefixedName, _prefix, _localName, mHash,
@@ -45,6 +46,7 @@ public final class PNameN
         return newName;
     }
 
+    @Override
     public boolean equals(int quad1, int quad2)
     {
         // Unlikely to match... but:
@@ -57,6 +59,7 @@ public final class PNameN
         return false;
     }
 
+    @Override
     public boolean equals(int[] quads, int qlen)
     {
         if (qlen == mQuadLen) {
@@ -70,19 +73,23 @@ public final class PNameN
         return false;
     }
 
+    @Override
     public int getFirstQuad() {
         return mQuads[0];
     }
 
+    @Override
     public int getLastQuad() {
         return mQuads[mQuadLen-1];
     }
 
+    @Override
     public int getQuad(int index)
     {
         return (index < mQuadLen) ? mQuads[index] : 0;
     }
 
+    @Override
     public int sizeInQuads() { return mQuadLen; }
 
     /* // for debugging

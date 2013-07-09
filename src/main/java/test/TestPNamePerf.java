@@ -813,7 +813,7 @@ public final class TestPNamePerf
             offset += count;
             len -= count;
         }
-
+        fis.close();
         return data;
     }
 

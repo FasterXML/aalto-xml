@@ -232,8 +232,8 @@ public class StreamReaderImpl
      *<p>
      * Note: method name is rather confusing (compare to {@link #getEncoding}).
      */
-    public final String getCharacterEncodingScheme()
-    {
+    @Override
+    public final String getCharacterEncodingScheme() {
         return _scanner.getConfig().getXmlDeclEncoding();
     }
 
@@ -243,22 +243,23 @@ public class StreamReaderImpl
      * cases where this can not be found; specifically when being passed a
      * {@link java.io.Reader}), it should return null.
      */
+    @Override
     public final String getEncoding() {
         return _scanner.getConfig().getActualEncoding();
     }
 
-    public String getVersion()
-    {
-        return _scanner.getConfig().getXmlDeclVersion();
+    @Override
+    public String getVersion() {
+       return _scanner.getConfig().getXmlDeclVersion();
     }
 
-    public final boolean isStandalone()
-    {
+    @Override
+    public final boolean isStandalone() {
         return (_scanner.getConfig().getXmlDeclStandalone() == ReaderConfig.STANDALONE_YES);
     }
 
-    public final boolean standaloneSet()
-    {
+    @Override
+    public final boolean standaloneSet() {
         return (_scanner.getConfig().getXmlDeclStandalone() != ReaderConfig.STANDALONE_UNKNOWN);
     }
 
@@ -268,6 +269,7 @@ public class StreamReaderImpl
     /**********************************************************************
      */
 
+    @Override
     public Object getProperty(String name)
     {
         if (name.equals("javax.xml.stream.entities")) {
@@ -290,6 +292,7 @@ public class StreamReaderImpl
 
     // // // Attribute access:
 
+    @Override
     public final int getAttributeCount()
     {
         if (_currToken != START_ELEMENT) {
@@ -298,6 +301,7 @@ public class StreamReaderImpl
         return _attrCount;
     }
 
+    @Override
     public final String getAttributeLocalName(int index)
     {
         if (_currToken != START_ELEMENT) {
@@ -309,6 +313,7 @@ public class StreamReaderImpl
         return _scanner.getAttrLocalName(index);
     }
 
+    @Override
     public final QName getAttributeName(int index)
     {
         if (_currToken != START_ELEMENT) {
@@ -320,6 +325,7 @@ public class StreamReaderImpl
         return _scanner.getAttrQName(index);
     }
 
+    @Override
     public final String getAttributeNamespace(int index)
     {
         if (_currToken != START_ELEMENT) {
@@ -332,6 +338,7 @@ public class StreamReaderImpl
         return (p == null) ? "" : p;
     }
 
+    @Override
     public final String getAttributePrefix(int index)
     {
         if (_currToken != START_ELEMENT) {
@@ -344,6 +351,7 @@ public class StreamReaderImpl
         return (p == null) ? "" : p;
     }
 
+    @Override
     public final String getAttributeType(int index)
     {
         if (_currToken != START_ELEMENT) {
@@ -355,6 +363,7 @@ public class StreamReaderImpl
         return _scanner.getAttrType(index);
     }
 
+    @Override
     public final String getAttributeValue(int index)
     {
         if (_currToken != START_ELEMENT) {
@@ -366,6 +375,7 @@ public class StreamReaderImpl
         return _scanner.getAttrValue(index);
     }
 
+    @Override
     public final String getAttributeValue(String nsURI, String localName)
     {
         if (_currToken != START_ELEMENT) {
@@ -385,6 +395,7 @@ public class StreamReaderImpl
      *<br/>Postcondition: the current event is the corresponding END_ELEMENT. 
      *</blockquote>
      */
+    @Override
     public final String getElementText()
         throws XMLStreamException
     {
@@ -430,6 +441,7 @@ public class StreamReaderImpl
      * Returns type of the last event returned; or START_DOCUMENT before
      * any events has been explicitly returned.
      */
+    @Override
     public final int getEventType()
     {
         /* Only complication -- multi-part coalesced text is to be reported
@@ -443,6 +455,7 @@ public class StreamReaderImpl
         return _currToken;
     }
     
+    @Override
     public final String getLocalName()
     {
         // Note: for this we need not (yet) finish reading element
@@ -455,6 +468,7 @@ public class StreamReaderImpl
 
     // // // getLocation() defined in StreamScanner
 
+    @Override
     public final QName getName()
     {
         if (_currToken != START_ELEMENT && _currToken != END_ELEMENT) {
@@ -465,6 +479,7 @@ public class StreamReaderImpl
 
     // // // Namespace access
 
+    @Override
     public final NamespaceContext getNamespaceContext()
     {
         /* Unlike other getNamespaceXxx methods, this is available
@@ -476,6 +491,7 @@ public class StreamReaderImpl
         return _scanner;
     }
 
+    @Override
     public final int getNamespaceCount() {
         if (_currToken != START_ELEMENT && _currToken != END_ELEMENT) {
             throw new IllegalStateException(ErrorConsts.ERR_STATE_NOT_ELEM);
@@ -483,6 +499,7 @@ public class StreamReaderImpl
         return _scanner.getNsCount();
     }
 
+    @Override
     public final String getNamespacePrefix(int index) {
         if (_currToken != START_ELEMENT && _currToken != END_ELEMENT) {
             throw new IllegalStateException(ErrorConsts.ERR_STATE_NOT_ELEM);
@@ -491,6 +508,7 @@ public class StreamReaderImpl
         return (p == null) ? "" : p;
     }
 
+    @Override
     public final String getNamespaceURI() {
         if (_currToken != START_ELEMENT && _currToken != END_ELEMENT) {
             throw new IllegalStateException(ErrorConsts.ERR_STATE_NOT_ELEM);
@@ -499,6 +517,7 @@ public class StreamReaderImpl
         return (uri == null) ? "" : uri;
     }
 
+    @Override
     public final String getNamespaceURI(int index) {
         if (_currToken != START_ELEMENT && _currToken != END_ELEMENT) {
             throw new IllegalStateException(ErrorConsts.ERR_STATE_NOT_ELEM);
@@ -507,6 +526,7 @@ public class StreamReaderImpl
         return (uri == null) ? "" : uri;
     }
 
+    @Override
     public final String getNamespaceURI(String prefix)
     {
         if (_currToken != START_ELEMENT && _currToken != END_ELEMENT) {
@@ -518,6 +538,7 @@ public class StreamReaderImpl
         return _scanner.getNamespaceURI(prefix);
     }
 
+    @Override
     public final String getPIData()
     {
         if (_currToken != PROCESSING_INSTRUCTION) {
@@ -530,6 +551,7 @@ public class StreamReaderImpl
         }
     }
 
+    @Override
     public final String getPITarget() {
         if (_currToken != PROCESSING_INSTRUCTION) {
             throw new IllegalStateException(ErrorConsts.ERR_STATE_NOT_PI);
@@ -537,6 +559,7 @@ public class StreamReaderImpl
         return _currName.getLocalName();
     }
 
+    @Override
     public final String getPrefix() {
         if (_currToken != START_ELEMENT && _currToken != END_ELEMENT) {
             throw new IllegalStateException(ErrorConsts.ERR_STATE_NOT_ELEM);
@@ -546,6 +569,7 @@ public class StreamReaderImpl
         return (p == null) ? "" : p;
     }
 
+    @Override
     public final String getText()
     {
         if (((1 << _currToken) & MASK_GET_TEXT) == 0) {
@@ -558,6 +582,7 @@ public class StreamReaderImpl
         }
     }
 
+    @Override
     public final char[] getTextCharacters()
     {
         if (((1 << _currToken) & MASK_GET_TEXT_XXX) == 0) {
@@ -570,6 +595,7 @@ public class StreamReaderImpl
         }
     }
 
+    @Override
     public final int getTextCharacters(int srcStart, char[] target, int targetStart, int len)
     {
         if (((1 << _currToken) & MASK_GET_TEXT_XXX) == 0) {
@@ -582,6 +608,7 @@ public class StreamReaderImpl
         }
     }
 
+    @Override
     public final int getTextLength()
     {
         if (((1 << _currToken) & MASK_GET_TEXT_XXX) == 0) {
@@ -594,6 +621,7 @@ public class StreamReaderImpl
         }
     }
 
+    @Override
     public final int getTextStart()
     {
         if (((1 << _currToken) & MASK_GET_TEXT_XXX) == 0) {
@@ -605,18 +633,22 @@ public class StreamReaderImpl
         return 0;
     }
 
+    @Override
     public final boolean hasName() {
         return (_currToken == START_ELEMENT) || (_currToken == END_ELEMENT);
     }
 
+    @Override
     public final boolean hasNext() {
         return (_currToken != END_DOCUMENT);
     }
 
+    @Override
     public final boolean hasText() {
         return (((1 << _currToken) & MASK_GET_TEXT) != 0);
     }
 
+    @Override
     public final boolean isAttributeSpecified(int index)
     {
         // No need to check for ATTRIBUTE since we never return that...
@@ -626,19 +658,22 @@ public class StreamReaderImpl
         return _scanner.isAttrSpecified(index);
     }
 
-    public final boolean isCharacters()
-    {
+    @Override
+    public final boolean isCharacters() {
         return (getEventType() == CHARACTERS);
     }
 
+    @Override
     public final boolean isEndElement() {
         return (_currToken == END_ELEMENT);
     }
 
+    @Override
     public final boolean isStartElement() {
         return (_currToken == START_ELEMENT);
     }
 
+    @Override
     public final boolean isWhiteSpace()
     {
         if (_currToken == CHARACTERS || _currToken == CDATA) {
@@ -651,6 +686,7 @@ public class StreamReaderImpl
         return (_currToken == SPACE);
     }
     
+    @Override
     public final void require(int type, String nsUri, String localName)
         throws XMLStreamException
     {
@@ -714,6 +750,7 @@ public class StreamReaderImpl
     /**********************************************************************
      */
 
+    @Override
     public final int next() throws XMLStreamException
     {
         if (_parseState == STATE_TREE) {
@@ -773,8 +810,8 @@ public class StreamReaderImpl
         return (_currToken = type);
     }
 
-    public final int nextTag()
-        throws XMLStreamException
+    @Override
+    public final int nextTag() throws XMLStreamException
     {
         while (true) {
             int next = next();
@@ -807,14 +844,13 @@ public class StreamReaderImpl
      * <code>org.codehaus.stax2.XMLInputFactory2#P_AUTO_CLOSE_INPUT</code> is
      * set to true).
      */
-    public final void close()
-        throws XMLStreamException
-    {
+    @Override
+    public final void close() throws XMLStreamException {
         _closeScanner(false);
     }
 
-    public final Location getLocation()
-    {
+    @Override
+    public final Location getLocation() {
         return getStartLocation();
     }
 
@@ -824,6 +860,7 @@ public class StreamReaderImpl
     /**********************************************************************
      */
 
+    @Override
     public final boolean getElementAsBoolean() throws XMLStreamException
     {
         ValueDecoderFactory.BooleanDecoder dec = _decoderFactory().getBooleanDecoder();
@@ -831,6 +868,7 @@ public class StreamReaderImpl
         return dec.getValue();
     }
 
+    @Override
     public final int getElementAsInt() throws XMLStreamException
     {
         ValueDecoderFactory.IntDecoder dec = _decoderFactory().getIntDecoder();
@@ -838,6 +876,7 @@ public class StreamReaderImpl
         return dec.getValue();
     }
 
+    @Override
     public final long getElementAsLong() throws XMLStreamException
     {
         ValueDecoderFactory.LongDecoder dec = _decoderFactory().getLongDecoder();
@@ -845,6 +884,7 @@ public class StreamReaderImpl
         return dec.getValue();
     }
 
+    @Override
     public final float getElementAsFloat() throws XMLStreamException
     {
         ValueDecoderFactory.FloatDecoder dec = _decoderFactory().getFloatDecoder();
@@ -852,6 +892,7 @@ public class StreamReaderImpl
         return dec.getValue();
     }
 
+    @Override
     public final double getElementAsDouble() throws XMLStreamException
     {
         ValueDecoderFactory.DoubleDecoder dec = _decoderFactory().getDoubleDecoder();
@@ -859,6 +900,7 @@ public class StreamReaderImpl
         return dec.getValue();
     }
 
+    @Override
     public final BigInteger getElementAsInteger() throws XMLStreamException
     {
         ValueDecoderFactory.IntegerDecoder dec = _decoderFactory().getIntegerDecoder();
@@ -866,6 +908,7 @@ public class StreamReaderImpl
         return dec.getValue();
     }
 
+    @Override
     public final BigDecimal getElementAsDecimal() throws XMLStreamException
     {
         ValueDecoderFactory.DecimalDecoder dec = _decoderFactory().getDecimalDecoder();
@@ -873,6 +916,7 @@ public class StreamReaderImpl
         return dec.getValue();
     }
 
+    @Override
     public final QName getElementAsQName() throws XMLStreamException
     {
         ValueDecoderFactory.QNameDecoder dec = _decoderFactory().getQNameDecoder(getNamespaceContext());
@@ -880,11 +924,13 @@ public class StreamReaderImpl
         return verifyQName(dec.getValue());
     }
 
+    @Override
     public final byte[] getElementAsBinary() throws XMLStreamException
     {
         return getElementAsBinary(Base64Variants.getDefaultVariant());
     }
 
+    @Override
     public final void getElementAs(TypedValueDecoder tvd) throws XMLStreamException
     {
         // !!! TODO: optimize
@@ -901,6 +947,7 @@ public class StreamReaderImpl
         }
     }
 
+    @Override
     public final byte[] getElementAsBinary(Base64Variant v) throws XMLStreamException
     {
         // note: code here is similar to Base64DecoderBase.aggregateAll(), see comments there
@@ -928,26 +975,31 @@ public class StreamReaderImpl
     /**********************************************************************
      */
 
+    @Override
     public final int readElementAsIntArray(int[] value, int from, int length) throws XMLStreamException
     {
         return readElementAsArray(_decoderFactory().getIntArrayDecoder(value, from, length));
     }
 
+    @Override
     public final int readElementAsLongArray(long[] value, int from, int length) throws XMLStreamException
     {
         return readElementAsArray(_decoderFactory().getLongArrayDecoder(value, from, length));
     }
 
+    @Override
     public final int readElementAsFloatArray(float[] value, int from, int length) throws XMLStreamException
     {
         return readElementAsArray(_decoderFactory().getFloatArrayDecoder(value, from, length));
     }
 
+    @Override
     public final int readElementAsDoubleArray(double[] value, int from, int length) throws XMLStreamException
     {
         return readElementAsArray(_decoderFactory().getDoubleArrayDecoder(value, from, length));
     }
 
+    @Override
     public final int readElementAsArray(TypedArrayDecoder dec)
         throws XMLStreamException
     {
@@ -1017,13 +1069,14 @@ public class StreamReaderImpl
     /**********************************************************************
      */
 
-
+    @Override
     public final int readElementAsBinary(byte[] resultBuffer, int offset, int maxLength)
         throws XMLStreamException
     {
         return readElementAsBinary(resultBuffer, offset, maxLength, Base64Variants.getDefaultVariant());
     }
 
+    @Override
     public final int readElementAsBinary(byte[] resultBuffer, int offset, int maxLength, Base64Variant v)
         throws XMLStreamException
     {
@@ -1558,15 +1611,18 @@ public class StreamReaderImpl
 
     // // // and then the object-based access methods:
 
+    @Override
     public final XMLStreamLocation2 getStartLocation() {
         return _scanner.getStartLocation();
     }
 
+    @Override
     public final XMLStreamLocation2 getEndLocation() throws XMLStreamException
     {
         return _scanner.getEndLocation();
     }
 
+    @Override
     public final XMLStreamLocation2 getCurrentLocation() {
         return _scanner.getStartLocation();
     }
@@ -1579,17 +1635,20 @@ public class StreamReaderImpl
 
     //public final int getAttributeCount();
 
+    @Override
     public final int findAttributeIndex(String nsURI, String localName)
     {
         return _scanner.findAttrIndex(nsURI, localName);
     }
 
+    @Override
     public final int getIdAttributeIndex()
     {
         // !!! TBI: Need dtd handling for it to work
         return -1;
     }
 
+    @Override
     public final int getNotationAttributeIndex()
     {
         // !!! TBI: Need dtd handling for it to work
@@ -1602,6 +1661,7 @@ public class StreamReaderImpl
     /**********************************************************************
      */
 
+    @Override
     public final XMLValidator validateAgainst(XMLValidationSchema schema)
         throws XMLStreamException
     {
@@ -1609,6 +1669,7 @@ public class StreamReaderImpl
         return null;
     }
 
+    @Override
     public final XMLValidator stopValidatingAgainst(XMLValidationSchema schema)
         throws XMLStreamException
     {
@@ -1616,6 +1677,7 @@ public class StreamReaderImpl
         return null;
     }
 
+    @Override
     public final XMLValidator stopValidatingAgainst(XMLValidator validator)
         throws XMLStreamException
     {
@@ -1623,6 +1685,7 @@ public class StreamReaderImpl
         return null;
     }
 
+    @Override
     public final ValidationProblemHandler setValidationProblemHandler(ValidationProblemHandler h)
     {
         // !!! TBI
@@ -1707,7 +1770,7 @@ public class StreamReaderImpl
 
     /**
      * Method called to wrap or convert given conversion-fail exception
-     * into a full {@link TypedXMLStreamException),
+     * into a full {@link TypedXMLStreamException}.
      *
      * @param iae Problem as reported by converter
      * @param lexicalValue Lexical value (element content, attribute value)

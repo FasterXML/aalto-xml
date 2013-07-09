@@ -43,30 +43,37 @@ public class UncheckedStreamException
         return new UncheckedStreamException(sex);
     }
 
+    @Override
     public StackTraceElement[] getStackTrace() {
         return getCause().getStackTrace();
     }
 
+    @Override
     public String getMessage() {
         return getCause().getMessage();
     }
 
+    @Override
     public String getLocalizedMessage() {
         return getCause().getLocalizedMessage();
     }
 
+    @Override
     public void printStackTrace() {
         getCause().printStackTrace();
     }
 
+    @Override
     public void printStackTrace(java.io.PrintStream p) {
         getCause().printStackTrace(p);
     }
 
+    @Override
     public void printStackTrace(java.io.PrintWriter p) {
         getCause().printStackTrace(p);
     }
 
+    @Override
     public String toString() {
         return getCause().toString();
     }

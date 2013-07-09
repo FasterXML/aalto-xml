@@ -45,10 +45,12 @@ public final class EventFactoryImpl
     /////////////////////////////////////////////////////////////
      */
 
+    @Override
     protected QName createQName(String nsURI, String localName) {
         return new QName(nsURI, localName);
     }
 
+    @Override
     protected QName createQName(String nsURI, String localName, String prefix) {
         return new QName(nsURI, localName, prefix);
     }

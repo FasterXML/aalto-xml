@@ -41,6 +41,7 @@ public final class PNameC
         mHash = hash;
     }
 
+    @Override
     public PName createBoundName(NsBinding nsb)
     {
         PNameC newName = new PNameC(_prefixedName, _prefix, _localName, mHash);
@@ -128,24 +129,28 @@ public final class PNameC
      * This method should never get called on instances of this class,
      * so let's throw an exception if that does happen.
      */
+    @Override
     public int sizeInQuads()
     {
         ErrorConsts.throwInternalError();
         return 0; // never gets here
     }
 
+    @Override
     public int getFirstQuad()
     {
         ErrorConsts.throwInternalError();
         return 0; // never gets here
     }
 
+    @Override
     public final int getLastQuad()
     {
         ErrorConsts.throwInternalError();
         return 0; // never gets here
     }
 
+    @Override
     public int getQuad(int index)
     {
         ErrorConsts.throwInternalError();
@@ -163,5 +168,6 @@ public final class PNameC
      * name string itself is an open question. For now, let's use
      * former.
      */
+    @Override
     public int hashCode() { return mHash; }
 }

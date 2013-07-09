@@ -40,11 +40,12 @@ public final class AsciiXmlWriter
         super(cfg, out, OutputCharTypes.getAsciiCharTypes());
     }
 
-    public int getHighestEncodable()
-    {
+    @Override
+    public int getHighestEncodable() {
         return LAST_VALID_CHAR;
     }
 
+    @Override
     public void writeRaw(char[] cbuf, int offset, int len)
         throws IOException, XMLStreamException
     {
@@ -73,12 +74,14 @@ public final class AsciiXmlWriter
         }
     }
 
+    @Override
     protected WName doConstructName(String localName)
         throws XMLStreamException
     {
         return new ByteWName(localName, getAscii(localName));
     }
 
+    @Override
     protected WName doConstructName(String prefix, String localName)
         throws XMLStreamException
     {

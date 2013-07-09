@@ -54,6 +54,7 @@ public class ValidationException
      * second, default implementation can not handle nested Location
      * information.
      */
+    @Override
     public String getMessage()
     {
         String locMsg = getLocationDesc();
@@ -73,8 +74,8 @@ public class ValidationException
         return sb.toString();
     }
 
-    public String toString()
-    {
+    @Override
+    public String toString() {
         return getClass().getName()+": "+getMessage();
     }
 

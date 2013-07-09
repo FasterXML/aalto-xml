@@ -69,64 +69,65 @@ public final class OutputFactoryImpl
     /**********************************************************************
      */
 
+    @Override
     public XMLEventWriter createXMLEventWriter(OutputStream out)
         throws XMLStreamException
     {
         return createXMLEventWriter(out, null);
     }
-
+    @Override
     public XMLEventWriter createXMLEventWriter(OutputStream out, String enc)
          throws XMLStreamException
     {
         return new Stax2EventWriterImpl(createSW(out, null, enc, false));
     }
-
+    @Override
     public XMLEventWriter createXMLEventWriter(javax.xml.transform.Result result)
          throws XMLStreamException
     {
         return new Stax2EventWriterImpl(createSW(result));
     }
-
+    @Override
     public XMLEventWriter createXMLEventWriter(Writer w)
         throws XMLStreamException
     {
         return new Stax2EventWriterImpl(createSW(null, w, null, false));
     }
-
+    @Override
     public XMLStreamWriter createXMLStreamWriter(OutputStream out)
         throws XMLStreamException
     {
         return createXMLStreamWriter(out, null);
     }
-
+    @Override
     public XMLStreamWriter createXMLStreamWriter(OutputStream out, String enc)
         throws XMLStreamException
     {
         return createSW(out, null, enc, false);
     }
-
+    @Override
     public XMLStreamWriter createXMLStreamWriter(javax.xml.transform.Result result)
         throws XMLStreamException
     {
         return createSW(result);
     }
-
+    @Override
     public XMLStreamWriter createXMLStreamWriter(Writer w)
         throws XMLStreamException
     {
         return createSW(null, w, null, false);
     }
-    
+    @Override
     public Object getProperty(String name)
     {
         // true -> is mandatory, unrecognized will throw IllegalArgumentException
         return _config.getProperty(name, true);
     }
-    
+    @Override
     public boolean isPropertySupported(String name) {
         return _config.isPropertySupported(name);
     }
-    
+    @Override
     public void setProperty(String name, Object value)
     {
         _config.setProperty(name, value);
@@ -140,12 +141,14 @@ public final class OutputFactoryImpl
 
     // // // StAX2 additional (encoding-aware) factory methods
 
+    @Override
     public XMLEventWriter createXMLEventWriter(Writer w, String enc)
         throws XMLStreamException
     {
         return new Stax2EventWriterImpl(createSW(null, w, enc, false));
     }
 
+    @Override
     public XMLEventWriter createXMLEventWriter(XMLStreamWriter sw)
         throws XMLStreamException
     {
@@ -153,6 +156,7 @@ public final class OutputFactoryImpl
         return new Stax2EventWriterImpl(sw2);
     }
 
+    @Override
     public XMLStreamWriter2 createXMLStreamWriter(Writer w, String enc)
         throws XMLStreamException
     {
@@ -161,16 +165,19 @@ public final class OutputFactoryImpl
 
     // // // StAX2 "Profile" mutators
 
+    @Override
     public void configureForXmlConformance()
     {
         _config.configureForXmlConformance();
     }
 
+    @Override
     public void configureForRobustness()
     {
         _config.configureForRobustness();
     }
 
+    @Override
     public void configureForSpeed()
     {
         _config.configureForSpeed();

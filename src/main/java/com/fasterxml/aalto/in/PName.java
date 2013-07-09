@@ -197,8 +197,10 @@ public abstract class PName
     /**********************************************************************
      */
 
+    @Override
     public final String toString() { return _prefixedName; }
 
+    @Override
     public final boolean equals(Object o)
     {
         if (o == this) {

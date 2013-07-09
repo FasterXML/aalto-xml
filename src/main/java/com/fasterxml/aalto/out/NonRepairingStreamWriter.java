@@ -48,12 +48,14 @@ public final class NonRepairingStreamWriter
     /////////////////////////////////////////////////////
      */
 
+    @Override
     public void setDefaultNamespace(String uri)
         throws XMLStreamException
     {
         _currElem.setDefaultNsURI(uri);
     }
 
+    @Override
     public void _setPrefix(String prefix, String uri)
     {
         _currElem.addPrefix(prefix, uri);
@@ -61,6 +63,7 @@ public final class NonRepairingStreamWriter
 
     //public void writeAttribute(String localName, String value)
     
+    @Override
     public void writeAttribute(String nsURI, String localName, String value)
         throws XMLStreamException
     {
@@ -80,6 +83,7 @@ public final class NonRepairingStreamWriter
         _writeAttribute(name, value);
     }
 
+    @Override
     public void writeAttribute(String prefix, String nsURI,
                                String localName, String value)
         throws XMLStreamException
@@ -93,6 +97,7 @@ public final class NonRepairingStreamWriter
         _writeAttribute(name, value);
     }
 
+    @Override
     public void writeDefaultNamespace(String nsURI)
         throws XMLStreamException
     {
@@ -110,6 +115,7 @@ public final class NonRepairingStreamWriter
 
     //public void writeEmptyElement(String localName)
 
+    @Override
     public void writeEmptyElement(String nsURI, String localName)
         throws XMLStreamException
     {
@@ -128,6 +134,7 @@ public final class NonRepairingStreamWriter
         _writeStartTag(name, true, nsURI);
     }
 
+    @Override
     public void writeEmptyElement(String prefix, String localName, String nsURI)
         throws XMLStreamException
     {
@@ -141,6 +148,7 @@ public final class NonRepairingStreamWriter
         _writeStartTag(name, true, nsURI);
     }
 
+    @Override
     public void writeNamespace(String prefix, String nsURI)
         throws XMLStreamException
     {
@@ -160,6 +168,7 @@ public final class NonRepairingStreamWriter
 
     //public void writeStartElement(String localName)
 
+    @Override
     public void writeStartElement(String nsURI, String localName)
         throws XMLStreamException
     {
@@ -178,6 +187,7 @@ public final class NonRepairingStreamWriter
         _writeStartTag(name, false);
     }
 
+    @Override
     public void writeStartElement(String prefix, String localName,
                                   String nsURI)
         throws XMLStreamException
@@ -199,6 +209,7 @@ public final class NonRepairingStreamWriter
     /////////////////////////////////////////////////////
      */
 
+    @Override
     public void writeTypedAttribute(String prefix, String nsURI, String localName,
                                     AsciiValueEncoder enc)
         throws XMLStreamException
@@ -212,6 +223,7 @@ public final class NonRepairingStreamWriter
         _writeAttribute(name, enc);
     }
 
+    @Override
     protected String _serializeQName(QName name)
     {
         String prefix = name.getPrefix();
