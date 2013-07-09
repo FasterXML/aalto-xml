@@ -7,8 +7,7 @@ import java.util.NoSuchElementException;
  * Simple implementation of "null iterator", iterator that has nothing to
  * iterate over.
  */
-public final class EmptyIterator<T>
-    implements Iterator<T>
+public final class EmptyIterator<T> implements Iterator<T>
 {
     final static EmptyIterator<Object> sInstance = new EmptyIterator<Object>();
 
@@ -20,16 +19,19 @@ public final class EmptyIterator<T>
      * here: bit unclean, but safe.
      */
     @SuppressWarnings("unchecked")
-	public static <T> EmptyIterator<T> getInstance() {
+    public static <T> EmptyIterator<T> getInstance() {
         return (EmptyIterator<T>) sInstance;
     }
 
+    @Override
     public boolean hasNext() { return false; }
 
+    @Override
     public T next() {
         throw new NoSuchElementException();
     }
 
+    @Override
     public void remove() {
         // could as well throw IllegalOperationException...
         throw new IllegalStateException();

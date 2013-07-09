@@ -2,15 +2,14 @@ package test;
 
 import java.io.*;
 
-public final class TestRawStream
-    extends BasePerfTest
+public final class TestRawStream extends BasePerfTest
 {
     final byte[] mBuffer = new byte[4000];
 
     protected TestRawStream() { }
 
-    protected int testExec(File file)
-        throws Exception
+    @Override
+    protected int testExec(File file) throws Exception
     {
         int total = 0;
         InputStream in = new FileInputStream(file);
@@ -28,8 +27,7 @@ public final class TestRawStream
         return total;
     }
 
-    public static void main(String[] args)
-        throws Exception
+    public static void main(String[] args) throws Exception
     {
         new TestRawStream().test(args);
     }

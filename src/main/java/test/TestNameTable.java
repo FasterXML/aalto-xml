@@ -12,6 +12,7 @@ public final class TestNameTable
 
     protected TestNameTable() { }
 
+    @Override
     protected int testExec(File file)
         throws Exception
     {

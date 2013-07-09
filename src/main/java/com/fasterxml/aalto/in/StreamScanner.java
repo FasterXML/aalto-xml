@@ -119,8 +119,8 @@ public abstract class StreamScanner
     /**********************************************************************
      */
 
-    public final int nextFromProlog(boolean isProlog)
-        throws XMLStreamException
+    @Override
+    public final int nextFromProlog(boolean isProlog) throws XMLStreamException
     {
         if (_tokenIncomplete) { // left-overs from last thingy?
             skipToken();
@@ -184,8 +184,8 @@ public abstract class StreamScanner
         return handleStartElement(b);
     }
 
-    public final int nextFromTree()
-        throws XMLStreamException
+    @Override
+    public final int nextFromTree() throws XMLStreamException
     {
         if (_tokenIncomplete) { // left-overs?
             if (skipToken()) { // Figured out next event (ENTITY_REFERENCE)?
@@ -1413,8 +1413,8 @@ public abstract class StreamScanner
     /**********************************************************************
      */
 
-    protected final boolean loadMore()
-        throws XMLStreamException
+    @Override
+    protected final boolean loadMore() throws XMLStreamException
     {
         // First, let's update offsets:
         _pastBytes += _inputEnd;

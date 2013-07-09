@@ -475,11 +475,9 @@ public class AsyncUtfScanner
                 return EVENT_INCOMPLETE;
             }
         }
-
-        if (true) throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException();
         // !!! TBI
-        
-        return 0;
+//        return 0;
     }
 
     /**

@@ -51,11 +51,12 @@ public class DOMReaderImpl
     /**********************************************************************
      */
 
-    public boolean isPropertySupported(String name)
-    {
+    @Override
+    public boolean isPropertySupported(String name) {
         return _config.isPropertySupported(name);
     }
 
+    @Override
     public Object getProperty(String name)
     {
         if (name.equals("javax.xml.stream.entities")) {
@@ -70,6 +71,7 @@ public class DOMReaderImpl
         return _config.getProperty(name, true);
     }
 
+    @Override
     public boolean setProperty(String name, Object value)
     {
         /* Note: can not call local method, since it'll return false for
@@ -84,7 +86,7 @@ public class DOMReaderImpl
     /**********************************************************************
      */
 
-    // @Override
+    @Override
     protected void throwStreamException(String msg, Location loc)
         throws XMLStreamException
     {

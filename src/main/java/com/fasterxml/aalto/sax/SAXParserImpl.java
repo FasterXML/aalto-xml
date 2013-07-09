@@ -262,6 +262,7 @@ class SAXParserImpl
             case IS_STANDALONE: // read-only, but only during parsing
                 // !!! TBI
                 return true;
+            default:
             }
         } else {
             // any non-standard one we may support?
@@ -554,11 +555,13 @@ class SAXParserImpl
     //public void setEntityResolver(EntityResolver resolver)
     //public void setErrorHandler(ErrorHandler handler)
 
+    @Override
     public void setDocumentHandler(DocumentHandler handler)
     {
         setContentHandler(new DocHandlerWrapper(handler));
     }
 
+    @Override
     public void setLocale(java.util.Locale locale) 
     {
         // Not supported, let's just ignore
@@ -570,35 +573,41 @@ class SAXParserImpl
     /**********************************************************************
      */
 
+    @Override
     public int getIndex(String qName)
     {
         return (_attrCollector == null) ? -1 : 
             _attrCollector.findIndex(null, qName);
     }
 
+    @Override
     public int getIndex(String uri, String localName)
     {
         return (_attrCollector == null) ? -1 : 
             _attrCollector.findIndex(uri, localName);
     }
 
+    @Override
     public int getLength()
     {
         return _attrCount;
     }
 
+    @Override
     public String getLocalName(int index)
     {
         return (index < 0 || index >= _attrCount) ? null :
             _attrCollector.getName(index).getLocalName();
     }
 
+    @Override
     public String getQName(int index)
     {
         return (index < 0 || index >= _attrCount) ? null :
             _attrCollector.getName(index).getPrefixedName();
     }
 
+    @Override
     public String getType(int index)
     {
         /* 13-Sep-2006, tatus: Note: not yet really implemented, will
@@ -608,18 +617,21 @@ class SAXParserImpl
             _scanner.getAttrType(index);
     }
 
+    @Override
     public String getType(String qName)
     {
         int ix = getIndex(qName);
         return (ix < 0) ? null : _scanner.getAttrType(ix);
     }
 
+    @Override
     public String getType(String uri, String localName)
     {
         int ix = getIndex(uri, localName);
         return (ix < 0) ? null : _scanner.getAttrType(ix);
     }
 
+    @Override
     public String getURI(int index)
     {
         if (index < 0 || index >= _attrCount) {
@@ -629,18 +641,21 @@ class SAXParserImpl
         return (uri == null) ? "" : uri;
     }
 
+    @Override
     public String getValue(int index)
     {
         return (index < 0 || index >= _attrCount) ? null :
             _attrCollector.getValue(index);
     }
 
+    @Override
     public String getValue(String qName)
     {
         int ix = getIndex(qName);
         return (ix < 0) ? null :  _attrCollector.getValue(ix);
     }
 
+    @Override
     public String getValue(String uri, String localName) 
     {
         int ix = getIndex(uri, localName);
@@ -658,33 +673,33 @@ class SAXParserImpl
      * a DTD)
      */
 
-    public boolean isDeclared(int index)
-    {
+    @Override
+    public boolean isDeclared(int index) {
         return false;
     }
 
-    public boolean isDeclared(String qName)
-    {
+    @Override
+    public boolean isDeclared(String qName) {
         return false;
     }
 
-    public boolean isDeclared(String uri, String localName)
-    {
+    @Override
+    public boolean isDeclared(String uri, String localName) {
         return false;
     }
 
-    public boolean isSpecified(int index)
-    {
+    @Override
+    public boolean isSpecified(int index) {
         return true;
     }
 
-    public boolean isSpecified(String qName)
-    {
+    @Override
+    public boolean isSpecified(String qName) {
         return true;
     }
 
-    public boolean isSpecified(String uri, String localName) 
-    {
+    @Override
+    public boolean isSpecified(String uri, String localName) {
         return true;
     }
 
@@ -694,23 +709,23 @@ class SAXParserImpl
     /**********************************************************************
      */
 
-    public int getColumnNumber()
-    {
+    @Override
+    public int getColumnNumber() {
         return (_scanner != null) ? _scanner.getCurrentColumnNr() : -1;
     }
 
-    public int getLineNumber()
-    {
+    @Override
+    public int getLineNumber() {
         return (_scanner != null) ? _scanner.getCurrentLineNr() : -1;
     }
 
-    public String getPublicId()
-    {
+    @Override
+    public String getPublicId() {
         return (_scanner != null) ? _scanner.getInputPublicId() : null;
     }
 
-    public String getSystemId() 
-    {
+    @Override
+    public String getSystemId() {
         return (_scanner != null) ? _scanner.getInputSystemId() : null;
     }
 
@@ -720,6 +735,7 @@ class SAXParserImpl
     /**********************************************************************
      */
 
+    @Override
     public String getEncoding()
     {
         ReaderConfig cfg = _scanner.getConfig();
@@ -733,8 +749,8 @@ class SAXParserImpl
         return enc;
     }
 
-    public String getXMLVersion() 
-    {
+    @Override
+    public String getXMLVersion() {
         return _scanner.getConfig().getXmlDeclVersion();
     }
 

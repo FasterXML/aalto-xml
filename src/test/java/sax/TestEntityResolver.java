@@ -49,12 +49,6 @@ public class TestEntityResolver
         }
     }
 
-    /*
-    ///////////////////////////////////////////////////////
-    // Helper classes
-    ///////////////////////////////////////////////////////
-     */
-
     static class MyResolver
         implements EntityResolver
     {
@@ -64,6 +58,7 @@ public class TestEntityResolver
             mContents = c;
         }
 
+        @Override
         public InputSource resolveEntity(String publicId, String systemId)
         {
             return new InputSource(new StringReader(mContents));

@@ -6,7 +6,6 @@ import javax.xml.stream.XMLStreamException;
 
 import org.codehaus.stax2.XMLStreamLocation2;
 
-
 import com.fasterxml.aalto.impl.ErrorConsts;
 import com.fasterxml.aalto.impl.IoStreamException;
 import com.fasterxml.aalto.impl.LocationImpl;

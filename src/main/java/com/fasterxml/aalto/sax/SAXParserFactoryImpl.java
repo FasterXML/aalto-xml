@@ -52,6 +52,7 @@ public class SAXParserFactoryImpl
         return new SAXParserFactoryImpl();
     }
     
+    @Override
     public boolean getFeature(String name)
         throws SAXNotRecognizedException, SAXNotSupportedException
     {
@@ -67,6 +68,7 @@ public class SAXParserFactoryImpl
             switch (stdFeat) {
             case IS_STANDALONE: // read-only, but only during parsing
                 return true;
+            default:
             }
         } else {
             // any non-standard one we may support?
@@ -77,11 +79,12 @@ public class SAXParserFactoryImpl
         return false; // never gets here
     }
 
-    public SAXParser newSAXParser()
-    {
+    @Override
+    public SAXParser newSAXParser() {
         return new SAXParserImpl(mStaxFactory);
     }
 
+    @Override
     public void setFeature(String name, boolean enabled)
         throws SAXNotRecognizedException, SAXNotSupportedException
     {
@@ -155,6 +158,7 @@ public class SAXParserFactoryImpl
         SAXUtil.reportUnknownFeature(name);
     }
 
+    @Override
     public void setNamespaceAware(boolean awareness)
     {
         if (!awareness) {
@@ -163,6 +167,7 @@ public class SAXParserFactoryImpl
         super.setNamespaceAware(awareness);
     }
 
+    @Override
     public void setValidating(boolean value)
     {
         if (value) {

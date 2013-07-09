@@ -5,12 +5,12 @@ import java.io.*;
 public final class TestLineReader
     extends BasePerfTest
 {
-    final char[] mBuffer = new char[4000];
+    final char[] _buffer = new char[4000];
 
     protected TestLineReader() { }
 
-    protected int testExec(File file)
-        throws Exception
+    @Override
+    protected int testExec(File file) throws Exception
     {
         int total = 0;
         InputStream in = new FileInputStream(file);
@@ -27,8 +27,7 @@ public final class TestLineReader
         return total;
     }
 
-    public static void main(String[] args)
-        throws Exception
+    public static void main(String[] args) throws Exception
     {
         new TestLineReader().test(args);
     }

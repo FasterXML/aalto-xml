@@ -28,34 +28,31 @@ import com.fasterxml.aalto.util.XmlCharTypes;
 public abstract class SingleByteXmlWriter
     extends ByteXmlWriter
 {
-    /*
-    ////////////////////////////////////////////////
-    // Life-cycle
-    ////////////////////////////////////////////////
-     */
-
     public SingleByteXmlWriter(WriterConfig cfg, OutputStream out, XmlCharTypes charTypes)
     {
         super(cfg, out, charTypes);
     }
 
     /*
-    ////////////////////////////////////////////////
-    // Abstract methods for sub-classes
-    ////////////////////////////////////////////////
+    /**********************************************************************
+    /* Abstract methods for sub-classes
+    /**********************************************************************
      */
 
+    @Override
     public abstract int getHighestEncodable();
 
+    @Override
     public abstract void writeRaw(char[] cbuf, int offset, int len)
         throws IOException, XMLStreamException;
 
     /*
-    ////////////////////////////////////////////////////
-    // Internal methods, low-level write
-    ////////////////////////////////////////////////////
+    /**********************************************************************
+    /* Internal methods, low-level writes
+    /**********************************************************************
      */
 
+    @Override
     final protected void output2ByteChar(int ch)
         throws IOException, XMLStreamException
     {
@@ -67,6 +64,7 @@ public abstract class SingleByteXmlWriter
      * characters without character entities. So, this always leads
      * to an exception
      */
+    @Override
     final protected int outputStrictMultiByteChar(int ch, char[] cbuf, int inputOffset, int inputLen)
         throws IOException, XMLStreamException
     {
@@ -77,6 +75,7 @@ public abstract class SingleByteXmlWriter
     /**
      * This can be done, although only by using character entities.
      */
+    @Override
     final protected int outputMultiByteChar(int ch, char[] cbuf, int inputOffset, int inputLen)
         throws IOException, XMLStreamException
     {
@@ -98,6 +97,7 @@ public abstract class SingleByteXmlWriter
         return inputOffset;
     }
 
+    @Override
     protected final void outputSurrogates(int surr1, int surr2)
         throws IOException, XMLStreamException
     {

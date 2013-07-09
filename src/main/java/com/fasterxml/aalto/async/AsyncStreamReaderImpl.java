@@ -27,6 +27,7 @@ public class AsyncStreamReaderImpl extends StreamReaderImpl
     /**********************************************************************
      */
     
+    @Override
     public AsyncInputFeeder getInputFeeder() {
         return this;
     }

@@ -30,16 +30,16 @@ public class CharBasedPNameTable
     protected static final float DEFAULT_FILL_FACTOR = 0.75f;
 
     /*
-    ////////////////////////////////////////
-    // Actual symbol table data:
-    ////////////////////////////////////////
+    /**********************************************************************
+    /* Actual symbol table data
+    /**********************************************************************
      */
 
     /**
      * Primary matching symbols; it's expected most match occur from
      * here.
      */
-    protected PNameC[] mSymbols;
+    protected PNameC[] _symbols;
 
     /**
      * Overflow buckets; if primary doesn't match, lookup is done
@@ -48,32 +48,32 @@ public class CharBasedPNameTable
      * Note: Number of buckets is half of number of symbol entries, on
      * assumption there's less need for buckets.
      */
-    protected Bucket[] mBuckets;
+    protected Bucket[] _buckets;
 
     /**
      * Current size (number of entries); needed to know if and when
      * rehash.
      */
-    protected int mSize;
+    protected int _size;
 
     /**
      * Limit that indicates maximum size this instance can hold before
      * it needs to be expanded and rehashed. Calculated using fill
      * factor passed in to constructor.
      */
-    protected int mSizeThreshold;
+    protected int _sizeThreshold;
 
     /**
      * Mask used to get index from hash values; equal to
      * <code>mBuckets.length - 1</code>, when mBuckets.length is
      * a power of two.
      */
-    protected int mIndexMask;
+    protected int _indexMask;
 
     /*
-    ////////////////////////////////////////
-    // Information about concurrency
-    ////////////////////////////////////////
+    /**********************************************************************
+    /* Information about concurrency
+    /**********************************************************************
      */
 
     /**
@@ -82,12 +82,12 @@ public class CharBasedPNameTable
      * (first) change is made, and potentially if updated bucket list
      * is to be resync'ed back to master instance.
      */
-    protected boolean mDirty;
+    protected boolean _dirty;
 
     /*
-    ////////////////////////////////////////
-    // Life-cycle:
-    ////////////////////////////////////////
+    /**********************************************************************
+    /* Life-cycle
+    /**********************************************************************
      */
 
     /**
@@ -100,7 +100,7 @@ public class CharBasedPNameTable
     public CharBasedPNameTable(int initialSize)
     {
         // Let's set flags so no copying of buckets is needed:
-        mDirty = true;
+        _dirty = true;
 
         // No point in requesting funny initial sizes...
         if (initialSize < 1) {
@@ -114,27 +114,27 @@ public class CharBasedPNameTable
             initialSize = currSize;
         }
 
-        mSymbols = new PNameC[initialSize];
-        mBuckets = new Bucket[initialSize >> 1];
+        _symbols = new PNameC[initialSize];
+        _buckets = new Bucket[initialSize >> 1];
         // Mask is easy to calc for powers of two.
-        mIndexMask = initialSize - 1;
-        mSize = 0;
+        _indexMask = initialSize - 1;
+        _size = 0;
 
         /* Let's use 3/4 fill factor...
          */
-        mSizeThreshold = (initialSize * 3 + 3) >> 2;
+        _sizeThreshold = (initialSize * 3 + 3) >> 2;
     }
 
     CharBasedPNameTable(CharBasedPNameTable parent)
     {
-        mSymbols = parent.mSymbols;
-        mBuckets = parent.mBuckets;
-        mSize = parent.mSize;
-        mSizeThreshold = parent.mSizeThreshold;
-        mIndexMask = parent.mIndexMask;
+        _symbols = parent._symbols;
+        _buckets = parent._buckets;
+        _size = parent._size;
+        _sizeThreshold = parent._sizeThreshold;
+        _indexMask = parent._indexMask;
 
         // Need to make copies of arrays, if/when adding new entries
-        mDirty = false;
+        _dirty = false;
     }
 
     /**
@@ -152,15 +152,15 @@ public class CharBasedPNameTable
         }
 
         // Okie dokie, let's get the data in!
-        mSymbols = child.mSymbols;
-        mBuckets = child.mBuckets;
-        mSize = child.mSize;
-        mSizeThreshold = child.mSizeThreshold;
-        mIndexMask = child.mIndexMask;
+        _symbols = child._symbols;
+        _buckets = child._buckets;
+        _size = child._size;
+        _sizeThreshold = child._sizeThreshold;
+        _indexMask = child._indexMask;
 
         // Dirty flag... well, let's just clear it, to force copying just
         // in case. Shouldn't really matter, for master tables.
-        mDirty = false;
+        _dirty = false;
 
         /* However, we have to mark child as dirty, so that it will not
          * be modifying arrays we "took over" (since child may have
@@ -168,29 +168,31 @@ public class CharBasedPNameTable
          * the SymbolTable: for example, it may still use it for
          * parsing PI targets in epilog)
          */
-        child.mDirty = false;
+        child._dirty = false;
     }
 
     /*
-    ////////////////////////////////////////////////////
+    /**********************************************************************
     // Public API, generic accessors:
-    ////////////////////////////////////////////////////
+    /**********************************************************************
      */
 
-    public int size() { return mSize; }
+    @Override
+    public int size() { return _size; }
 
-    public boolean maybeDirty() { return mDirty; }
+    @Override
+    public boolean maybeDirty() { return _dirty; }
 
     /*
-    ////////////////////////////////////////////////////
-    // Public API, accessing symbols:
-    ////////////////////////////////////////////////////
+    /**********************************************************************
+    /* Public API, accessing symbols
+    /**********************************************************************
      */
 
     public PNameC findSymbol(char[] buffer, int start, int len, int hash)
     {
-        int index = hash & mIndexMask;
-        PNameC sym = mSymbols[index];
+        int index = hash & _indexMask;
+        PNameC sym = _symbols[index];
 
         // Optimal case; checking existing primary symbol for hash index:
         if (sym != null) {
@@ -198,7 +200,7 @@ public class CharBasedPNameTable
                 return sym;
             }
             // How about collision bucket?
-            Bucket b = mBuckets[index >> 1];
+            Bucket b = _buckets[index >> 1];
             if (b != null) {
                 sym = b.find(buffer, start, len, hash);
                 if (sym != null) {
@@ -213,46 +215,46 @@ public class CharBasedPNameTable
     {
         String newStr = new String(buffer, start, len).intern();
         PNameC pname = PNameC.construct(newStr, hash);
-        int index = hash & mIndexMask;
+        int index = hash & _indexMask;
         boolean primary;
 
         // First... let's see if we can add it without a collision.
-        if (null == mSymbols[index]) {
+        if (null == _symbols[index]) {
             primary = true; // yup, we are good then
         } else {
             /* Otherwise, better check if we need to expand; after
              * which there may be a slot in primary hash?
              */
-            if (mSize >= mSizeThreshold) {
+            if (_size >= _sizeThreshold) {
                 rehash();
                 // Need to recalc hash index
-                index = hash & mIndexMask;
-                primary = (null == mSymbols[index]);
+                index = hash & _indexMask;
+                primary = (null == _symbols[index]);
             } else { // nope: need a bucket
                 primary = false;
             }
         }
 
         // good, can just update primary hash table
-        if (!mDirty) { // need to do copy-on-write?
+        if (!_dirty) { // need to do copy-on-write?
             copyArrays();
         }
 
-        ++mSize;
+        ++_size;
         if (primary) {
-            mSymbols[index] = pname;
+            _symbols[index] = pname;
         } else {
             // Ok, all right: need to add to a bucket
             int bix = (index >> 1);
-            mBuckets[bix] = new Bucket(pname, mBuckets[bix]);
+            _buckets[bix] = new Bucket(pname, _buckets[bix]);
         }
         return pname;
     }
 
     /*
-    //////////////////////////////////////////////////////////
-    // Internal methods
-    //////////////////////////////////////////////////////////
+    /**********************************************************************
+    /* Internal methods
+    /**********************************************************************
      */
 
     /**
@@ -261,16 +263,16 @@ public class CharBasedPNameTable
      */
     private void copyArrays()
     {
-        PNameC[] oldSyms = mSymbols;
+        PNameC[] oldSyms = _symbols;
         int size = oldSyms.length;
-        mSymbols = new PNameC[size];
-        System.arraycopy(oldSyms, 0, mSymbols, 0, size);
-        Bucket[] oldBuckets = mBuckets;
+        _symbols = new PNameC[size];
+        System.arraycopy(oldSyms, 0, _symbols, 0, size);
+        Bucket[] oldBuckets = _buckets;
         size = oldBuckets.length;
-        mBuckets = new Bucket[size];
-        System.arraycopy(oldBuckets, 0, mBuckets, 0, size);
+        _buckets = new Bucket[size];
+        System.arraycopy(oldBuckets, 0, _buckets, 0, size);
 
-        mDirty = true;
+        _dirty = true;
     }
 
     /**
@@ -282,15 +284,15 @@ public class CharBasedPNameTable
      */
     private void rehash()
     {
-        int size = mSymbols.length;
+        int size = _symbols.length;
         int newSize = size + size;
-        PNameC[] oldSyms = mSymbols;
-        Bucket[] oldBuckets = mBuckets;
-        mSymbols = new PNameC[newSize];
-        mBuckets = new Bucket[newSize >> 1];
+        PNameC[] oldSyms = _symbols;
+        Bucket[] oldBuckets = _buckets;
+        _symbols = new PNameC[newSize];
+        _buckets = new Bucket[newSize >> 1];
         // Let's update index mask, threshold, now (needed for rehashing)
-        mIndexMask = newSize - 1;
-        mSizeThreshold += mSizeThreshold;
+        _indexMask = newSize - 1;
+        _sizeThreshold += _sizeThreshold;
         
         int count = 0; // let's do sanity check
 
@@ -301,12 +303,12 @@ public class CharBasedPNameTable
             PNameC symbol = oldSyms[i];
             if (symbol != null) {
                 ++count;
-                int index = symbol.getCustomHash() & mIndexMask;
-                if (mSymbols[index] == null) {
-                    mSymbols[index] = symbol;
+                int index = symbol.getCustomHash() & _indexMask;
+                if (_symbols[index] == null) {
+                    _symbols[index] = symbol;
                 } else {
                     int bix = index >> 1;
-                    mBuckets[bix] = new Bucket(symbol, mBuckets[bix]);
+                    _buckets[bix] = new Bucket(symbol, _buckets[bix]);
                 }
             }
         }
@@ -317,26 +319,26 @@ public class CharBasedPNameTable
             while (b != null) {
                 ++count;
                 PNameC symbol = b.getSymbol();
-                int index = symbol.getCustomHash() & mIndexMask;
-                if (mSymbols[index] == null) {
-                    mSymbols[index] = symbol;
+                int index = symbol.getCustomHash() & _indexMask;
+                if (_symbols[index] == null) {
+                    _symbols[index] = symbol;
                 } else {
                     int bix = index >> 1;
-                    mBuckets[bix] = new Bucket(symbol, mBuckets[bix]);
+                    _buckets[bix] = new Bucket(symbol, _buckets[bix]);
                 }
                 b = b.getNext();
             }
         }
 
-        if (count != mSize) {
-            throw new Error("Internal error on SymbolTable.rehash(): had "+mSize+" entries; now have "+count+".");
+        if (count != _size) {
+            throw new Error("Internal error on SymbolTable.rehash(): had "+_size+" entries; now have "+count+".");
         }
     }
 
     /*
-    //////////////////////////////////////////////////////////
-    // Bucket class
-    //////////////////////////////////////////////////////////
+    /**********************************************************************
+    /* Bucket class
+    /**********************************************************************
      */
 
     /**

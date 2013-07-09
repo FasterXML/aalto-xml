@@ -1,4 +1,4 @@
-/* Woodstox Lite ("wool") XML processor
+/* Aalto XML processor
  *
  * Copyright (c) 2006- Tatu Saloranta, tatu.saloranta@iki.fi
  *
@@ -65,6 +65,7 @@ public class StreamExceptionBase
      * second, default implementation can not handle nested Location
      * information.
      */
+    @Override
     public String getMessage()
     {
         String locMsg = getLocationDesc();
@@ -83,15 +84,15 @@ public class StreamExceptionBase
         return sb.toString();
     }
 
-    public String toString()
-    {
+    @Override
+    public String toString() {
         return getClass().getName()+": "+getMessage();
     }
 
     /*
-    ////////////////////////////////////////////////////////
-    // Internal methods:
-    ////////////////////////////////////////////////////////
+    /**********************************************************************
+    /* Internal methods
+    /**********************************************************************
      */
 
     protected String getLocationDesc()

@@ -1189,6 +1189,7 @@ public class StreamReaderImpl
     /**********************************************************************
      */
 
+    @Override
     public final int getAttributeIndex(String namespaceURI, String localName)
     {
         if (_currToken != START_ELEMENT) {
@@ -1198,6 +1199,7 @@ public class StreamReaderImpl
         return findAttributeIndex(namespaceURI, localName);
     }
 
+    @Override
     public final boolean getAttributeAsBoolean(int index) throws XMLStreamException
     {
         ValueDecoderFactory.BooleanDecoder dec = _decoderFactory().getBooleanDecoder();
@@ -1205,6 +1207,7 @@ public class StreamReaderImpl
         return dec.getValue();
     }
 
+    @Override
     public final int getAttributeAsInt(int index) throws XMLStreamException
     {
         ValueDecoderFactory.IntDecoder dec = _decoderFactory().getIntDecoder();
@@ -1212,6 +1215,7 @@ public class StreamReaderImpl
         return dec.getValue();
     }
 
+    @Override
     public final long getAttributeAsLong(int index) throws XMLStreamException
     {
         ValueDecoderFactory.LongDecoder dec = _decoderFactory().getLongDecoder();
@@ -1219,6 +1223,7 @@ public class StreamReaderImpl
         return dec.getValue();
     }
 
+    @Override
     public final float getAttributeAsFloat(int index) throws XMLStreamException
     {
         ValueDecoderFactory.FloatDecoder dec = _decoderFactory().getFloatDecoder();
@@ -1226,6 +1231,7 @@ public class StreamReaderImpl
         return dec.getValue();
     }
 
+    @Override
     public final double getAttributeAsDouble(int index) throws XMLStreamException
     {
         ValueDecoderFactory.DoubleDecoder dec = _decoderFactory().getDoubleDecoder();
@@ -1233,6 +1239,7 @@ public class StreamReaderImpl
         return dec.getValue();
     }
 
+    @Override
     public final BigInteger getAttributeAsInteger(int index) throws XMLStreamException
     {
         ValueDecoderFactory.IntegerDecoder dec = _decoderFactory().getIntegerDecoder();
@@ -1240,6 +1247,7 @@ public class StreamReaderImpl
         return dec.getValue();
     }
 
+    @Override
     public final BigDecimal getAttributeAsDecimal(int index) throws XMLStreamException
     {
         ValueDecoderFactory.DecimalDecoder dec = _decoderFactory().getDecimalDecoder();
@@ -1247,6 +1255,7 @@ public class StreamReaderImpl
         return dec.getValue();
     }
 
+    @Override
     public final QName getAttributeAsQName(int index) throws XMLStreamException
     {
         ValueDecoderFactory.QNameDecoder dec = _decoderFactory().getQNameDecoder(getNamespaceContext());
@@ -1254,6 +1263,7 @@ public class StreamReaderImpl
         return verifyQName(dec.getValue());
     }
 
+    @Override
     public final void getAttributeAs(int index, TypedValueDecoder tvd)
         throws XMLStreamException
     {
@@ -1267,6 +1277,7 @@ public class StreamReaderImpl
         }
     }
 
+    @Override
     public final int[] getAttributeAsIntArray(int index) throws XMLStreamException
     {
         ValueDecoderFactory.IntArrayDecoder dec = _decoderFactory().getIntArrayDecoder();
@@ -1274,6 +1285,7 @@ public class StreamReaderImpl
         return dec.getValues();
     }
 
+    @Override
     public final long[] getAttributeAsLongArray(int index) throws XMLStreamException
     {
         ValueDecoderFactory.LongArrayDecoder dec = _decoderFactory().getLongArrayDecoder();
@@ -1281,6 +1293,7 @@ public class StreamReaderImpl
         return dec.getValues();
     }
 
+    @Override
     public final float[] getAttributeAsFloatArray(int index) throws XMLStreamException
     {
         ValueDecoderFactory.FloatArrayDecoder dec = _decoderFactory().getFloatArrayDecoder();
@@ -1288,6 +1301,7 @@ public class StreamReaderImpl
         return dec.getValues();
     }
 
+    @Override
     public final double[] getAttributeAsDoubleArray(int index) throws XMLStreamException
     {
         ValueDecoderFactory.DoubleArrayDecoder dec = _decoderFactory().getDoubleArrayDecoder();
@@ -1301,6 +1315,7 @@ public class StreamReaderImpl
      *
      * @return Number of tokens decoded, 0 if none found
      */
+    @Override
     public final int getAttributeAsArray(int index, TypedArrayDecoder tad) throws XMLStreamException
     {
         if (_currToken != START_ELEMENT) {
@@ -1309,11 +1324,13 @@ public class StreamReaderImpl
         return _scanner.decodeAttrValues(index, tad);
     }
 
+    @Override
     public final byte[] getAttributeAsBinary(int index) throws XMLStreamException
     {
         return getAttributeAsBinary(index, Base64Variants.getDefaultVariant());
     }
 
+    @Override
     public final byte[] getAttributeAsBinary(int index, Base64Variant v) throws XMLStreamException
     {
         if (_currToken != START_ELEMENT) {
@@ -1344,19 +1361,20 @@ public class StreamReaderImpl
 
     // // // StAX2, per-reader configuration
 
-    public final Object getFeature(String name)
-    {
+    @Override
+    public final Object getFeature(String name) {
         // !!! TBI
         return null;
     }
 
-    public final void setFeature(String name, Object value)
-    {
+    @Override
+    public final void setFeature(String name, Object value) {
         // !!! TBI
     }
 
     // NOTE: getProperty() defined in Stax 1.0 interface
 
+    @Override
     public final boolean isPropertySupported(String name) {
         // !!! TBI: not all these properties are really supported
         return _scanner.getConfig().isPropertySupported(name);
@@ -1369,6 +1387,7 @@ public class StreamReaderImpl
      * @return True, if the specified property was <b>succesfully</b>
      *    set to specified value; false if its value was not changed
      */
+    @Override
     public final boolean setProperty(String name, Object value)
     {
         /* Note: can not call local method, since it'll return false for
@@ -1379,6 +1398,7 @@ public class StreamReaderImpl
 
     // // // StAX2, additional traversal methods
 
+    @Override
     public final void skipElement() throws XMLStreamException
     {
         if (_currToken != START_ELEMENT) {
@@ -1400,6 +1420,7 @@ public class StreamReaderImpl
 
     // // // StAX2, additional attribute access
 
+    @Override
     public final AttributeInfo getAttributeInfo() throws XMLStreamException
     {
         if (_currToken != START_ELEMENT) {
@@ -1414,6 +1435,7 @@ public class StreamReaderImpl
      * Since this class implements {@link DTDInfo}, method can just
      * return <code>this</code>.
      */
+    @Override
     public final DTDInfo getDTDInfo() throws XMLStreamException
     {
         /* Let's not allow it to be accessed during other events -- that
@@ -1430,6 +1452,7 @@ public class StreamReaderImpl
     /**
      * Location information is always accessible, for this reader.
      */
+    @Override
     public final LocationInfo getLocationInfo() {
         return this;
     }
@@ -1458,6 +1481,7 @@ public class StreamReaderImpl
      *
      * @return Number of characters written to the reader
      */
+    @Override
     public final int getText(Writer w, boolean preserveContents)
         throws XMLStreamException
     {
@@ -1473,6 +1497,7 @@ public class StreamReaderImpl
      * @return Number of open elements in the stack; 0 when parser is in
      *  prolog/epilog, 1 inside root element and so on.
      */
+    @Override
     public final int getDepth()
     {
         /* 20-Mar-2008, tatus: Need to modify scanner's value since
@@ -1490,16 +1515,17 @@ public class StreamReaderImpl
      *    constructed from 'empty' element (ends with '/>');
      *    false otherwise.
      */
-    public final boolean isEmptyElement() throws XMLStreamException
-    {
+    @Override
+    public final boolean isEmptyElement() throws XMLStreamException {
         return (_currToken == START_ELEMENT) ? _scanner.isEmptyTag() : false;
     }
 
-    public final NamespaceContext getNonTransientNamespaceContext()
-    {
+    @Override
+    public final NamespaceContext getNonTransientNamespaceContext() {
         return _scanner.getNonTransientNamespaceContext();
     }
 
+    @Override
     public final String getPrefixedName()
     {
         switch (_currToken) {
@@ -1517,8 +1543,8 @@ public class StreamReaderImpl
         throw new IllegalStateException("Current state not START_ELEMENT, END_ELEMENT, ENTITY_REFERENCE, PROCESSING_INSTRUCTION or DTD");
     }
 
-    public final void closeCompletely() throws XMLStreamException
-    {
+    @Override
+    public final void closeCompletely() throws XMLStreamException {
         _closeScanner(true);
     }
 
@@ -1532,11 +1558,13 @@ public class StreamReaderImpl
      *<p>
      * Note: DTD-handling sub-classes need to override this method.
      */
+    @Override
     public final Object getProcessedDTD() {
         // !!! TBI
         return null;
     }
 
+    @Override
     public final String getDTDRootName() {
         if (_currToken != DTD) {
             return null;
@@ -1544,11 +1572,13 @@ public class StreamReaderImpl
         return (_currName == null) ? null : _currName.getPrefixedName();
     }
 
+    @Override
     public final String getDTDPublicId()
     {
         return _scanner.getDTDPublicId();
     }
 
+    @Override
     public final String getDTDSystemId() {
         return _scanner.getDTDSystemId();
     }
@@ -1557,6 +1587,7 @@ public class StreamReaderImpl
      * @return Internal subset portion of the DOCTYPE declaration, if any;
      *   empty String if none
      */
+    @Override
     public final String getDTDInternalSubset()
     {
         if (_currToken != DTD) {
@@ -1574,6 +1605,7 @@ public class StreamReaderImpl
     /**
      * Sub-class will override this method
      */
+    @Override
     public final DTDValidationSchema getProcessedDTDSchema() {
         // !!! TBI
         return null;
@@ -1587,22 +1619,26 @@ public class StreamReaderImpl
 
     // // // First, the "raw" offset accessors:
 
+    @Override
     public final long getStartingByteOffset() {
         // !!! TBI
         return -1L;
     }
 
+    @Override
     public final long getStartingCharOffset() {
         // !!! TBI
         return -1L;
     }
 
+    @Override
     public final long getEndingByteOffset() throws XMLStreamException
     {
         // !!! TBI
         return -1L;
     }
 
+    @Override
     public final long getEndingCharOffset() throws XMLStreamException
     {
         // !!! TBI

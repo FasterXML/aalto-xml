@@ -55,6 +55,7 @@ public class TestEventReader
                 QName n = elem.getName();
                 System.err.println("QName = ["+n+", ns='"+n.getNamespaceURI()+"']");
                 Iterator<?> it = elem.getNamespaces();
+                @SuppressWarnings("unused")
                 int count = 0;
                 while (it.hasNext()) {
                     it.next();

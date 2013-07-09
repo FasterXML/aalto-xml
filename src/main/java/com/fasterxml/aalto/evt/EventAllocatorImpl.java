@@ -1,4 +1,4 @@
-/* Woodstox Lite ("wool") XML processor
+/* Aalto XML processor
  *
  * Copyright (c) 2006- Tatu Saloranta, tatu.saloranta@iki.fi
  *
@@ -31,24 +31,24 @@ public final class EventAllocatorImpl
     final static EventAllocatorImpl sStdInstance = new EventAllocatorImpl(true);
 
     /*
-    ////////////////////////////////////////
-    // Configuration
-    ////////////////////////////////////////
-    */
+    /**********************************************************************
+    /* Configuration
+    /**********************************************************************
+     */
 
-    protected final boolean mPreserveLocation;
+    protected final boolean _cfgPreserveLocation;
 
     /*
-    ////////////////////////////////////////
-    // Recycled objects
-    ////////////////////////////////////////
-    */
+    /**********************************************************************
+    /* Recycled objects
+    /**********************************************************************
+     */
 
     /**
      * Last used location info; only relevant to non-accurate-location
      * allocators.
      */
-    protected Location mLastLocation = null;
+    protected Location _lastLocation = null;
 
     /**
      * @param preserveLocation If true, allocator will construct instances
@@ -57,7 +57,7 @@ public final class EventAllocatorImpl
      *   will reduce memory usage/thrashing a bit, and may improve speed.
      */
     protected EventAllocatorImpl(boolean preserveLocation) {
-        mPreserveLocation = preserveLocation;
+        _cfgPreserveLocation = preserveLocation;
     }
 
     public static EventAllocatorImpl getDefaultInstance() {
@@ -81,14 +81,15 @@ public final class EventAllocatorImpl
      * Note: if this class is sub-classes, this method should be
      * redefined if assumptions about shareability do not hold.
      */
+    @Override
     public XMLEventAllocator newInstance() {
-        return new EventAllocatorImpl(mPreserveLocation);
+        return new EventAllocatorImpl(_cfgPreserveLocation);
     }
 
     /*
-    //////////////////////////////////////////////////////////
-    // Overridable methods
-    //////////////////////////////////////////////////////////
+    /**********************************************************************
+    /* Overridable methods
+    /**********************************************************************
      */
 
     /**
@@ -97,17 +98,18 @@ public final class EventAllocatorImpl
      * reader's accessors, but sub-classes may choose to use other
      * methods (esp. when not in "preserve location" mode).
      */
+    @Override
     protected Location getLocation(XMLStreamReader r)
     {
-        if (mPreserveLocation) {
+        if (_cfgPreserveLocation) {
             return r.getLocation();
         }
-        Location loc = mLastLocation;
+        Location loc = _lastLocation;
         /* And even if we can just share one instance, we need that
          * first instance...
          */
         if (loc == null) {
-            loc = mLastLocation = r.getLocation();
+            loc = _lastLocation = r.getLocation();
         }
         return loc;
     }
