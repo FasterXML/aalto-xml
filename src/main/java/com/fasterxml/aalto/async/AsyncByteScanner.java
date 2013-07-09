@@ -407,6 +407,7 @@ public abstract class AsyncByteScanner
     /**********************************************************************
      */
 
+    @Override
     public final int nextFromProlog(boolean isProlog)
         throws XMLStreamException
     {
@@ -542,8 +543,8 @@ public abstract class AsyncByteScanner
         return throwInternal(); // should never get here
     }
 
-    public int nextFromTree()
-        throws XMLStreamException
+    @Override
+    public int nextFromTree() throws XMLStreamException
     {
         // Had a fully complete event? Need to reset state:
         if (_currToken != EVENT_INCOMPLETE) {
@@ -2447,39 +2448,39 @@ public abstract class AsyncByteScanner
     /**********************************************************************
      */
 
-    protected abstract void finishCharacters()
-        throws XMLStreamException;
+    @Override
+    protected abstract void finishCharacters() throws XMLStreamException;
 
-    protected void finishCData()
-        throws XMLStreamException
+    @Override
+    protected void finishCData() throws XMLStreamException
     {
         // N/A
         throwInternal();
     }
 
-    protected void finishComment()
-        throws XMLStreamException
+    @Override
+    protected void finishComment() throws XMLStreamException
     {
         // N/A
         throwInternal();
     }
 
-    protected void finishDTD(boolean copyContents)
-        throws XMLStreamException
+    @Override
+    protected void finishDTD(boolean copyContents) throws XMLStreamException
     {
         // N/A
         throwInternal();
     }
 
-    protected void finishPI()
-        throws XMLStreamException
+    @Override
+    protected void finishPI() throws XMLStreamException
     {
         // N/A
         throwInternal();
     }
 
-    protected void finishSpace()
-        throws XMLStreamException
+    @Override
+    protected void finishSpace() throws XMLStreamException
     {
         // N/A
         throwInternal();
@@ -2491,33 +2492,39 @@ public abstract class AsyncByteScanner
      * @return True if the whole characters segment was succesfully
      *   skipped; false if not
      */
+    @Override
     protected abstract boolean skipCharacters()
         throws XMLStreamException;
 
+    @Override
     protected void skipCData() throws XMLStreamException
     {
         // should never be called
         throwInternal();
     }
 
+    @Override
     protected void skipComment() throws XMLStreamException
     {
         // should never be called
         throwInternal();
     }
 
+    @Override
     protected void skipPI() throws XMLStreamException
     {
         // should never be called
         throwInternal();
     }
 
+    @Override
     protected void skipSpace() throws XMLStreamException
     {
         // should never be called
         throwInternal();
     }
 
+    @Override
     protected boolean loadMore() throws XMLStreamException
     {
         // should never get called
@@ -2856,6 +2863,7 @@ public abstract class AsyncByteScanner
     /**********************************************************************
      */
 
+    @Override
     protected abstract PName addPName(int hash, int[] quads, int qlen, int lastQuadBytes)
         throws XMLStreamException;
 
@@ -2914,6 +2922,7 @@ public abstract class AsyncByteScanner
     /**********************************************************************
      */
 
+    @Override
     protected int decodeCharForError(byte b)
         throws XMLStreamException
     {

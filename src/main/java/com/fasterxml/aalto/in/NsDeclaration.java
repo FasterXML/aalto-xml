@@ -110,8 +110,8 @@ public final class NsDeclaration
         return count;
     }
 
-    public String toString()
-    {
+    @Override
+    public String toString() {
         return "[NS-DECL, prefix = <"+mBinding.mPrefix+">, current URI <"+mBinding.mURI+">, level "+mLevel+", prev URI <"+mPreviousURI+">]";
     }
 }

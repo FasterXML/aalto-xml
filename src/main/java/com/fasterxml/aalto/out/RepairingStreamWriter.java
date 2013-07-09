@@ -93,12 +93,14 @@ public final class RepairingStreamWriter
      * With repairing writer, this is only taken as a suggestion as to how
      * the caller would prefer prefixes to be mapped.
      */
+    @Override
     public void setDefaultNamespace(String uri)
         throws XMLStreamException
     {
         _suggestedDefNs = (uri == null || uri.length() == 0) ? null : uri;
     }
 
+    @Override
     public void _setPrefix(String prefix, String uri)
     {
         // note: sub-class has verified that prefix != null, uri != null
@@ -127,7 +129,8 @@ public final class RepairingStreamWriter
     }
 
     //public void writeAttribute(String localName, String value)
-    
+
+    @Override
     public void writeAttribute(String nsURI, String localName, String value)
         throws XMLStreamException
     {
@@ -141,6 +144,7 @@ public final class RepairingStreamWriter
         _writeAttribute(name, value);
     }
 
+    @Override
     public void writeAttribute(String prefix, String nsURI,
                                String localName, String value)
         throws XMLStreamException
@@ -155,6 +159,7 @@ public final class RepairingStreamWriter
         _writeAttribute(name, value);
     }
 
+    @Override
     public void writeDefaultNamespace(String nsURI)
         throws XMLStreamException
     {
@@ -178,12 +183,14 @@ public final class RepairingStreamWriter
 
     //public void writeEmptyElement(String localName)
 
+    @Override
     public void writeEmptyElement(String nsURI, String localName)
         throws XMLStreamException
     {
         _writeStartOrEmpty(null, localName, nsURI, true);
     }
 
+    @Override
     public void writeEmptyElement(String prefix, String localName, String nsURI)
         throws XMLStreamException
     {
@@ -192,6 +199,7 @@ public final class RepairingStreamWriter
 
     //public void writeEndElement()
 
+    @Override
     public void writeNamespace(String prefix, String nsURI)
         throws XMLStreamException
     {
@@ -216,14 +224,15 @@ public final class RepairingStreamWriter
 
     //public void writeStartElement(String localName)
 
+    @Override
     public void writeStartElement(String nsURI, String localName)
         throws XMLStreamException
     {
         _writeStartOrEmpty(null, localName, nsURI, false);
     }
 
-    public void writeStartElement(String prefix, String localName,
-                                  String nsURI)
+    @Override
+    public void writeStartElement(String prefix, String localName, String nsURI)
         throws XMLStreamException
     {
         _writeStartOrEmpty(prefix, localName, nsURI, false);
@@ -236,8 +245,9 @@ public final class RepairingStreamWriter
     /////////////////////////////////////////////////////
      */
 
+    @Override
     public void writeTypedAttribute(String prefix, String nsURI, String localName,
-                                    AsciiValueEncoder enc)
+            AsciiValueEncoder enc)
         throws XMLStreamException
     {
         if (!_stateStartElementOpen) {
@@ -249,8 +259,8 @@ public final class RepairingStreamWriter
         _writeAttribute(name, enc);
     }
 
-    protected String _serializeQName(QName name)
-        throws XMLStreamException
+    @Override
+    protected String _serializeQName(QName name) throws XMLStreamException
     {
         /* Gets bit more complicated: we need to ensure that given URI
          * is properly bound...

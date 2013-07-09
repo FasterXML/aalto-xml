@@ -163,6 +163,7 @@ public abstract class ByteXmlWriter
         mCharTypes = charTypes;
     }
 
+    @Override
     protected final int getOutputPtr() {
         return _outputPtr;
     }
@@ -173,6 +174,7 @@ public abstract class ByteXmlWriter
     ////////////////////////////////////////////////
      */
 
+    @Override
     public final WName constructName(String localName)
         throws XMLStreamException
     {
@@ -180,6 +182,7 @@ public abstract class ByteXmlWriter
         return doConstructName(localName);
     }
 
+    @Override
     public WName constructName(String prefix, String localName)
         throws XMLStreamException
     {
@@ -313,6 +316,7 @@ public abstract class ByteXmlWriter
         }
     }
 
+    @Override
     public void _closeTarget(boolean doClose) throws IOException
     {
         if (_out != null) { // just in case it's called multiple times
@@ -323,8 +327,8 @@ public abstract class ByteXmlWriter
         }
     }
 
-    public final void flush()
-        throws IOException
+    @Override
+    public final void flush() throws IOException
     {
         if (_out != null) {
             flushBuffer();
@@ -338,6 +342,7 @@ public abstract class ByteXmlWriter
     //////////////////////////////////////////////////
      */
 
+    @Override
     public final void writeRaw(String text, int offset, int len)
         throws IOException, XMLStreamException
     {
@@ -356,6 +361,7 @@ public abstract class ByteXmlWriter
      * This method is heavily encoding-dependant, so it needs
      * to be deferred to sub-classes
      */
+    @Override
     public abstract void writeRaw(char[] cbuf, int offset, int len)
         throws IOException, XMLStreamException;
 
@@ -365,6 +371,7 @@ public abstract class ByteXmlWriter
     //////////////////////////////////////////////////
      */
 
+    @Override
     public final void writeStartTagStart(WName name)
         throws IOException, XMLStreamException
     {
@@ -382,6 +389,7 @@ public abstract class ByteXmlWriter
         _outputPtr = ptr;
     }
 
+    @Override
     public final void writeStartTagEnd()
         throws IOException, XMLStreamException
     {
@@ -395,6 +403,7 @@ public abstract class ByteXmlWriter
         _outputBuffer[_outputPtr++] = BYTE_GT;
     }    
 
+    @Override
     public void writeStartTagEmptyEnd()
         throws IOException
     {
@@ -407,8 +416,9 @@ public abstract class ByteXmlWriter
         bbuf[ptr++] = BYTE_SLASH;
         bbuf[ptr++] = BYTE_GT;
         _outputPtr = ptr;
-    }    
+    }
 
+    @Override
     public final void writeEndTag(WName name)
         throws IOException, XMLStreamException
     {
@@ -444,6 +454,7 @@ public abstract class ByteXmlWriter
     //////////////////////////////////////////////////
      */
 
+    @Override
     public final void writeAttribute(WName name, String value)
         throws IOException, XMLStreamException
     {
@@ -460,6 +471,7 @@ public abstract class ByteXmlWriter
         writeAttribute(name, cbuf, 0, vlen);
     }
 
+    @Override
     public final void writeAttribute(WName name, char[] vbuf, int offset, int vlen)
         throws IOException, XMLStreamException
     {
@@ -746,6 +758,7 @@ public abstract class ByteXmlWriter
      *   character in input (first ']' from "]]>" sequence, in non-fixing
      *   mode)
      */
+    @Override
     public int writeCData(String data)
         throws IOException, XMLStreamException
     {
@@ -773,6 +786,7 @@ public abstract class ByteXmlWriter
         return -1;
     }
 
+    @Override
     public int writeCData(char[] cbuf, int offset, int len)
         throws IOException, XMLStreamException
     {
@@ -864,6 +878,7 @@ public abstract class ByteXmlWriter
         return -1;
     }    
 
+    @Override
     public final void writeCharacters(String text)
         throws IOException, XMLStreamException
     {
@@ -898,6 +913,7 @@ public abstract class ByteXmlWriter
         } while (len > 0);
     }
 
+    @Override
     public final void writeCharacters(char[] cbuf, int offset, int len)
         throws IOException, XMLStreamException
     {
@@ -1094,6 +1110,7 @@ public abstract class ByteXmlWriter
     //////////////////////////////////////////////////
      */
 
+    @Override
     public void writeTypedValue(AsciiValueEncoder enc)
         throws IOException, XMLStreamException
     {
@@ -1113,6 +1130,7 @@ public abstract class ByteXmlWriter
         }
     }
 
+    @Override
     public final void writeAttribute(WName name, AsciiValueEncoder enc)
         throws IOException, XMLStreamException
     {
@@ -1153,8 +1171,8 @@ public abstract class ByteXmlWriter
      * fixing is enabled), or return the offset of the first hyphen in
      * multi-hyphen sequence.
      */
-    public int writeComment(String data)
-        throws IOException, XMLStreamException
+    @Override
+    public int writeComment(String data) throws IOException, XMLStreamException
     {
         writeCommentStart();
 
@@ -1251,15 +1269,17 @@ public abstract class ByteXmlWriter
             }
         }
         return -1;
-    }    
+    }
 
+    @Override
     public void writeDTD(String data)
         throws IOException, XMLStreamException
     {
         // !!! TBI: Check for char validity, similar to other methods?
         writeRaw(data, 0, data.length());
-    }    
+    }
 
+    @Override
     public void writeDTD(WName rootName, String systemId, String publicId,
                          String internalSubset)
         throws IOException, XMLStreamException
@@ -1337,6 +1357,7 @@ public abstract class ByteXmlWriter
         return -1;
     }
 
+    @Override
     public void writeEntityReference(WName name)
         throws IOException, XMLStreamException
     {
@@ -1345,6 +1366,7 @@ public abstract class ByteXmlWriter
         writeRaw(BYTE_SEMICOLON);
     }
 
+    @Override
     public int writePI(WName target, String data)
         throws IOException, XMLStreamException
     {
@@ -1378,6 +1400,7 @@ public abstract class ByteXmlWriter
         return -1;
     }
 
+    @Override
     public final void writeSpace(String data)
         throws IOException, XMLStreamException
     {
@@ -1395,6 +1418,7 @@ public abstract class ByteXmlWriter
         }
     }
 
+    @Override
     public void writeSpace(char[] cbuf, int offset, int len)
         throws IOException, XMLStreamException
     {
@@ -1421,6 +1445,7 @@ public abstract class ByteXmlWriter
         }
     }
 
+    @Override
     public void writeXmlDeclaration(String version, String encoding, String standalone)
         throws IOException, XMLStreamException
     {

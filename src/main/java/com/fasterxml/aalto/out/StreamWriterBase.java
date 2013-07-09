@@ -234,14 +234,14 @@ public abstract class StreamWriterBase
     /**********************************************************************
      */
 
-    public void close()
-        throws XMLStreamException
+    @Override
+    public void close() throws XMLStreamException
     {
         _finishDocument(false);
     }
 
-    public void flush()
-        throws XMLStreamException
+    @Override
+    public void flush() throws XMLStreamException
     {
         try {
             _xmlWriter.flush();
@@ -250,6 +250,7 @@ public abstract class StreamWriterBase
         }
     }
 
+    @Override
     public final NamespaceContext getNamespaceContext() {
         return this;
     }
@@ -257,14 +258,17 @@ public abstract class StreamWriterBase
     // note: will be defined later on, in NamespaceContext impl part:
     //public String getPrefix(String uri);
 
+    @Override
     public Object getProperty(String name) {
         // true -> mandatory, unrecognized will throw exception, as per Stax javadocs
         return _config.getProperty(name, true);
     }
 
+    @Override
     public abstract void setDefaultNamespace(String uri)
         throws XMLStreamException;
 
+    @Override
     public void setNamespaceContext(NamespaceContext ctxt)
         throws XMLStreamException
     {
@@ -275,6 +279,7 @@ public abstract class StreamWriterBase
         _rootNsContext = ctxt;
     }
 
+    @Override
     public final void setPrefix(String prefix, String uri)
         throws XMLStreamException
     {
@@ -320,6 +325,7 @@ public abstract class StreamWriterBase
 
     protected abstract void _setPrefix(String prefix, String uri);
 
+    @Override
     public final void writeAttribute(String localName, String value)
         throws XMLStreamException
     {
@@ -330,16 +336,17 @@ public abstract class StreamWriterBase
         _writeAttribute(_symbols.findSymbol(localName), value);
     }
     
-    public abstract void writeAttribute(String nsURI, String localName,
-                                        String value)
+    @Override
+    public abstract void writeAttribute(String nsURI, String localName, String value)
         throws XMLStreamException;
 
+    @Override
     public abstract void writeAttribute(String prefix, String nsURI,
                                         String localName, String value)
         throws XMLStreamException;
 
-    public void writeCData(String data)
-        throws XMLStreamException
+    @Override
+    public void writeCData(String data) throws XMLStreamException
     {
         if (_cfgCDataAsText) {
             writeCharacters(data);
@@ -366,6 +373,7 @@ public abstract class StreamWriterBase
         }
     }
 
+    @Override
     public void writeCharacters(char[] text, int start, int len)
         throws XMLStreamException
     {
@@ -408,8 +416,8 @@ public abstract class StreamWriterBase
         }
     }
 
-    public void writeCharacters(String text)
-        throws XMLStreamException
+    @Override
+    public void writeCharacters(String text) throws XMLStreamException
     {
         _stateAnyOutput = true;
         if (_stateStartElementOpen) {
@@ -450,8 +458,8 @@ public abstract class StreamWriterBase
         }
     }
 
-    public void writeComment(String data)
-        throws XMLStreamException
+    @Override
+    public void writeComment(String data) throws XMLStreamException
     {
         _stateAnyOutput = true;
         if (_stateStartElementOpen) {
@@ -475,11 +483,11 @@ public abstract class StreamWriterBase
         }
     }
 
-    public abstract void writeDefaultNamespace(String nsURI)
-        throws XMLStreamException;
+    @Override
+    public abstract void writeDefaultNamespace(String nsURI) throws XMLStreamException;
 
-    public final void writeDTD(String dtd)
-        throws XMLStreamException
+    @Override
+    public final void writeDTD(String dtd) throws XMLStreamException
     {
         _verifyWriteDTD();
         _dtdRootElemName = ""; // marker to verify only one is output
@@ -496,8 +504,8 @@ public abstract class StreamWriterBase
      * no namespaces are bound ever). As such we do not have to
      * distinguish between repairing and non-repairing modes.
      */
-    public void writeEmptyElement(String localName)
-        throws XMLStreamException
+    @Override
+    public void writeEmptyElement(String localName) throws XMLStreamException
     {
         _verifyStartElement(null, localName);
         WName name = _symbols.findSymbol(localName);
@@ -507,17 +515,20 @@ public abstract class StreamWriterBase
         _writeStartTag(name, true);
     }
 
+    @Override
     public abstract void writeEmptyElement(String nsURI, String localName)
         throws XMLStreamException;
 
+    @Override
     public abstract void writeEmptyElement(String prefix, String localName, String nsURI)
         throws XMLStreamException;
 
-    public void writeEndDocument() throws XMLStreamException
-    {
+    @Override
+    public void writeEndDocument() throws XMLStreamException {
         _finishDocument(false);
     }
 
+    @Override
     public void writeEndElement() throws XMLStreamException
     {
         /* Do we need to close up an earlier empty element?
@@ -580,6 +591,7 @@ public abstract class StreamWriterBase
         }
     }
 
+    @Override
     public void writeEntityRef(String name)
         throws XMLStreamException
     {
@@ -606,15 +618,16 @@ public abstract class StreamWriterBase
         }
     }
 
+    @Override
     public abstract void writeNamespace(String prefix, String nsURI)
         throws XMLStreamException;
 
-    public void writeProcessingInstruction(String target)
-        throws XMLStreamException
-    {
+    @Override
+    public void writeProcessingInstruction(String target) throws XMLStreamException {
         writeProcessingInstruction(target, null);
     }
 
+    @Override
     public void writeProcessingInstruction(String target, String data)
         throws XMLStreamException
     {
@@ -640,8 +653,8 @@ public abstract class StreamWriterBase
         }
     }
 
-    public void writeStartDocument()
-        throws XMLStreamException
+    @Override
+    public void writeStartDocument() throws XMLStreamException
     {
         String enc = _config.getActualEncoding();
         if (enc == null) {
@@ -651,12 +664,14 @@ public abstract class StreamWriterBase
         _writeStartDocument(XmlConsts.STAX_DEFAULT_OUTPUT_VERSION, enc, null);
     }
 
+    @Override
     public void writeStartDocument(String version)
         throws XMLStreamException
     {
         _writeStartDocument(version, _config.getActualEncoding(), null);
     }
 
+    @Override
     public void writeStartDocument(String encoding, String version)
         throws XMLStreamException
     {
@@ -1084,6 +1099,7 @@ public abstract class StreamWriterBase
     /**********************************************************************
      */
 
+    @Override
     public XMLStreamLocation2 getLocation()
     {
         return new LocationImpl(null, null, // pub/sys ids not yet known
@@ -1091,6 +1107,7 @@ public abstract class StreamWriterBase
                                 _xmlWriter.getRow(), _xmlWriter.getColumn());
     }
 
+    @Override
     public String getEncoding() {
         return _config.getActualEncoding();
     }
@@ -1101,6 +1118,7 @@ public abstract class StreamWriterBase
     /**********************************************************************
      */
 
+    @Override
     public void writeCData(char[] cbuf, int start, int len)
         throws XMLStreamException
     {
@@ -1256,6 +1274,7 @@ public abstract class StreamWriterBase
      * Adding default attribute values does not usually make sense on
      * output side, so the implementation is a NOP for now.
      */
+    @Override
     public int addDefaultAttribute(String localName, String uri, String prefix,
                                    String value)
     {
@@ -1265,8 +1284,10 @@ public abstract class StreamWriterBase
 
     // // // Notation/entity access: not (yet?) implemented
 
+    @Override
     public boolean isNotationDeclared(String name) { return false; }
 
+    @Override
     public boolean isUnparsedEntityDeclared(String name) { return false; }
 
 
@@ -1275,25 +1296,32 @@ public abstract class StreamWriterBase
     /* !!! TODO: Implement attribute access (iff validate-attributes
      *   enabled?
      */
-
+    @Override
     public int getAttributeCount() { return 0; }
 
+    @Override
     public String getAttributeLocalName(int index) { return null; }
 
+    @Override
     public String getAttributeNamespace(int index) { return null; }
 
+    @Override
     public String getAttributePrefix(int index) { return null; }
 
+    @Override
     public String getAttributeValue(int index) { return null; }
 
+    @Override
     public String getAttributeValue(String nsURI, String localName) {
         return null;
     }
 
+    @Override
     public String getAttributeType(int index) {
         return "";
     }
 
+    @Override
     public int findAttributeIndex(String nsURI, String localName) {
         return -1;
     }

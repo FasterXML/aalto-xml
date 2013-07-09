@@ -79,11 +79,13 @@ class SAXParserImpl
         _staxFactory = sf;
     }
 
+    @Override
     public final Parser getParser()
     {
         return this;
     }
 
+    @Override
     public final XMLReader getXMLReader()
     {
         return this;
@@ -95,14 +97,17 @@ class SAXParserImpl
     /**********************************************************************
      */
 
+    @Override
     public boolean isNamespaceAware() {
         return true;
     }
 
+    @Override
     public boolean isValidating() {
         return false;
     }
 
+    @Override
     public Object getProperty(String name)
         throws SAXNotRecognizedException, SAXNotSupportedException
     {
@@ -126,6 +131,7 @@ class SAXParserImpl
         return null;
     }
 
+    @Override
     public void setProperty(String name, Object value)
         throws SAXNotRecognizedException, SAXNotSupportedException
     {
@@ -219,26 +225,27 @@ class SAXParserImpl
     /**********************************************************************
      */
 
-    public ContentHandler getContentHandler()
-    {
+    @Override
+    public ContentHandler getContentHandler() {
         return _contentHandler;
     }
 
-    public DTDHandler getDTDHandler()
-    {
+    @Override
+    public DTDHandler getDTDHandler() {
         return _dtdHandler;
     }
 
-    public EntityResolver getEntityResolver()
-    {
+    @Override
+    public EntityResolver getEntityResolver() {
         return _entityResolver;
     }
 
-    public ErrorHandler getErrorHandler()
-    {
+    @Override
+    public ErrorHandler getErrorHandler() {
         return _errorHandler;
     }
 
+    @Override
     public boolean getFeature(String name)
         throws SAXNotRecognizedException
     {
@@ -274,26 +281,27 @@ class SAXParserImpl
     /**********************************************************************
      */
 
-    public void setContentHandler(ContentHandler handler)
-    {
+    @Override
+    public void setContentHandler(ContentHandler handler) {
         _contentHandler = handler;
     }
 
-    public void setDTDHandler(DTDHandler handler)
-    {
+    @Override
+    public void setDTDHandler(DTDHandler handler) {
         _dtdHandler = handler;
     }
 
-    public void setEntityResolver(EntityResolver resolver)
-    {
+    @Override
+    public void setEntityResolver(EntityResolver resolver) {
         _entityResolver = resolver;
     }
 
-    public void setErrorHandler(ErrorHandler handler)
-    {
+    @Override
+    public void setErrorHandler(ErrorHandler handler) {
         _errorHandler = handler;
     }
 
+    @Override
     public void setFeature(String name, boolean value)
         throws SAXNotRecognizedException
     {
@@ -322,8 +330,8 @@ class SAXParserImpl
     /**********************************************************************
      */
 
-    public void parse(InputSource input)
-        throws SAXException
+    @Override
+    public void parse(InputSource input) throws SAXException
     {
         String enc = input.getEncoding();
         String systemId = input.getSystemId();
@@ -411,8 +419,8 @@ class SAXParserImpl
         }
     }
 
-    public void parse(String systemId)
-        throws SAXException
+    @Override
+    public void parse(String systemId) throws SAXException
     {
         InputSource src = new InputSource(systemId);
         parse(src);

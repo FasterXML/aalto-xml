@@ -68,18 +68,22 @@ public class TestSaxReader
 
         public MyContentHandler() { }
 
+        @Override
         public String toString() { return mText.toString(); }
 
+        @Override
         public void characters(char[] ch, int start, int length)
         {
             mText.append(ch, start, length);
         }
 
+        @Override
         public void endDocument()
         {
             mText.append("]]");
         }
 
+        @Override
         public void endElement(String namespaceURI, String localName, String qName)
         {
             mText.append("</");
@@ -87,6 +91,7 @@ public class TestSaxReader
             mText.append(">");
         }
 
+        @Override
         public void endPrefixMapping(String prefix)
         {
             mText.append("{/");
@@ -94,11 +99,13 @@ public class TestSaxReader
             mText.append("}");
         }
 
+        @Override
         public void ignorableWhitespace(char[] ch, int start, int length)
         {
             mText.append(ch, start, length);
         }
 
+        @Override
         public void processingInstruction(String target, String data)
         {
             mText.append("<?");
@@ -110,8 +117,10 @@ public class TestSaxReader
             mText.append("?>");
         }
 
+        @Override
         public void setDocumentLocator(Locator locator) { }
 
+        @Override
         public void skippedEntity(String name)
         {
             mText.append('&');
@@ -119,11 +128,13 @@ public class TestSaxReader
             mText.append(';');
         }
 
+        @Override
         public void startDocument()
         {
             mText.append("[[");
         }
 
+        @Override
         public void startElement(String namespaceURI, String localName, String qName, Attributes attrs)
         {
             mText.append("<");
@@ -139,16 +150,19 @@ public class TestSaxReader
             mText.append(">");
         }
 
+        @Override
         public void startPrefixMapping(String prefix, String uri)
         {
             // !!! TBI
         }
 
+        @Override
         public void unparsedEntityDecl(String name, String publicId, String systemId, String notationName)
         {
             // !!! TBI
         }
 
+        @Override
         public void warning(SAXParseException e)
         {
             // !!! TBI
@@ -156,6 +170,7 @@ public class TestSaxReader
 
         // // // LexicalHandler:
 
+        @Override
         public void comment(char[] ch, int start, int length)
         {
             mText.append("<!--");
@@ -163,23 +178,28 @@ public class TestSaxReader
             mText.append("-->");
         }
 
+        @Override
         public void endCDATA()
         {
         }
 
+        @Override
         public void endDTD()
         {
             mText.append("]>");
         }
 
+        @Override
         public void endEntity(String name)
         {
         }
 
+        @Override
         public void startCDATA()
         {
         }
 
+        @Override
         public void startDTD(String name, String publicId, String systemId)
         {
             mText.append("<!DOCTYPE ");
@@ -198,9 +218,8 @@ public class TestSaxReader
             mText.append(" [");
         }
 
-        public void startEntity(String name) 
-        {
-        }
+        @Override
+        public void startEntity(String name) { }
 
         // // // Helper methods:
 

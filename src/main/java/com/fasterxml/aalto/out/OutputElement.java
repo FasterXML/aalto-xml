@@ -20,7 +20,6 @@ import java.util.*;
 import javax.xml.XMLConstants;
 import javax.xml.namespace.NamespaceContext;
 import javax.xml.namespace.QName;
-import javax.xml.stream.*;
 
 import com.fasterxml.aalto.util.EmptyIterator;
 
@@ -379,9 +378,6 @@ final class OutputElement
      * @return OK, if passed-in prefix matches matched-in namespace URI
      *    in current scope; UNBOUND if it's not bound to anything, 
      *    and MISBOUND if it's bound to another URI.
-     *
-     * @throws XMLStreamException True if default (no) prefix is allowed to
-     *    match a non-default URI (elements); false if not (attributes)
      */
     public PrefixState checkPrefixValidity(String prefix, String nsURI, NamespaceContext rootNsContext)
     {

@@ -640,6 +640,7 @@ public final class Utf8Scanner
     /**********************************************************************
      */
 
+    @Override
     protected final PName addPName(int hash, int[] quads, int qlen, int lastQuadBytes)
         throws XMLStreamException
     {
@@ -650,8 +651,8 @@ public final class Utf8Scanner
      * Parsing of public ids is bit more complicated than that of system
      * ids, since white space is to be coalesced.
      */
-    protected String parsePublicId(byte quoteChar)
-        throws XMLStreamException
+    @Override
+    protected String parsePublicId(byte quoteChar) throws XMLStreamException
     {
         char[] outputBuffer = _nameBuffer;
         int outPtr = 0;
@@ -695,8 +696,8 @@ public final class Utf8Scanner
         return new String(outputBuffer, 0, outPtr);
     }
 
-    protected String parseSystemId(byte quoteChar)
-        throws XMLStreamException
+    @Override
+    protected String parseSystemId(byte quoteChar) throws XMLStreamException
     {
         // caller has init'ed the buffer...
         char[] outputBuffer = _nameBuffer;
@@ -771,8 +772,8 @@ public final class Utf8Scanner
     /**********************************************************************
      */
 
-    protected final boolean skipCharacters()
-        throws XMLStreamException
+    @Override
+    protected final boolean skipCharacters() throws XMLStreamException
     {
         final int[] TYPES = _charTypes.TEXT_CHARS;
         final byte[] inputBuffer = _inputBuffer;
@@ -864,8 +865,8 @@ public final class Utf8Scanner
         }
     }
 
-    protected final void skipComment()
-        throws XMLStreamException
+    @Override
+    protected final void skipComment() throws XMLStreamException
     {
         final int[] TYPES = _charTypes.OTHER_CHARS;
         final byte[] inputBuffer = _inputBuffer;
@@ -941,8 +942,8 @@ public final class Utf8Scanner
         }
     }
 
-    protected final void skipCData()
-        throws XMLStreamException
+    @Override
+    protected final void skipCData() throws XMLStreamException
     {
         final int[] TYPES = _charTypes.OTHER_CHARS;
         final byte[] inputBuffer = _inputBuffer;
@@ -1027,8 +1028,8 @@ public final class Utf8Scanner
         }
     }
 
-    protected final void skipPI()
-        throws XMLStreamException
+    @Override
+    protected final void skipPI() throws XMLStreamException
     {
         final int[] TYPES = _charTypes.OTHER_CHARS;
         final byte[] inputBuffer = _inputBuffer;
@@ -1098,8 +1099,8 @@ public final class Utf8Scanner
         }
     }
 
-    protected final void skipSpace()
-        throws XMLStreamException
+    @Override
+    protected final void skipSpace() throws XMLStreamException
     {
         // mTmpChar has a space, but it's been checked, can ignore
         int ptr = _inputPtr;
@@ -1452,8 +1453,8 @@ public final class Utf8Scanner
         }
     }
 
-    protected final void finishCharacters()
-        throws XMLStreamException
+    @Override
+    protected final void finishCharacters() throws XMLStreamException
     {
         int outPtr;
         int c;
@@ -1637,8 +1638,8 @@ public final class Utf8Scanner
         }
     }
 
-    protected final void finishComment()
-        throws XMLStreamException
+    @Override
+    protected final void finishComment() throws XMLStreamException
     {
         final int[] TYPES = _charTypes.OTHER_CHARS;
         final byte[] inputBuffer = _inputBuffer;
@@ -1742,8 +1743,8 @@ public final class Utf8Scanner
      * When this method gets called we know that we have an internal subset,
      * and that the opening '[' has already been read.
      */
-    protected final void finishDTD(boolean copyContents)
-        throws XMLStreamException
+    @Override
+    protected final void finishDTD(boolean copyContents) throws XMLStreamException
     {
         char[] outputBuffer = copyContents ? _textBuilder.resetWithEmpty() : null;
         int outPtr = 0;
@@ -1880,8 +1881,8 @@ public final class Utf8Scanner
         }
     }
 
-    protected final void finishPI()
-        throws XMLStreamException
+    @Override
+    protected final void finishPI() throws XMLStreamException
     {
         final int[] TYPES = _charTypes.OTHER_CHARS;
         final byte[] inputBuffer = _inputBuffer;
@@ -1982,8 +1983,8 @@ public final class Utf8Scanner
      * that only space chars are legal. Thus, encountering a non-space
      * is an error (WFC or VC). However, an end-of-input is ok.
      */
-    protected final void finishSpace()
-        throws XMLStreamException
+    @Override
+    protected final void finishSpace() throws XMLStreamException
     {
         /* Ok: so, mTmpChar contains first space char. If it looks
          * like indentation, we can probably optimize a bit...
@@ -2690,8 +2691,8 @@ public final class Utf8Scanner
      * is only to be used for informational purposes (often when an error
      * has already been encountered)
      */
-    public int decodeCharForError(byte b)
-        throws XMLStreamException
+    @Override
+    public int decodeCharForError(byte b) throws XMLStreamException
     {
         int c = (int) b;
         if (c >= 0) { // ascii? fine as is...

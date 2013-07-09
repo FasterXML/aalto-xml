@@ -29,9 +29,9 @@ public abstract class OutputElementBase
     public final static int PREFIX_MISBOUND = 2;
 
     /*
-    ////////////////////////////////////////////
-    // Namespace binding/mapping information
-    ////////////////////////////////////////////
+    /**********************************************************************
+    /* Namespace binding/mapping information
+    /**********************************************************************
      */
 
     /**
@@ -55,9 +55,9 @@ public abstract class OutputElementBase
     protected boolean _nsMapShared;
 
     /*
-    ////////////////////////////////////////////
-    // Life-cycle
-    ////////////////////////////////////////////
+    /**********************************************************************
+    /* Life-cycle
+    /**********************************************************************
      */
 
     /**
@@ -93,9 +93,9 @@ public abstract class OutputElementBase
     protected abstract void setRootNsContext(NamespaceContext ctxt);
 
     /*
-    ////////////////////////////////////////////
-    // Public API, accessors
-    ////////////////////////////////////////////
+    /**********************************************************************
+    /* Public API, accessors
+    /**********************************************************************
      */
 
     public abstract boolean isRoot();
@@ -112,9 +112,9 @@ public abstract class OutputElementBase
     }
 
     /*
-    ////////////////////////////////////////////
-    // Public API, ns binding, checking
-    ////////////////////////////////////////////
+    /**********************************************************************
+    /* Public API, ns binding, checking
+    /**********************************************************************
      */
 
     /**
@@ -227,9 +227,9 @@ public abstract class OutputElementBase
     }
 
     /*
-    ////////////////////////////////////////////
-    // Public API, mutators
-    ////////////////////////////////////////////
+    /**********************************************************************
+    /* Public API, mutators
+    /**********************************************************************
      */
 
     public abstract void setDefaultNsUri(String uri);
@@ -267,11 +267,12 @@ public abstract class OutputElementBase
     }
 
     /*
-    //////////////////////////////////////////////////
-    // NamespaceContext implementation
-    //////////////////////////////////////////////////
+    /**********************************************************************
+    /* NamespaceContext implementation
+    /**********************************************************************
      */
 
+    @Override
     public final String getNamespaceURI(String prefix)
     {
         if (prefix.length() == 0) { //default NS
@@ -287,6 +288,7 @@ public abstract class OutputElementBase
             _rootNsContext.getNamespaceURI(prefix) : null;
     }
 
+    @Override
     public final String getPrefix(String uri)
     {
         if (_defaultNsURI.equals(uri)) {
@@ -302,8 +304,9 @@ public abstract class OutputElementBase
             _rootNsContext.getPrefix(uri) : null;
     }
 
+    @Override
     @SuppressWarnings("unchecked")
-	public final Iterator<String> getPrefixes(String uri)
+    public final Iterator<String> getPrefixes(String uri)
     {
         List<String> l = null;
 
@@ -342,9 +345,9 @@ public abstract class OutputElementBase
     }
 
     /*
-    ////////////////////////////////////////////
-    // Internal methods
-    ////////////////////////////////////////////
+    /**********************************************************************
+    /* Internal methods
+    /**********************************************************************
      */
 
     protected final void throwOutputError(String msg)

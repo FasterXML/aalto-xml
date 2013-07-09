@@ -297,9 +297,12 @@ public final class ReaderConfig
                                 mReporter, mResolver, mCanonicalizer);
     }
 
+    @Override
     public String getExternalEncoding() { return mExtEncoding; }
+    @Override
     public String getActualEncoding() { return mActualEncoding; }
 
+    @Override
     public boolean isXml11() {
         return false;
     }
@@ -343,6 +346,7 @@ public final class ReaderConfig
         return hasFlag(f);
     }
 
+    @Override
     public boolean setProperty(String name, Object value)
     {
         Object ob = sProperties.get(name);

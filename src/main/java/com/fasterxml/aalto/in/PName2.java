@@ -38,6 +38,7 @@ public final class PName2
         mQuad2 = quad2;
     }
 
+    @Override
     public PName createBoundName(NsBinding nsb)
     {
         PName2 newName = new PName2(_prefixedName, _prefix, _localName, mHash,
@@ -46,29 +47,34 @@ public final class PName2
         return newName;
     }
 
+    @Override
     public boolean equals(int quad1, int quad2)
     {
         return (quad1 == mQuad1) && (quad2 == mQuad2);
     }
 
+    @Override
     public boolean equals(int[] quads, int qlen)
     {
         return (qlen == 2)
             && (quads[0] == mQuad1) && (quads[1] == mQuad2);
     }
 
+    @Override
     public int getFirstQuad() {
         return mQuad1;
     }
 
+    @Override
     public int getLastQuad() {
         return mQuad2;
     }
 
-    public int getQuad(int index)
-    {
+    @Override
+    public int getQuad(int index) {
         return (index == 0) ? mQuad1 :mQuad2;
     }
 
+    @Override
     public int sizeInQuads() { return 2; }
 }

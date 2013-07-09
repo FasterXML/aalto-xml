@@ -49,21 +49,25 @@ final class CharWName
         localName.getChars(0, llen, _chars, plen+1);
     }
 
+    @Override
     public final int serializedLength()
     {
         return _chars.length;
     }
 
+    @Override
     public int appendBytes(byte[] buffer, int offset)
     {
         throw new RuntimeException("Internal error: appendBytes() should never be called");
     }
 
+    @Override
     public void writeBytes(OutputStream out) throws IOException
     {
         throw new RuntimeException("Internal error: writeBytes() should never be called");
     }
 
+    @Override
     public int appendChars(char[] buffer, int offset)
     {
         int len = _chars.length;
@@ -71,6 +75,7 @@ final class CharWName
         return len;
     }
 
+    @Override
     public void writeChars(Writer w) throws IOException
     {
         w.write(_chars);

@@ -141,10 +141,12 @@ public final class CharXmlWriter
             : OutputCharTypes.getLatin1CharTypes();
     }
 
+    @Override
     protected int getOutputPtr() {
         return _outputPtr;
     }
 
+    @Override
     public int getHighestEncodable()
     {
         return mEncHighChar;
@@ -156,13 +158,13 @@ public final class CharXmlWriter
     ///////////////////////////////////////////////////////
      */
 
-    public WName constructName(String localName)
-    {
+    @Override
+    public WName constructName(String localName) {
         return new CharWName(localName);
     }
 
-    public WName constructName(String prefix, String localName)
-    {
+    @Override
+    public WName constructName(String prefix, String localName) {
         return new CharWName(prefix, localName);
     }
 
@@ -182,6 +184,7 @@ public final class CharXmlWriter
         }
     }
 
+    @Override
     public void _closeTarget(boolean doClose) throws IOException
     {
         if (_out != null) { // just in case it's called multiple times
@@ -196,8 +199,8 @@ public final class CharXmlWriter
         }
     }
 
-    public final void flush()
-        throws IOException
+    @Override
+    public final void flush() throws IOException
     {
         if (_out != null) {
             flushBuffer();
@@ -205,8 +208,8 @@ public final class CharXmlWriter
         }
     }
 
-    public void writeRaw(char[] cbuf, int offset, int len)
-        throws IOException
+    @Override
+    public void writeRaw(char[] cbuf, int offset, int len) throws IOException
     {
         if (_out == null) {
             return;
@@ -249,8 +252,8 @@ public final class CharXmlWriter
         _out.write(cbuf, offset, len);
     }
 
-    public void writeRaw(String str, int offset, int len)
-        throws IOException
+    @Override
+    public void writeRaw(String str, int offset, int len) throws IOException
     {
         if (_out == null) {
             return;
@@ -334,6 +337,7 @@ public final class CharXmlWriter
      *   character in input (first ']' from "]]>" sequence, in non-fixing
      *   mode)
      */
+    @Override
     public int writeCData(String data)
         throws IOException, XMLStreamException
     {
@@ -361,6 +365,7 @@ public final class CharXmlWriter
         return -1;
     }
 
+    @Override
     public int writeCData(char[] cbuf, int offset, int len)
         throws IOException, XMLStreamException
     {
@@ -438,6 +443,7 @@ public final class CharXmlWriter
         return -1;
     }    
 
+    @Override
     public void writeCharacters(String text)
         throws IOException, XMLStreamException
     {
@@ -459,6 +465,7 @@ public final class CharXmlWriter
         }
     }
 
+    @Override
     public void writeCharacters(char[] cbuf, int offset, int len)
         throws IOException, XMLStreamException
     {
@@ -532,6 +539,7 @@ public final class CharXmlWriter
         }
     }    
 
+    @Override
     public void writeSpace(String data)
         throws IOException, XMLStreamException
     {
@@ -555,6 +563,7 @@ public final class CharXmlWriter
         }
     }
 
+    @Override
     public void writeSpace(char[] cbuf, int offset, int len)
         throws IOException, XMLStreamException
     {
@@ -585,6 +594,7 @@ public final class CharXmlWriter
      * fixing is enabled), or return the offset of the first hyphen in
      * multi-hyphen sequence.
      */
+    @Override
     public int writeComment(String data)
         throws IOException, XMLStreamException
     {
@@ -698,6 +708,7 @@ public final class CharXmlWriter
         return -1;
     }    
 
+    @Override
     public void writeDTD(String data)
         throws IOException, XMLStreamException
     {
@@ -705,6 +716,7 @@ public final class CharXmlWriter
         writeRaw(data, 0, data.length());
     }    
 
+    @Override
     public void writeDTD(WName rootName, String systemId, String publicId,
                          String internalSubset)
         throws IOException, XMLStreamException
@@ -738,6 +750,7 @@ public final class CharXmlWriter
         fastWriteRaw('>');
     }
 
+    @Override
     public void writeEntityReference(WName name)
         throws IOException, XMLStreamException
     {
@@ -746,6 +759,7 @@ public final class CharXmlWriter
         fastWriteRaw(';');
     }
 
+    @Override
     public void writeXmlDeclaration(String version, String encoding, String standalone)
         throws IOException, XMLStreamException
     {
@@ -769,6 +783,7 @@ public final class CharXmlWriter
         fastWriteRaw('?', '>');
     }    
 
+    @Override
     public int writePI(WName target, String data)
         throws IOException, XMLStreamException
     {
@@ -872,6 +887,7 @@ public final class CharXmlWriter
     ////////////////////////////////////////////////////
      */
 
+    @Override
     public void writeStartTagStart(WName name)
         throws IOException, XMLStreamException
     {
@@ -896,12 +912,14 @@ public final class CharXmlWriter
         _outputPtr = ptr + len;
     }    
 
+    @Override
     public void writeStartTagEnd()
         throws IOException, XMLStreamException
     {
         fastWriteRaw('>');
     }    
 
+    @Override
     public void writeStartTagEmptyEnd()
         throws IOException
     {
@@ -919,6 +937,7 @@ public final class CharXmlWriter
         _outputPtr = ptr;
     }    
 
+    @Override
     public void writeEndTag(WName name)
         throws IOException, XMLStreamException
     {
@@ -951,6 +970,7 @@ public final class CharXmlWriter
     ////////////////////////////////////////////////////
      */
 
+    @Override
     public void writeAttribute(WName name, String value)
         throws IOException, XMLStreamException
     {
@@ -967,6 +987,7 @@ public final class CharXmlWriter
         fastWriteRaw('"');
     }
 
+    @Override
     public void writeAttribute(WName name, char[] value, int offset, int vlen)
         throws IOException, XMLStreamException
     {
@@ -1139,6 +1160,7 @@ public final class CharXmlWriter
     //////////////////////////////////////////////////
      */
 
+    @Override
     public void writeTypedValue(AsciiValueEncoder enc)
         throws IOException, XMLStreamException
     {
@@ -1161,6 +1183,7 @@ public final class CharXmlWriter
     ////////////////////////////////////////////////////
      */
 
+    @Override
     public final void writeAttribute(WName name, AsciiValueEncoder enc)
         throws IOException, XMLStreamException
     {

@@ -85,6 +85,7 @@ public final class FixedNsContext
     /////////////////////////////////////////////
      */
 
+    @Override
     public final String getNamespaceURI(String prefix)
     {
         /* First the known offenders; invalid args, 2 predefined xml
@@ -111,6 +112,7 @@ public final class FixedNsContext
         return null;
     }
 
+    @Override
     public final String getPrefix(String nsURI)
     {
         /* First the known offenders; invalid args, 2 predefined xml
@@ -145,6 +147,7 @@ public final class FixedNsContext
 
     }
 
+    @Override
     public final Iterator<?> getPrefixes(String nsURI)
     {
         /* First the known offenders; invalid args, 2 predefined xml

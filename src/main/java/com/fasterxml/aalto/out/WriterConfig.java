@@ -171,10 +171,12 @@ public final class WriterConfig
                                 _propAutoNsPrefix);
     }
 
+    @Override
     public boolean isXml11() {
         return false;
     }
 
+    @Override
     public String getExternalEncoding()
     {
         /* !!! 01-Jan-2007, tatus: Can we distinguish this from the
@@ -183,6 +185,7 @@ public final class WriterConfig
         return getActualEncoding();
     }
 
+    @Override
     public String getActualEncoding() { return _encoding; }
 
     public String getPreferredEncoding()

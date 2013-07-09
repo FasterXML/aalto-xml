@@ -78,10 +78,9 @@ public final class Utf32Reader
     ////////////////////////////////////////
     */
 
-    public void close()
-        throws IOException
+    @Override
+    public void close() throws IOException
     {
-//System.err.println("DEBUG: BaseReader, close");
         InputStream in = mIn;
 
         if (in != null) {
@@ -98,8 +97,8 @@ public final class Utf32Reader
      * never be called by Woodstox code, let's still implement it bit more
      * efficiently just in case
      */
-    public int read()
-        throws IOException
+    @Override
+    public int read() throws IOException
     {
         if (mTmpBuf == null) {
             mTmpBuf = new char[1];
@@ -116,8 +115,8 @@ public final class Utf32Reader
     ////////////////////////////////////////
     */
 
-    public int read(char[] cbuf, int start, int len)
-        throws IOException
+    @Override
+    public int read(char[] cbuf, int start, int len) throws IOException
     {
         // Already EOF?
         if (mBuffer == null) {

@@ -285,6 +285,7 @@ final class NsBinder
     ///////////////////////////////////////////////
      */
 
+    @Override
     public String toString() {
         return "["+getClass().toString()+"; "+size()+" entries; of which "
             +localSize()+" local]";

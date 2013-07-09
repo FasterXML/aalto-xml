@@ -60,8 +60,8 @@ public final class UTF8Writer
     }
     */
 
-    public void close()
-        throws IOException
+    @Override
+    public void close() throws IOException
     {
         if (mOut != null) {
             if (mOutPtr > 0) {
@@ -89,8 +89,8 @@ public final class UTF8Writer
         }
     }
 
-    public void flush()
-        throws IOException
+    @Override
+    public void flush() throws IOException
     {
         if (mOutPtr > 0) {
             mOut.write(mOutBuffer, 0, mOutPtr);
@@ -99,14 +99,14 @@ public final class UTF8Writer
         mOut.flush();
     }
 
-    public void write(char[] cbuf)
-        throws IOException
+    @Override
+    public void write(char[] cbuf) throws IOException
     {
         write(cbuf, 0, cbuf.length);
     }
 
-    public void write(char[] cbuf, int off, int len)
-        throws IOException
+    @Override
+    public void write(char[] cbuf, int off, int len) throws IOException
     {
         if (len < 2) {
             if (len == 1) {
@@ -201,8 +201,8 @@ public final class UTF8Writer
         mOutPtr = outPtr;
     }
     
-    public void write(int c)
-        throws IOException
+    @Override
+    public void write(int c) throws IOException
     {
         // First; do we have a left over surrogate?
         if (mSurrogate > 0) {
@@ -247,14 +247,14 @@ public final class UTF8Writer
         }
     }
 
-    public void write(String str)
-        throws IOException
+    @Override
+    public void write(String str) throws IOException
     {
         write(str, 0, str.length());
     }
 
-    public void write(String str, int off, int len) 
-        throws IOException
+    @Override
+    public void write(String str, int off, int len) throws IOException
     {
         if (len < 2) {
             if (len == 1) {

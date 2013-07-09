@@ -37,9 +37,9 @@ public final class WNameTable
     final static int LAST_VALID_BUCKET = 0xFE;
 
     /*
-    /////////////////////////////////////////////////////
-    // Related objects
-    /////////////////////////////////////////////////////    
+    /**********************************************************************
+    /* Related objects
+    /**********************************************************************
      */
 
     final WNameFactory mNameFactory;
@@ -51,9 +51,9 @@ public final class WNameTable
     final WNameTable mParent;
 
     /*
-    /////////////////////////////////////////////////////
-    // Main table state
-    /////////////////////////////////////////////////////    
+    /**********************************************************************
+    /* Main table state
+    /**********************************************************************
      */
 
     // // // First, global information
@@ -118,9 +118,9 @@ public final class WNameTable
     private transient boolean mNeedRehash;
 
     /*
-    /////////////////////////////////////////////////////
-    // Sharing, versioning
-    /////////////////////////////////////////////////////    
+    /**********************************************************************
+    /* Sharing, versioning
+    /**********************************************************************
      */
 
     // // // Which of the buffers may be shared (and are copy-on-write)?
@@ -152,9 +152,9 @@ public final class WNameTable
     private boolean mCollListShared;
 
     /*
-    /////////////////////////////////////////////////////
-    // Construction, merging
-    /////////////////////////////////////////////////////
+    /**********************************************************************
+    /* Construction, merging
+    /**********************************************************************
      */
 
     protected WNameTable(int hashSize)
@@ -269,11 +269,12 @@ public final class WNameTable
     }
 
     /*
-    /////////////////////////////////////////////////////
-    // API, accessors
-    /////////////////////////////////////////////////////
+    /**********************************************************************
+    /* API, accessors
+    /**********************************************************************
      */
 
+    @Override
     public int size() { return mCount; }
 
     /**
@@ -281,8 +282,8 @@ public final class WNameTable
      * may have gotten additional entries. Used for checking to see
      * if a child table should be merged into shared table.
      */
-    public boolean maybeDirty()
-    {
+    @Override
+    public boolean maybeDirty() {
         return !mMainHashShared;
     }
 
@@ -370,11 +371,12 @@ public final class WNameTable
     }
 
     /*
-    /////////////////////////////////////////////////////
-    // Standard methods
-    /////////////////////////////////////////////////////
+    /**********************************************************************
+    /* Standard methods
+    /**********************************************************************
      */
 
+    @Override
     public String toString()
     {
         StringBuilder sb = new StringBuilder();
@@ -450,9 +452,9 @@ public final class WNameTable
     }
 
     /*
-    /////////////////////////////////////////////////////
-    // Internal methods
-    /////////////////////////////////////////////////////
+    /**********************************************************************
+    /* Internal methods
+    /**********************************************************************
      */
 
     private void addSymbol(WName symbol)
@@ -681,9 +683,9 @@ public final class WNameTable
     }
 
     /*
-    /////////////////////////////////////////////////////
-    // Helper classes
-    /////////////////////////////////////////////////////
+    /**********************************************************************
+    /* Helper classes
+    /**********************************************************************
      */
 
     final static class Bucket

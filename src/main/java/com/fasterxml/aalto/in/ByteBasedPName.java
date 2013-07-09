@@ -47,10 +47,13 @@ public abstract class ByteBasedPName
 
     // From base class:
 
+    @Override
     public abstract int getFirstQuad();
 
+    @Override
     public abstract int getQuad(int index);
 
+    @Override
     public abstract int sizeInQuads();
 
     // additional ones:
@@ -70,6 +73,7 @@ public abstract class ByteBasedPName
      * name string itself is an open question. For now, let's use
      * former.
      */
+    @Override
     public int hashCode() { return mHash; }
 }
 

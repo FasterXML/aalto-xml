@@ -20,6 +20,7 @@ public final class ElementScope
     public PName getName() { return mName; }
     public ElementScope getParent() { return mParent; }
 
+    @Override
     public String toString()
     {
         if (mParent == null) {

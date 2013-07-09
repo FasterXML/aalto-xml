@@ -929,6 +929,7 @@ public abstract class XmlScanner
     /**********************************************************************
      */
 
+    @Override
     public String getNamespaceURI(String prefix)
     {
         if (prefix == null) {
@@ -957,6 +958,7 @@ public abstract class XmlScanner
         return null;
     }
 
+    @Override
     public String getPrefix(String nsURI)
     {
         /* As per JDK 1.5 JavaDocs, null is illegal; but no mention
@@ -999,6 +1001,7 @@ public abstract class XmlScanner
         return null;
     }
 
+    @Override
     public Iterator<String> getPrefixes(String nsURI)
     {
         if (nsURI == null) {

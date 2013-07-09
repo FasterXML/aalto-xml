@@ -163,6 +163,7 @@ public final class ReaderScanner
 
     // // // First, main iteration methods
 
+    @Override
     public final int nextFromProlog(boolean isProlog)
         throws XMLStreamException
     {
@@ -223,8 +224,8 @@ public final class ReaderScanner
         return handleStartElement(c);
     }
 
-    public final int nextFromTree()
-        throws XMLStreamException
+    @Override
+    public final int nextFromTree() throws XMLStreamException
     {
         if (_tokenIncomplete) { // left-overs?
             if (skipToken()) { // Figured out next even (ENTITY_REFERENCE)?
@@ -1237,8 +1238,8 @@ public final class ReaderScanner
         return 0;
     }
 
-    protected final void finishComment()
-        throws XMLStreamException
+    @Override
+    protected final void finishComment() throws XMLStreamException
     {
         final int[] TYPES = sCharTypes.OTHER_CHARS;
         final char[] inputBuffer = _inputBuffer;
@@ -1341,8 +1342,8 @@ public final class ReaderScanner
         _textBuilder.setCurrentLength(outPtr);
     }
 
-    protected final void finishPI()
-        throws XMLStreamException
+    @Override
+    protected final void finishPI() throws XMLStreamException
     {
         final int[] TYPES = sCharTypes.OTHER_CHARS;
         final char[] inputBuffer = _inputBuffer;
@@ -1437,8 +1438,8 @@ public final class ReaderScanner
         _textBuilder.setCurrentLength(outPtr);
     }
 
-    protected final void finishDTD(boolean copyContents)
-        throws XMLStreamException
+    @Override
+    protected final void finishDTD(boolean copyContents) throws XMLStreamException
     {
         char[] outputBuffer = copyContents ?
             _textBuilder.resetWithEmpty() : null;
@@ -1573,8 +1574,8 @@ public final class ReaderScanner
         }
     }
 
-    protected final void finishCData()
-        throws XMLStreamException
+    @Override
+    protected final void finishCData() throws XMLStreamException
     {
         final int[] TYPES = sCharTypes.OTHER_CHARS;
         final char[] inputBuffer = _inputBuffer;
@@ -1710,8 +1711,8 @@ public final class ReaderScanner
         }
     }
 
-    protected final void finishCharacters()
-        throws XMLStreamException
+    @Override
+    protected final void finishCharacters() throws XMLStreamException
     {
         int outPtr;
         char[] outputBuffer;
@@ -1897,8 +1898,8 @@ public final class ReaderScanner
         }
     }
 
-    protected final void finishSpace()
-        throws XMLStreamException
+    @Override
+    protected final void finishSpace() throws XMLStreamException
     {
         /* Ok: so, mTmpChar contains first space char. If it looks
          * like indentation, we can probably optimize a bit...
@@ -2326,6 +2327,7 @@ public final class ReaderScanner
      *
      * @return True if we encountered an unexpandable entity
      */
+    @Override
     protected final boolean skipCoalescedText()
         throws XMLStreamException
     {
@@ -2377,6 +2379,7 @@ public final class ReaderScanner
     /**********************************************************************
      */
 
+    @Override
     protected final void skipComment()
         throws XMLStreamException
     {
@@ -2452,8 +2455,8 @@ public final class ReaderScanner
         }
     }
 
-    protected final void skipPI()
-        throws XMLStreamException
+    @Override
+    protected final void skipPI() throws XMLStreamException
     {
         final int[] TYPES = sCharTypes.OTHER_CHARS;
         final char[] inputBuffer = _inputBuffer;
@@ -2526,8 +2529,8 @@ public final class ReaderScanner
         }
     }
 
-    protected final boolean skipCharacters()
-        throws XMLStreamException
+    @Override
+    protected final boolean skipCharacters() throws XMLStreamException
     {
         final int[] TYPES = sCharTypes.TEXT_CHARS;
         final char[] inputBuffer = _inputBuffer;
@@ -2626,8 +2629,8 @@ public final class ReaderScanner
         }
     }
 
-    protected final void skipCData()
-        throws XMLStreamException
+    @Override
+    protected final void skipCData() throws XMLStreamException
     {
         final int[] TYPES = sCharTypes.OTHER_CHARS;
         final char[] inputBuffer = _inputBuffer;
@@ -2719,8 +2722,8 @@ public final class ReaderScanner
         }
     }
 
-    protected final void skipSpace()
-        throws XMLStreamException
+    @Override
+    protected final void skipSpace() throws XMLStreamException
     {
         // mTmpChar has a space, but it's been checked, can ignore
         int ptr = _inputPtr;
@@ -3245,6 +3248,7 @@ public final class ReaderScanner
     /**
      * @return Current input location
      */
+    @Override
     public XMLStreamLocation2 getCurrentLocation()
     {
         return LocationImpl.fromZeroBased
@@ -3252,13 +3256,13 @@ public final class ReaderScanner
              mPastChars + _inputPtr, _currRow, _inputPtr - mRowStartOffset);
     }
 
-    public int getCurrentLineNr()
-    {
+    @Override
+    public int getCurrentLineNr() {
         return _currRow+1;
     }
 
-    public int getCurrentColumnNr()
-    {
+    @Override
+    public int getCurrentColumnNr() {
         return _inputPtr - mRowStartOffset;
     }
 
@@ -3280,8 +3284,8 @@ public final class ReaderScanner
     /**********************************************************************
      */
 
-    protected final boolean loadMore()
-        throws XMLStreamException
+    @Override
+    protected final boolean loadMore() throws XMLStreamException
     {
         // If it's a block source, there's no Reader, or any more data:
         if (_in == null) {

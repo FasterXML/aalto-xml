@@ -182,6 +182,7 @@ public abstract class ByteBasedScanner
         }
     }
 
+    @Override
     protected abstract void _closeSource() throws IOException;
 
     /*
@@ -190,19 +191,20 @@ public abstract class ByteBasedScanner
     /**********************************************************************
      */
 
+    @Override
     public XMLStreamLocation2 getCurrentLocation()
     {
         return LocationImpl.fromZeroBased(_config.getPublicId(), _config.getSystemId(),
              _pastBytes + _inputPtr, _currRow, _inputPtr - _rowStartOffset);
     }
 
-    public int getCurrentLineNr()
-    {
+    @Override
+    public int getCurrentLineNr() {
         return _currRow+1;
     }
 
-    public int getCurrentColumnNr()
-    {
+    @Override
+    public int getCurrentColumnNr() {
         return _inputPtr - _rowStartOffset;
     }
 

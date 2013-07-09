@@ -242,6 +242,7 @@ public final class ByteBasedPNameTable
     /////////////////////////////////////////////////////
      */
 
+    @Override
     public int size() { return mCount; }
 
     /**
@@ -249,8 +250,8 @@ public final class ByteBasedPNameTable
      * may have gotten additional entries. Used for checking to see
      * if a child table should be merged into shared table.
      */
-    public boolean maybeDirty()
-    {
+    @Override
+    public boolean maybeDirty() {
         return !mMainHashShared;
     }
 
@@ -436,6 +437,7 @@ public final class ByteBasedPNameTable
     /////////////////////////////////////////////////////
      */
 
+    @Override
     public String toString()
     {
         StringBuilder sb = new StringBuilder();

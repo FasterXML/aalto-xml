@@ -36,6 +36,7 @@ public final class PName1
         mQuad = quad;
     }
 
+    @Override
     public PName createBoundName(NsBinding nsb)
     {
         PName1 newName = new PName1(_prefixedName, _prefix, _localName,
@@ -44,27 +45,33 @@ public final class PName1
         return newName;
     }
 
+    @Override
     public boolean equals(int quad1, int quad2)
     {
         return (quad1 == mQuad) && (quad2 == 0);
     }
 
+    @Override
     public boolean equals(int[] quads, int qlen)
     {
         return (qlen == 1 && quads[0] == mQuad);
     }
 
+    @Override
     public int getFirstQuad() {
         return mQuad;
     }
 
+    @Override
     public final int getLastQuad() {
         return mQuad;
     }
 
+    @Override
     public int getQuad(int index) {
         return (index == 0) ? mQuad : 0;
     }
 
+    @Override
     public int sizeInQuads() { return 1; }
 }
