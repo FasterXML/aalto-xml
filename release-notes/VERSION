@@ -1,14 +1,11 @@
-Version: 0.9.9
-
-Release date: xx-xxx-2012
-
-Description:
-  Bug fix version.
-
+Project: aalto-xml
+Version: 0.9.9 (xx-Aug-2013)
 Fixes:
 
 #15: Allow handling of illegal XML characters using `IllegalCharHandler` (configurable)
  (contributed by jakeri@github)
+#21: Remove JAXP/SAX auto-registration from META-INF, to avoid conflicts
+ (suggested by Dave P)
 * Minor improvement to AsyncUtfScanner.handleNsValuePending to avoid problems
   with split (across chunk boundary) namespace declaration.
 
