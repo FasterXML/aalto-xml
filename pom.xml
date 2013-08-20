@@ -10,7 +10,7 @@
   </parent>
 
   <artifactId>aalto-xml</artifactId>
-  <version>0.9.9-SNAPSHOT</version>
+  <version>0.9.9</version>
   <packaging>jar</packaging>
   <licenses>
     <license>
@@ -28,6 +28,7 @@
     <connection>scm:git:git@github.com:FasterXML/aalto-xml.git</connection>
     <developerConnection>scm:git:git@github.com:FasterXML/aalto-xml.git</developerConnection>
     <url>http://github.com/FasterXML/aalto-xml</url>
+    <tag>aalto-xml-0.9.9</tag>
   </scm>
 
   <properties>
