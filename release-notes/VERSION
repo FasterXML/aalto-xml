@@ -1,6 +1,5 @@
 Project: aalto-xml
-Version: 0.9.9 (xx-Aug-2013)
-Fixes:
+Version: 0.9.9 (19-Aug-2013)
 
 #15: Allow handling of illegal XML characters using `IllegalCharHandler` (configurable)
  (contributed by jakeri@github)
@@ -13,8 +12,6 @@ Fixes:
 
 0.9.8 [08-Apr-2012]
 
-Fixes:
-
 * #4: Added SAXParserFactoryImpl.newInstance(), to reduce likelihood of getting a
     non-Aalto factory.
 * #6: Fix ordering problem wrt public/system ids, ReaderConfig construction
@@ -23,29 +20,21 @@ Fixes:
 
 0.9.7 [11-Feb-2011]
 
-New features:
-
 * Finally complete non-blocking ("async") parser interface (with
   AsyncXMLInputFactory, AsyncXMLStreamReader) and implementation
   (only missing coalescing mode, and some aspects of entity handling)
 
 0.9.6 [11-Oct-2010]
 
-Refactoring:
-
 * Build system converted to use Maven for easier deployment; OSGi bundle,
   moved home page to [http://wiki.fasterxml.com/AaltoHome]
 
 0.9.5 [20-Mar-2009]
 
-Refactoring:
-
 * Licensing change to basic Apache License 2.0
 * Moved code under "com.fasterxml.aalto" Java package.
 
 0.9.4 [04-Feb-2009]
-
-Improvements:
 
 * Namespace-repairing mode for stream writers implemented.
 * Coalescing mode implemented for blocking parsers (can not implement
@@ -54,8 +43,6 @@ Improvements:
 
 0.9.3 [21-Jan-2009]
 
-Problems fixed:
-
 * A problem with comments content skipping (when underlying scanner
   is Readers based) fixed: would surface parts of comment content as
   regular text.
@@ -63,14 +50,9 @@ Problems fixed:
   XMLOutputFactory2#P_AUTO_CLOSE_OUTPUT) wasn't working properly, now is.
 * An IndexOutOfBounds problem with character (Writer) backed
   XMLStreamWriter, writeCharacters(char[],int,int) fixed.
-
-Improvements:
-
 * Complete implementation of Stax2 3.0 Typed Access API.
 
 0.9.2 [08-May-2008]
-
-Problems fixed:
 
 * Fixed stax conformance issue wrt. returning of no prefix/namespace URI;
   now returns "" as expected instead of nulls.
@@ -80,9 +62,6 @@ Problems fixed:
   (could implement Stax2 REPORT_WS_IN_PROLOG in future if needed)
 * Now disables lazy parsing for event readers, SAX reader, to improve
   accuracy of error reporting (and possible minor performance benefit too)
-
-New features:
-
 * Added stax2test unit test suite from Woodstox, for additional
   test coverage via stax2 API.
 * Implemented first (incomplete) version of Stax2 3.0 Typed Access API
@@ -90,8 +69,6 @@ New features:
   for int, long, boolean.
 
 0.9.1 [13-Mar-2008]
-
-Problems fixed:
 
 * XMLStreamReader (blocking) implementation:
   * Implemented non-lazy parsing functionality (still defaults to lazy
