@@ -1508,8 +1508,8 @@ public abstract class StreamScanner
 
         try {
             do {
-                int max = _inputBuffer.length - remaining;
-                int count = _in.read(_inputBuffer, remaining, max);
+                int max = _inputBuffer.length - _inputEnd;
+                int count = _in.read(_inputBuffer, _inputEnd, max);
                 if (count < 1) {
                     if (count == 0) {
                         // Sanity check, should never happen with non-buggy readers/stream
