@@ -1,5 +1,11 @@
 Project: aalto-xml
-Version: 0.9.9 (19-Aug-2013)
+Version: 0.9.10 (19-Aug-2014)
+
+- Improve location handling, access
+
+== History: ==
+
+0.9.9 (19-Aug-2013)
 
 #15: Allow handling of illegal XML characters using `IllegalCharHandler` (configurable)
  (contributed by jakeri@github)
@@ -8,7 +14,6 @@ Version: 0.9.9 (19-Aug-2013)
 * Minor improvement to AsyncUtfScanner.handleNsValuePending to avoid problems
   with split (across chunk boundary) namespace declaration.
 
-== History: ==
 
 0.9.8 [08-Apr-2012]
 

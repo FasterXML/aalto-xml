@@ -1660,7 +1660,7 @@ public class StreamReaderImpl
 
     @Override
     public final XMLStreamLocation2 getCurrentLocation() {
-        return _scanner.getStartLocation();
+        return _scanner.getCurrentLocation();
     }
 
     /*
@@ -1672,14 +1672,12 @@ public class StreamReaderImpl
     //public final int getAttributeCount();
 
     @Override
-    public final int findAttributeIndex(String nsURI, String localName)
-    {
+    public final int findAttributeIndex(String nsURI, String localName) {
         return _scanner.findAttrIndex(nsURI, localName);
     }
 
     @Override
-    public final int getIdAttributeIndex()
-    {
+    public final int getIdAttributeIndex() {
         // !!! TBI: Need dtd handling for it to work
         return -1;
     }

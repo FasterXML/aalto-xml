@@ -51,10 +51,6 @@ public abstract class StreamScanner
 
     protected byte[] _inputBuffer;
 
-    protected int _inputPtr;
-
-    protected int _inputEnd;
-
     /*
     /**********************************************************************
     /* Life-cycle

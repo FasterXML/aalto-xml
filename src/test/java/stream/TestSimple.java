@@ -3,6 +3,7 @@ package stream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
+import javax.xml.stream.Location;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
@@ -13,12 +14,13 @@ public class TestSimple extends base.BaseTestCase
     public void testNamespaces() throws Exception
     {
         // note: must specify encoding so parsers knows which decoder to use
-        String DOC = "<root xmlns='abc' xmlns:a='b' xmlns:b='c' />";
+        String DOC = "<root xmlns='abc' xmlns:a='b' xmlns:b='c'>\n</root>";
         XMLStreamReader sr = createReader(DOC, "UTF-8");
         assertTokenType(START_DOCUMENT, sr.getEventType());
         assertTokenType(START_ELEMENT, sr.next());
         assertEquals("root", sr.getLocalName());
         assertEquals(3, sr.getNamespaceCount());
+        
         /* Although Stax does not mandate that ordering of namespace
          * declarations is preserved, ideally we would want to have them
          * that way...
@@ -29,7 +31,26 @@ public class TestSimple extends base.BaseTestCase
         assertEquals("b", sr.getNamespaceURI(1));
         assertEquals("b", sr.getNamespacePrefix(2));
         assertEquals("c", sr.getNamespaceURI(2));
+
+        Location loc = sr.getLocation();
+        assertEquals(1, loc.getLineNumber());
+        assertEquals(43, loc.getColumnNumber());
+        assertEquals(42, loc.getCharacterOffset());
+        
+        assertTokenType(CHARACTERS, sr.next());
+        assertEquals("\n", sr.getText());
+
+        loc = sr.getLocation();
+        assertEquals(2, loc.getLineNumber());
+        assertEquals(1,  loc.getColumnNumber());
+        assertEquals(43, loc.getCharacterOffset());
+        
         assertTokenType(END_ELEMENT, sr.next());
+        loc = sr.getLocation();
+        assertEquals(8, loc.getColumnNumber());
+        assertEquals(2, loc.getLineNumber());
+        assertEquals(50, loc.getCharacterOffset());
+
         assertTokenType(END_DOCUMENT, sr.next());
         sr.close();
     }
