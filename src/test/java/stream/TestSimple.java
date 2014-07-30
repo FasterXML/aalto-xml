@@ -73,6 +73,7 @@ public class TestSimple extends base.BaseTestCase
         assertEquals(43, loc.getCharacterOffset());
 
         assertTokenType(END_DOCUMENT, sr.next());
+        loc = sr.getLocation();
         assertEquals(2, loc.getLineNumber());
         assertEquals(8, loc.getColumnNumber());
         assertEquals(50, loc.getCharacterOffset());
