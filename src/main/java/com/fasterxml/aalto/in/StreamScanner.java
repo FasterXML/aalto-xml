@@ -121,14 +121,12 @@ public abstract class StreamScanner
         }
 
         // First: keep track of where event started
-        _startRawOffset = _pastBytes + _inputPtr;
-        _startRow = _currRow;
-        _startColumn = _inputPtr - _rowStartOffset;
-        
+        setStartLocation();        
         // Ok: we should get a WS or '<'. So, let's skip through WS
         while (true) {
             if (_inputPtr >= _inputEnd) {
                 if (!loadMore()) {
+                    setStartLocation();        
                     return TOKEN_EOI;
                 }
             }
@@ -150,6 +148,7 @@ public abstract class StreamScanner
                     if (_inputPtr >= _inputEnd) {
                         if (!loadMore()) {
                             markLF();
+                            setStartLocation();        
                             return TOKEN_EOI;
                         }
                     }
@@ -212,15 +211,14 @@ public abstract class StreamScanner
             }
         }
         // and except for special cases, mark down actual start location of the event
-        _startRawOffset = _pastBytes + _inputPtr;
-        _startRow = _currRow;
-        _startColumn = _inputPtr - _rowStartOffset;
+        setStartLocation();        
 
         /* Any more data? Although it'd be an error not to get any,
          * let's leave error reporting up to caller
          */
         if (_inputPtr >= _inputEnd) {
             if (!loadMore()) {
+                setStartLocation();        
                 return TOKEN_EOI;
             }
         }
@@ -434,8 +432,7 @@ public abstract class StreamScanner
      * Method called after leading '<?' has been parsed; needs to parse
      * target.
      */
-    private final int handlePIStart()
-        throws XMLStreamException
+    private final int handlePIStart() throws XMLStreamException
     {
         _currToken = PROCESSING_INSTRUCTION;
 
@@ -1428,7 +1425,7 @@ public abstract class StreamScanner
     protected final boolean loadMore() throws XMLStreamException
     {
         // First, let's update offsets:
-        _pastBytes += _inputEnd;
+        _pastBytesOrChars += _inputEnd;
         _rowStartOffset -= _inputEnd;
         _inputPtr = 0;
 
@@ -1509,7 +1506,7 @@ public abstract class StreamScanner
 
         // otherwise, need to use cut'n pasted code from loadMore()...
 
-        _pastBytes += _inputPtr;
+        _pastBytesOrChars += _inputPtr;
         _rowStartOffset -= _inputPtr;
 
         int remaining = (_inputEnd - _inputPtr); // must be > 0

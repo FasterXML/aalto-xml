@@ -16,6 +16,7 @@
 package com.fasterxml.aalto.in;
 
 import java.io.IOException;
+
 import javax.xml.stream.XMLStreamException;
 
 import org.codehaus.stax2.XMLStreamLocation2;
@@ -124,17 +125,6 @@ public abstract class ByteBasedScanner
      * just utf-8 itself.
      */
     protected final XmlCharTypes _charTypes;
-    /*
-    /**********************************************************************
-    /* Location info
-    /**********************************************************************
-     */
-
-    /**
-     * Number of bytes that were read and processed before the contents
-     * of the current buffer; used for calculating absolute offsets.
-     */
-    protected long _pastBytes;
 
     /*
     /**********************************************************************
@@ -161,7 +151,7 @@ public abstract class ByteBasedScanner
         super(cfg);
         _symbols = cfg.getBBSymbols();
         _charTypes = cfg.getCharTypes();
-        _pastBytes = 0; // should it be passed by caller?
+        _pastBytesOrChars = 0; // should it be passed by caller?
         _rowStartOffset = 0; // should probably be passed by caller...
     }
 
@@ -187,7 +177,7 @@ public abstract class ByteBasedScanner
     public XMLStreamLocation2 getCurrentLocation()
     {
         return LocationImpl.fromZeroBased(_config.getPublicId(), _config.getSystemId(),
-             _pastBytes + _inputPtr, _currRow, _inputPtr - _rowStartOffset);
+                _pastBytesOrChars + _inputPtr, _currRow, _inputPtr - _rowStartOffset);
     }
 
     @Override
@@ -205,6 +195,12 @@ public abstract class ByteBasedScanner
         ++_currRow;
     }
 
+    protected final void setStartLocation() {
+        _startRawOffset = _pastBytesOrChars + _inputPtr;
+        _startRow = _currRow;
+        _startColumn = _inputPtr - _rowStartOffset;
+    }
+    
     /*
     /**********************************************************************
     /* Abstract methods for sub-classes to implement

@@ -324,8 +324,7 @@ public abstract class AsyncByteScanner
     }
 
     @Override
-    public String toString()
-    {
+    public String toString() {
         return "asyncScanner; curr="+_currToken+" next="+_nextEvent+", state = "+_state;
     }
 
@@ -373,7 +372,7 @@ public abstract class AsyncByteScanner
             throw new XMLStreamException("Already closed, can not feed more input");
         }
         // Time to update pointers first
-        _pastBytes += _origBufferLen;
+        _pastBytesOrChars += _origBufferLen;
         _rowStartOffset -= _origBufferLen;
 
         // And then update buffer settings
@@ -414,9 +413,7 @@ public abstract class AsyncByteScanner
         // Had fully complete event? Need to reset state etc:
         if (_currToken != EVENT_INCOMPLETE) {
             // First: keep track of where event started
-            _startRawOffset = _pastBytes + _inputPtr;
-            _startRow = _currRow;
-            _startColumn = _inputPtr - _rowStartOffset;
+            setStartLocation();
             
             // yet one more special case: after START_DOCUMENT need to check things...
             if (_currToken == START_DOCUMENT) {
@@ -480,6 +477,7 @@ public abstract class AsyncByteScanner
             while (_state == STATE_DEFAULT) {
                 if (_inputPtr >= _inputEnd) { // no more input available
                     if (_endOfInput) { // for good? That may be fine
+                        setStartLocation();
                         return TOKEN_EOI;
                     }
                     return _currToken;
@@ -498,6 +496,7 @@ public abstract class AsyncByteScanner
                     // Prolog/epilog ws is to be skipped, not part of Infoset
                     if (!asyncSkipSpace()) { // ran out of input?
                         if (_endOfInput) { // for good? That may be fine
+                            setStartLocation();
                             return TOKEN_EOI;
                         }
                         return _currToken;
@@ -570,10 +569,8 @@ public abstract class AsyncByteScanner
                 }
             }
 
-            // First: keep track of where event started
-            _startRawOffset = _pastBytes + _inputPtr;
-            _startRow = _currRow;
-            _startColumn = _inputPtr - _rowStartOffset;
+            // keep track of where event started
+            setStartLocation();
             
             /* Only CHARACTERS can remain incomplete: this happens if
              * first character is decoded, but coalescing mode is NOT

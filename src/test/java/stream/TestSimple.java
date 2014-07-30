@@ -2,21 +2,30 @@ package stream;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.StringReader;
 
-import javax.xml.stream.Location;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamReader;
+import javax.xml.stream.*;
 
 import org.codehaus.stax2.XMLInputFactory2;
 import org.codehaus.stax2.XMLStreamReader2;
 
 public class TestSimple extends base.BaseTestCase
 {
-    public void testNamespaces() throws Exception
+    private final XMLInputFactory2 F2 = getNewInputFactory();
+    
+    public void testNamespacesBytes() throws Exception {
+        _testNamespaces(true);
+    }
+
+    public void testNamespacesChars() throws Exception {
+        _testNamespaces(false);
+    }
+    
+    public void _testNamespaces(boolean useBytes) throws Exception
     {
         // note: must specify encoding so parsers knows which decoder to use
         String DOC = "<root xmlns='abc' xmlns:a='b' xmlns:b='c'>\n</root>";
-        XMLStreamReader2 sr = createReader(DOC, "UTF-8");
+        XMLStreamReader2 sr = createReader(DOC, "UTF-8", useBytes);
         assertTokenType(START_DOCUMENT, sr.getEventType());
         assertTokenType(START_ELEMENT, sr.next());
         assertEquals("root", sr.getLocalName());
@@ -77,13 +86,14 @@ public class TestSimple extends base.BaseTestCase
      */
 
 
-    XMLStreamReader2 createReader(String content, String enc)
+    XMLStreamReader2 createReader(String content, String enc, boolean useBytes)
         throws IOException, XMLStreamException
     {
-        // Let's ensure it's a new factory, to minimize caching probs
-        XMLInputFactory2 f = getNewInputFactory();
-        byte[] data = content.getBytes(enc);
-        return (XMLStreamReader2) f.createXMLStreamReader(new ByteArrayInputStream(data));
+        if (useBytes) {
+            byte[] data = content.getBytes(enc);
+            return (XMLStreamReader2) F2.createXMLStreamReader(new ByteArrayInputStream(data));
+        }
+        return (XMLStreamReader2) F2.createXMLStreamReader(new StringReader(content));
     }
 
 }

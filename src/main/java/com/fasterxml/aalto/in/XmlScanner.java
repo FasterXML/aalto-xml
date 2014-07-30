@@ -279,6 +279,12 @@ public abstract class XmlScanner
      */
 
     /**
+     * Number of bytes that were read and processed before the contents
+     * of the current buffer; used for calculating absolute offsets.
+     */
+    protected long _pastBytesOrChars;
+
+    /**
      * The row on which the character to read next is on. Note that
      * it is 0-based, so API will generally add one to it before
      * returning the value
@@ -291,6 +297,21 @@ public abstract class XmlScanner
      * row was contained within an earlier buffer.
      */
     protected int _rowStartOffset;
+
+    /**
+     * Offset (in chars or bytes) at start of current token
+     */
+    protected long _startRawOffset;
+
+    /**
+     * Current row at start of current (last returned) token
+     */
+    protected long _startRow = -1L;
+
+    /**
+     * Current column at start of current (last returned) token
+     */
+    protected long _startColumn = -1L;
     
     /*
     /**********************************************************************
@@ -459,12 +480,6 @@ public abstract class XmlScanner
     /* Public scanner interface, location access
     /**********************************************************************
      */
-
-    protected long _startRawOffset;
-
-    protected long _startRow = -1L;
-
-    protected long _startColumn = -1L;
     
     /**
      * @return Current input location
@@ -531,13 +546,11 @@ public abstract class XmlScanner
         return _tokenName.constructQName(_defaultNs);
     }
 
-    public final String getDTDPublicId()
-    {
+    public final String getDTDPublicId() {
         return _publicId;
     }
 
-    public final String getDTDSystemId()
-    {
+    public final String getDTDSystemId() {
         return _systemId;
     }
 
@@ -547,8 +560,7 @@ public abstract class XmlScanner
     /**********************************************************************
      */
 
-    public final String getText()
-        throws XMLStreamException
+    public final String getText() throws XMLStreamException
     {
         if (_tokenIncomplete) {
             finishToken();

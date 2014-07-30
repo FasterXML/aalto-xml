@@ -74,25 +74,6 @@ public final class ReaderScanner
 
     /*
     /**********************************************************************
-    /* Location info
-    /**********************************************************************
-     */
-
-    /**
-     * Number of bytes that were read and processed before the contents
-     * of the current buffer; used for calculating absolute offsets.
-     */
-    protected long _pastChars;
-
-    /**
-     * Offset used to calculate the column value given current input
-     * buffer pointer. May be negative, if the first character of the
-     * row was contained within an earlier buffer.
-     */
-    protected int _rowStartOffset;
-
-    /*
-    /**********************************************************************
     /* Life-cycle
     /**********************************************************************
      */
@@ -105,7 +86,7 @@ public final class ReaderScanner
         _inputBuffer = buffer;
         _inputPtr = ptr;
         _inputEnd = last;
-        _pastChars = 0; // should it be passed by caller?
+        _pastBytesOrChars = 0; // should it be passed by caller?
         _rowStartOffset = 0; // should probably be passed by caller...
  
         _symbols = cfg.getCBSymbols();
@@ -117,7 +98,7 @@ public final class ReaderScanner
         _in = r;
         _inputBuffer = cfg.allocFullCBuffer(ReaderConfig.DEFAULT_CHAR_BUFFER_LEN);
         _inputPtr = _inputEnd = 0;
-        _pastChars = 0; // should it be passed by caller?
+        _pastBytesOrChars = 0; // should it be passed by caller?
         _rowStartOffset = 0; // should probably be passed by caller...
 
         _symbols = cfg.getCBSymbols();
@@ -170,15 +151,14 @@ public final class ReaderScanner
         }
 
         // First: keep track of where event started
-        _startRawOffset = _pastChars + _inputPtr;
-        _startRow = _currRow;
-        _startColumn = _inputPtr - _rowStartOffset;
-        
+        setStartLocation();
+
         // Ok: we should get a WS or '<'. So, let's skip through WS
         while (true) {
             // Any more data? Just need a single byte
             if (_inputPtr >= _inputEnd) {
                 if (!loadMore()) {
+                    setStartLocation();
                     return TOKEN_EOI;
                 }
             }
@@ -195,6 +175,7 @@ public final class ReaderScanner
                     if (_inputPtr >= _inputEnd) {
                         if (!loadMore()) {
                             markLF();
+                            setStartLocation();
                             return TOKEN_EOI;
                         }
                     }
@@ -258,15 +239,14 @@ public final class ReaderScanner
             }
         }
         // and except for special cases, mark down actual start location of the event
-        _startRawOffset = _pastChars + _inputPtr;
-        _startRow = _currRow;
-        _startColumn = _inputPtr - _rowStartOffset;
+        setStartLocation();
 
         /* Any more data? Although it'd be an error not to get any,
          * let's leave error reporting up to caller
          */
         if (_inputPtr >= _inputEnd) {
             if (!loadMore()) {
+                setStartLocation();
                 return TOKEN_EOI;
             }
         }
@@ -3270,7 +3250,7 @@ public final class ReaderScanner
     {
         return LocationImpl.fromZeroBased
             (_config.getPublicId(), _config.getSystemId(),
-             _pastChars + _inputPtr, _currRow, _inputPtr - _rowStartOffset);
+             _pastBytesOrChars + _inputPtr, _currRow, _inputPtr - _rowStartOffset);
     }
 
     @Override
@@ -3290,6 +3270,12 @@ public final class ReaderScanner
         ++_currRow;
     }
 
+    protected final void setStartLocation() {
+        _startRawOffset = _pastBytesOrChars + _inputPtr;
+        _startRow = _currRow;
+        _startColumn = _inputPtr - _rowStartOffset;
+    }
+    
     /*
     /**********************************************************************
     /* Input loading
@@ -3306,7 +3292,7 @@ public final class ReaderScanner
         }
 
         // Otherwise let's update offsets:
-        _pastChars += _inputEnd;
+        _pastBytesOrChars += _inputEnd;
         _rowStartOffset -= _inputEnd;
         _inputPtr = 0;
 
@@ -3358,7 +3344,7 @@ public final class ReaderScanner
 
         // otherwise, need to use cut'n pasted code from loadMore()...
 
-        _pastChars += _inputPtr;
+        _pastBytesOrChars += _inputPtr;
         _rowStartOffset -= _inputPtr;
 
         int remaining = (_inputEnd - _inputPtr); // must be > 0
