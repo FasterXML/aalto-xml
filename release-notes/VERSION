@@ -1,7 +1,8 @@
 Project: aalto-xml
-Version: 0.9.10 (19-Aug-2014)
+Version: 0.9.10 (xx-Jul-2014)
 
-- Improve location handling, access
+#18: Improve location handling, access
+ (requested by "wanghaopu@github")
 
 == History: ==
 
