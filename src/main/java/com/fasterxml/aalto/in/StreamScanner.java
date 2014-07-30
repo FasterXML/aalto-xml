@@ -57,9 +57,8 @@ public abstract class StreamScanner
     /**********************************************************************
      */
 
-    public StreamScanner(ReaderConfig cfg,
-                         InputStream in,
-                         byte[] buffer, int ptr, int last)
+    public StreamScanner(ReaderConfig cfg, InputStream in,
+            byte[] buffer, int ptr, int last)
     {
         super(cfg);
         _in = in;
@@ -85,8 +84,7 @@ public abstract class StreamScanner
     }
 
     @Override
-    protected void _closeSource()
-        throws IOException
+    protected void _closeSource() throws IOException
     {
         if (_in != null) {
             _in.close();
@@ -122,6 +120,11 @@ public abstract class StreamScanner
             skipToken();
         }
 
+        // First: keep track of where event started
+        _startRawOffset = _pastBytes + _inputPtr;
+        _startRow = _currRow;
+        _startColumn = _inputPtr - _rowStartOffset;
+        
         // Ok: we should get a WS or '<'. So, let's skip through WS
         while (true) {
             if (_inputPtr >= _inputEnd) {
@@ -186,8 +189,7 @@ public abstract class StreamScanner
         if (_tokenIncomplete) { // left-overs?
             if (skipToken()) { // Figured out next event (ENTITY_REFERENCE)?
                 // !!! We don't yet parse DTD, don't know real contents
-                _textBuilder.resetWithEmpty();
-                return _currToken;
+                return _nextEntity();
             }
         } else { // note: START_ELEMENT/END_ELEMENT never incomplete
             if (_currToken == START_ELEMENT) {
@@ -204,13 +206,15 @@ public abstract class StreamScanner
             } else {
                 // It's possible CHARACTERS entity with an entity ref:
                 if (_entityPending) {
-                    // !!! We don't yet parse DTD, don't know real contents
-                    _textBuilder.resetWithEmpty();
                     _entityPending = false;
-                    return ENTITY_REFERENCE;
+                    return _nextEntity();
                 }
             }
         }
+        // and except for special cases, mark down actual start location of the event
+        _startRawOffset = _pastBytes + _inputPtr;
+        _startRow = _currRow;
+        _startColumn = _inputPtr - _rowStartOffset;
 
         /* Any more data? Although it'd be an error not to get any,
          * let's leave error reporting up to caller
@@ -267,6 +271,17 @@ public abstract class StreamScanner
         return (_currToken = CHARACTERS);
     }
 
+    /**
+     * Helper method used to isolate things that need to be (re)set in
+     * cases where 
+     */
+    protected int _nextEntity() {
+        // !!! Also, have to assume start location has been set or such
+        _textBuilder.resetWithEmpty();
+        // !!! TODO: handle start location?
+        return (_currToken = ENTITY_REFERENCE);
+    }
+    
     /*
     /**********************************************************************
     /* Internal methods, secondary parsing

@@ -82,14 +82,14 @@ public final class ReaderScanner
      * Number of bytes that were read and processed before the contents
      * of the current buffer; used for calculating absolute offsets.
      */
-    protected int mPastChars;
+    protected long _pastChars;
 
     /**
      * Offset used to calculate the column value given current input
      * buffer pointer. May be negative, if the first character of the
      * row was contained within an earlier buffer.
      */
-    protected int mRowStartOffset;
+    protected int _rowStartOffset;
 
     /*
     /**********************************************************************
@@ -105,8 +105,8 @@ public final class ReaderScanner
         _inputBuffer = buffer;
         _inputPtr = ptr;
         _inputEnd = last;
-        mPastChars = 0; // should it be passed by caller?
-        mRowStartOffset = 0; // should probably be passed by caller...
+        _pastChars = 0; // should it be passed by caller?
+        _rowStartOffset = 0; // should probably be passed by caller...
  
         _symbols = cfg.getCBSymbols();
    }
@@ -117,8 +117,8 @@ public final class ReaderScanner
         _in = r;
         _inputBuffer = cfg.allocFullCBuffer(ReaderConfig.DEFAULT_CHAR_BUFFER_LEN);
         _inputPtr = _inputEnd = 0;
-        mPastChars = 0; // should it be passed by caller?
-        mRowStartOffset = 0; // should probably be passed by caller...
+        _pastChars = 0; // should it be passed by caller?
+        _rowStartOffset = 0; // should probably be passed by caller...
 
         _symbols = cfg.getCBSymbols();
     }
@@ -163,12 +163,17 @@ public final class ReaderScanner
     // // // First, main iteration methods
 
     @Override
-    public final int nextFromProlog(boolean isProlog)
-        throws XMLStreamException
+    public final int nextFromProlog(boolean isProlog) throws XMLStreamException
     {
         if (_tokenIncomplete) { // left-overs from last thingy?
             skipToken();
         }
+
+        // First: keep track of where event started
+        _startRawOffset = _pastChars + _inputPtr;
+        _startRow = _currRow;
+        _startColumn = _inputPtr - _rowStartOffset;
+        
         // Ok: we should get a WS or '<'. So, let's skip through WS
         while (true) {
             // Any more data? Just need a single byte
@@ -222,19 +227,19 @@ public final class ReaderScanner
         }
         return handleStartElement(c);
     }
-
+    
     @Override
     public final int nextFromTree() throws XMLStreamException
     {
         if (_tokenIncomplete) { // left-overs?
-            if (skipToken()) { // Figured out next even (ENTITY_REFERENCE)?
+            if (skipToken()) { // Figured out next event (ENTITY_REFERENCE)?
                 // !!! We don't yet parse DTD, don't know real contents
-                _textBuilder.resetWithEmpty();
-                return _currToken;
+                return _nextEntity();
             }
         } else { // note: START_ELEMENT/END_ELEMENT never incomplete
             if (_currToken == START_ELEMENT) {
                 if (_isEmptyTag) {
+                    // Important: retain same start location as with START_ELEMENT, don't overwrite
                     --_depth;
                     return (_currToken = END_ELEMENT);
                 }
@@ -248,12 +253,14 @@ public final class ReaderScanner
                 // It's possible CHARACTERS entity with an entity ref:
                 if (_entityPending) {
                     _entityPending = false;
-                    // !!! We don't yet parse DTD, don't know real contents
-                    _textBuilder.resetWithEmpty();
-                    return ENTITY_REFERENCE;
+                    return _nextEntity();
                 }
             }
         }
+        // and except for special cases, mark down actual start location of the event
+        _startRawOffset = _pastChars + _inputPtr;
+        _startRow = _currRow;
+        _startColumn = _inputPtr - _rowStartOffset;
 
         /* Any more data? Although it'd be an error not to get any,
          * let's leave error reporting up to caller
@@ -311,6 +318,17 @@ public final class ReaderScanner
         return (_currToken = CHARACTERS);
     }
 
+    /**
+     * Helper method used to isolate things that need to be (re)set in
+     * cases where 
+     */
+    protected int _nextEntity() {
+        // !!! Also, have to assume start location has been set or such
+        _textBuilder.resetWithEmpty();
+        // !!! TODO: handle start location?
+        return (_currToken = ENTITY_REFERENCE);
+    }
+    
     /*
     /**********************************************************************
     /* 2nd level parsing
@@ -3252,28 +3270,23 @@ public final class ReaderScanner
     {
         return LocationImpl.fromZeroBased
             (_config.getPublicId(), _config.getSystemId(),
-             mPastChars + _inputPtr, _currRow, _inputPtr - mRowStartOffset);
-    }
-
-    @Override
-    public int getCurrentLineNr() {
-        return _currRow+1;
+             _pastChars + _inputPtr, _currRow, _inputPtr - _rowStartOffset);
     }
 
     @Override
     public int getCurrentColumnNr() {
-        return _inputPtr - mRowStartOffset;
+        return _inputPtr - _rowStartOffset;
     }
 
     protected final void markLF(int offset)
     {
-        mRowStartOffset = offset;
+        _rowStartOffset = offset;
         ++_currRow;
     }
 
     protected final void markLF()
     {
-        mRowStartOffset = _inputPtr;
+        _rowStartOffset = _inputPtr;
         ++_currRow;
     }
 
@@ -3293,8 +3306,8 @@ public final class ReaderScanner
         }
 
         // Otherwise let's update offsets:
-        mPastChars += _inputEnd;
-        mRowStartOffset -= _inputEnd;
+        _pastChars += _inputEnd;
+        _rowStartOffset -= _inputEnd;
         _inputPtr = 0;
 
         try {
@@ -3316,8 +3329,7 @@ public final class ReaderScanner
         }
     }
 
-    protected final char loadOne()
-        throws XMLStreamException
+    protected final char loadOne() throws XMLStreamException
     {
         if (!loadMore()) {
             reportInputProblem("Unexpected end-of-input when trying to parse "+ErrorConsts.tokenTypeDesc(_currToken));
@@ -3346,8 +3358,8 @@ public final class ReaderScanner
 
         // otherwise, need to use cut'n pasted code from loadMore()...
 
-        mPastChars += _inputPtr;
-        mRowStartOffset -= _inputPtr;
+        _pastChars += _inputPtr;
+        _rowStartOffset -= _inputPtr;
 
         int remaining = (_inputEnd - _inputPtr); // must be > 0
         System.arraycopy(_inputBuffer, _inputPtr, _inputBuffer, 0, remaining);

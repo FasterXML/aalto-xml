@@ -28,8 +28,8 @@ import com.fasterxml.aalto.util.XmlChars;
 /**
  * Intermediate base class used by different byte-backed scanners.
  * Specifically, used as a base by both blocking (stream) and
- * non-blocking (async) byte-based scanners (as opposed to Writer-backed,
- * ie. character-based scanners)
+ * non-blocking (async) byte-based scanners (as opposed to Reader-backed,
+ * character-based scanners)
  */
 public abstract class ByteBasedScanner
     extends XmlScanner
@@ -124,7 +124,6 @@ public abstract class ByteBasedScanner
      * just utf-8 itself.
      */
     protected final XmlCharTypes _charTypes;
-
     /*
     /**********************************************************************
     /* Location info
@@ -135,14 +134,7 @@ public abstract class ByteBasedScanner
      * Number of bytes that were read and processed before the contents
      * of the current buffer; used for calculating absolute offsets.
      */
-    protected int _pastBytes;
-
-    /**
-     * Offset used to calculate the column value given current input
-     * buffer pointer. May be negative, if the first character of the
-     * row was contained within an earlier buffer.
-     */
-    protected int _rowStartOffset;
+    protected long _pastBytes;
 
     /*
     /**********************************************************************
@@ -199,23 +191,16 @@ public abstract class ByteBasedScanner
     }
 
     @Override
-    public int getCurrentLineNr() {
-        return _currRow+1;
-    }
-
-    @Override
     public int getCurrentColumnNr() {
         return _inputPtr - _rowStartOffset;
     }
 
-    protected final void markLF(int offset)
-    {
+    protected final void markLF(int offset) {
         _rowStartOffset = offset;
         ++_currRow;
     }
 
-    protected final void markLF()
-    {
+    protected final void markLF() {
         _rowStartOffset = _inputPtr;
         ++_currRow;
     }
@@ -467,17 +452,11 @@ public abstract class ByteBasedScanner
         return _symbols.addSymbol(hash, baseName, last_colon, quads, qlen);
     }
 
-    protected void reportInvalidInitial(int mask)
-        throws XMLStreamException
-    {
-        reportInputProblem("Invalid UTF-8 start byte 0x"
-                           +Integer.toHexString(mask));
+    protected void reportInvalidInitial(int mask) throws XMLStreamException {
+        reportInputProblem("Invalid UTF-8 start byte 0x"+Integer.toHexString(mask));
     }
 
-    protected void reportInvalidOther(int mask)
-        throws XMLStreamException
-    {
-        reportInputProblem("Invalid UTF-8 middle byte 0x"
-                           +Integer.toHexString(mask));
+    protected void reportInvalidOther(int mask) throws XMLStreamException {
+        reportInputProblem("Invalid UTF-8 middle byte 0x"+Integer.toHexString(mask));
     }
 }

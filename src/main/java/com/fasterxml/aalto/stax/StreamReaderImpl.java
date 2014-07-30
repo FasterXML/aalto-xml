@@ -1639,8 +1639,7 @@ public class StreamReaderImpl
     }
 
     @Override
-    public final long getEndingCharOffset() throws XMLStreamException
-    {
+    public final long getEndingCharOffset() throws XMLStreamException {
         // !!! TBI
         return -1L;
     }
@@ -1653,8 +1652,7 @@ public class StreamReaderImpl
     }
 
     @Override
-    public final XMLStreamLocation2 getEndLocation() throws XMLStreamException
-    {
+    public final XMLStreamLocation2 getEndLocation() throws XMLStreamException {
         return _scanner.getEndLocation();
     }
 

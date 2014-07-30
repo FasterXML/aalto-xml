@@ -21,20 +21,11 @@ import org.codehaus.stax2.typed.Base64Variant;
 import org.codehaus.stax2.typed.TypedArrayDecoder;
 import org.codehaus.stax2.typed.TypedValueDecoder;
 import org.codehaus.stax2.typed.TypedXMLStreamException;
-
 import org.codehaus.stax2.ri.typed.CharArrayBase64Decoder;
 
-
 import com.fasterxml.aalto.WFCException;
-import com.fasterxml.aalto.impl.ErrorConsts;
-import com.fasterxml.aalto.impl.IoStreamException;
-import com.fasterxml.aalto.util.DataUtil;
-import com.fasterxml.aalto.util.EmptyIterator;
-import com.fasterxml.aalto.util.IllegalCharHandler;
-import com.fasterxml.aalto.util.SingletonIterator;
-import com.fasterxml.aalto.util.TextBuilder;
-import com.fasterxml.aalto.util.XmlChars;
-import com.fasterxml.aalto.util.XmlConsts;
+import com.fasterxml.aalto.impl.*;
+import com.fasterxml.aalto.util.*;
 
 /**
  * This is the abstract base class for all scanner implementations,
@@ -294,6 +285,13 @@ public abstract class XmlScanner
      */
     protected int _currRow;
 
+    /**
+     * Offset used to calculate the column value given current input
+     * buffer pointer. May be negative, if the first character of the
+     * row was contained within an earlier buffer.
+     */
+    protected int _rowStartOffset;
+    
     /*
     /**********************************************************************
     /* Life-cycle
@@ -366,19 +364,16 @@ public abstract class XmlScanner
 
     // // // First, main iteration methods
 
-    public abstract int nextFromProlog(boolean isProlog)
-        throws XMLStreamException;
+    public abstract int nextFromProlog(boolean isProlog) throws XMLStreamException;
 
-    public abstract int nextFromTree()
-        throws XMLStreamException;
+    public abstract int nextFromTree() throws XMLStreamException;
 
     /**
      * This token is called to ensure that the current token/event has been
      * completely parsed, such that we have all the data needed to return
      * it (textual content, PI data, comment text etc)
      */
-    protected final void finishToken()
-        throws XMLStreamException
+    protected final void finishToken() throws XMLStreamException
     {
         _tokenIncomplete = false;
         switch (_currToken) {
@@ -465,19 +460,27 @@ public abstract class XmlScanner
     /**********************************************************************
      */
 
+    protected long _startRawOffset;
+
+    protected long _startRow = -1L;
+
+    protected long _startColumn = -1L;
+    
     /**
      * @return Current input location
      */
     public abstract XMLStreamLocation2 getCurrentLocation();
 
-    public XMLStreamLocation2 getStartLocation()
+    public final XMLStreamLocation2 getStartLocation()
     {
-        // !!! TBI: Fix, not right:
-        return getCurrentLocation();
+        // !!! TODO: deal with impedance wrt int/long (flaw in Stax API)
+        int row = (int) _startRow;
+        int col = (int) _startColumn;
+        return LocationImpl.fromZeroBased(_config.getPublicId(), _config.getSystemId(),
+                _startRawOffset, row, col);
     }
 
-    public XMLStreamLocation2 getEndLocation()
-        throws XMLStreamException
+    public XMLStreamLocation2 getEndLocation() throws XMLStreamException
     {
         // Have to complete the token to know the ending location...
         if (_tokenIncomplete) {
@@ -486,18 +489,17 @@ public abstract class XmlScanner
         return getCurrentLocation();
     }
 
-    public abstract int getCurrentLineNr();
+    public final int getCurrentLineNr() {
+        return _currRow+1;
+    }
 
     public abstract int getCurrentColumnNr();
 
-
-    public final String getInputSystemId()
-    {
+    public final String getInputSystemId() {
         return _config.getSystemId();
     }
 
-    public final String getInputPublicId()
-    {
+    public final String getInputPublicId() {
         return _config.getPublicId();
     }
 

@@ -413,6 +413,11 @@ public abstract class AsyncByteScanner
     {
         // Had fully complete event? Need to reset state etc:
         if (_currToken != EVENT_INCOMPLETE) {
+            // First: keep track of where event started
+            _startRawOffset = _pastBytes + _inputPtr;
+            _startRow = _currRow;
+            _startColumn = _inputPtr - _rowStartOffset;
+            
             // yet one more special case: after START_DOCUMENT need to check things...
             if (_currToken == START_DOCUMENT) {
                 _currToken = EVENT_INCOMPLETE;
@@ -554,6 +559,7 @@ public abstract class AsyncByteScanner
             if (_currToken == START_ELEMENT) {
                 if (_isEmptyTag) {
                     --_depth;
+                    // Important: do NOT overwrite start location, same as with START_ELEMENT
                     return (_currToken = END_ELEMENT);
                 }
             } else if (_currToken == END_ELEMENT) {
@@ -564,6 +570,11 @@ public abstract class AsyncByteScanner
                 }
             }
 
+            // First: keep track of where event started
+            _startRawOffset = _pastBytes + _inputPtr;
+            _startRow = _currRow;
+            _startColumn = _inputPtr - _rowStartOffset;
+            
             /* Only CHARACTERS can remain incomplete: this happens if
              * first character is decoded, but coalescing mode is NOT
              * set. Skip can not therefore block, nor will add pending

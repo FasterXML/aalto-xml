@@ -11,12 +11,12 @@ public class LocationImpl
 {
     private final static LocationImpl sEmptyLocation = new LocationImpl("", "", -1, -1, -1);
 
-    final String mPublicId, mSystemId;
+    final protected String mPublicId, mSystemId;
     
-    final int mCharOffset;
-    final int mCol, mRow;
+    final protected int mCharOffset;
+    final protected int mCol, mRow;
 
-    transient String mDesc = null;
+    transient protected  String mDesc = null;
 
     public LocationImpl(String pubId, String sysId,
                         int charOffset, int row, int col)
@@ -36,10 +36,12 @@ public class LocationImpl
      * to 1-based values that should be externally visible.
      */
     public static LocationImpl fromZeroBased(String pubId, String sysId,
-                                             int rawOffset, int rawRow, int rawCol)
+            long rawOffset, int rawRow, int rawCol)
     {
         // row, column are 1-based, offset 0-based
-        return new LocationImpl(pubId, sysId, rawOffset, rawRow+1, rawCol+1);
+        // TODO: handle overflow
+        int offset = (int) rawOffset;
+        return new LocationImpl(pubId, sysId, offset, rawRow+1, rawCol+1);
     }
 
     public static LocationImpl getEmptyLocation() {
@@ -48,13 +50,16 @@ public class LocationImpl
 
     @Override
     public int getCharacterOffset() { return mCharOffset; }
+
     @Override
     public int getColumnNumber() { return mCol; }
+
     @Override
     public int getLineNumber() { return mRow; }
     
     @Override
     public String getPublicId() { return mPublicId; }
+
     @Override
     public String getSystemId() { return mSystemId; }
 
