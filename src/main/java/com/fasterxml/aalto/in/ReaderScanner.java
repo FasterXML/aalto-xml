@@ -3242,9 +3242,6 @@ public final class ReaderScanner
     /**********************************************************************
      */
 
-    /**
-     * @return Current input location
-     */
     @Override
     public XMLStreamLocation2 getCurrentLocation()
     {
@@ -3258,6 +3255,32 @@ public final class ReaderScanner
         return _inputPtr - _rowStartOffset;
     }
 
+    @Override
+    public long getStartingByteOffset() {
+        // N/A for this type
+        return -1L;
+    }
+
+    @Override
+    public long getStartingCharOffset() {
+        return _startRawOffset;
+    }
+
+    @Override
+    public long getEndingByteOffset() throws XMLStreamException {
+        // N/A for this type
+        return -1L;
+    }
+
+    @Override
+    public long getEndingCharOffset() throws XMLStreamException {
+        // Have to complete the token to know the ending location...
+        if (_tokenIncomplete) {
+            finishToken();
+        }
+        return _pastBytesOrChars + _inputPtr;
+    }
+    
     protected final void markLF(int offset)
     {
         _rowStartOffset = offset;

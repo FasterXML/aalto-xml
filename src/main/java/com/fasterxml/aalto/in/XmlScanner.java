@@ -495,6 +495,11 @@ public abstract class XmlScanner
                 _startRawOffset, row, col);
     }
 
+    public abstract long getStartingByteOffset();
+    public abstract long getStartingCharOffset();
+    public abstract long getEndingByteOffset() throws XMLStreamException;
+    public abstract long getEndingCharOffset() throws XMLStreamException;
+    
     public XMLStreamLocation2 getEndLocation() throws XMLStreamException
     {
         // Have to complete the token to know the ending location...

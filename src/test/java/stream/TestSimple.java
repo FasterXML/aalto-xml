@@ -67,6 +67,12 @@ public class TestSimple extends base.BaseTestCase
         assertEquals(43, loc.getCharacterOffset());
         
         assertTokenType(END_ELEMENT, sr.next());
+        assertEquals("root", sr.getLocalName());
+        assertEquals(useBytes ? -1L : 43L, sr.getLocationInfo().getStartingCharOffset());
+        assertEquals(useBytes ? 43L : -1L, sr.getLocationInfo().getStartingByteOffset());
+        assertEquals(useBytes ? -1L : 50L, sr.getLocationInfo().getEndingCharOffset());
+        assertEquals(useBytes ? 50L : -1L, sr.getLocationInfo().getEndingByteOffset());
+        
         loc = sr.getLocation();
         assertEquals(1, loc.getColumnNumber());
         assertEquals(2, loc.getLineNumber());

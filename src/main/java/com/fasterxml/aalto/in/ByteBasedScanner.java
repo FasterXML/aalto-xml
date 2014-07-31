@@ -185,6 +185,32 @@ public abstract class ByteBasedScanner
         return _inputPtr - _rowStartOffset;
     }
 
+    @Override
+    public long getStartingByteOffset() {
+        return _startRawOffset;
+    }
+
+    @Override
+    public long getStartingCharOffset() {
+        // N/A for this type
+        return -1L;
+    }
+
+    @Override
+    public long getEndingByteOffset() throws XMLStreamException {
+        // Have to complete the token to know the ending location...
+        if (_tokenIncomplete) {
+            finishToken();
+        }
+        return _pastBytesOrChars + _inputPtr;
+    }
+
+    @Override
+    public long getEndingCharOffset() throws XMLStreamException {
+        // N/A for this type
+        return -1L;
+    }
+    
     protected final void markLF(int offset) {
         _rowStartOffset = offset;
         ++_currRow;

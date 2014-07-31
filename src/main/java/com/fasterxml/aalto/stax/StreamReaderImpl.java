@@ -396,8 +396,7 @@ public class StreamReaderImpl
      *</blockquote>
      */
     @Override
-    public final String getElementText()
-        throws XMLStreamException
+    public final String getElementText() throws XMLStreamException
     {
         if (_currToken != START_ELEMENT) {
             throwWfe(ErrorConsts.ERR_STATE_NOT_STELEM);
@@ -412,7 +411,7 @@ public class StreamReaderImpl
                 continue;
             }
             if (((1 << type) & MASK_GET_ELEMENT_TEXT) == 0) {
-                throwWfe("Expected a text token, got "+ErrorConsts.tokenTypeDesc(type)+".");
+                _reportNonTextEvent(type);
             }
             break;
         }
@@ -431,12 +430,12 @@ public class StreamReaderImpl
                 continue;
             }
             if (type != COMMENT && type != PROCESSING_INSTRUCTION) {
-                throwWfe("Expected a text token, got "+ErrorConsts.tokenTypeDesc(type)+".");
+                _reportNonTextEvent(type);
             }
         }
         return (acc == null) ? text : acc.getAndClear();
     }
-
+    
     /**
      * Returns type of the last event returned; or START_DOCUMENT before
      * any events has been explicitly returned.
@@ -1621,27 +1620,22 @@ public class StreamReaderImpl
 
     @Override
     public final long getStartingByteOffset() {
-        // !!! TBI
-        return -1L;
+        return _scanner.getStartingByteOffset();
     }
 
     @Override
     public final long getStartingCharOffset() {
-        // !!! TBI
-        return -1L;
+        return _scanner.getStartingCharOffset();
     }
 
     @Override
-    public final long getEndingByteOffset() throws XMLStreamException
-    {
-        // !!! TBI
-        return -1L;
+    public final long getEndingByteOffset() throws XMLStreamException {
+        return _scanner.getEndingByteOffset();
     }
 
     @Override
     public final long getEndingCharOffset() throws XMLStreamException {
-        // !!! TBI
-        return -1L;
+        return _scanner.getEndingCharOffset();
     }
 
     // // // and then the object-based access methods:
@@ -1725,11 +1719,20 @@ public class StreamReaderImpl
     }
 
     /*
-    /////////////////////////////////////////////////////
-    // Internal methods, error reporting
-    /////////////////////////////////////////////////////
+    /**********************************************************************
+    /* Internal methods, error reporting
+    /**********************************************************************
      */
 
+    /**
+     * Helper method called when {@link #getElementText} (et al) method encounters
+     * a token type it should not, during text coalescing
+     */
+    protected void _reportNonTextEvent(int type) throws XMLStreamException
+    {
+        throwWfe("Expected a text token, got "+ErrorConsts.tokenTypeDesc(type)+".");
+    }
+    
     protected Location getLastCharLocation()
     {
         // !!! TBI
@@ -1753,8 +1756,7 @@ public class StreamReaderImpl
      * Method called when hitting an end-of-input within tree, after
      * a valid token
      */
-    protected void handleTreeEoi()
-        throws XMLStreamException
+    protected void handleTreeEoi() throws XMLStreamException
     {
         _currToken = END_DOCUMENT;
         // !!! Should indicate open tree etc.
@@ -1765,25 +1767,21 @@ public class StreamReaderImpl
      * Throws generic parse error with specified message and current parsing
      * location.
      */
-    protected void throwWfe(String msg) throws XMLStreamException
-    {
+    protected void throwWfe(String msg) throws XMLStreamException {
         throw new WFCException(msg, getLastCharLocation());
     }
 
-    private void throwNotTextual(int type)
-    {
+    private void throwNotTextual(int type) {
         throw new IllegalStateException("Not a textual event ("
                                         +ErrorConsts.tokenTypeDesc(_currToken)+")");
     }
 
-    private void throwNotTextXxx(int type)
-    {
+    private void throwNotTextXxx(int type) {
         throw new IllegalStateException("getTextXxx() methods can not be called on "
                                         +ErrorConsts.tokenTypeDesc(_currToken));
     }
 
-    protected void throwFromIOE(IOException ioe) throws XMLStreamException
-    {
+    protected void throwFromIOE(IOException ioe) throws XMLStreamException {
         throw new IoStreamException(ioe);
     }
 

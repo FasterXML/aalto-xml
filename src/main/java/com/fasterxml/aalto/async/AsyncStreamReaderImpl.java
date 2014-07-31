@@ -52,4 +52,20 @@ public class AsyncStreamReaderImpl extends StreamReaderImpl
     public void feedInput(byte[] data, int offset, int len) throws XMLStreamException {
         _asyncScanner.feedInput(data, offset, len);
     }
+
+    /*
+    /**********************************************************************
+    /* Overrides
+    /**********************************************************************
+     */
+
+    @Override
+    protected void _reportNonTextEvent(int type) throws XMLStreamException
+    {
+        // for Async parser
+        if (type == EVENT_INCOMPLETE) {
+            throwWfe("Can not use text-aggregating methods with non-blocking parser, as they (may) require blocking");
+        }
+        super._reportNonTextEvent(type);
+    }
 }
