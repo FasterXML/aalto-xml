@@ -6,6 +6,8 @@ import com.fasterxml.aalto.AsyncInputFeeder;
 import com.fasterxml.aalto.AsyncXMLStreamReader;
 import com.fasterxml.aalto.stax.StreamReaderImpl;
 
+import java.nio.ByteBuffer;
+
 /**
  * Implementation of {@link AsyncXMLStreamReader}.
  */
@@ -51,6 +53,11 @@ public class AsyncStreamReaderImpl extends StreamReaderImpl
     @Override
     public void feedInput(byte[] data, int offset, int len) throws XMLStreamException {
         _asyncScanner.feedInput(data, offset, len);
+    }
+
+    @Override
+    public void feedInput(ByteBuffer data) throws XMLStreamException {
+        _asyncScanner.feedInput(data);
     }
 
     /*

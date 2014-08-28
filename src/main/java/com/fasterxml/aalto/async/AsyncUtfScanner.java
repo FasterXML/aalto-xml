@@ -103,7 +103,7 @@ public class AsyncUtfScanner
                     _pendingInput = PENDING_STATE_CR;
                     return EVENT_INCOMPLETE;
                 }
-                if (_inputBuffer[_inputPtr] == BYTE_LF) {
+                if (byteAt(_inputPtr) == BYTE_LF) {
                     ++_inputPtr;
                 }
                 markLF();
@@ -122,7 +122,7 @@ public class AsyncUtfScanner
             case XmlCharTypes.CT_MULTIBYTE_3:
                 if ((_inputEnd - _inputPtr) < 2) {
                     if (_inputEnd > _inputPtr) { // 2 bytes available
-                        int d = (int) _inputBuffer[_inputPtr++] & 0xFF;
+                        int d = (int) byteAt(_inputPtr++) & 0xFF;
                         c |= (d << 8);
                     }
                     _pendingInput = c;
@@ -133,10 +133,10 @@ public class AsyncUtfScanner
             case XmlCharTypes.CT_MULTIBYTE_4:
                 if ((_inputEnd - _inputPtr) < 3) {
                     if (_inputEnd > _inputPtr) { // at least 2 bytes?
-                        int d = (int) _inputBuffer[_inputPtr++] & 0xFF;
+                        int d = (int) byteAt(_inputPtr++) & 0xFF;
                         c |= (d << 8);
                         if (_inputEnd > _inputPtr) { // 3 bytes?
-                            d = (int) _inputBuffer[_inputPtr++] & 0xFF;
+                            d = (int) byteAt(_inputPtr++) & 0xFF;
                             c |= (d << 16);
                         }
                     }
@@ -193,7 +193,7 @@ public class AsyncUtfScanner
 
         // Possible \r\n linefeed?
         if (c == PENDING_STATE_CR) {
-            if (_inputBuffer[_inputPtr] == BYTE_LF) {
+            if (byteAt(_inputPtr) == BYTE_LF) {
                 ++_inputPtr;
             }
             markLF();
@@ -210,14 +210,14 @@ public class AsyncUtfScanner
             case XmlCharTypes.CT_MULTIBYTE_3:
                 {
                     // Ok... so do we have one or two pending bytes?
-                    int next = _inputBuffer[_inputPtr++] & 0xFF;
+                    int next = byteAt(_inputPtr++) & 0xFF;
                     int c2 = (c >> 8);
                     if (c2 == 0) { // just one; need two more
                         if (_inputPtr >= _inputEnd) { // but got only one
                             _pendingInput = c | (next << 8);
                             return EVENT_INCOMPLETE;
                         }
-                        int c3 = _inputBuffer[_inputPtr++] & 0xFF;
+                        int c3 = byteAt(_inputPtr++) & 0xFF;
                         c = decodeUtf8_3(c, next, c3);
                     } else { // had two, got one, bueno:
                         c = decodeUtf8_3((c & 0xFF), c2, next);
@@ -227,19 +227,19 @@ public class AsyncUtfScanner
                 break;
             case XmlCharTypes.CT_MULTIBYTE_4:
                 {
-                    int next = (int) _inputBuffer[_inputPtr++] & 0xFF;
+                    int next = (int) byteAt(_inputPtr++) & 0xFF;
                     // Only had one?
                     if ((c >> 8) == 0) { // ok, so need 3 more
                         if (_inputPtr >= _inputEnd) { // just have 1
                             _pendingInput = c | (next << 8);
                             return EVENT_INCOMPLETE;
                         }
-                        int c2 = _inputBuffer[_inputPtr++] & 0xFF;
+                        int c2 = byteAt(_inputPtr++) & 0xFF;
                         if (_inputPtr >= _inputEnd) { // almost, got 2
                             _pendingInput = c | (next << 8) | (c2 << 16);
                             return EVENT_INCOMPLETE;
                         }
-                        int c3 = _inputBuffer[_inputPtr++] & 0xFF;
+                        int c3 = byteAt(_inputPtr++) & 0xFF;
                         c = decodeUtf8_4(c, next, c2, c3);
                     } else { // had two or three
                         int c2 = (c >> 8) & 0xFF;
@@ -250,7 +250,7 @@ public class AsyncUtfScanner
                                 _pendingInput = c | (next << 16);
                                 return EVENT_INCOMPLETE;
                             }
-                            c3 = _inputBuffer[_inputPtr++] & 0xFF;
+                            c3 = byteAt(_inputPtr++) & 0xFF;
                             c = decodeUtf8_4((c & 0xFF), c2, next, c3);
                         } else { // had three, got last
                             c = decodeUtf8_4((c & 0xFF), c2, c3, next);
@@ -300,7 +300,6 @@ public class AsyncUtfScanner
         }
 
         final int[] TYPES = _charTypes.TEXT_CHARS;
-        final byte[] inputBuffer = _inputBuffer;
         char[] outputBuffer = _textBuilder.getBufferWithoutReset();
         // Should have just one code point (one or two chars). Assert?
         int outPtr = _textBuilder.getCurrentLength();
@@ -327,7 +326,7 @@ public class AsyncUtfScanner
                     }
                 }
                 while (ptr < max) {
-                    c = (int) inputBuffer[ptr++] & 0xFF;
+                    c = (int) byteAt(ptr++) & 0xFF;
                     if (TYPES[c] != 0) {
                         _inputPtr = ptr;
                         break ascii_loop;
@@ -346,7 +345,7 @@ public class AsyncUtfScanner
                         _pendingInput = PENDING_STATE_CR;
                         break main_loop;
                     }
-                    if (inputBuffer[_inputPtr] == BYTE_LF) {
+                    if (byteAt(_inputPtr) == BYTE_LF) {
                         ++_inputPtr;
                     }
                     markLF();
@@ -366,7 +365,7 @@ public class AsyncUtfScanner
             case XmlCharTypes.CT_MULTIBYTE_3:
                 if ((_inputEnd - _inputPtr) < 2) {
                     if (_inputEnd > _inputPtr) { // 2 bytes available
-                        int d = (int) _inputBuffer[_inputPtr++] & 0xFF;
+                        int d = (int) byteAt(_inputPtr++) & 0xFF;
                         c |= (d << 8);
                     }
                     _pendingInput = c;
@@ -377,10 +376,10 @@ public class AsyncUtfScanner
             case XmlCharTypes.CT_MULTIBYTE_4:
                 if ((_inputEnd - _inputPtr) < 3) {
                     if (_inputEnd > _inputPtr) { // at least 2 bytes?
-                        int d = (int) _inputBuffer[_inputPtr++] & 0xFF;
+                        int d = (int) byteAt(_inputPtr++) & 0xFF;
                         c |= (d << 8);
                         if (_inputEnd > _inputPtr) { // 3 bytes?
-                            d = (int) _inputBuffer[_inputPtr++] & 0xFF;
+                            d = (int) byteAt(_inputPtr++) & 0xFF;
                             c |= (d << 16);
                         }
                     }
@@ -432,7 +431,7 @@ public class AsyncUtfScanner
                     int count = 1;
                     byte b = BYTE_NULL;
                     while (_inputPtr < _inputEnd) {
-                        b = inputBuffer[_inputPtr];
+                        b = byteAt(_inputPtr);
                         if (b != BYTE_RBRACKET) {
                             break;
                         }
@@ -499,50 +498,50 @@ public class AsyncUtfScanner
          */
         int ptr = _inputPtr;
         if ((ptr  + 3) <= _inputEnd) {
-            byte b = _inputBuffer[ptr++];
+            byte b = byteAt(ptr++);
             if (b == BYTE_HASH) { // numeric character entity
-                if (_inputBuffer[ptr] == BYTE_x) {
+                if (byteAt(ptr) == BYTE_x) {
                     return handleHexEntityInCharacters(ptr+1);
                 }
                 return handleDecEntityInCharacters(ptr);
             }
             // general entity; maybe one of pre-defined ones
             if (b == BYTE_a) { // amp or apos?
-                b = _inputBuffer[ptr++];
+                b = byteAt(ptr++);
                 if (b == BYTE_m) {
                     if ((ptr + 1) < _inputPtr
-                            && _inputBuffer[ptr] == BYTE_p
-                            && _inputBuffer[ptr+1] == BYTE_SEMICOLON) {
+                            && byteAt(ptr) == BYTE_p
+                            && byteAt(ptr+1) == BYTE_SEMICOLON) {
                         _inputPtr = ptr + 2;
                         return INT_AMP;
                     }
                 } else if (b == BYTE_p) {
                     if ((ptr + 2) < _inputPtr
-                            && _inputBuffer[ptr] == BYTE_o
-                            && _inputBuffer[ptr+1] == BYTE_s
-                            && _inputBuffer[ptr+2] == BYTE_SEMICOLON) {
+                            && byteAt(ptr) == BYTE_o
+                            && byteAt(ptr+1) == BYTE_s
+                            && byteAt(ptr+2) == BYTE_SEMICOLON) {
                         _inputPtr = ptr + 3;
                         return INT_APOS;
                     }
                 }
             } else if (b == BYTE_g) { // gt?
-                if (_inputBuffer[ptr] == BYTE_t
-                        && _inputBuffer[ptr+1] == BYTE_SEMICOLON) {
+                if (byteAt(ptr) == BYTE_t
+                        && byteAt(ptr+1) == BYTE_SEMICOLON) {
                     _inputPtr = ptr + 2;
                     return INT_GT;
                 }
             } else if (b == BYTE_l) { // lt?
-                if (_inputBuffer[ptr] == BYTE_t
-                        && _inputBuffer[ptr+1] == BYTE_SEMICOLON) {
+                if (byteAt(ptr) == BYTE_t
+                        && byteAt(ptr+1) == BYTE_SEMICOLON) {
                     _inputPtr = ptr + 2;
                     return INT_LT;
                 }
             } else if (b == BYTE_q) { // quot?
                 if ((ptr + 3) < _inputPtr
-                        && _inputBuffer[ptr] == BYTE_u
-                        && _inputBuffer[ptr+1] == BYTE_o
-                        && _inputBuffer[ptr+2] == BYTE_t
-                        && _inputBuffer[ptr+3] == BYTE_SEMICOLON) {
+                        && byteAt(ptr) == BYTE_u
+                        && byteAt(ptr+1) == BYTE_o
+                        && byteAt(ptr+2) == BYTE_t
+                        && byteAt(ptr+3) == BYTE_SEMICOLON) {
                     _inputPtr = ptr + 4;
                     return INT_APOS;
                 }
@@ -554,7 +553,7 @@ public class AsyncUtfScanner
 
     protected int handleDecEntityInCharacters(int ptr) throws XMLStreamException
     {
-        byte b = _inputBuffer[ptr++];
+        byte b = byteAt(ptr++);
         final int end = _inputEnd;
         int value = 0;
         do {
@@ -569,7 +568,7 @@ public class AsyncUtfScanner
             if (ptr >= end) {
                 return 0;
             }
-            b = _inputBuffer[ptr++];
+            b = byteAt(ptr++);
         } while (b != BYTE_SEMICOLON);
         _inputPtr = ptr;
         verifyXmlChar(value);
@@ -578,7 +577,7 @@ public class AsyncUtfScanner
     
     protected int handleHexEntityInCharacters(int ptr) throws XMLStreamException
     {
-        byte b = _inputBuffer[ptr++];
+        byte b = byteAt(ptr++);
         final int end = _inputEnd;
         int value = 0;
         do {
@@ -599,7 +598,7 @@ public class AsyncUtfScanner
             if (ptr >= end) {
                 return 0;
             }
-            b = _inputBuffer[ptr++];
+            b = byteAt(ptr++);
         } while (b != BYTE_SEMICOLON);
         _inputPtr = ptr;
         verifyXmlChar(value);
@@ -626,7 +625,7 @@ public class AsyncUtfScanner
         // Possible \r\n linefeed?
         if (c < 0) { // markers are all negative
             if (c == PENDING_STATE_CR) {
-                if (_inputBuffer[_inputPtr] == BYTE_LF) {
+                if (byteAt(_inputPtr) == BYTE_LF) {
                     ++_inputPtr;
                 }
                 markLF();
@@ -647,14 +646,14 @@ public class AsyncUtfScanner
         case XmlCharTypes.CT_MULTIBYTE_3:
             {
                 // Ok... so do we have one or two pending bytes?
-                int next = _inputBuffer[_inputPtr++] & 0xFF;
+                int next = byteAt(_inputPtr++) & 0xFF;
                 int c2 = (c >> 8);
                 if (c2 == 0) { // just one; need two more
                     if (_inputPtr >= _inputEnd) { // but got only one
                         _pendingInput = c | (next << 8);
                         return false;
                     }
-                    int c3 = _inputBuffer[_inputPtr++] & 0xFF;
+                    int c3 = byteAt(_inputPtr++) & 0xFF;
                     c = decodeUtf8_3(c, next, c3);
                 } else { // had two, got one, bueno:
                     c = decodeUtf8_3((c & 0xFF), c2, next);
@@ -664,19 +663,19 @@ public class AsyncUtfScanner
             break;
         case XmlCharTypes.CT_MULTIBYTE_4:
             {
-                int next = (int) _inputBuffer[_inputPtr++] & 0xFF;
+                int next = (int) byteAt(_inputPtr++) & 0xFF;
                 // Only had one?
                 if ((c >> 8) == 0) { // ok, so need 3 more
                     if (_inputPtr >= _inputEnd) { // just have 1
                         _pendingInput = c | (next << 8);
                         return false;
                     }
-                    int c2 = _inputBuffer[_inputPtr++] & 0xFF;
+                    int c2 = byteAt(_inputPtr++) & 0xFF;
                     if (_inputPtr >= _inputEnd) { // almost, got 2
                         _pendingInput = c | (next << 8) | (c2 << 16);
                         return false;
                     }
-                    int c3 = _inputBuffer[_inputPtr++] & 0xFF;
+                    int c3 = byteAt(_inputPtr++) & 0xFF;
                     c = decodeUtf8_4(c, next, c2, c3);
                 } else { // had two or three
                     int c2 = (c >> 8) & 0xFF;
@@ -687,7 +686,7 @@ public class AsyncUtfScanner
                             _pendingInput = c | (next << 16);
                             return false;
                         }
-                        c3 = _inputBuffer[_inputPtr++] & 0xFF;
+                        c3 = byteAt(_inputPtr++) & 0xFF;
                         c = decodeUtf8_4((c & 0xFF), c2, next, c3);
                     } else { // had three, got last
                         c = decodeUtf8_4((c & 0xFF), c2, c3, next);
@@ -729,7 +728,6 @@ public class AsyncUtfScanner
         }
 
         final int[] TYPES = _charTypes.TEXT_CHARS;
-        final byte[] inputBuffer = _inputBuffer;
 
         main_loop:
         while (true) {
@@ -743,7 +741,7 @@ public class AsyncUtfScanner
                     break main_loop;
                 }
                 while (ptr < max) {
-                    c = (int) inputBuffer[ptr++] & 0xFF;
+                    c = (int) byteAt(ptr++) & 0xFF;
                     if (TYPES[c] != 0) {
                         _inputPtr = ptr;
                         break ascii_loop;
@@ -761,7 +759,7 @@ public class AsyncUtfScanner
                         _pendingInput = PENDING_STATE_CR;
                         break main_loop;
                     }
-                    if (inputBuffer[_inputPtr] == BYTE_LF) {
+                    if (byteAt(_inputPtr) == BYTE_LF) {
                         ++_inputPtr;
                     }
                     markLF();
@@ -780,7 +778,7 @@ public class AsyncUtfScanner
             case XmlCharTypes.CT_MULTIBYTE_3:
                 if ((_inputEnd - _inputPtr) < 2) {
                     if (_inputEnd > _inputPtr) { // 2 bytes available
-                        int d = (int) _inputBuffer[_inputPtr++] & 0xFF;
+                        int d = (int) byteAt(_inputPtr++) & 0xFF;
                         c |= (d << 8);
                     }
                     _pendingInput = c;
@@ -791,10 +789,10 @@ public class AsyncUtfScanner
             case XmlCharTypes.CT_MULTIBYTE_4:
                 if ((_inputEnd - _inputPtr) < 3) {
                     if (_inputEnd > _inputPtr) { // at least 2 bytes?
-                        int d = (int) _inputBuffer[_inputPtr++] & 0xFF;
+                        int d = (int) byteAt(_inputPtr++) & 0xFF;
                         c |= (d << 8);
                         if (_inputEnd > _inputPtr) { // 3 bytes?
-                            d = (int) _inputBuffer[_inputPtr++] & 0xFF;
+                            d = (int) byteAt(_inputPtr++) & 0xFF;
                             c |= (d << 16);
                         }
                     }
@@ -832,7 +830,7 @@ public class AsyncUtfScanner
                     int count = 1;
                     byte b = BYTE_NULL;
                     while (_inputPtr < _inputEnd) {
-                        b = inputBuffer[_inputPtr];
+                        b = byteAt(_inputPtr);
                         if (b != BYTE_RBRACKET) {
                             break;
                         }
@@ -867,14 +865,14 @@ public class AsyncUtfScanner
                 switch (_pendingInput) {
                 case PENDING_STATE_CR:
                     _pendingInput = 0;
-                    if (_inputBuffer[_inputPtr] == BYTE_LF) {
+                    if (byteAt(_inputPtr) == BYTE_LF) {
                         ++_inputPtr;
                     }
                     markLF();
                     return true;
                 case PENDING_STATE_TEXT_AMP:
                     {
-                        byte b = _inputBuffer[_inputPtr++];
+                        byte b = byteAt(_inputPtr++);
                         if (b == BYTE_HASH) {
                             _pendingInput = PENDING_STATE_TEXT_AMP_HASH;
                             break;
@@ -894,7 +892,7 @@ public class AsyncUtfScanner
                     return true; // no matter what, we are done
                 case PENDING_STATE_TEXT_AMP_HASH:
                     _entityValue = 0;
-                    if (_inputBuffer[_inputPtr] == BYTE_x) {
+                    if (byteAt(_inputPtr) == BYTE_x) {
                         ++_inputPtr;
                         if (decodeHexEntity()) {
                             _pendingInput = 0;
@@ -940,7 +938,7 @@ public class AsyncUtfScanner
                     return true;
 
                 case PENDING_STATE_TEXT_BRACKET1:
-                    if (_inputBuffer[_inputPtr] != BYTE_RBRACKET) {
+                    if (byteAt(_inputPtr) != BYTE_RBRACKET) {
                         _pendingInput = 0;
                         return true;
                     }
@@ -951,7 +949,7 @@ public class AsyncUtfScanner
                 case PENDING_STATE_TEXT_BRACKET2:
                     // may get sequence...
                     {
-                        byte b = _inputBuffer[_inputPtr];
+                        byte b = byteAt(_inputPtr);
                         if (b == BYTE_RBRACKET) {
                             ++_inputPtr;
                             break;
@@ -986,14 +984,14 @@ public class AsyncUtfScanner
         case XmlCharTypes.CT_MULTIBYTE_3:
             {
                 // Ok... so do we have one or two pending bytes?
-                int next = _inputBuffer[_inputPtr++] & 0xFF;
+                int next = byteAt(_inputPtr++) & 0xFF;
                 int c2 = (c >> 8);
                 if (c2 == 0) { // just one; need two more
                     if (_inputPtr >= _inputEnd) { // but got only one
                         _pendingInput = c | (next << 8);
                         return false;
                     }
-                    int c3 = _inputBuffer[_inputPtr++] & 0xFF;
+                    int c3 = byteAt(_inputPtr++) & 0xFF;
                     decodeUtf8_3(c, next, c3);
                 } else { // had two, got one, bueno:
                     decodeUtf8_3((c & 0xFF), c2, next);
@@ -1002,19 +1000,19 @@ public class AsyncUtfScanner
             break;
         case XmlCharTypes.CT_MULTIBYTE_4:
             {
-                int next = (int) _inputBuffer[_inputPtr++] & 0xFF;
+                int next = (int) byteAt(_inputPtr++) & 0xFF;
                 // Only had one?
                 if ((c >> 8) == 0) { // ok, so need 3 more
                     if (_inputPtr >= _inputEnd) { // just have 1
                         _pendingInput = c | (next << 8);
                         return false;
                     }
-                    int c2 = _inputBuffer[_inputPtr++] & 0xFF;
+                    int c2 = byteAt(_inputPtr++) & 0xFF;
                     if (_inputPtr >= _inputEnd) { // almost, got 2
                         _pendingInput = c | (next << 8) | (c2 << 16);
                         return false;
                     }
-                    int c3 = _inputBuffer[_inputPtr++] & 0xFF;
+                    int c3 = byteAt(_inputPtr++) & 0xFF;
                     decodeUtf8_4(c, next, c2, c3);
                 } else { // had two or three
                     int c2 = (c >> 8) & 0xFF;
@@ -1025,7 +1023,7 @@ public class AsyncUtfScanner
                             _pendingInput = c | (next << 16);
                             return false;
                         }
-                        c3 = _inputBuffer[_inputPtr++] & 0xFF;
+                        c3 = byteAt(_inputPtr++) & 0xFF;
                         decodeUtf8_4((c & 0xFF), c2, next, c3);
                     } else { // had three, got last
                         decodeUtf8_4((c & 0xFF), c2, c3, next);
@@ -1056,50 +1054,50 @@ public class AsyncUtfScanner
          */
         int ptr = _inputPtr;
         if ((ptr  + 3) <= _inputEnd) {
-            byte b = _inputBuffer[ptr++];
+            byte b = byteAt(ptr++);
             if (b == BYTE_HASH) { // numeric character entity
-                if (_inputBuffer[ptr] == BYTE_x) {
+                if (byteAt(ptr) == BYTE_x) {
                     return handleHexEntityInCharacters(ptr+1);
                 }
                 return handleDecEntityInCharacters(ptr);
             }
             // general entity; maybe one of pre-defined ones
             if (b == BYTE_a) { // amp or apos?
-                b = _inputBuffer[ptr++];
+                b = byteAt(ptr++);
                 if (b == BYTE_m) {
                     if ((ptr + 1) < _inputPtr
-                            && _inputBuffer[ptr] == BYTE_p
-                            && _inputBuffer[ptr+1] == BYTE_SEMICOLON) {
+                            && byteAt(ptr) == BYTE_p
+                            && byteAt(ptr+1) == BYTE_SEMICOLON) {
                         _inputPtr = ptr + 2; // NOTE: do skip semicolon as well
                         return INT_AMP;
                     }
                 } else if (b == BYTE_p) {
                     if ((ptr + 2) < _inputPtr
-                            && _inputBuffer[ptr] == BYTE_o
-                            && _inputBuffer[ptr+1] == BYTE_s
-                            && _inputBuffer[ptr+2] == BYTE_SEMICOLON) {
+                            && byteAt(ptr) == BYTE_o
+                            && byteAt(ptr+1) == BYTE_s
+                            && byteAt(ptr+2) == BYTE_SEMICOLON) {
                         _inputPtr = ptr + 3;
                         return INT_APOS;
                     }
                 }
             } else if (b == BYTE_g) { // gt?
-                if (_inputBuffer[ptr] == BYTE_t
-                        && _inputBuffer[ptr+1] == BYTE_SEMICOLON) {
+                if (byteAt(ptr) == BYTE_t
+                        && byteAt(ptr+1) == BYTE_SEMICOLON) {
                     _inputPtr = ptr + 2;
                     return INT_GT;
                 }
             } else if (b == BYTE_l) { // lt?
-                if (_inputBuffer[ptr] == BYTE_t
-                        && _inputBuffer[ptr+1] == BYTE_SEMICOLON) {
+                if (byteAt(ptr) == BYTE_t
+                        && byteAt(ptr+1) == BYTE_SEMICOLON) {
                     _inputPtr = ptr + 2;
                     return INT_LT;
                 }
             } else if (b == BYTE_q) { // quot?
                 if ((ptr + 3) < _inputPtr
-                        && _inputBuffer[ptr] == BYTE_u
-                        && _inputBuffer[ptr+1] == BYTE_o
-                        && _inputBuffer[ptr+2] == BYTE_t
-                        && _inputBuffer[ptr+3] == BYTE_SEMICOLON) {
+                        && byteAt(ptr) == BYTE_u
+                        && byteAt(ptr+1) == BYTE_o
+                        && byteAt(ptr+2) == BYTE_t
+                        && byteAt(ptr+3) == BYTE_SEMICOLON) {
                     _inputPtr = ptr + 4;
                     return INT_APOS;
                 }
@@ -1167,7 +1165,7 @@ public class AsyncUtfScanner
                     }
                 }
                 while (_inputPtr < max) {
-                    c = (int) _inputBuffer[_inputPtr++] & 0xFF;
+                    c = (int) byteAt(_inputPtr++) & 0xFF;
                     if (TYPES[c] != 0) {
                         break ascii_loop;
                     }
@@ -1183,7 +1181,7 @@ public class AsyncUtfScanner
                     _pendingInput = PENDING_STATE_CR;
                     return false;
                 }
-                if (_inputBuffer[_inputPtr] == BYTE_LF) {
+                if (byteAt(_inputPtr) == BYTE_LF) {
                     ++_inputPtr;
                 }
                 // fall through
@@ -1204,7 +1202,7 @@ public class AsyncUtfScanner
             case XmlCharTypes.CT_MULTIBYTE_3:
                 if ((_inputEnd - _inputPtr) < 2) {
                     if (_inputEnd > _inputPtr) { // 2 bytes available
-                        int d = (int) _inputBuffer[_inputPtr++] & 0xFF;
+                        int d = (int) byteAt(_inputPtr++) & 0xFF;
                         c |= (d << 8);
                     }
                     _pendingInput = c;
@@ -1215,10 +1213,10 @@ public class AsyncUtfScanner
             case XmlCharTypes.CT_MULTIBYTE_4:
                 if ((_inputEnd - _inputPtr) < 3) {
                     if (_inputEnd > _inputPtr) { // at least 2 bytes?
-                        int d = (int) _inputBuffer[_inputPtr++] & 0xFF;
+                        int d = (int) byteAt(_inputPtr++) & 0xFF;
                         c |= (d << 8);
                         if (_inputEnd > _inputPtr) { // 3 bytes?
-                            d = (int) _inputBuffer[_inputPtr++] & 0xFF;
+                            d = (int) byteAt(_inputPtr++) & 0xFF;
                             c |= (d << 16);
                         }
                     }
@@ -1295,13 +1293,13 @@ public class AsyncUtfScanner
         int ch;
 
         if (_pendingInput == PENDING_STATE_ATTR_VALUE_AMP) {
-            byte b = _inputBuffer[_inputPtr++];
+            byte b = byteAt(_inputPtr++);
             if (b == BYTE_HASH) { // numeric character entity
                 _pendingInput = PENDING_STATE_ATTR_VALUE_AMP_HASH;
                 if (_inputPtr >= _inputEnd) {
                     return false;
                 }
-                if (_inputBuffer[_inputPtr] == BYTE_x) {
+                if (byteAt(_inputPtr) == BYTE_x) {
                     _pendingInput = PENDING_STATE_ATTR_VALUE_AMP_HASH_X;
                     ++_inputPtr;
                     if (_inputPtr >= _inputEnd) {
@@ -1324,7 +1322,7 @@ public class AsyncUtfScanner
                 }
             }
         } else if (_pendingInput == PENDING_STATE_ATTR_VALUE_AMP_HASH) {
-            if (_inputBuffer[_inputPtr] == BYTE_x) {
+            if (byteAt(_inputPtr) == BYTE_x) {
                 _pendingInput = PENDING_STATE_ATTR_VALUE_AMP_HASH_X;
                 ++_inputPtr;
                 if (_inputPtr >= _inputEnd) {
@@ -1390,14 +1388,14 @@ public class AsyncUtfScanner
         case XmlCharTypes.CT_MULTIBYTE_3:
             {
                 // Ok... so do we have one or two pending bytes?
-                int next = _inputBuffer[_inputPtr++] & 0xFF;
+                int next = byteAt(_inputPtr++) & 0xFF;
                 int c2 = (c >> 8);
                 if (c2 == 0) { // just one; need two more
                     if (_inputPtr >= _inputEnd) { // but got only one
                         _pendingInput = c | (next << 8);
                         return 0;
                     }
-                    int c3 = _inputBuffer[_inputPtr++] & 0xFF;
+                    int c3 = byteAt(_inputPtr++) & 0xFF;
                     c = decodeUtf8_3(c, next, c3);
                 } else { // had two, got one, bueno:
                     c = decodeUtf8_3((c & 0xFF), c2, next);
@@ -1406,19 +1404,19 @@ public class AsyncUtfScanner
             }
         case XmlCharTypes.CT_MULTIBYTE_4:
             {
-                int next = (int) _inputBuffer[_inputPtr++] & 0xFF;
+                int next = (int) byteAt(_inputPtr++) & 0xFF;
                 // Only had one?
                 if ((c >> 8) == 0) { // ok, so need 3 more
                     if (_inputPtr >= _inputEnd) { // just have 1
                         _pendingInput = c | (next << 8);
                         return 0;
                     }
-                    int c2 = _inputBuffer[_inputPtr++] & 0xFF;
+                    int c2 = byteAt(_inputPtr++) & 0xFF;
                     if (_inputPtr >= _inputEnd) { // almost, got 2
                         _pendingInput = c | (next << 8) | (c2 << 16);
                         return 0;
                     }
-                    int c3 = _inputBuffer[_inputPtr++] & 0xFF;
+                    int c3 = byteAt(_inputPtr++) & 0xFF;
                     c = decodeUtf8_4(c, next, c2, c3);
                 } else { // had two or three
                     int c2 = (c >> 8) & 0xFF;
@@ -1429,7 +1427,7 @@ public class AsyncUtfScanner
                             _pendingInput = c | (next << 16);
                             return 0;
                         }
-                        c3 = _inputBuffer[_inputPtr++] & 0xFF;
+                        c3 = byteAt(_inputPtr++) & 0xFF;
                         c = decodeUtf8_4((c & 0xFF), c2, next, c3);
                     } else { // had three, got last
                         c = decodeUtf8_4((c & 0xFF), c2, c3, next);
@@ -1446,7 +1444,7 @@ public class AsyncUtfScanner
     private final int handleDecEntityInAttribute(boolean starting)
         throws XMLStreamException
     {
-        byte b = _inputBuffer[_inputPtr++]; // we know one is available
+        byte b = byteAt(_inputPtr++); // we know one is available
         if (starting) {
             int ch = (int) b;
             if (ch < INT_0 || ch > INT_9) { // invalid entity
@@ -1457,7 +1455,7 @@ public class AsyncUtfScanner
             if (_inputPtr >= _inputEnd) {
                 return 0;
             }
-            b = _inputBuffer[_inputPtr++];
+            b = byteAt(_inputPtr++);
         }
         while (b != BYTE_SEMICOLON) {
             int ch = ((int) b) - INT_0;
@@ -1472,7 +1470,7 @@ public class AsyncUtfScanner
             if (_inputPtr >= _inputEnd) {
                 return 0;
             }
-            b = _inputBuffer[_inputPtr++];
+            b = byteAt(_inputPtr++);
         }
         verifyXmlChar(_entityValue);
         _pendingInput = 0;
@@ -1482,7 +1480,7 @@ public class AsyncUtfScanner
     private final int handleHexEntityInAttribute(boolean starting)
         throws XMLStreamException
     {
-        byte b = _inputBuffer[_inputPtr++]; // we know one is available
+        byte b = byteAt(_inputPtr++); // we know one is available
         if (starting) {
             int ch = (int) b;
             if (ch < INT_0 || ch > INT_9) { // invalid entity
@@ -1493,7 +1491,7 @@ public class AsyncUtfScanner
             if (_inputPtr >= _inputEnd) {
                 return 0;
             }
-            b = _inputBuffer[_inputPtr++];
+            b = byteAt(_inputPtr++);
         }
         while (b != BYTE_SEMICOLON) {
             int ch = (int) b;
@@ -1514,7 +1512,7 @@ public class AsyncUtfScanner
             if (_inputPtr >= _inputEnd) {
                 return 0;
             }
-            b = _inputBuffer[_inputPtr++];
+            b = byteAt(_inputPtr++);
         }
         verifyXmlChar(_entityValue);
         _pendingInput = 0;
@@ -1534,14 +1532,14 @@ public class AsyncUtfScanner
             _pendingInput = PENDING_STATE_ATTR_VALUE_AMP;
             return -1;
         }
-        byte b = _inputBuffer[_inputPtr++];
+        byte b = byteAt(_inputPtr++);
         if (b == BYTE_HASH) { // numeric character entity
             _pendingInput = PENDING_STATE_ATTR_VALUE_AMP_HASH;
             if (_inputPtr >= _inputEnd) {
                 return -1;
             }
             int ch;
-            if (_inputBuffer[_inputPtr] == BYTE_x) {
+            if (byteAt(_inputPtr) == BYTE_x) {
                 _pendingInput = PENDING_STATE_ATTR_VALUE_AMP_HASH_X;
                 ++_inputPtr;
                 if (_inputPtr >= _inputEnd) {
@@ -1605,7 +1603,7 @@ public class AsyncUtfScanner
                     }
                 }
                 while (_inputPtr < max) {
-                    c = (int) _inputBuffer[_inputPtr++] & 0xFF;
+                    c = (int) byteAt(_inputPtr++) & 0xFF;
                     if (TYPES[c] != 0) {
                         break ascii_loop;
                     }
@@ -1621,7 +1619,7 @@ public class AsyncUtfScanner
                     _pendingInput = PENDING_STATE_CR;
                     return false;
                 }
-                if (_inputBuffer[_inputPtr] == BYTE_LF) {
+                if (byteAt(_inputPtr) == BYTE_LF) {
                     ++_inputPtr;
                 }
                 // fall through
@@ -1642,7 +1640,7 @@ public class AsyncUtfScanner
             case XmlCharTypes.CT_MULTIBYTE_3:
                 if ((_inputEnd - _inputPtr) < 2) {
                     if (_inputEnd > _inputPtr) { // 2 bytes available
-                        int d = (int) _inputBuffer[_inputPtr++] & 0xFF;
+                        int d = (int) byteAt(_inputPtr++) & 0xFF;
                         c |= (d << 8);
                     }
                     _pendingInput = c;
@@ -1653,10 +1651,10 @@ public class AsyncUtfScanner
             case XmlCharTypes.CT_MULTIBYTE_4:
                 if ((_inputEnd - _inputPtr) < 3) {
                     if (_inputEnd > _inputPtr) { // at least 2 bytes?
-                        int d = (int) _inputBuffer[_inputPtr++] & 0xFF;
+                        int d = (int) byteAt(_inputPtr++) & 0xFF;
                         c |= (d << 8);
                         if (_inputEnd > _inputPtr) { // 3 bytes?
-                            d = (int) _inputBuffer[_inputPtr++] & 0xFF;
+                            d = (int) byteAt(_inputPtr++) & 0xFF;
                             c |= (d << 16);
                         }
                     }
@@ -1746,13 +1744,13 @@ public class AsyncUtfScanner
         int ch;
 
         if (_pendingInput == PENDING_STATE_ATTR_VALUE_AMP) {
-            byte b = _inputBuffer[_inputPtr++];
+            byte b = byteAt(_inputPtr++);
             if (b == BYTE_HASH) { // numeric character entity
                 _pendingInput = PENDING_STATE_ATTR_VALUE_AMP_HASH;
                 if (_inputPtr >= _inputEnd) {
                     return false;
                 }
-                if (_inputBuffer[_inputPtr] == BYTE_x) {
+                if (byteAt(_inputPtr) == BYTE_x) {
                     _pendingInput = PENDING_STATE_ATTR_VALUE_AMP_HASH_X;
                     ++_inputPtr;
                     if (_inputPtr >= _inputEnd) {
@@ -1775,7 +1773,7 @@ public class AsyncUtfScanner
                 }
             }
         } else if (_pendingInput == PENDING_STATE_ATTR_VALUE_AMP_HASH) {
-            if (_inputBuffer[_inputPtr] == BYTE_x) {
+            if (byteAt(_inputPtr) == BYTE_x) {
                 _pendingInput = PENDING_STATE_ATTR_VALUE_AMP_HASH_X;
                 ++_inputPtr;
                 if (_inputPtr >= _inputEnd) {
@@ -1854,8 +1852,7 @@ public class AsyncUtfScanner
         }
 
         final int[] TYPES = _charTypes.DTD_CHARS;
-        final byte[] inputBuffer = _inputBuffer;
-        
+
         main_loop:
         while (true) {
             int c;
@@ -1877,7 +1874,7 @@ public class AsyncUtfScanner
                     }
                 }
                 while (_inputPtr < max) {
-                    c = (int) inputBuffer[_inputPtr++] & 0xFF;
+                    c = (int) byteAt(_inputPtr++) & 0xFF;
                     if (TYPES[c] != 0) {
                         break ascii_loop;
                     }
@@ -1893,7 +1890,7 @@ public class AsyncUtfScanner
                     _pendingInput = PENDING_STATE_CR;
                     break main_loop;
                 }
-                if (inputBuffer[_inputPtr] == BYTE_LF) {
+                if (byteAt(_inputPtr) == BYTE_LF) {
                     ++_inputPtr;
                 }
                 markLF();
@@ -1912,7 +1909,7 @@ public class AsyncUtfScanner
             case XmlCharTypes.CT_MULTIBYTE_3:
                 if ((_inputEnd - _inputPtr) < 2) {
                     if (_inputEnd > _inputPtr) { // 2 bytes available
-                        int d = (int) _inputBuffer[_inputPtr++] & 0xFF;
+                        int d = (int) byteAt(_inputPtr++) & 0xFF;
                         c |= (d << 8);
                     }
                     _pendingInput = c;
@@ -1923,10 +1920,10 @@ public class AsyncUtfScanner
             case XmlCharTypes.CT_MULTIBYTE_4:
                 if ((_inputEnd - _inputPtr) < 3) {
                     if (_inputEnd > _inputPtr) { // at least 2 bytes?
-                        int d = (int) _inputBuffer[_inputPtr++] & 0xFF;
+                        int d = (int) byteAt(_inputPtr++) & 0xFF;
                         c |= (d << 8);
                         if (_inputEnd > _inputPtr) { // 3 bytes?
-                            d = (int) _inputBuffer[_inputPtr++] & 0xFF;
+                            d = (int) byteAt(_inputPtr++) & 0xFF;
                             c |= (d << 16);
                         }
                     }
@@ -2000,7 +1997,6 @@ public class AsyncUtfScanner
         int outPtr = _textBuilder.getCurrentLength();
 
         final int[] TYPES = _charTypes.OTHER_CHARS;
-        final byte[] inputBuffer = _inputBuffer;
 
         main_loop:
         while (true) {
@@ -2023,7 +2019,7 @@ public class AsyncUtfScanner
                     }
                 }
                 while (_inputPtr < max) {
-                    c = (int) inputBuffer[_inputPtr++] & 0xFF;
+                    c = (int) byteAt(_inputPtr++) & 0xFF;
                     if (TYPES[c] != 0) {
                         break ascii_loop;
                     }
@@ -2040,7 +2036,7 @@ public class AsyncUtfScanner
                         _pendingInput = PENDING_STATE_CR;
                         break main_loop;
                     }
-                    if (inputBuffer[_inputPtr] == BYTE_LF) {
+                    if (byteAt(_inputPtr) == BYTE_LF) {
                         ++_inputPtr;
                     }
                     markLF();
@@ -2060,7 +2056,7 @@ public class AsyncUtfScanner
             case XmlCharTypes.CT_MULTIBYTE_3:
                 if ((_inputEnd - _inputPtr) < 2) {
                     if (_inputEnd > _inputPtr) { // 2 bytes available
-                        int d = (int) _inputBuffer[_inputPtr++] & 0xFF;
+                        int d = (int) byteAt(_inputPtr++) & 0xFF;
                         c |= (d << 8);
                     }
                     _pendingInput = c;
@@ -2071,10 +2067,10 @@ public class AsyncUtfScanner
             case XmlCharTypes.CT_MULTIBYTE_4:
                 if ((_inputEnd - _inputPtr) < 3) {
                     if (_inputEnd > _inputPtr) { // at least 2 bytes?
-                        int d = (int) _inputBuffer[_inputPtr++] & 0xFF;
+                        int d = (int) byteAt(_inputPtr++) & 0xFF;
                         c |= (d << 8);
                         if (_inputEnd > _inputPtr) { // 3 bytes?
-                            d = (int) _inputBuffer[_inputPtr++] & 0xFF;
+                            d = (int) byteAt(_inputPtr++) & 0xFF;
                             c |= (d << 16);
                         }
                     }
@@ -2098,13 +2094,13 @@ public class AsyncUtfScanner
                     _pendingInput = PENDING_STATE_COMMENT_HYPHEN1;
                     break main_loop;
                 }
-                if (_inputBuffer[_inputPtr] == BYTE_HYPHEN) { // ok, must be end then
+                if (byteAt(_inputPtr) == BYTE_HYPHEN) { // ok, must be end then
                     ++_inputPtr;
                     if (_inputPtr >= _inputEnd) {
                         _pendingInput = PENDING_STATE_COMMENT_HYPHEN2;
                         break main_loop;
                     }
-                    if (_inputBuffer[_inputPtr++] != BYTE_GT) {
+                    if (byteAt(_inputPtr++) != BYTE_GT) {
                         reportDoubleHyphenInComments();
                     }
                     _textBuilder.setCurrentLength(outPtr);
@@ -2138,7 +2134,7 @@ public class AsyncUtfScanner
             return EVENT_INCOMPLETE;
         }
         if (_pendingInput == PENDING_STATE_COMMENT_HYPHEN1) {
-            if (_inputBuffer[_inputPtr] != BYTE_HYPHEN) {
+            if (byteAt(_inputPtr) != BYTE_HYPHEN) {
                 // can't be the end marker, just append '-' and go
                 _pendingInput = 0;
                 _textBuilder.append("-");
@@ -2153,7 +2149,7 @@ public class AsyncUtfScanner
         }
         if (_pendingInput == PENDING_STATE_COMMENT_HYPHEN2) {
             _pendingInput = 0;
-            byte b = _inputBuffer[_inputPtr++];
+            byte b = byteAt(_inputPtr++);
             if (b != BYTE_GT) {
                 reportDoubleHyphenInComments();
             } 
@@ -2182,8 +2178,7 @@ public class AsyncUtfScanner
         int outPtr = _textBuilder.getCurrentLength();
     
         final int[] TYPES = _charTypes.OTHER_CHARS;
-        final byte[] inputBuffer = _inputBuffer;
-    
+
         main_loop:
         while (true) {
             int c;
@@ -2205,7 +2200,7 @@ public class AsyncUtfScanner
                     }
                 }
                 while (_inputPtr < max) {
-                    c = (int) inputBuffer[_inputPtr++] & 0xFF;
+                    c = (int) byteAt(_inputPtr++) & 0xFF;
                     if (TYPES[c] != 0) {
                         break ascii_loop;
                     }
@@ -2222,7 +2217,7 @@ public class AsyncUtfScanner
                         _pendingInput = PENDING_STATE_CR;
                         break main_loop;
                     }
-                    if (inputBuffer[_inputPtr] == BYTE_LF) {
+                    if (byteAt(_inputPtr) == BYTE_LF) {
                         ++_inputPtr;
                     }
                     markLF();
@@ -2242,7 +2237,7 @@ public class AsyncUtfScanner
             case XmlCharTypes.CT_MULTIBYTE_3:
                 if ((_inputEnd - _inputPtr) < 2) {
                     if (_inputEnd > _inputPtr) { // 2 bytes available
-                        int d = (int) _inputBuffer[_inputPtr++] & 0xFF;
+                        int d = (int) byteAt(_inputPtr++) & 0xFF;
                         c |= (d << 8);
                     }
                     _pendingInput = c;
@@ -2253,10 +2248,10 @@ public class AsyncUtfScanner
             case XmlCharTypes.CT_MULTIBYTE_4:
                 if ((_inputEnd - _inputPtr) < 3) {
                     if (_inputEnd > _inputPtr) { // at least 2 bytes?
-                        int d = (int) _inputBuffer[_inputPtr++] & 0xFF;
+                        int d = (int) byteAt(_inputPtr++) & 0xFF;
                         c |= (d << 8);
                         if (_inputEnd > _inputPtr) { // 3 bytes?
-                            d = (int) _inputBuffer[_inputPtr++] & 0xFF;
+                            d = (int) byteAt(_inputPtr++) & 0xFF;
                             c |= (d << 16);
                         }
                     }
@@ -2281,21 +2276,21 @@ public class AsyncUtfScanner
                     break main_loop;
                 }
                 // Hmmh. This is more complex... so be it.
-                if (_inputBuffer[_inputPtr] == BYTE_RBRACKET) { // end might be nigh...
+                if (byteAt(_inputPtr) == BYTE_RBRACKET) { // end might be nigh...
                     ++_inputPtr;
                     while (true) {
                         if (_inputPtr >= _inputEnd) {
                             _pendingInput = PENDING_STATE_CDATA_BRACKET2;
                             break main_loop;
                         }
-                        if (_inputBuffer[_inputPtr] == BYTE_GT) {
+                        if (byteAt(_inputPtr) == BYTE_GT) {
                             ++_inputPtr;
                             _textBuilder.setCurrentLength(outPtr);
                             _state = STATE_DEFAULT;
                             _nextEvent = EVENT_INCOMPLETE;
                             return CDATA;
                         }
-                        if (_inputBuffer[_inputPtr] != BYTE_RBRACKET) { // neither '>' nor ']'; push "]]" back
+                        if (byteAt(_inputPtr) != BYTE_RBRACKET) { // neither '>' nor ']'; push "]]" back
                             outputBuffer[outPtr++] = ']';
                             if (outPtr >= outputBuffer.length) {
                                 outputBuffer = _textBuilder.finishCurrentSegment();
@@ -2339,7 +2334,7 @@ public class AsyncUtfScanner
             if (_inputPtr >= _inputEnd) {
                 return EVENT_INCOMPLETE;
             }
-            if (_inputBuffer[_inputPtr] != BYTE_RBRACKET) {
+            if (byteAt(_inputPtr) != BYTE_RBRACKET) {
                 // can't be the end marker, just append ']' and go
                 _textBuilder.append(']');
                 return (_pendingInput = 0);
@@ -2355,7 +2350,7 @@ public class AsyncUtfScanner
             if (_inputPtr >= _inputEnd) {
                 return EVENT_INCOMPLETE;
             }
-            byte b = _inputBuffer[_inputPtr++];
+            byte b = byteAt(_inputPtr++);
             if (b == BYTE_GT) {
                 _pendingInput = 0;
                 _state = STATE_DEFAULT;
@@ -2391,8 +2386,7 @@ public class AsyncUtfScanner
         int outPtr = _textBuilder.getCurrentLength();
         
         final int[] TYPES = _charTypes.OTHER_CHARS;
-        final byte[] inputBuffer = _inputBuffer;
-        
+
         main_loop:
         while (true) {
             int c;
@@ -2414,7 +2408,7 @@ public class AsyncUtfScanner
                     }
                 }
                 while (_inputPtr < max) {
-                    c = (int) inputBuffer[_inputPtr++] & 0xFF;
+                    c = (int) byteAt(_inputPtr++) & 0xFF;
                     if (TYPES[c] != 0) {
                         break ascii_loop;
                     }
@@ -2431,7 +2425,7 @@ public class AsyncUtfScanner
                         _pendingInput = PENDING_STATE_CR;
                         break main_loop;
                     }
-                    if (inputBuffer[_inputPtr] == BYTE_LF) {
+                    if (byteAt(_inputPtr) == BYTE_LF) {
                         ++_inputPtr;
                     }
                     markLF();
@@ -2451,7 +2445,7 @@ public class AsyncUtfScanner
             case XmlCharTypes.CT_MULTIBYTE_3:
                 if ((_inputEnd - _inputPtr) < 2) {
                     if (_inputEnd > _inputPtr) { // 2 bytes available
-                        int d = (int) _inputBuffer[_inputPtr++] & 0xFF;
+                        int d = (int) byteAt(_inputPtr++) & 0xFF;
                         c |= (d << 8);
                     }
                     _pendingInput = c;
@@ -2462,10 +2456,10 @@ public class AsyncUtfScanner
             case XmlCharTypes.CT_MULTIBYTE_4:
                 if ((_inputEnd - _inputPtr) < 3) {
                     if (_inputEnd > _inputPtr) { // at least 2 bytes?
-                        int d = (int) _inputBuffer[_inputPtr++] & 0xFF;
+                        int d = (int) byteAt(_inputPtr++) & 0xFF;
                         c |= (d << 8);
                         if (_inputEnd > _inputPtr) { // 3 bytes?
-                            d = (int) _inputBuffer[_inputPtr++] & 0xFF;
+                            d = (int) byteAt(_inputPtr++) & 0xFF;
                             c |= (d << 16);
                         }
                     }
@@ -2490,7 +2484,7 @@ public class AsyncUtfScanner
                     _pendingInput = PENDING_STATE_PI_QMARK;
                     break main_loop;
                 }
-                if (_inputBuffer[_inputPtr] == BYTE_GT) { // end
+                if (byteAt(_inputPtr) == BYTE_GT) { // end
                     ++_inputPtr;
                     _textBuilder.setCurrentLength(outPtr);
                     _state = STATE_DEFAULT;
@@ -2524,7 +2518,7 @@ public class AsyncUtfScanner
             if (_inputPtr >= _inputEnd) {
                 return EVENT_INCOMPLETE;
             }
-            byte b = _inputBuffer[_inputPtr];
+            byte b = byteAt(_inputPtr);
             _pendingInput = 0;
             if (b != BYTE_GT) {
                 // can't be the end marker, just append '-' and go
@@ -2554,7 +2548,7 @@ public class AsyncUtfScanner
     protected final int decodeUtf8_2(int c)
         throws XMLStreamException
     {
-        int d = (int) _inputBuffer[_inputPtr++];
+        int d = (int) byteAt(_inputPtr++);
         if ((d & 0xC0) != 0x080) {
             reportInvalidOther(d & 0xFF, _inputPtr);
         }
@@ -2564,7 +2558,7 @@ public class AsyncUtfScanner
     protected final void skipUtf8_2(int c)
         throws XMLStreamException
     {
-        int d = (int) _inputBuffer[_inputPtr++];
+        int d = (int) byteAt(_inputPtr++);
         if ((d & 0xC0) != 0x080) {
             reportInvalidOther(d & 0xFF, _inputPtr);
         }
@@ -2579,12 +2573,12 @@ public class AsyncUtfScanner
         throws XMLStreamException
     {
         c1 &= 0x0F;
-        int d = (int) _inputBuffer[_inputPtr++];
+        int d = (int) byteAt(_inputPtr++);
         if ((d & 0xC0) != 0x080) {
             reportInvalidOther(d & 0xFF, _inputPtr);
         }
         int c = (c1 << 6) | (d & 0x3F);
-        d = (int) _inputBuffer[_inputPtr++];
+        d = (int) byteAt(_inputPtr++);
         if ((d & 0xC0) != 0x080) {
             reportInvalidOther(d & 0xFF, _inputPtr);
         }
@@ -2623,17 +2617,17 @@ public class AsyncUtfScanner
     protected final int decodeUtf8_4(int c)
         throws XMLStreamException
     {
-        int d = (int) _inputBuffer[_inputPtr++];
+        int d = (int) byteAt(_inputPtr++);
         if ((d & 0xC0) != 0x080) {
             reportInvalidOther(d & 0xFF, _inputPtr);
         }
         c = ((c & 0x07) << 6) | (d & 0x3F);
-        d = (int) _inputBuffer[_inputPtr++];
+        d = (int) byteAt(_inputPtr++);
         if ((d & 0xC0) != 0x080) {
             reportInvalidOther(d & 0xFF, _inputPtr);
         }
         c = (c << 6) | (d & 0x3F);
-        d = (int) _inputBuffer[_inputPtr++];
+        d = (int) byteAt(_inputPtr++);
         if ((d & 0xC0) != 0x080) {
             reportInvalidOther(d & 0xFF, _inputPtr);
         }

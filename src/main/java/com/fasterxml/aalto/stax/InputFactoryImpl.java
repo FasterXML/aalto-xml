@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.net.URL;
+import java.nio.ByteBuffer;
 
 import javax.xml.stream.EventFilter;
 import javax.xml.stream.StreamFilter;
@@ -34,6 +35,7 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamSource;
 
+import com.fasterxml.aalto.async.AsyncUtfScanner;
 import org.codehaus.stax2.XMLEventReader2;
 import org.codehaus.stax2.XMLStreamReader2;
 import org.codehaus.stax2.io.Stax2ByteArraySource;
@@ -48,7 +50,6 @@ import org.xml.sax.InputSource;
 import com.fasterxml.aalto.AsyncXMLInputFactory;
 import com.fasterxml.aalto.AsyncXMLStreamReader;
 import com.fasterxml.aalto.async.AsyncStreamReaderImpl;
-import com.fasterxml.aalto.async.AsyncUtfScanner;
 import com.fasterxml.aalto.dom.DOMReaderImpl;
 import com.fasterxml.aalto.evt.EventAllocatorImpl;
 import com.fasterxml.aalto.evt.EventReaderImpl;
@@ -377,17 +378,29 @@ public final class InputFactoryImpl
     
 
     @Override
-    public AsyncXMLStreamReader createAsyncXMLStreamReader(byte[] input) {
+    public AsyncXMLStreamReader createAsyncXMLStreamReader(byte[] input) throws XMLStreamException {
         return createAsyncXMLStreamReader(input, 0, input.length);
     }
 
     @Override
-    public AsyncXMLStreamReader createAsyncXMLStreamReader(byte[] input, int offset, int length)
+    public AsyncXMLStreamReader createAsyncXMLStreamReader(byte[] input, int offset, int length) throws XMLStreamException
     {
         AsyncXMLStreamReader sr = createAsyncXMLStreamReader();
+        sr.getInputFeeder().feedInput(input, offset, length);
         return sr;
     }
-    
+
+    @Override
+    public AsyncXMLStreamReader createAsyncXMLStreamReader(ByteBuffer input) throws XMLStreamException {
+        // TODO: pass system and/or public ids?
+        ReaderConfig cfg = getNonSharedConfig(null, null, null, false, false);
+        cfg.setActualEncoding("UTF-8");
+        AsyncXMLStreamReader reader =  new AsyncStreamReaderImpl(new AsyncUtfScanner(cfg));
+        reader.getInputFeeder().feedInput(input);
+        return reader;
+    }
+
+
     /*
     /**********************************************************************
     /* Internal/package methods
