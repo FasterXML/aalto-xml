@@ -194,6 +194,11 @@ public abstract class AsyncByteScanner
     /* Input buffer handling
     /**********************************************************************
      */
+    // Cache the different sequences to reduce object creation
+    private ByteArraySequence byteArraySequence;
+    private ByteBufferSequence byteBufferSequence;
+
+    private ByteSequence sequence;
 
     /**
      * In addition to current buffer pointer, and end pointer,
@@ -370,6 +375,20 @@ public abstract class AsyncByteScanner
         // Time to update pointers first
         _pastBytesOrChars += _origBufferLen;
         _rowStartOffset -= _origBufferLen;
+
+        // And then update buffer settings
+        _inputPtr = start;
+        _inputEnd = start+len;
+        _origBufferLen = len;
+    }
+
+    private void setSequence(ByteSequence seq) {
+        ByteSequence sequence = this.sequence;
+        if (seq != sequence && sequence != null) {
+            // Make sure we can GC the backing storage by clear the previous used ByteSequence
+            sequence.clear();
+        }
+        this.sequence = seq;
     }
 
     public void feedInput(byte[] buf, int start, int len)
@@ -377,11 +396,12 @@ public abstract class AsyncByteScanner
     {
         checkInput(start, len);
 
-        // And then update buffer settings
-        _inputPtr = start;
-        _inputEnd = start+len;
-        _origBufferLen = len;
-        setInput(buf);
+        ByteArraySequence arraySequence = this.byteArraySequence;
+        if (arraySequence == null) {
+            byteArraySequence = arraySequence = new ByteArraySequence();
+        }
+        arraySequence.buffer = buf;
+        setSequence(arraySequence);
     }
 
     public void feedInput(ByteBuffer buf)
@@ -389,17 +409,27 @@ public abstract class AsyncByteScanner
     {
         int start = buf.position();
         int len = buf.limit() - start;
-        checkInput(start, len);
+        if (buf.hasArray()) {
+            // Use the underlying array directly to eliminate extra range checks done by ByteBuffer.
+            feedInput(buf.array(), start + buf.arrayOffset(), len);
+        } else {
+            checkInput(start, len);
 
-        // And then update buffer settings
-        _inputPtr = start;
-        _inputEnd = start+len;
-        _origBufferLen = len;
-        setInput(buf);
+            ByteBufferSequence bufferSequence = this.byteBufferSequence;
+            if (bufferSequence == null) {
+                byteBufferSequence = bufferSequence = new ByteBufferSequence();
+            }
+            bufferSequence.buffer = buf;
+            setSequence(bufferSequence);
+        }
     }
 
     public void endOfInput() {
         _endOfInput = true;
+        // Allow for GC
+        sequence = null;
+        byteArraySequence = null;
+        byteBufferSequence = null;
     }
     
     /**
@@ -413,23 +443,15 @@ public abstract class AsyncByteScanner
         throws IOException
     {
         // nothing to do, we are done.
-        _endOfInput = true;
+        endOfInput();
     }
-
-    /**
-     * Set the input for the content of the provided byte array.
-     */
-    protected abstract void setInput(byte[] buf);
-
-    /**
-     * Set the input for the content of the provided {@link ByteBuffer}.
-     */
-    protected abstract void setInput(ByteBuffer buf);
 
     /**
      * Returns the byte on the given index.
      */
-    protected abstract byte byteAt(int index);
+    protected byte byteAt(int index) {
+        return sequence.byteAt(index);
+    }
 
     /*
     /**********************************************************************
@@ -2981,5 +3003,40 @@ public abstract class AsyncByteScanner
     protected int throwInternal()
     {
         throw new IllegalStateException("Internal error: should never execute this code path");
+    }
+
+    private static interface ByteSequence {
+        byte byteAt(int index);
+        void clear();
+    }
+
+    private static final class ByteArraySequence implements ByteSequence {
+        byte[] buffer;
+
+        @Override
+        public byte byteAt(int index) {
+            return buffer[index];
+        }
+
+        @Override
+        public void clear() {
+            // Set to null to allow GC of the backing storage
+            buffer = null;
+        }
+    }
+
+    private static final class ByteBufferSequence implements ByteSequence {
+        ByteBuffer buffer;
+
+        @Override
+        public byte byteAt(int index) {
+            return buffer.get(index);
+        }
+
+        @Override
+        public void clear() {
+            // Set to null to allow GC of the backing storage
+            buffer = null;
+        }
     }
 }

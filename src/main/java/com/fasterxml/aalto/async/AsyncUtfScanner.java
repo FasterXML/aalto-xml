@@ -28,7 +28,7 @@ import com.fasterxml.aalto.util.XmlCharTypes;
  * other UTF-8 compatible (subset) encodings (specifically, Latin1 and
  * US-ASCII).
  */
-public abstract class AsyncUtfScanner
+public class AsyncUtfScanner
     extends AsyncByteScanner
 {
     private final static int EVENT_INCOMPLETE = AsyncXMLStreamReader.EVENT_INCOMPLETE;

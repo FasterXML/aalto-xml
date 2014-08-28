@@ -35,8 +35,7 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamSource;
 
-import com.fasterxml.aalto.async.AsyncUtfArrayScanner;
-import com.fasterxml.aalto.async.AsyncUtfByteBufferScanner;
+import com.fasterxml.aalto.async.AsyncUtfScanner;
 import org.codehaus.stax2.XMLEventReader2;
 import org.codehaus.stax2.XMLStreamReader2;
 import org.codehaus.stax2.io.Stax2ByteArraySource;
@@ -365,7 +364,7 @@ public final class InputFactoryImpl
     	// TODO: pass system and/or public ids?
     	ReaderConfig cfg = getNonSharedConfig(null, null, null, false, false);
     	cfg.setActualEncoding("UTF-8");
-    	return new AsyncStreamReaderImpl(new AsyncUtfArrayScanner(cfg));
+    	return new AsyncStreamReaderImpl(new AsyncUtfScanner(cfg));
     }
     
     public AsyncXMLStreamReader createAsyncXMLStreamReader(final IllegalCharHandler illegalCharHandler)
@@ -374,7 +373,7 @@ public final class InputFactoryImpl
     	ReaderConfig cfg = getNonSharedConfig(null, null, null, false, false);
     	cfg.setActualEncoding("UTF-8");
     	cfg.setIllegalCharHandler(illegalCharHandler);
-    	return new AsyncStreamReaderImpl(new AsyncUtfArrayScanner(cfg));
+    	return new AsyncStreamReaderImpl(new AsyncUtfScanner(cfg));
     }
     
 
@@ -396,7 +395,7 @@ public final class InputFactoryImpl
         // TODO: pass system and/or public ids?
         ReaderConfig cfg = getNonSharedConfig(null, null, null, false, false);
         cfg.setActualEncoding("UTF-8");
-        AsyncXMLStreamReader reader =  new AsyncStreamReaderImpl(new AsyncUtfByteBufferScanner(cfg));
+        AsyncXMLStreamReader reader =  new AsyncStreamReaderImpl(new AsyncUtfScanner(cfg));
         reader.getInputFeeder().feedInput(input);
         return reader;
     }
