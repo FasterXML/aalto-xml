@@ -379,14 +379,15 @@ public final class InputFactoryImpl
     
 
     @Override
-    public AsyncXMLStreamReader createAsyncXMLStreamReader(byte[] input) {
+    public AsyncXMLStreamReader createAsyncXMLStreamReader(byte[] input) throws XMLStreamException {
         return createAsyncXMLStreamReader(input, 0, input.length);
     }
 
     @Override
-    public AsyncXMLStreamReader createAsyncXMLStreamReader(byte[] input, int offset, int length)
+    public AsyncXMLStreamReader createAsyncXMLStreamReader(byte[] input, int offset, int length) throws XMLStreamException
     {
         AsyncXMLStreamReader sr = createAsyncXMLStreamReader();
+        sr.getInputFeeder().feedInput(input, offset, length);
         return sr;
     }
 
