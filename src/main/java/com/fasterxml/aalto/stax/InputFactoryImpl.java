@@ -22,13 +22,7 @@ import java.io.InputStream;
 import java.io.Reader;
 import java.net.URL;
 
-import javax.xml.stream.EventFilter;
-import javax.xml.stream.StreamFilter;
-import javax.xml.stream.XMLEventReader;
-import javax.xml.stream.XMLReporter;
-import javax.xml.stream.XMLResolver;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamReader;
+import javax.xml.stream.*;
 import javax.xml.stream.util.XMLEventAllocator;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.sax.SAXSource;
@@ -46,8 +40,8 @@ import org.codehaus.stax2.ri.evt.Stax2FilteredEventReader;
 import org.xml.sax.InputSource;
 
 import com.fasterxml.aalto.*;
+import com.fasterxml.aalto.async.AsyncByteArrayScanner;
 import com.fasterxml.aalto.async.AsyncStreamReaderImpl;
-import com.fasterxml.aalto.async.AsyncByteArrayScannerImpl;
 import com.fasterxml.aalto.dom.DOMReaderImpl;
 import com.fasterxml.aalto.evt.EventAllocatorImpl;
 import com.fasterxml.aalto.evt.EventReaderImpl;
@@ -358,14 +352,14 @@ public final class InputFactoryImpl
         // TODO: pass system and/or public ids?
         ReaderConfig cfg = getNonSharedConfig(null, null, null, false, false);
         cfg.setActualEncoding("UTF-8");
-        return new AsyncStreamReaderImpl<AsyncByteArrayFeeder>(new AsyncByteArrayScannerImpl(cfg));
+        return new AsyncStreamReaderImpl<AsyncByteArrayFeeder>(new AsyncByteArrayScanner(cfg));
     }
 
     @Override
     public AsyncXMLStreamReader<AsyncByteArrayFeeder> createAsyncFor(byte[] input) {
         ReaderConfig cfg = getNonSharedConfig(null, null, null, false, false);
         cfg.setActualEncoding("UTF-8");
-        AsyncByteArrayScannerImpl scanner = new AsyncByteArrayScannerImpl(cfg);
+        AsyncByteArrayScanner scanner = new AsyncByteArrayScanner(cfg);
         return new AsyncStreamReaderImpl<AsyncByteArrayFeeder>(scanner);
     }
 
@@ -375,7 +369,7 @@ public final class InputFactoryImpl
     {
          ReaderConfig cfg = getNonSharedConfig(null, null, null, false, false);
          cfg.setActualEncoding("UTF-8");
-         AsyncByteArrayScannerImpl scanner = new AsyncByteArrayScannerImpl(cfg);
+         AsyncByteArrayScanner scanner = new AsyncByteArrayScanner(cfg);
          scanner.feedInput(input, offset, length);
          return new AsyncStreamReaderImpl<AsyncByteArrayFeeder>(scanner);
     }
