@@ -1,5 +1,6 @@
 package async;
 
+import com.fasterxml.aalto.AsyncByteArrayFeeder;
 import com.fasterxml.aalto.AsyncXMLInputFactory;
 import com.fasterxml.aalto.AsyncXMLStreamReader;
 import com.fasterxml.aalto.stax.InputFactoryImpl;
@@ -15,7 +16,7 @@ public class TestXmlDeclaration extends AsyncTestBase
         AsyncXMLInputFactory f = new InputFactoryImpl();
         for (String XML : new String[] { "   <root />", "<root/>" }) {
             for (int chunkSize : CHUNK_SIZES) {
-                AsyncXMLStreamReader sr = f.createAsyncXMLStreamReader();
+                AsyncXMLStreamReader<AsyncByteArrayFeeder> sr = f.createAsyncForByteArray();
                 AsyncReaderWrapper reader = new AsyncReaderWrapper(sr, chunkSize, XML);
                 assertEquals(EVENT_INCOMPLETE, reader.currentToken());
                 assertTokenType(START_DOCUMENT, reader.nextToken());
@@ -37,7 +38,7 @@ public class TestXmlDeclaration extends AsyncTestBase
         AsyncXMLInputFactory f = new InputFactoryImpl();
 
         for (int chunkSize : CHUNK_SIZES) {
-            AsyncXMLStreamReader sr = f.createAsyncXMLStreamReader();
+            AsyncXMLStreamReader<AsyncByteArrayFeeder> sr = f.createAsyncForByteArray();
             AsyncReaderWrapper reader = new AsyncReaderWrapper(sr, chunkSize, XML);
             assertEquals(EVENT_INCOMPLETE, reader.currentToken());
             assertTokenType(START_DOCUMENT, reader.nextToken());
@@ -57,7 +58,7 @@ public class TestXmlDeclaration extends AsyncTestBase
         AsyncXMLInputFactory f = new InputFactoryImpl();
 
         for (int chunkSize : CHUNK_SIZES) {
-            AsyncXMLStreamReader sr = f.createAsyncXMLStreamReader();
+            AsyncXMLStreamReader<AsyncByteArrayFeeder> sr = f.createAsyncForByteArray();
             AsyncReaderWrapper reader = new AsyncReaderWrapper(sr, chunkSize, XML);
             assertEquals(EVENT_INCOMPLETE, reader.currentToken());
             assertTokenType(START_DOCUMENT, reader.nextToken());
@@ -77,7 +78,7 @@ public class TestXmlDeclaration extends AsyncTestBase
         AsyncXMLInputFactory f = new InputFactoryImpl();
 
         for (int chunkSize : CHUNK_SIZES) {
-            AsyncXMLStreamReader sr = f.createAsyncXMLStreamReader();
+            AsyncXMLStreamReader<AsyncByteArrayFeeder> sr = f.createAsyncForByteArray();
             AsyncReaderWrapper reader = new AsyncReaderWrapper(sr, chunkSize, XML);
             assertEquals(EVENT_INCOMPLETE, reader.currentToken());
             assertTokenType(START_DOCUMENT, reader.nextToken());
@@ -98,7 +99,7 @@ public class TestXmlDeclaration extends AsyncTestBase
         AsyncXMLInputFactory f = new InputFactoryImpl();
 
         for (int chunkSize : CHUNK_SIZES) {
-            AsyncXMLStreamReader sr = f.createAsyncXMLStreamReader();
+            AsyncXMLStreamReader<AsyncByteArrayFeeder> sr = f.createAsyncForByteArray();
             AsyncReaderWrapper reader = new AsyncReaderWrapper(sr, chunkSize, XML);
             assertEquals(EVENT_INCOMPLETE, reader.currentToken());
             assertTokenType(START_DOCUMENT, reader.nextToken());

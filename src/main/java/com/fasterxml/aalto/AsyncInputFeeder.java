@@ -1,7 +1,5 @@
 package com.fasterxml.aalto;
 
-import javax.xml.stream.XMLStreamException;
-
 /**
  * Interface used by {@link AsyncXMLStreamReader} to get more input to parse.
  * It is accessed by entity that feeds XML content to parse; at any given point
@@ -23,24 +21,9 @@ public interface AsyncInputFeeder
     public boolean needMoreInput();
 
     /**
-     * Method that can be called to feed more data, if (and only if)
-     * {@link #needMoreInput} returns true.
-     * 
-     * @param data Byte array that containts data to feed: caller must ensure data remains
-     *    stable until it is fully processed (which is true when {@link #needMoreInput}
-     *    returns true)
-     * @param offset Offset within array where input data to process starts
-     * @param len Length of input data within array to process.
-     * 
-     * @throws XMLStreamException if the state is such that this method should not be called
-     *   (has not yet consumed existing input data, or has been marked as closed)
-     */
-    public void feedInput(byte[] data, int offset, int len) throws XMLStreamException;
-
-    /**
-     * Method that should be called after last chunk of data to parse has been fed
-     * (with {@link #feedInput}); can be called regardless of what {@link #needMoreInput}
-     * returns. After calling this method, no more data can be fed; and parser assumes
+     * Method that should be called after last chunk of data to parse has been fed.
+     * May be called regardless of what {@link #needMoreInput} returns.
+     * After calling this method, no more data can be fed; and parser assumes
      * no more data will be available.
      */
     public void endOfInput();

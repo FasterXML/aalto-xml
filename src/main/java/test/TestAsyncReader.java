@@ -6,8 +6,7 @@ import javax.xml.stream.*;
 
 import org.codehaus.stax2.XMLStreamWriter2;
 
-import com.fasterxml.aalto.AsyncInputFeeder;
-import com.fasterxml.aalto.AsyncXMLStreamReader;
+import com.fasterxml.aalto.*;
 import com.fasterxml.aalto.stax.*;
 
 /**
@@ -26,8 +25,8 @@ public class TestAsyncReader
         @SuppressWarnings("resource")
         InputStream in = new FileInputStream(file);
 
-        AsyncXMLStreamReader asyncReader = new InputFactoryImpl().createAsyncXMLStreamReader();
-        final AsyncInputFeeder feeder = asyncReader.getInputFeeder();
+        AsyncXMLStreamReader<AsyncByteArrayFeeder> asyncReader = new InputFactoryImpl().createAsyncForByteArray();
+        final AsyncByteArrayFeeder feeder = asyncReader.getInputFeeder();
         
         final byte[] buf = new byte[BLOCK_SIZE];
 

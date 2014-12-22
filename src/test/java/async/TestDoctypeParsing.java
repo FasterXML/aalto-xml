@@ -4,6 +4,8 @@ import javax.xml.stream.XMLStreamException;
 
 //import async.AsyncTestBase.AsyncReaderWrapper;
 
+
+import com.fasterxml.aalto.AsyncByteArrayFeeder;
 import com.fasterxml.aalto.AsyncXMLInputFactory;
 import com.fasterxml.aalto.AsyncXMLStreamReader;
 import com.fasterxml.aalto.stax.InputFactoryImpl;
@@ -81,7 +83,7 @@ public class TestDoctypeParsing extends AsyncTestBase
     {
         String XML = spaces+"<!DOCTYPE root>  <root />";
         AsyncXMLInputFactory f = new InputFactoryImpl();
-        AsyncXMLStreamReader sr = f.createAsyncXMLStreamReader();
+        AsyncXMLStreamReader<AsyncByteArrayFeeder> sr = f.createAsyncForByteArray();
         AsyncReaderWrapper reader = new AsyncReaderWrapper(sr, chunkSize, XML);
         int t = verifyStart(reader);
         assertTokenType(DTD, t);
@@ -97,7 +99,7 @@ public class TestDoctypeParsing extends AsyncTestBase
         final String SYSTEM_ID = "file:/something";
         String XML = spaces+"<!DOCTYPE root PUBLIC '"+PUBLIC_ID+"' \""+SYSTEM_ID+"\"><root/>";
         AsyncXMLInputFactory f = new InputFactoryImpl();
-        AsyncXMLStreamReader sr = f.createAsyncXMLStreamReader();
+        AsyncXMLStreamReader<AsyncByteArrayFeeder> sr = f.createAsyncForByteArray();
         AsyncReaderWrapper reader = new AsyncReaderWrapper(sr, chunkSize, XML);
         int t = verifyStart(reader);
         assertTokenType(DTD, t);
@@ -120,7 +122,7 @@ public class TestDoctypeParsing extends AsyncTestBase
         final String SYSTEM_ID = "file:/something";
         String XML = spaces+"<!DOCTYPE root SYSTEM '"+SYSTEM_ID+"' ["+INTERNAL_SUBSET+"]>\n<root/>";
         AsyncXMLInputFactory f = new InputFactoryImpl();
-        AsyncXMLStreamReader sr = f.createAsyncXMLStreamReader();
+        AsyncXMLStreamReader<AsyncByteArrayFeeder> sr = f.createAsyncForByteArray();
         AsyncReaderWrapper reader = new AsyncReaderWrapper(sr, chunkSize, XML);
         int t = verifyStart(reader);
         assertTokenType(DTD, t);
@@ -142,7 +144,7 @@ public class TestDoctypeParsing extends AsyncTestBase
     {
         String XML = spaces+"<!DOCTYPE root> <!DOCTYPE root> <root />";
         AsyncXMLInputFactory f = new InputFactoryImpl();
-        AsyncXMLStreamReader sr = f.createAsyncXMLStreamReader();
+        AsyncXMLStreamReader<AsyncByteArrayFeeder> sr = f.createAsyncForByteArray();
         AsyncReaderWrapper reader = new AsyncReaderWrapper(sr, chunkSize, XML);
         int t = verifyStart(reader);
         assertTokenType(DTD, t);

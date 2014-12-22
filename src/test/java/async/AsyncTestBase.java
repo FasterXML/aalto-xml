@@ -4,7 +4,7 @@ import java.io.IOException;
 
 import javax.xml.stream.XMLStreamException;
 
-import com.fasterxml.aalto.AsyncInputFeeder;
+import com.fasterxml.aalto.AsyncByteArrayFeeder;
 import com.fasterxml.aalto.AsyncXMLStreamReader;
 
 abstract class AsyncTestBase extends base.BaseTestCase
@@ -43,16 +43,16 @@ abstract class AsyncTestBase extends base.BaseTestCase
      */
     public static class AsyncReaderWrapper
     {
-        private final AsyncXMLStreamReader _streamReader;
+        private final AsyncXMLStreamReader<AsyncByteArrayFeeder> _streamReader;
         private final byte[] _xml;
         private final int _bytesPerFeed;
         private int _offset = 0;
 
-        public AsyncReaderWrapper(AsyncXMLStreamReader sr, String xmlString) {
+        public AsyncReaderWrapper(AsyncXMLStreamReader<AsyncByteArrayFeeder> sr, String xmlString) {
             this(sr, 1, xmlString);
         }
         
-        public AsyncReaderWrapper(AsyncXMLStreamReader sr, int bytesPerCall, String xmlString)
+        public AsyncReaderWrapper(AsyncXMLStreamReader<AsyncByteArrayFeeder> sr, int bytesPerCall, String xmlString)
         {
             _streamReader = sr;
             _bytesPerFeed = bytesPerCall;
@@ -63,13 +63,11 @@ abstract class AsyncTestBase extends base.BaseTestCase
             }
         }
 
-        public String currentText() throws XMLStreamException
-        {
+        public String currentText() throws XMLStreamException {
             return _streamReader.getText();
         }
         
-        public int currentToken() throws XMLStreamException
-        {
+        public int currentToken() throws XMLStreamException {
             return _streamReader.getEventType();
         }
         
@@ -78,7 +76,7 @@ abstract class AsyncTestBase extends base.BaseTestCase
             int token;
             
             while ((token = _streamReader.next()) == AsyncXMLStreamReader.EVENT_INCOMPLETE) {
-                AsyncInputFeeder feeder = _streamReader.getInputFeeder();
+                AsyncByteArrayFeeder feeder = _streamReader.getInputFeeder();
                 if (!feeder.needMoreInput()) {
                     fail("Got EVENT_INCOMPLETE, could not feed more input");
                 }

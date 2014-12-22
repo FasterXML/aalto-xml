@@ -28,7 +28,6 @@ import org.codehaus.stax2.io.Stax2Result;
 import org.codehaus.stax2.ri.Stax2EventWriterImpl;
 import org.codehaus.stax2.ri.Stax2WriterAdapter;
 
-
 import com.fasterxml.aalto.dom.DOMWriterImpl;
 import com.fasterxml.aalto.impl.IoStreamException;
 import com.fasterxml.aalto.impl.StreamExceptionBase;
@@ -196,6 +195,7 @@ public final class OutputFactoryImpl
      * @param autoCloseOutput Whether writer should automatically close the
      *   output stream or Writer, when close() is called on stream writer.
      */
+    @SuppressWarnings("resource")
     private XMLStreamWriter2 createSW(OutputStream out, Writer w, String enc,
                                       boolean forceAutoClose)
         throws XMLStreamException
@@ -287,8 +287,8 @@ public final class OutputFactoryImpl
         return new NonRepairingStreamWriter(cfg, xw, symbols);
     }
 
-    private XMLStreamWriter2 createSW(Result res)
-        throws XMLStreamException
+    @SuppressWarnings("resource")
+    private XMLStreamWriter2 createSW(Result res) throws XMLStreamException
     {
         OutputStream out = null;
         Writer w = null;

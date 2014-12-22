@@ -9,12 +9,13 @@ import com.fasterxml.aalto.stax.StreamReaderImpl;
 /**
  * Implementation of {@link AsyncXMLStreamReader}.
  */
-public class AsyncStreamReaderImpl extends StreamReaderImpl
-    implements AsyncXMLStreamReader, AsyncInputFeeder
+public class AsyncStreamReaderImpl<F extends AsyncInputFeeder>
+     extends StreamReaderImpl
+     implements AsyncXMLStreamReader<F>
 {
-    protected final AsyncUtfScanner _asyncScanner;
+    protected final AsyncByteScanner _asyncScanner;
     
-    public AsyncStreamReaderImpl(AsyncUtfScanner scanner)
+    public AsyncStreamReaderImpl(AsyncByteScanner scanner)
     {
         super(scanner);
         _asyncScanner = scanner;
@@ -27,30 +28,10 @@ public class AsyncStreamReaderImpl extends StreamReaderImpl
     /**********************************************************************
      */
     
+    @SuppressWarnings("unchecked")
     @Override
-    public AsyncInputFeeder getInputFeeder() {
-        return this;
-    }
-
-    /*
-    /**********************************************************************
-    /* AsyncInputFeeder implementation
-    /**********************************************************************
-     */
-    
-    @Override
-    public boolean needMoreInput() {
-        return _asyncScanner.needMoreInput();
-    }
-
-    @Override
-    public void endOfInput() {
-        _asyncScanner.endOfInput();
-    }
-
-    @Override
-    public void feedInput(byte[] data, int offset, int len) throws XMLStreamException {
-        _asyncScanner.feedInput(data, offset, len);
+    public F getInputFeeder() {
+        return (F) _asyncScanner;
     }
 
     /*

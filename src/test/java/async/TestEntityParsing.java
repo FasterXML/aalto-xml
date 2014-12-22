@@ -3,6 +3,7 @@ package async;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamConstants;
 
+import com.fasterxml.aalto.AsyncByteArrayFeeder;
 import com.fasterxml.aalto.AsyncXMLInputFactory;
 import com.fasterxml.aalto.AsyncXMLStreamReader;
 import com.fasterxml.aalto.stax.InputFactoryImpl;
@@ -48,7 +49,7 @@ public class TestEntityParsing extends AsyncTestBase
         AsyncXMLInputFactory f = new InputFactoryImpl();
         // important must not require expansion of general entities
         f.setProperty(XMLInputFactory.IS_REPLACING_ENTITY_REFERENCES, Boolean.FALSE);
-        AsyncXMLStreamReader sr = f.createAsyncXMLStreamReader();
+        AsyncXMLStreamReader<AsyncByteArrayFeeder> sr = f.createAsyncForByteArray();
         AsyncReaderWrapper reader = new AsyncReaderWrapper(sr, chunkSize, XML);
 
         // should start with START_DOCUMENT, but for now skip

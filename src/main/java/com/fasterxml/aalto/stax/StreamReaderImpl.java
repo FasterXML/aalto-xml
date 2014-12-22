@@ -284,6 +284,10 @@ public class StreamReaderImpl
         return _scanner.getConfig().getProperty(name, false);
     }
 
+    public ReaderConfig getConfig() {
+        return _scanner.getConfig();
+    }
+    
     /*
     /**********************************************************************
     /* XMLStreamReader, current state

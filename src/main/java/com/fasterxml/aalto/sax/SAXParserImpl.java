@@ -17,6 +17,7 @@ package com.fasterxml.aalto.sax;
 
 import java.io.*;
 import java.net.URL;
+
 import javax.xml.parsers.SAXParser;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
@@ -27,7 +28,6 @@ import org.xml.sax.ext.DeclHandler;
 import org.xml.sax.ext.LexicalHandler;
 import org.xml.sax.ext.Locator2;
 import org.xml.sax.helpers.DefaultHandler;
-
 
 import com.fasterxml.aalto.in.*;
 import com.fasterxml.aalto.stax.InputFactoryImpl;
@@ -331,6 +331,7 @@ class SAXParserImpl
     /**********************************************************************
      */
 
+    @SuppressWarnings("resource")
     @Override
     public void parse(InputSource input) throws SAXException
     {

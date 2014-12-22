@@ -2,6 +2,7 @@ package async;
 
 import javax.xml.stream.XMLStreamConstants;
 
+import com.fasterxml.aalto.AsyncByteArrayFeeder;
 import com.fasterxml.aalto.AsyncXMLInputFactory;
 import com.fasterxml.aalto.AsyncXMLStreamReader;
 import com.fasterxml.aalto.stax.InputFactoryImpl;
@@ -47,7 +48,7 @@ public class TestCDataParsing extends AsyncTestBase
     private void _testCData(int chunkSize, String SPC) throws Exception
     {
         AsyncXMLInputFactory f = new InputFactoryImpl();
-        AsyncXMLStreamReader sr = f.createAsyncXMLStreamReader();
+        AsyncXMLStreamReader<AsyncByteArrayFeeder> sr = f.createAsyncForByteArray();
         AsyncReaderWrapper reader = new AsyncReaderWrapper(sr, chunkSize, SPC + XML);
 
         int t = verifyStart(reader);
@@ -81,7 +82,7 @@ public class TestCDataParsing extends AsyncTestBase
     private void _testCDataSkip(int chunkSize, String SPC) throws Exception
     {
         AsyncXMLInputFactory f = new InputFactoryImpl();
-        AsyncXMLStreamReader sr = f.createAsyncXMLStreamReader();
+        AsyncXMLStreamReader<AsyncByteArrayFeeder> sr = f.createAsyncForByteArray();
         AsyncReaderWrapper reader = new AsyncReaderWrapper(sr, chunkSize, SPC + XML);
 
         int t = verifyStart(reader);

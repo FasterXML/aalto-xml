@@ -2,6 +2,7 @@ package async;
 
 import javax.xml.stream.XMLStreamConstants;
 
+import com.fasterxml.aalto.AsyncByteArrayFeeder;
 import com.fasterxml.aalto.AsyncXMLInputFactory;
 import com.fasterxml.aalto.AsyncXMLStreamReader;
 import com.fasterxml.aalto.stax.InputFactoryImpl;
@@ -119,7 +120,7 @@ public class TestElementParsing extends AsyncTestBase
     private void _testEmptyRoot(int chunkSize, String XML) throws Exception
     {
         AsyncXMLInputFactory f = new InputFactoryImpl();
-        AsyncXMLStreamReader sr = f.createAsyncXMLStreamReader();
+        AsyncXMLStreamReader<AsyncByteArrayFeeder> sr = f.createAsyncForByteArray();
         AsyncReaderWrapper reader = new AsyncReaderWrapper(sr, chunkSize, XML);
 
         // should start with START_DOCUMENT, but for now skip
@@ -138,7 +139,7 @@ public class TestElementParsing extends AsyncTestBase
     private void _testElements(int chunkSize, String SPC) throws Exception
     {
         AsyncXMLInputFactory f = new InputFactoryImpl();
-        AsyncXMLStreamReader sr = f.createAsyncXMLStreamReader();
+        AsyncXMLStreamReader<AsyncByteArrayFeeder> sr = f.createAsyncForByteArray();
 //        final String XML = SPC+"<root attr='1&amp;2'><leaf xmlns='abc' a   ='3'\rb=''  /></root>";
         final String XML = SPC+"<root attr='1&amp;2'><leaf xmlns='abc' a   ='3'\rxmlns:foo='bar'  b=''  /></root>";
         AsyncReaderWrapper reader = new AsyncReaderWrapper(sr, chunkSize, XML);
@@ -184,7 +185,7 @@ public class TestElementParsing extends AsyncTestBase
     private void _testElementsWithAttrs(int chunkSize, boolean checkValues, String SPC) throws Exception
     {
         AsyncXMLInputFactory f = new InputFactoryImpl();
-        AsyncXMLStreamReader sr = f.createAsyncXMLStreamReader();
+        AsyncXMLStreamReader<AsyncByteArrayFeeder> sr = f.createAsyncForByteArray();
 //        final String XML = SPC+"<root attr='1&amp;2'><leaf xmlns='abc' a   ='3'\rb=''  /></root>";
         final String XML = SPC+"<root attr='1&#62;2, 2&#x3C;1' />";
         AsyncReaderWrapper reader = new AsyncReaderWrapper(sr, chunkSize, XML);
@@ -212,7 +213,7 @@ public class TestElementParsing extends AsyncTestBase
     private void _testElementsWithUTF8Attrs(int chunkSize, boolean checkValues, String SPC) throws Exception
     {
         AsyncXMLInputFactory f = new InputFactoryImpl();
-        AsyncXMLStreamReader sr = f.createAsyncXMLStreamReader();
+        AsyncXMLStreamReader<AsyncByteArrayFeeder> sr = f.createAsyncForByteArray();
         final String VALUE = "Gr\u00e4"; 
         final String XML = SPC+"<root attr='"+VALUE+"' />";
         AsyncReaderWrapper reader = new AsyncReaderWrapper(sr, chunkSize, XML);
@@ -239,9 +240,10 @@ public class TestElementParsing extends AsyncTestBase
     
     private void _testElementsWithIllegalChars(int chunkSize, boolean checkValues, String SPC) throws Exception
     {
-    	char replaced = ' ';
-    	InputFactoryImpl f = new InputFactoryImpl();
-        AsyncXMLStreamReader sr = f.createAsyncXMLStreamReader(new IllegalCharHandler.ReplacingIllegalCharHandler(replaced));
+        char replaced = ' ';
+        InputFactoryImpl f = new InputFactoryImpl();
+        AsyncXMLStreamReader<AsyncByteArrayFeeder> sr = f.createAsyncForByteArray();
+        sr.getConfig().setIllegalCharHandler(new IllegalCharHandler.ReplacingIllegalCharHandler(replaced));
         char illegal = 22;
         final String VALUE = "Gr" + illegal; 
         final String VALUE_REPL  = "Gr" + replaced;

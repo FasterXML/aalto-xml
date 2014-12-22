@@ -15,11 +15,9 @@ import com.fasterxml.aalto.sax.*;
  */
 public class TestSaxReader
 {
-    protected TestSaxReader() {
-    }
+    protected TestSaxReader() { }
 
-    protected void test(File file)
-        throws Exception
+    protected void test(File file) throws Exception
     {
         SAXParserFactoryImpl spf = new SAXParserFactoryImpl();
         SAXParser sp = spf.newSAXParser();
@@ -27,6 +25,7 @@ public class TestSaxReader
         sp.setProperty(SAXProperty.LEXICAL_HANDLER.toExternal(), (DeclHandler) h);
         InputStream in = new FileInputStream(file);
         sp.parse(new InputSource(in), h);
+        in.close();
     }
 
     /*

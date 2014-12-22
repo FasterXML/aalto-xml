@@ -1,5 +1,9 @@
 package com.fasterxml.aalto;
 
+import java.nio.ByteBuffer;
+
+import javax.xml.stream.XMLStreamException;
+
 import org.codehaus.stax2.XMLInputFactory2;
 import org.codehaus.stax2.XMLStreamReader2;
 
@@ -17,7 +21,24 @@ public abstract class AsyncXMLInputFactory
      * 
      * @return Non-blocking stream reader without any input
      */
-    public abstract AsyncXMLStreamReader createAsyncXMLStreamReader();
+    public abstract AsyncXMLStreamReader<AsyncByteArrayFeeder> createAsyncForByteArray();
+    
+    /**
+     * Method for constructing a non-blocking {@link XMLStreamReader2} instance
+     * with specified initial input data.
+     * Input data will not be parsed at this point but merely fed to be parsed as
+     * needed with Stax API calls.
+     *<p>
+     * Note that caller needs to ensure that given input buffer is available for
+     * parser to use until it has been fully consumed; parser is not required to
+     * make a copy of it, in order to minimize number of copies made. Caller can
+     * choose to just make a copy to pass. After input has been parsed buffer can
+     * be reused.
+     * 
+     * @return Non-blocking stream reader initialized with given input
+     */
+    public abstract AsyncXMLStreamReader<AsyncByteArrayFeeder> createAsyncFor(byte[] input)
+        throws XMLStreamException;
 
     /**
      * Method for constructing a non-blocking {@link XMLStreamReader2} instance
@@ -33,8 +54,17 @@ public abstract class AsyncXMLInputFactory
      * 
      * @return Non-blocking stream reader initialized with given input
      */
-    public abstract AsyncXMLStreamReader createAsyncXMLStreamReader(byte[] input);
+    public abstract AsyncXMLStreamReader<AsyncByteArrayFeeder> createAsyncFor(byte[] input, int offset, int length)
+        throws XMLStreamException;
 
+    /**
+     * Method for constructing a non-blocking {@link XMLStreamReader2} instance
+     * without any input data.
+     * 
+     * @return Non-blocking stream reader without any input
+     */
+//    public abstract AsyncXMLStreamReader<AsyncByteBufferFeeder> createAsyncForByteBuffer();
+    
     /**
      * Method for constructing a non-blocking {@link XMLStreamReader2} instance
      * with specified initial input data.
@@ -49,5 +79,6 @@ public abstract class AsyncXMLInputFactory
      * 
      * @return Non-blocking stream reader initialized with given input
      */
-    public abstract AsyncXMLStreamReader createAsyncXMLStreamReader(byte[] input, int offset, int length);
+//    public abstract AsyncXMLStreamReader<AsyncByteBufferFeeder> createAsyncFor(ByteBuffer input)
+//      throws XMLStreamException;
 }

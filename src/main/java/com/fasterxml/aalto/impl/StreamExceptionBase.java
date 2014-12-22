@@ -40,7 +40,7 @@ public class StreamExceptionBase
         super(th.getMessage(), th);
         mMsg = th.getMessage();
 
-        if (th != null && getCause() == null) {
+        if (getCause() == null) {
             initCause(th);
         }
     }

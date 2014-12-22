@@ -46,7 +46,7 @@ public class TestStreamReader
         return f;
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "resource" })
 	protected int test(File file)
         throws Exception
     {

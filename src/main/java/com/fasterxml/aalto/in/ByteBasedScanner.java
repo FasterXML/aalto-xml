@@ -242,8 +242,11 @@ public abstract class ByteBasedScanner
     protected abstract int decodeCharForError(byte b)
         throws XMLStreamException;
 
-    protected abstract PName addPName(int hash, int[] quads, int qlen, int lastQuadBytes)
-        throws XMLStreamException;
+    protected final PName addPName(int hash, int[] quads, int qlen, int lastQuadBytes)
+        throws XMLStreamException
+    {
+        return addUtfPName(_charTypes, hash, quads, qlen, lastQuadBytes);
+    }
 
     /*
     /**********************************************************************
@@ -474,6 +477,12 @@ public abstract class ByteBasedScanner
         return _symbols.addSymbol(hash, baseName, last_colon, quads, qlen);
     }
 
+    /*
+    /**********************************************************************
+    /* Error reporting
+    /**********************************************************************
+     */
+    
     protected void reportInvalidInitial(int mask) throws XMLStreamException {
         reportInputProblem("Invalid UTF-8 start byte 0x"+Integer.toHexString(mask));
     }

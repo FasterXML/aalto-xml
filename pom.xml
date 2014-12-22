@@ -41,7 +41,8 @@
      | Configuration properties for the OSGi maven-bundle-plugin
     -->
     <osgi.export>${project.groupId}.aalto.*;version=${project.version}</osgi.export>
-    <osgi.import>javax.xml.namespace, javax.xml.parsers, javax.xml.stream, javax.xml.stream.util,
+    <osgi.import>javax.xml, javax.xml.namespace, javax.xml.parsers,
+javax.xml.stream, javax.xml.stream.util,
 javax.xml.transform, javax.xml.transform.dom, javax.xml.transform.sax, javax.xml.transform.stream,
 org.codehaus.stax2, org.codehaus.stax2.io, org.codehaus.stax2.ri, org.codehaus.stax2.typed,
 org.codehaus.stax2.validation,

@@ -17,8 +17,6 @@ package com.fasterxml.aalto.async;
 
 import javax.xml.stream.XMLStreamException;
 
-
-import com.fasterxml.aalto.AsyncXMLStreamReader;
 import com.fasterxml.aalto.in.*;
 import com.fasterxml.aalto.util.DataUtil;
 import com.fasterxml.aalto.util.XmlCharTypes;
@@ -28,55 +26,11 @@ import com.fasterxml.aalto.util.XmlCharTypes;
  * other UTF-8 compatible (subset) encodings (specifically, Latin1 and
  * US-ASCII).
  */
-public class AsyncUtfScanner
-    extends AsyncByteScanner
+public class AsyncByteArrayScannerImpl
+    extends AsyncByteArrayScanner
 {
-    private final static int EVENT_INCOMPLETE = AsyncXMLStreamReader.EVENT_INCOMPLETE;
-
-    /*
-    /**********************************************************************
-    /* Local state constants only used in this class
-    /**********************************************************************
-     */
-    
-    // partially handled entities within attribute/ns values use pending state as well
-    private final static int PENDING_STATE_ATTR_VALUE_AMP = -60;
-    private final static int PENDING_STATE_ATTR_VALUE_AMP_HASH = -61;
-   final static int PENDING_STATE_ATTR_VALUE_AMP_HASH_X = -62;
-    private final static int PENDING_STATE_ATTR_VALUE_ENTITY_NAME = -63;
-    private final static int PENDING_STATE_ATTR_VALUE_DEC_DIGIT = -64;
-    private final static int PENDING_STATE_ATTR_VALUE_HEX_DIGIT = -65;
-
-    private final static int PENDING_STATE_TEXT_AMP = -80; // seen &
-    private final static int PENDING_STATE_TEXT_AMP_HASH = -81; // seen &#
-    private final static int PENDING_STATE_TEXT_DEC_ENTITY = -82; // seen &# and 1 or more decimals
-    private final static int PENDING_STATE_TEXT_HEX_ENTITY = -83; // seen &#x and 1 or more hex digits
-    private final static int PENDING_STATE_TEXT_IN_ENTITY = -84; // seen & and part of entity name
-    private final static int PENDING_STATE_TEXT_BRACKET1 = -85; // seen ]
-    private final static int PENDING_STATE_TEXT_BRACKET2 = -86; // seen ]]
-
-    /*
-    /**********************************************************************
-    /* Additional state
-    /**********************************************************************
-     */
-    
-    /**
-     * Flag that indicates whether we are inside a declaration during parsing
-     * of internal DTD subset.
-     */
-    protected boolean _inDtdDeclaration;
-    
-    /*
-    /**********************************************************************
-    /* Instance construction
-    /**********************************************************************
-     */
-
-    public AsyncUtfScanner(ReaderConfig cfg)
-    {
+    public AsyncByteArrayScannerImpl(ReaderConfig cfg) {
         super(cfg);
-        _currToken = EVENT_INCOMPLETE;
     }
 
     /*
@@ -86,8 +40,7 @@ public class AsyncUtfScanner
      */
 
     @Override
-    protected final int startCharacters(byte b)
-        throws XMLStreamException
+    protected final int startCharacters(byte b) throws XMLStreamException
     {
         dummy_loop:
         do { // dummy loop, to allow break
@@ -179,8 +132,7 @@ public class AsyncUtfScanner
     }
 
     @Override
-    protected int startCharactersPending()
-        throws XMLStreamException
+    protected int startCharactersPending() throws XMLStreamException
     {
         // First, need to have at least one more byte:
         if (_inputPtr >= _inputEnd) {
@@ -285,8 +237,7 @@ public class AsyncUtfScanner
      * from the current input block as possible.
      */
     @Override
-    protected final void finishCharacters()
-        throws XMLStreamException
+    protected final void finishCharacters() throws XMLStreamException
     {
         /* Now: there should not usually be any pending input (as it's
          * handled when CHARACTERS segment started, and this method
@@ -466,8 +417,7 @@ public class AsyncUtfScanner
     }
 
     @Override
-    protected final int finishCharactersCoalescing()
-        throws XMLStreamException
+    protected final int finishCharactersCoalescing() throws XMLStreamException
     {
         // First things first: any pending partial multi-bytes?
         if (_pendingInput != 0) {
@@ -2374,8 +2324,7 @@ public class AsyncUtfScanner
     }
     
     @Override
-    protected final int parsePIData()
-        throws XMLStreamException
+    protected final int parsePIData() throws XMLStreamException
     {
         // Left-overs from last input block?
         if (_pendingInput != 0) { // CR, multi-byte, '?'
@@ -2516,8 +2465,7 @@ public class AsyncUtfScanner
      *   "?>" end marker, or 0 to indicate something else
      *   was succesfully handled.
      */
-    protected final int handlePIPending()
-        throws XMLStreamException
+    protected final int handlePIPending() throws XMLStreamException
     {
         // First, the special case, end marker:
         if (_pendingInput == PENDING_STATE_PI_QMARK) {
@@ -2551,8 +2499,7 @@ public class AsyncUtfScanner
      * Note: caller must guarantee enough data is available before
      * calling the method
      */
-    protected final int decodeUtf8_2(int c)
-        throws XMLStreamException
+    protected final int decodeUtf8_2(int c) throws XMLStreamException
     {
         int d = (int) _inputBuffer[_inputPtr++];
         if ((d & 0xC0) != 0x080) {
@@ -2561,8 +2508,7 @@ public class AsyncUtfScanner
         return ((c & 0x1F) << 6) | (d & 0x3F);
     }
 
-    protected final void skipUtf8_2(int c)
-        throws XMLStreamException
+    protected final void skipUtf8_2(int c) throws XMLStreamException
     {
         int d = (int) _inputBuffer[_inputPtr++];
         if ((d & 0xC0) != 0x080) {
@@ -2599,8 +2545,7 @@ public class AsyncUtfScanner
         return c;
     }
 
-    protected final int decodeUtf8_3(int c1, int c2, int c3)
-        throws XMLStreamException
+    protected final int decodeUtf8_3(int c1, int c2, int c3) throws XMLStreamException
     {
         // Note: first char is assumed to have been checked
         if ((c2 & 0xC0) != 0x080) {
@@ -2647,8 +2592,7 @@ public class AsyncUtfScanner
      * @return Character value <b>minus 0x10000</c>; this so that caller
      *    can readily expand it to actual surrogates
      */
-    protected final int decodeUtf8_4(int c1, int c2, int c3, int c4)
-        throws XMLStreamException
+    protected final int decodeUtf8_4(int c1, int c2, int c3, int c4) throws XMLStreamException
     {
         /* Note: first char is assumed to have been checked,
          * (but not yet masked)
@@ -2665,47 +2609,5 @@ public class AsyncUtfScanner
             reportInvalidOther(c4 & 0xFF, _inputPtr);
         }
         return ((c << 6) | (c4 & 0x3F)) - 0x10000;
-    }
-
-    /*
-    /**********************************************************************
-    /* Name handling
-    /**********************************************************************
-     */
-
-    @Override
-    protected final PName addPName(int hash, int[] quads, int qlen, int lastQuadBytes)
-        throws XMLStreamException
-    {
-        return addUtfPName(_charTypes, hash, quads, qlen, lastQuadBytes);
-    }
-
-    /*
-    /**********************************************************************
-    /* Error reporting
-    /**********************************************************************
-     */
-
-    @Override
-    protected void reportInvalidInitial(int mask)
-        throws XMLStreamException
-    {
-        reportInputProblem("Invalid UTF-8 start byte 0x"
-                           +Integer.toHexString(mask));
-    }
-
-    @Override
-    protected void reportInvalidOther(int mask)
-        throws XMLStreamException
-    {
-        reportInputProblem("Invalid UTF-8 middle byte 0x"
-                           +Integer.toHexString(mask));
-    }
-
-    protected void reportInvalidOther(int mask, int ptr)
-        throws XMLStreamException
-    {
-        _inputPtr = ptr;
-        reportInvalidOther(mask);
     }
 }

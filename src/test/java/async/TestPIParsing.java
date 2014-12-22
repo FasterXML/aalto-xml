@@ -1,5 +1,6 @@
 package async;
 
+import com.fasterxml.aalto.AsyncByteArrayFeeder;
 import com.fasterxml.aalto.AsyncXMLInputFactory;
 import com.fasterxml.aalto.AsyncXMLStreamReader;
 import com.fasterxml.aalto.stax.InputFactoryImpl;
@@ -43,7 +44,7 @@ public class TestPIParsing extends AsyncTestBase
     private void _testPI(String spaces, int chunkSize) throws Exception
     {
         AsyncXMLInputFactory f = new InputFactoryImpl();
-        AsyncXMLStreamReader sr = f.createAsyncXMLStreamReader();
+        AsyncXMLStreamReader<AsyncByteArrayFeeder> sr = f.createAsyncForByteArray();
         AsyncReaderWrapper reader = new AsyncReaderWrapper(sr, chunkSize, spaces+XML);
         int t = verifyStart(reader);
         assertTokenType(PROCESSING_INSTRUCTION, t);
@@ -68,7 +69,7 @@ public class TestPIParsing extends AsyncTestBase
     private void _testPISkip(String spaces, int chunkSize) throws Exception
     {
         AsyncXMLInputFactory f = new InputFactoryImpl();
-        AsyncXMLStreamReader sr = f.createAsyncXMLStreamReader();
+        AsyncXMLStreamReader<AsyncByteArrayFeeder> sr = f.createAsyncForByteArray();
         AsyncReaderWrapper reader = new AsyncReaderWrapper(sr, chunkSize, spaces+XML);
         int t = verifyStart(reader);
         assertTokenType(PROCESSING_INSTRUCTION, t);

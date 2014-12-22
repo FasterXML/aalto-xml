@@ -20,7 +20,6 @@ import java.io.*;
 import javax.xml.stream.Location;
 import javax.xml.stream.XMLStreamException;
 
-
 import com.fasterxml.aalto.impl.IoStreamException;
 import com.fasterxml.aalto.impl.LocationImpl;
 import com.fasterxml.aalto.util.CharsetNames;
@@ -112,6 +111,7 @@ public final class ByteSourceBootstrapper
         return new ByteSourceBootstrapper(cfg, inputBuffer, inputStart, inputLen);
     }
 
+    @SuppressWarnings("resource")
     @Override
     public XmlScanner doBootstrap()
         throws IOException, XMLStreamException

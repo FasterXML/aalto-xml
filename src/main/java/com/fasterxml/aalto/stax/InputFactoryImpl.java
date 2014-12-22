@@ -45,18 +45,14 @@ import org.codehaus.stax2.ri.evt.Stax2EventReaderAdapter;
 import org.codehaus.stax2.ri.evt.Stax2FilteredEventReader;
 import org.xml.sax.InputSource;
 
-import com.fasterxml.aalto.AsyncXMLInputFactory;
-import com.fasterxml.aalto.AsyncXMLStreamReader;
+import com.fasterxml.aalto.*;
 import com.fasterxml.aalto.async.AsyncStreamReaderImpl;
-import com.fasterxml.aalto.async.AsyncUtfScanner;
+import com.fasterxml.aalto.async.AsyncByteArrayScannerImpl;
 import com.fasterxml.aalto.dom.DOMReaderImpl;
 import com.fasterxml.aalto.evt.EventAllocatorImpl;
 import com.fasterxml.aalto.evt.EventReaderImpl;
 import com.fasterxml.aalto.impl.IoStreamException;
-import com.fasterxml.aalto.in.ByteSourceBootstrapper;
-import com.fasterxml.aalto.in.CharSourceBootstrapper;
-import com.fasterxml.aalto.in.ReaderConfig;
-import com.fasterxml.aalto.util.IllegalCharHandler;
+import com.fasterxml.aalto.in.*;
 import com.fasterxml.aalto.util.URLUtil;
 
 /**
@@ -86,8 +82,7 @@ public final class InputFactoryImpl
     /**********************************************************************
      */
 
-    public InputFactoryImpl()
-    {
+    public InputFactoryImpl() {
         _config = new ReaderConfig();
     }
 
@@ -358,35 +353,43 @@ public final class InputFactoryImpl
      */
 
     @Override
-    public AsyncXMLStreamReader createAsyncXMLStreamReader()
+    public AsyncXMLStreamReader<AsyncByteArrayFeeder> createAsyncForByteArray()
     {
-    	// TODO: pass system and/or public ids?
-    	ReaderConfig cfg = getNonSharedConfig(null, null, null, false, false);
-    	cfg.setActualEncoding("UTF-8");
-    	return new AsyncStreamReaderImpl(new AsyncUtfScanner(cfg));
-    }
-    
-    public AsyncXMLStreamReader createAsyncXMLStreamReader(final IllegalCharHandler illegalCharHandler)
-    {
-    	// TODO: pass system and/or public ids?
-    	ReaderConfig cfg = getNonSharedConfig(null, null, null, false, false);
-    	cfg.setActualEncoding("UTF-8");
-    	cfg.setIllegalCharHandler(illegalCharHandler);
-    	return new AsyncStreamReaderImpl(new AsyncUtfScanner(cfg));
-    }
-    
-
-    @Override
-    public AsyncXMLStreamReader createAsyncXMLStreamReader(byte[] input) {
-        return createAsyncXMLStreamReader(input, 0, input.length);
+        // TODO: pass system and/or public ids?
+        ReaderConfig cfg = getNonSharedConfig(null, null, null, false, false);
+        cfg.setActualEncoding("UTF-8");
+        return new AsyncStreamReaderImpl<AsyncByteArrayFeeder>(new AsyncByteArrayScannerImpl(cfg));
     }
 
     @Override
-    public AsyncXMLStreamReader createAsyncXMLStreamReader(byte[] input, int offset, int length)
-    {
-        AsyncXMLStreamReader sr = createAsyncXMLStreamReader();
-        return sr;
+    public AsyncXMLStreamReader<AsyncByteArrayFeeder> createAsyncFor(byte[] input) {
+        ReaderConfig cfg = getNonSharedConfig(null, null, null, false, false);
+        cfg.setActualEncoding("UTF-8");
+        AsyncByteArrayScannerImpl scanner = new AsyncByteArrayScannerImpl(cfg);
+        return new AsyncStreamReaderImpl<AsyncByteArrayFeeder>(scanner);
     }
+
+    @Override
+    public AsyncXMLStreamReader<AsyncByteArrayFeeder> createAsyncFor(byte[] input, int offset, int length)
+        throws XMLStreamException
+    {
+         ReaderConfig cfg = getNonSharedConfig(null, null, null, false, false);
+         cfg.setActualEncoding("UTF-8");
+         AsyncByteArrayScannerImpl scanner = new AsyncByteArrayScannerImpl(cfg);
+         scanner.feedInput(input, offset, length);
+         return new AsyncStreamReaderImpl<AsyncByteArrayFeeder>(scanner);
+    }
+
+    /*
+    public AsyncXMLStreamReader<AsyncByteArrayFeeder> createAsyncFor(final IllegalCharHandler illegalCharHandler)
+    {
+        // TODO: pass system and/or public ids?
+        ReaderConfig cfg = getNonSharedConfig(null, null, null, false, false);
+         cfg.setActualEncoding("UTF-8");
+         cfg.setIllegalCharHandler(illegalCharHandler);
+         return new AsyncStreamReaderImpl<AsyncByteArrayFeeder>(new AsyncByteArrayScannerImpl(cfg));
+    }
+    */
     
     /*
     /**********************************************************************
@@ -441,6 +444,7 @@ public final class InputFactoryImpl
         return StreamReaderImpl.construct(ByteSourceBootstrapper.construct(cfg, in));
     }
 
+    @SuppressWarnings("resource")
     protected XMLStreamReader2 constructSR(javax.xml.transform.Source src,
                                           boolean forEventReader)
         throws XMLStreamException
@@ -518,6 +522,7 @@ public final class InputFactoryImpl
         throw new XMLStreamException("Can not create Stax reader for the Source passed -- neither reader, input stream nor system id was accessible; can not use other types of sources (like embedded SAX streams)");
     }
 
+    @SuppressWarnings("resource")
     protected XMLStreamReader2 constructSR2(Stax2Source ss, boolean forEventReader)
         throws XMLStreamException
     {
@@ -557,6 +562,7 @@ public final class InputFactoryImpl
         throw new IllegalArgumentException("Can not create stream reader for given Stax2Source: neither InputStream nor Reader available");
     }
 
+    @SuppressWarnings("resource")
     protected XMLStreamReader2 constructSR(URL src, boolean forEventReader)
         throws XMLStreamException
     {
@@ -571,6 +577,7 @@ public final class InputFactoryImpl
         return StreamReaderImpl.construct(ByteSourceBootstrapper.construct(cfg, in));
     }
 
+    @SuppressWarnings("resource")
     protected XMLStreamReader2 constructSR(File f, boolean forEventReader)
         throws XMLStreamException
     {

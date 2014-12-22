@@ -28,8 +28,7 @@ public class TestEventReader
         System.out.println("  coalescing: "+f.getProperty(XMLInputFactory.IS_COALESCING));
     }
 
-	public void test(String[] args)
-        throws Exception
+	public void test(String[] args) throws Exception
     {
         if (args.length != 1) {
             System.err.println("Usage: java ... "+getClass().getName()+" [file]");
@@ -68,7 +67,7 @@ public class TestEventReader
                 out.write("[CHARACTERS("+len+"), ws: "+chars.isWhiteSpace()+", iws: "+chars.isIgnorableWhiteSpace()+"]");
             } else if (evt instanceof EntityReference) {
 		EntityReference eref = (EntityReference) evt;
-                out.write("[ENTITY-REF '"+eref.getName()+"']");
+		out.write("[ENTITY-REF '"+eref.getName()+"']");
             }
             //out.write("{ENC:");
             evt.writeAsEncodedUnicode(out);
@@ -79,6 +78,7 @@ public class TestEventReader
         }
         //out.write("[END]\n");
         out.flush();
+        fin.close();
     }
 
     public static void main(String[] args) throws Exception

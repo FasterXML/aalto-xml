@@ -1,5 +1,6 @@
 package async;
 
+import com.fasterxml.aalto.AsyncByteArrayFeeder;
 import com.fasterxml.aalto.AsyncXMLInputFactory;
 import com.fasterxml.aalto.AsyncXMLStreamReader;
 import com.fasterxml.aalto.stax.InputFactoryImpl;
@@ -43,7 +44,7 @@ public class TestCommentParsing extends AsyncTestBase
     private void _testComments(String spaces, int chunkSize) throws Exception
     {
         AsyncXMLInputFactory f = new InputFactoryImpl();
-        AsyncXMLStreamReader sr = f.createAsyncXMLStreamReader();
+        AsyncXMLStreamReader<AsyncByteArrayFeeder> sr = f.createAsyncForByteArray();
         AsyncReaderWrapper reader = new AsyncReaderWrapper(sr, chunkSize, spaces+XML);
         int t = verifyStart(reader);
         assertTokenType(COMMENT, t);
@@ -62,7 +63,7 @@ public class TestCommentParsing extends AsyncTestBase
     private void _testSkipComments(String spaces, int chunkSize) throws Exception
     {
         AsyncXMLInputFactory f = new InputFactoryImpl();
-        AsyncXMLStreamReader sr = f.createAsyncXMLStreamReader();
+        AsyncXMLStreamReader<AsyncByteArrayFeeder> sr = f.createAsyncForByteArray();
         AsyncReaderWrapper reader = new AsyncReaderWrapper(sr, chunkSize, spaces+XML);
         int t = verifyStart(reader);
         assertTokenType(COMMENT, t);

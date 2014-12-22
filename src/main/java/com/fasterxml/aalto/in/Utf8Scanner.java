@@ -640,13 +640,6 @@ public final class Utf8Scanner
     /**********************************************************************
      */
 
-    @Override
-    protected final PName addPName(int hash, int[] quads, int qlen, int lastQuadBytes)
-        throws XMLStreamException
-    {
-        return addUtfPName(_charTypes, hash, quads, qlen, lastQuadBytes);
-    }
-
     /**
      * Parsing of public ids is bit more complicated than that of system
      * ids, since white space is to be coalesced.
@@ -2633,53 +2626,6 @@ public final class Utf8Scanner
     }
 
     /*
-    private final int decodeMultiByteChar3(int c, int ptr)
-        throws XMLStreamException
-    {
-        // let's see how many add'l bytes are needed
-        int type = mTmpChar - XmlCharTypes.CT_MULTIBYTE_N;
-        c &= (0x3F >> type); // 1f/0f/07 (for 2/3/4 bytes)
-        if (ptr >= _inputEnd) {
-            loadMoreGuaranteed();
-            ptr = _inputPtr;
-        }
-        int d = (int) _inputBuffer[ptr++];
-        if ((d & 0xC0) != 0x080) {
-            reportInvalidOther(d & 0xFF, ptr);
-        }
-        c = (c << 6) | (d & 0x3F);
-        
-        if (type > 1) {
-            if (ptr >= _inputEnd) {
-                loadMoreGuaranteed();
-                ptr = _inputPtr;
-            }
-            d = (int) _inputBuffer[ptr++];
-            if ((d & 0xC0) != 0x080) {
-                reportInvalidOther(d & 0xFF, ptr);
-            }
-            c = (c << 6) | (d & 0x3F);
-            if (type > 2) { // 4 bytes? (need surrogates)
-                if (ptr >= _inputEnd) {
-                    loadMoreGuaranteed();
-                    ptr = _inputPtr;
-                }
-                d = (int) _inputBuffer[ptr++];
-                if ((d & 0xC0) != 0x080) {
-                    reportInvalidOther(d & 0xFF, ptr);
-                }
-                c = (c << 6) | (d & 0x3F);
-                // Need to signal such pair differently (to make comparison
-                // easier)
-                c = -c;
-            }
-        }
-        _inputPtr = ptr;
-        return c;
-    }
-    */
-
-    /*
     /**********************************************************************
     /* Internal methods, error reporting
     /**********************************************************************
@@ -2739,22 +2685,7 @@ public final class Utf8Scanner
         return c;
     }
 
-    @Override
-    protected void reportInvalidInitial(int mask)
-        throws XMLStreamException
-    {
-        reportInputProblem("Invalid UTF-8 start byte 0x"+Integer.toHexString(mask));
-    }
-
-    @Override
-    protected void reportInvalidOther(int mask)
-        throws XMLStreamException
-    {
-        reportInputProblem("Invalid UTF-8 middle byte 0x"+Integer.toHexString(mask));
-    }
-
-    protected void reportInvalidOther(int mask, int ptr)
-        throws XMLStreamException
+    protected void reportInvalidOther(int mask, int ptr) throws XMLStreamException
     {
         _inputPtr = ptr;
         reportInvalidOther(mask);

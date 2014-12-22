@@ -2,6 +2,7 @@ package async;
 
 import javax.xml.stream.XMLStreamConstants;
 
+import com.fasterxml.aalto.AsyncByteArrayFeeder;
 import com.fasterxml.aalto.AsyncXMLInputFactory;
 import com.fasterxml.aalto.AsyncXMLStreamReader;
 import com.fasterxml.aalto.stax.InputFactoryImpl;
@@ -95,7 +96,7 @@ public class TestCharactersParsing extends AsyncTestBase
     private void _testLinefeeds(int chunkSize, boolean checkValues, String SPC) throws Exception
     {
         AsyncXMLInputFactory f = new InputFactoryImpl();
-        AsyncXMLStreamReader sr = f.createAsyncXMLStreamReader();
+        AsyncXMLStreamReader<AsyncByteArrayFeeder> sr = f.createAsyncForByteArray();
         final String XML = SPC+"<root>\rFirst\r\nSecond\nThird: "+UNICODE_SEGMENT+"</root>";
         AsyncReaderWrapper reader = new AsyncReaderWrapper(sr, chunkSize, XML);
 
@@ -125,7 +126,7 @@ public class TestCharactersParsing extends AsyncTestBase
     private void _testTextWithEntities(int chunkSize, boolean checkValues, String SPC) throws Exception
     {
         AsyncXMLInputFactory f = new InputFactoryImpl();
-        AsyncXMLStreamReader sr = f.createAsyncXMLStreamReader();
+        AsyncXMLStreamReader<AsyncByteArrayFeeder> sr = f.createAsyncForByteArray();
         final String XML = SPC+"<root>a&lt;b\rMOT</root>";
         AsyncReaderWrapper reader = new AsyncReaderWrapper(sr, chunkSize, XML);
 
@@ -155,7 +156,7 @@ public class TestCharactersParsing extends AsyncTestBase
     private void _testTextWithNumericEntities(int chunkSize, boolean checkValues, String SPC) throws Exception
     {
         AsyncXMLInputFactory f = new InputFactoryImpl();
-        AsyncXMLStreamReader sr = f.createAsyncXMLStreamReader();
+        AsyncXMLStreamReader<AsyncByteArrayFeeder> sr = f.createAsyncForByteArray();
         final String XML = SPC+"<root>&#60;tag&#x3e;!</root>";
         AsyncReaderWrapper reader = new AsyncReaderWrapper(sr, chunkSize, XML);
 

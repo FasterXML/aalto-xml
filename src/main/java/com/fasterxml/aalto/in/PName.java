@@ -201,6 +201,11 @@ public abstract class PName
     public final String toString() { return _prefixedName; }
 
     @Override
+    public int hashCode() {
+        return _prefixedName.hashCode();
+    }
+    
+    @Override
     public final boolean equals(Object o)
     {
         if (o == this) {
