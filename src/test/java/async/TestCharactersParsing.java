@@ -98,7 +98,7 @@ public class TestCharactersParsing extends AsyncTestBase
         AsyncXMLInputFactory f = new InputFactoryImpl();
         AsyncXMLStreamReader<AsyncByteArrayFeeder> sr = f.createAsyncForByteArray();
         final String XML = SPC+"<root>\rFirst\r\nSecond\nThird: "+UNICODE_SEGMENT+"</root>";
-        AsyncReaderWrapper reader = new AsyncReaderWrapper(sr, chunkSize, XML);
+        AsyncReaderWrapperForByteArray reader = new AsyncReaderWrapperForByteArray(sr, chunkSize, XML);
 
         assertTokenType(START_ELEMENT, verifyStart(reader));
         if (checkValues) {
@@ -128,7 +128,7 @@ public class TestCharactersParsing extends AsyncTestBase
         AsyncXMLInputFactory f = new InputFactoryImpl();
         AsyncXMLStreamReader<AsyncByteArrayFeeder> sr = f.createAsyncForByteArray();
         final String XML = SPC+"<root>a&lt;b\rMOT</root>";
-        AsyncReaderWrapper reader = new AsyncReaderWrapper(sr, chunkSize, XML);
+        AsyncReaderWrapperForByteArray reader = new AsyncReaderWrapperForByteArray(sr, chunkSize, XML);
 
         // should start with START_DOCUMENT, but for now skip
         int t = verifyStart(reader);
@@ -158,7 +158,7 @@ public class TestCharactersParsing extends AsyncTestBase
         AsyncXMLInputFactory f = new InputFactoryImpl();
         AsyncXMLStreamReader<AsyncByteArrayFeeder> sr = f.createAsyncForByteArray();
         final String XML = SPC+"<root>&#60;tag&#x3e;!</root>";
-        AsyncReaderWrapper reader = new AsyncReaderWrapper(sr, chunkSize, XML);
+        AsyncReaderWrapperForByteArray reader = new AsyncReaderWrapperForByteArray(sr, chunkSize, XML);
 
         // should start with START_DOCUMENT, but for now skip
         int t = verifyStart(reader);

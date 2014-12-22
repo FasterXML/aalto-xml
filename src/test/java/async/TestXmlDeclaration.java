@@ -17,7 +17,7 @@ public class TestXmlDeclaration extends AsyncTestBase
         for (String XML : new String[] { "   <root />", "<root/>" }) {
             for (int chunkSize : CHUNK_SIZES) {
                 AsyncXMLStreamReader<AsyncByteArrayFeeder> sr = f.createAsyncForByteArray();
-                AsyncReaderWrapper reader = new AsyncReaderWrapper(sr, chunkSize, XML);
+                AsyncReaderWrapperForByteArray reader = new AsyncReaderWrapperForByteArray(sr, chunkSize, XML);
                 assertEquals(EVENT_INCOMPLETE, reader.currentToken());
                 assertTokenType(START_DOCUMENT, reader.nextToken());
                 // no info, however; except for encoding auto-detection
@@ -39,7 +39,7 @@ public class TestXmlDeclaration extends AsyncTestBase
 
         for (int chunkSize : CHUNK_SIZES) {
             AsyncXMLStreamReader<AsyncByteArrayFeeder> sr = f.createAsyncForByteArray();
-            AsyncReaderWrapper reader = new AsyncReaderWrapper(sr, chunkSize, XML);
+            AsyncReaderWrapperForByteArray reader = new AsyncReaderWrapperForByteArray(sr, chunkSize, XML);
             assertEquals(EVENT_INCOMPLETE, reader.currentToken());
             assertTokenType(START_DOCUMENT, reader.nextToken());
             assertNull(sr.getCharacterEncodingScheme());
@@ -59,7 +59,7 @@ public class TestXmlDeclaration extends AsyncTestBase
 
         for (int chunkSize : CHUNK_SIZES) {
             AsyncXMLStreamReader<AsyncByteArrayFeeder> sr = f.createAsyncForByteArray();
-            AsyncReaderWrapper reader = new AsyncReaderWrapper(sr, chunkSize, XML);
+            AsyncReaderWrapperForByteArray reader = new AsyncReaderWrapperForByteArray(sr, chunkSize, XML);
             assertEquals(EVENT_INCOMPLETE, reader.currentToken());
             assertTokenType(START_DOCUMENT, reader.nextToken());
             assertEquals("UTF-8", sr.getEncoding());
@@ -79,7 +79,7 @@ public class TestXmlDeclaration extends AsyncTestBase
 
         for (int chunkSize : CHUNK_SIZES) {
             AsyncXMLStreamReader<AsyncByteArrayFeeder> sr = f.createAsyncForByteArray();
-            AsyncReaderWrapper reader = new AsyncReaderWrapper(sr, chunkSize, XML);
+            AsyncReaderWrapperForByteArray reader = new AsyncReaderWrapperForByteArray(sr, chunkSize, XML);
             assertEquals(EVENT_INCOMPLETE, reader.currentToken());
             assertTokenType(START_DOCUMENT, reader.nextToken());
             assertEquals("UTF-8", sr.getEncoding());
@@ -100,7 +100,7 @@ public class TestXmlDeclaration extends AsyncTestBase
 
         for (int chunkSize : CHUNK_SIZES) {
             AsyncXMLStreamReader<AsyncByteArrayFeeder> sr = f.createAsyncForByteArray();
-            AsyncReaderWrapper reader = new AsyncReaderWrapper(sr, chunkSize, XML);
+            AsyncReaderWrapperForByteArray reader = new AsyncReaderWrapperForByteArray(sr, chunkSize, XML);
             assertEquals(EVENT_INCOMPLETE, reader.currentToken());
             assertTokenType(START_DOCUMENT, reader.nextToken());
             assertEquals("UTF-8", sr.getEncoding());

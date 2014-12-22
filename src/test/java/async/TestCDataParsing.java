@@ -49,7 +49,7 @@ public class TestCDataParsing extends AsyncTestBase
     {
         AsyncXMLInputFactory f = new InputFactoryImpl();
         AsyncXMLStreamReader<AsyncByteArrayFeeder> sr = f.createAsyncForByteArray();
-        AsyncReaderWrapper reader = new AsyncReaderWrapper(sr, chunkSize, SPC + XML);
+        AsyncReaderWrapperForByteArray reader = new AsyncReaderWrapperForByteArray(sr, chunkSize, SPC + XML);
 
         int t = verifyStart(reader);
         assertTokenType(START_ELEMENT, t);
@@ -83,7 +83,7 @@ public class TestCDataParsing extends AsyncTestBase
     {
         AsyncXMLInputFactory f = new InputFactoryImpl();
         AsyncXMLStreamReader<AsyncByteArrayFeeder> sr = f.createAsyncForByteArray();
-        AsyncReaderWrapper reader = new AsyncReaderWrapper(sr, chunkSize, SPC + XML);
+        AsyncReaderWrapperForByteArray reader = new AsyncReaderWrapperForByteArray(sr, chunkSize, SPC + XML);
 
         int t = verifyStart(reader);
         assertTokenType(START_ELEMENT, t);

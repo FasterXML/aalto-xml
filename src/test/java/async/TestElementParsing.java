@@ -121,7 +121,7 @@ public class TestElementParsing extends AsyncTestBase
     {
         AsyncXMLInputFactory f = new InputFactoryImpl();
         AsyncXMLStreamReader<AsyncByteArrayFeeder> sr = f.createAsyncForByteArray();
-        AsyncReaderWrapper reader = new AsyncReaderWrapper(sr, chunkSize, XML);
+        AsyncReaderWrapperForByteArray reader = new AsyncReaderWrapperForByteArray(sr, chunkSize, XML);
 
         // should start with START_DOCUMENT, but for now skip
         int t = verifyStart(reader);
@@ -142,7 +142,7 @@ public class TestElementParsing extends AsyncTestBase
         AsyncXMLStreamReader<AsyncByteArrayFeeder> sr = f.createAsyncForByteArray();
 //        final String XML = SPC+"<root attr='1&amp;2'><leaf xmlns='abc' a   ='3'\rb=''  /></root>";
         final String XML = SPC+"<root attr='1&amp;2'><leaf xmlns='abc' a   ='3'\rxmlns:foo='bar'  b=''  /></root>";
-        AsyncReaderWrapper reader = new AsyncReaderWrapper(sr, chunkSize, XML);
+        AsyncReaderWrapperForByteArray reader = new AsyncReaderWrapperForByteArray(sr, chunkSize, XML);
 
         // should start with START_DOCUMENT, but for now skip
         int t = verifyStart(reader);
@@ -188,7 +188,7 @@ public class TestElementParsing extends AsyncTestBase
         AsyncXMLStreamReader<AsyncByteArrayFeeder> sr = f.createAsyncForByteArray();
 //        final String XML = SPC+"<root attr='1&amp;2'><leaf xmlns='abc' a   ='3'\rb=''  /></root>";
         final String XML = SPC+"<root attr='1&#62;2, 2&#x3C;1' />";
-        AsyncReaderWrapper reader = new AsyncReaderWrapper(sr, chunkSize, XML);
+        AsyncReaderWrapperForByteArray reader = new AsyncReaderWrapperForByteArray(sr, chunkSize, XML);
 
         // should start with START_DOCUMENT, but for now skip
         int t = verifyStart(reader);
@@ -216,7 +216,7 @@ public class TestElementParsing extends AsyncTestBase
         AsyncXMLStreamReader<AsyncByteArrayFeeder> sr = f.createAsyncForByteArray();
         final String VALUE = "Gr\u00e4"; 
         final String XML = SPC+"<root attr='"+VALUE+"' />";
-        AsyncReaderWrapper reader = new AsyncReaderWrapper(sr, chunkSize, XML);
+        AsyncReaderWrapperForByteArray reader = new AsyncReaderWrapperForByteArray(sr, chunkSize, XML);
 
         // should start with START_DOCUMENT, but for now skip
         int t = verifyStart(reader);
@@ -248,7 +248,7 @@ public class TestElementParsing extends AsyncTestBase
         final String VALUE = "Gr" + illegal; 
         final String VALUE_REPL  = "Gr" + replaced;
         final String XML = SPC+"<root attr='"+VALUE+"' />";
-        AsyncReaderWrapper reader = new AsyncReaderWrapper(sr, chunkSize, XML);
+        AsyncReaderWrapperForByteArray reader = new AsyncReaderWrapperForByteArray(sr, chunkSize, XML);
 
         // should start with START_DOCUMENT, but for now skip
         int t = verifyStart(reader);

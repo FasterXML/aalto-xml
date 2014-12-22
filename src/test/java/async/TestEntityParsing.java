@@ -50,7 +50,7 @@ public class TestEntityParsing extends AsyncTestBase
         // important must not require expansion of general entities
         f.setProperty(XMLInputFactory.IS_REPLACING_ENTITY_REFERENCES, Boolean.FALSE);
         AsyncXMLStreamReader<AsyncByteArrayFeeder> sr = f.createAsyncForByteArray();
-        AsyncReaderWrapper reader = new AsyncReaderWrapper(sr, chunkSize, XML);
+        AsyncReaderWrapperForByteArray reader = new AsyncReaderWrapperForByteArray(sr, chunkSize, XML);
 
         // should start with START_DOCUMENT, but for now skip
         int t = verifyStart(reader);

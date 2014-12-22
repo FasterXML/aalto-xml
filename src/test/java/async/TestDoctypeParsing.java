@@ -84,7 +84,7 @@ public class TestDoctypeParsing extends AsyncTestBase
         String XML = spaces+"<!DOCTYPE root>  <root />";
         AsyncXMLInputFactory f = new InputFactoryImpl();
         AsyncXMLStreamReader<AsyncByteArrayFeeder> sr = f.createAsyncForByteArray();
-        AsyncReaderWrapper reader = new AsyncReaderWrapper(sr, chunkSize, XML);
+        AsyncReaderWrapperForByteArray reader = new AsyncReaderWrapperForByteArray(sr, chunkSize, XML);
         int t = verifyStart(reader);
         assertTokenType(DTD, t);
         // as per Stax API, can't call getLocalName (ugh), but Stax2 gives us this:
@@ -100,7 +100,7 @@ public class TestDoctypeParsing extends AsyncTestBase
         String XML = spaces+"<!DOCTYPE root PUBLIC '"+PUBLIC_ID+"' \""+SYSTEM_ID+"\"><root/>";
         AsyncXMLInputFactory f = new InputFactoryImpl();
         AsyncXMLStreamReader<AsyncByteArrayFeeder> sr = f.createAsyncForByteArray();
-        AsyncReaderWrapper reader = new AsyncReaderWrapper(sr, chunkSize, XML);
+        AsyncReaderWrapperForByteArray reader = new AsyncReaderWrapperForByteArray(sr, chunkSize, XML);
         int t = verifyStart(reader);
         assertTokenType(DTD, t);
         assertTokenType(DTD, sr.getEventType());
@@ -123,7 +123,7 @@ public class TestDoctypeParsing extends AsyncTestBase
         String XML = spaces+"<!DOCTYPE root SYSTEM '"+SYSTEM_ID+"' ["+INTERNAL_SUBSET+"]>\n<root/>";
         AsyncXMLInputFactory f = new InputFactoryImpl();
         AsyncXMLStreamReader<AsyncByteArrayFeeder> sr = f.createAsyncForByteArray();
-        AsyncReaderWrapper reader = new AsyncReaderWrapper(sr, chunkSize, XML);
+        AsyncReaderWrapperForByteArray reader = new AsyncReaderWrapperForByteArray(sr, chunkSize, XML);
         int t = verifyStart(reader);
         assertTokenType(DTD, t);
         if (checkValue) {
@@ -145,7 +145,7 @@ public class TestDoctypeParsing extends AsyncTestBase
         String XML = spaces+"<!DOCTYPE root> <!DOCTYPE root> <root />";
         AsyncXMLInputFactory f = new InputFactoryImpl();
         AsyncXMLStreamReader<AsyncByteArrayFeeder> sr = f.createAsyncForByteArray();
-        AsyncReaderWrapper reader = new AsyncReaderWrapper(sr, chunkSize, XML);
+        AsyncReaderWrapperForByteArray reader = new AsyncReaderWrapperForByteArray(sr, chunkSize, XML);
         int t = verifyStart(reader);
         assertTokenType(DTD, t);
         assertEquals("root", sr.getPrefixedName());

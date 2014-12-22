@@ -45,7 +45,7 @@ public class TestPIParsing extends AsyncTestBase
     {
         AsyncXMLInputFactory f = new InputFactoryImpl();
         AsyncXMLStreamReader<AsyncByteArrayFeeder> sr = f.createAsyncForByteArray();
-        AsyncReaderWrapper reader = new AsyncReaderWrapper(sr, chunkSize, spaces+XML);
+        AsyncReaderWrapperForByteArray reader = new AsyncReaderWrapperForByteArray(sr, chunkSize, spaces+XML);
         int t = verifyStart(reader);
         assertTokenType(PROCESSING_INSTRUCTION, t);
         assertEquals("p", sr.getPITarget());
@@ -70,7 +70,7 @@ public class TestPIParsing extends AsyncTestBase
     {
         AsyncXMLInputFactory f = new InputFactoryImpl();
         AsyncXMLStreamReader<AsyncByteArrayFeeder> sr = f.createAsyncForByteArray();
-        AsyncReaderWrapper reader = new AsyncReaderWrapper(sr, chunkSize, spaces+XML);
+        AsyncReaderWrapperForByteArray reader = new AsyncReaderWrapperForByteArray(sr, chunkSize, spaces+XML);
         int t = verifyStart(reader);
         assertTokenType(PROCESSING_INSTRUCTION, t);
         assertTokenType(START_ELEMENT, reader.nextToken());
