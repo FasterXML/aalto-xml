@@ -15,11 +15,14 @@
 
 package com.fasterxml.aalto.async;
 
+import java.nio.ByteBuffer;
+
 import javax.xml.stream.XMLStreamException;
 
-import com.fasterxml.aalto.AsyncByteArrayFeeder;
+import com.fasterxml.aalto.*;
 import com.fasterxml.aalto.in.*;
 import com.fasterxml.aalto.util.DataUtil;
+//import com.fasterxml.aalto.util.XmlConsts;
 import com.fasterxml.aalto.util.XmlCharTypes;
 
 /**
@@ -27,10 +30,11 @@ import com.fasterxml.aalto.util.XmlCharTypes;
  * scanners. Due to basic complexity of async approach, character-based
  * doesn't make much sense, so only byte-based input is supported.
  */
-public class AsyncByteArrayScanner
+public class AsyncByteBufferScanner
     extends AsyncByteScanner
-    implements AsyncByteArrayFeeder
+    implements AsyncByteBufferFeeder
 {
+    
     /*
     /**********************************************************************
     /* Input buffer handling
@@ -40,7 +44,7 @@ public class AsyncByteArrayScanner
     /**
      * This buffer is actually provided by caller
      */
-    protected byte[] _inputBuffer;
+    protected ByteBuffer _inputBuffer;
 
     /**
      * In addition to current buffer pointer, and end pointer,
@@ -57,7 +61,7 @@ public class AsyncByteArrayScanner
     /**********************************************************************
      */
 
-    public AsyncByteArrayScanner(ReaderConfig cfg)
+    public AsyncByteBufferScanner(ReaderConfig cfg)
     {
         super(cfg);
         // must start by checking if there's XML declaration...
@@ -92,7 +96,7 @@ public class AsyncByteArrayScanner
         int outPtr = _textBuilder.getCurrentLength();
 
         final int[] TYPES = _charTypes.OTHER_CHARS;
-        final byte[] inputBuffer = _inputBuffer;
+        ByteBuffer inputBuffer = _inputBuffer;
 
         main_loop:
         while (true) {
@@ -115,7 +119,7 @@ public class AsyncByteArrayScanner
                     }
                 }
                 while (_inputPtr < max) {
-                    c = (int) inputBuffer[_inputPtr++] & 0xFF;
+                    c = (int) inputBuffer.get(_inputPtr++) & 0xFF;
                     if (TYPES[c] != 0) {
                         break ascii_loop;
                     }
@@ -132,7 +136,7 @@ public class AsyncByteArrayScanner
                         _pendingInput = PENDING_STATE_CR;
                         break main_loop;
                     }
-                    if (inputBuffer[_inputPtr] == BYTE_LF) {
+                    if (inputBuffer.get(_inputPtr) == BYTE_LF) {
                         ++_inputPtr;
                     }
                     markLF();
@@ -152,7 +156,7 @@ public class AsyncByteArrayScanner
             case XmlCharTypes.CT_MULTIBYTE_3:
                 if ((_inputEnd - _inputPtr) < 2) {
                     if (_inputEnd > _inputPtr) { // 2 bytes available
-                        int d = (int) _inputBuffer[_inputPtr++] & 0xFF;
+                        int d = (int) _inputBuffer.get(_inputPtr++) & 0xFF;
                         c |= (d << 8);
                     }
                     _pendingInput = c;
@@ -163,10 +167,10 @@ public class AsyncByteArrayScanner
             case XmlCharTypes.CT_MULTIBYTE_4:
                 if ((_inputEnd - _inputPtr) < 3) {
                     if (_inputEnd > _inputPtr) { // at least 2 bytes?
-                        int d = (int) _inputBuffer[_inputPtr++] & 0xFF;
+                        int d = (int) _inputBuffer.get(_inputPtr++) & 0xFF;
                         c |= (d << 8);
                         if (_inputEnd > _inputPtr) { // 3 bytes?
-                            d = (int) _inputBuffer[_inputPtr++] & 0xFF;
+                            d = (int) _inputBuffer.get(_inputPtr++) & 0xFF;
                             c |= (d << 16);
                         }
                     }
@@ -190,13 +194,13 @@ public class AsyncByteArrayScanner
                     _pendingInput = PENDING_STATE_COMMENT_HYPHEN1;
                     break main_loop;
                 }
-                if (_inputBuffer[_inputPtr] == BYTE_HYPHEN) { // ok, must be end then
+                if (_inputBuffer.get(_inputPtr) == BYTE_HYPHEN) { // ok, must be end then
                     ++_inputPtr;
                     if (_inputPtr >= _inputEnd) {
                         _pendingInput = PENDING_STATE_COMMENT_HYPHEN2;
                         break main_loop;
                     }
-                    if (_inputBuffer[_inputPtr++] != BYTE_GT) {
+                    if (_inputBuffer.get(_inputPtr++) != BYTE_GT) {
                         reportDoubleHyphenInComments();
                     }
                     _textBuilder.setCurrentLength(outPtr);
@@ -229,7 +233,7 @@ public class AsyncByteArrayScanner
             return EVENT_INCOMPLETE;
         }
         if (_pendingInput == PENDING_STATE_COMMENT_HYPHEN1) {
-            if (_inputBuffer[_inputPtr] != BYTE_HYPHEN) {
+            if (_inputBuffer.get(_inputPtr) != BYTE_HYPHEN) {
                 // can't be the end marker, just append '-' and go
                 _pendingInput = 0;
                 _textBuilder.append("-");
@@ -244,7 +248,7 @@ public class AsyncByteArrayScanner
         }
         if (_pendingInput == PENDING_STATE_COMMENT_HYPHEN2) {
             _pendingInput = 0;
-            byte b = _inputBuffer[_inputPtr++];
+            byte b = _inputBuffer.get(_inputPtr++);
             if (b != BYTE_GT) {
                 reportDoubleHyphenInComments();
             } 
@@ -278,7 +282,7 @@ public class AsyncByteArrayScanner
         int outPtr = _textBuilder.getCurrentLength();
         
         final int[] TYPES = _charTypes.OTHER_CHARS;
-        final byte[] inputBuffer = _inputBuffer;
+        ByteBuffer inputBuffer = _inputBuffer;
         
         main_loop:
         while (true) {
@@ -301,7 +305,7 @@ public class AsyncByteArrayScanner
                     }
                 }
                 while (_inputPtr < max) {
-                    c = (int) inputBuffer[_inputPtr++] & 0xFF;
+                    c = (int) inputBuffer.get(_inputPtr++) & 0xFF;
                     if (TYPES[c] != 0) {
                         break ascii_loop;
                     }
@@ -318,7 +322,7 @@ public class AsyncByteArrayScanner
                         _pendingInput = PENDING_STATE_CR;
                         break main_loop;
                     }
-                    if (inputBuffer[_inputPtr] == BYTE_LF) {
+                    if (inputBuffer.get(_inputPtr) == BYTE_LF) {
                         ++_inputPtr;
                     }
                     markLF();
@@ -338,7 +342,7 @@ public class AsyncByteArrayScanner
             case XmlCharTypes.CT_MULTIBYTE_3:
                 if ((_inputEnd - _inputPtr) < 2) {
                     if (_inputEnd > _inputPtr) { // 2 bytes available
-                        int d = (int) _inputBuffer[_inputPtr++] & 0xFF;
+                        int d = (int) _inputBuffer.get(_inputPtr++) & 0xFF;
                         c |= (d << 8);
                     }
                     _pendingInput = c;
@@ -349,10 +353,10 @@ public class AsyncByteArrayScanner
             case XmlCharTypes.CT_MULTIBYTE_4:
                 if ((_inputEnd - _inputPtr) < 3) {
                     if (_inputEnd > _inputPtr) { // at least 2 bytes?
-                        int d = (int) _inputBuffer[_inputPtr++] & 0xFF;
+                        int d = (int) _inputBuffer.get(_inputPtr++) & 0xFF;
                         c |= (d << 8);
                         if (_inputEnd > _inputPtr) { // 3 bytes?
-                            d = (int) _inputBuffer[_inputPtr++] & 0xFF;
+                            d = (int) _inputBuffer.get(_inputPtr++) & 0xFF;
                             c |= (d << 16);
                         }
                     }
@@ -377,7 +381,7 @@ public class AsyncByteArrayScanner
                     _pendingInput = PENDING_STATE_PI_QMARK;
                     break main_loop;
                 }
-                if (_inputBuffer[_inputPtr] == BYTE_GT) { // end
+                if (_inputBuffer.get(_inputPtr) == BYTE_GT) { // end
                     ++_inputPtr;
                     _textBuilder.setCurrentLength(outPtr);
                     _state = STATE_DEFAULT;
@@ -410,7 +414,7 @@ public class AsyncByteArrayScanner
             if (_inputPtr >= _inputEnd) {
                 return EVENT_INCOMPLETE;
             }
-            byte b = _inputBuffer[_inputPtr];
+            byte b = _inputBuffer.get(_inputPtr);
             _pendingInput = 0;
             if (b != BYTE_GT) {
                 // can't be the end marker, just append '-' and go
@@ -453,7 +457,7 @@ public class AsyncByteArrayScanner
         }
 
         final int[] TYPES = _charTypes.DTD_CHARS;
-        final byte[] inputBuffer = _inputBuffer;
+        ByteBuffer inputBuffer = _inputBuffer;
         
         main_loop:
         while (true) {
@@ -476,7 +480,7 @@ public class AsyncByteArrayScanner
                     }
                 }
                 while (_inputPtr < max) {
-                    c = (int) inputBuffer[_inputPtr++] & 0xFF;
+                    c = (int) inputBuffer.get(_inputPtr++) & 0xFF;
                     if (TYPES[c] != 0) {
                         break ascii_loop;
                     }
@@ -492,7 +496,7 @@ public class AsyncByteArrayScanner
                     _pendingInput = PENDING_STATE_CR;
                     break main_loop;
                 }
-                if (inputBuffer[_inputPtr] == BYTE_LF) {
+                if (inputBuffer.get(_inputPtr) == BYTE_LF) {
                     ++_inputPtr;
                 }
                 markLF();
@@ -511,7 +515,7 @@ public class AsyncByteArrayScanner
             case XmlCharTypes.CT_MULTIBYTE_3:
                 if ((_inputEnd - _inputPtr) < 2) {
                     if (_inputEnd > _inputPtr) { // 2 bytes available
-                        int d = (int) _inputBuffer[_inputPtr++] & 0xFF;
+                        int d = (int) _inputBuffer.get(_inputPtr++) & 0xFF;
                         c |= (d << 8);
                     }
                     _pendingInput = c;
@@ -522,10 +526,10 @@ public class AsyncByteArrayScanner
             case XmlCharTypes.CT_MULTIBYTE_4:
                 if ((_inputEnd - _inputPtr) < 3) {
                     if (_inputEnd > _inputPtr) { // at least 2 bytes?
-                        int d = (int) _inputBuffer[_inputPtr++] & 0xFF;
+                        int d = (int) _inputBuffer.get(_inputPtr++) & 0xFF;
                         c |= (d << 8);
                         if (_inputEnd > _inputPtr) { // 3 bytes?
-                            d = (int) _inputBuffer[_inputPtr++] & 0xFF;
+                            d = (int) _inputBuffer.get(_inputPtr++) & 0xFF;
                             c |= (d << 16);
                         }
                     }
@@ -602,7 +606,7 @@ public class AsyncByteArrayScanner
         int outPtr = _textBuilder.getCurrentLength();
     
         final int[] TYPES = _charTypes.OTHER_CHARS;
-        final byte[] inputBuffer = _inputBuffer;
+        ByteBuffer inputBuffer = _inputBuffer;
     
         main_loop:
         while (true) {
@@ -625,7 +629,7 @@ public class AsyncByteArrayScanner
                     }
                 }
                 while (_inputPtr < max) {
-                    c = (int) inputBuffer[_inputPtr++] & 0xFF;
+                    c = (int) inputBuffer.get(_inputPtr++) & 0xFF;
                     if (TYPES[c] != 0) {
                         break ascii_loop;
                     }
@@ -642,7 +646,7 @@ public class AsyncByteArrayScanner
                         _pendingInput = PENDING_STATE_CR;
                         break main_loop;
                     }
-                    if (inputBuffer[_inputPtr] == BYTE_LF) {
+                    if (inputBuffer.get(_inputPtr) == BYTE_LF) {
                         ++_inputPtr;
                     }
                     markLF();
@@ -662,7 +666,7 @@ public class AsyncByteArrayScanner
             case XmlCharTypes.CT_MULTIBYTE_3:
                 if ((_inputEnd - _inputPtr) < 2) {
                     if (_inputEnd > _inputPtr) { // 2 bytes available
-                        int d = (int) _inputBuffer[_inputPtr++] & 0xFF;
+                        int d = (int) _inputBuffer.get(_inputPtr++) & 0xFF;
                         c |= (d << 8);
                     }
                     _pendingInput = c;
@@ -673,10 +677,10 @@ public class AsyncByteArrayScanner
             case XmlCharTypes.CT_MULTIBYTE_4:
                 if ((_inputEnd - _inputPtr) < 3) {
                     if (_inputEnd > _inputPtr) { // at least 2 bytes?
-                        int d = (int) _inputBuffer[_inputPtr++] & 0xFF;
+                        int d = (int) _inputBuffer.get(_inputPtr++) & 0xFF;
                         c |= (d << 8);
                         if (_inputEnd > _inputPtr) { // 3 bytes?
-                            d = (int) _inputBuffer[_inputPtr++] & 0xFF;
+                            d = (int) _inputBuffer.get(_inputPtr++) & 0xFF;
                             c |= (d << 16);
                         }
                     }
@@ -701,21 +705,21 @@ public class AsyncByteArrayScanner
                     break main_loop;
                 }
                 // Hmmh. This is more complex... so be it.
-                if (_inputBuffer[_inputPtr] == BYTE_RBRACKET) { // end might be nigh...
+                if (_inputBuffer.get(_inputPtr) == BYTE_RBRACKET) { // end might be nigh...
                     ++_inputPtr;
                     while (true) {
                         if (_inputPtr >= _inputEnd) {
                             _pendingInput = PENDING_STATE_CDATA_BRACKET2;
                             break main_loop;
                         }
-                        if (_inputBuffer[_inputPtr] == BYTE_GT) {
+                        if (_inputBuffer.get(_inputPtr) == BYTE_GT) {
                             ++_inputPtr;
                             _textBuilder.setCurrentLength(outPtr);
                             _state = STATE_DEFAULT;
                             _nextEvent = EVENT_INCOMPLETE;
                             return CDATA;
                         }
-                        if (_inputBuffer[_inputPtr] != BYTE_RBRACKET) { // neither '>' nor ']'; push "]]" back
+                        if (_inputBuffer.get(_inputPtr) != BYTE_RBRACKET) { // neither '>' nor ']'; push "]]" back
                             outputBuffer[outPtr++] = ']';
                             if (outPtr >= outputBuffer.length) {
                                 outputBuffer = _textBuilder.finishCurrentSegment();
@@ -758,7 +762,7 @@ public class AsyncByteArrayScanner
             if (_inputPtr >= _inputEnd) {
                 return EVENT_INCOMPLETE;
             }
-            if (_inputBuffer[_inputPtr] != BYTE_RBRACKET) {
+            if (_inputBuffer.get(_inputPtr) != BYTE_RBRACKET) {
                 // can't be the end marker, just append ']' and go
                 _textBuilder.append(']');
                 return (_pendingInput = 0);
@@ -774,7 +778,7 @@ public class AsyncByteArrayScanner
             if (_inputPtr >= _inputEnd) {
                 return EVENT_INCOMPLETE;
             }
-            byte b = _inputBuffer[_inputPtr++];
+            byte b = _inputBuffer.get(_inputPtr++);
             if (b == BYTE_GT) {
                 _pendingInput = 0;
                 _state = STATE_DEFAULT;
@@ -811,7 +815,7 @@ public class AsyncByteArrayScanner
 
         // Possible \r\n linefeed?
         if (c == PENDING_STATE_CR) {
-            if (_inputBuffer[_inputPtr] == BYTE_LF) {
+            if (_inputBuffer.get(_inputPtr) == BYTE_LF) {
                 ++_inputPtr;
             }
             markLF();
@@ -828,14 +832,14 @@ public class AsyncByteArrayScanner
             case XmlCharTypes.CT_MULTIBYTE_3:
                 {
                     // Ok... so do we have one or two pending bytes?
-                    int next = _inputBuffer[_inputPtr++] & 0xFF;
+                    int next = _inputBuffer.get(_inputPtr++) & 0xFF;
                     int c2 = (c >> 8);
                     if (c2 == 0) { // just one; need two more
                         if (_inputPtr >= _inputEnd) { // but got only one
                             _pendingInput = c | (next << 8);
                             return EVENT_INCOMPLETE;
                         }
-                        int c3 = _inputBuffer[_inputPtr++] & 0xFF;
+                        int c3 = _inputBuffer.get(_inputPtr++) & 0xFF;
                         c = decodeUtf8_3(c, next, c3);
                     } else { // had two, got one, bueno:
                         c = decodeUtf8_3((c & 0xFF), c2, next);
@@ -845,19 +849,19 @@ public class AsyncByteArrayScanner
                 break;
             case XmlCharTypes.CT_MULTIBYTE_4:
                 {
-                    int next = (int) _inputBuffer[_inputPtr++] & 0xFF;
+                    int next = (int) _inputBuffer.get(_inputPtr++) & 0xFF;
                     // Only had one?
                     if ((c >> 8) == 0) { // ok, so need 3 more
                         if (_inputPtr >= _inputEnd) { // just have 1
                             _pendingInput = c | (next << 8);
                             return EVENT_INCOMPLETE;
                         }
-                        int c2 = _inputBuffer[_inputPtr++] & 0xFF;
+                        int c2 = _inputBuffer.get(_inputPtr++) & 0xFF;
                         if (_inputPtr >= _inputEnd) { // almost, got 2
                             _pendingInput = c | (next << 8) | (c2 << 16);
                             return EVENT_INCOMPLETE;
                         }
-                        int c3 = _inputBuffer[_inputPtr++] & 0xFF;
+                        int c3 = _inputBuffer.get(_inputPtr++) & 0xFF;
                         c = decodeUtf8_4(c, next, c2, c3);
                     } else { // had two or three
                         int c2 = (c >> 8) & 0xFF;
@@ -868,7 +872,7 @@ public class AsyncByteArrayScanner
                                 _pendingInput = c | (next << 16);
                                 return EVENT_INCOMPLETE;
                             }
-                            c3 = _inputBuffer[_inputPtr++] & 0xFF;
+                            c3 = _inputBuffer.get(_inputPtr++) & 0xFF;
                             c = decodeUtf8_4((c & 0xFF), c2, next, c3);
                         } else { // had three, got last
                             c = decodeUtf8_4((c & 0xFF), c2, c3, next);
@@ -923,7 +927,7 @@ public class AsyncByteArrayScanner
         return (_inputPtr >=_inputEnd) && !_endOfInput;
     }
 
-    public void feedInput(byte[] buf, int start, int len) throws XMLStreamException
+    public void feedInput(ByteBuffer buffer) throws XMLStreamException
     {
         // Must not have remaining input
         if (_inputPtr < _inputEnd) {
@@ -937,11 +941,14 @@ public class AsyncByteArrayScanner
         _pastBytesOrChars += _origBufferLen;
         _rowStartOffset -= _origBufferLen;
 
+        int start = buffer.position();
+        int end = buffer.limit();
+
         // And then update buffer settings
-        _inputBuffer = buf;
+        _inputBuffer = buffer;
         _inputPtr = start;
-        _inputEnd = start+len;
-        _origBufferLen = len;
+        _inputEnd = end;
+        _origBufferLen = end-start;
     }
 
     /*
@@ -992,7 +999,7 @@ public class AsyncByteArrayScanner
                     }
                     return handleXmlDeclaration();
                 }
-                if (_inputBuffer[_inputPtr] == BYTE_LT) { // first byte, see if it could be XML declaration
+                if (_inputBuffer.get(_inputPtr) == BYTE_LT) { // first byte, see if it could be XML declaration
                     ++_inputPtr;
                     _pendingInput = PENDING_STATE_XMLDECL_LT;
                     Boolean b = startXmlDeclaration(); // is or may be XML declaration, so:
@@ -1025,7 +1032,7 @@ public class AsyncByteArrayScanner
                     }
                     return _currToken;
                 }
-                byte b = _inputBuffer[_inputPtr++];
+                byte b = _inputBuffer.get(_inputPtr++);
 
                 /* Really should get white space or '<'... anything else is
                  * pretty much an error.
@@ -1052,7 +1059,7 @@ public class AsyncByteArrayScanner
                 if (_inputPtr >= _inputEnd) {
                     return _currToken;
                 }
-                byte b = _inputBuffer[_inputPtr++];
+                byte b = _inputBuffer.get(_inputPtr++);
                 if (b == BYTE_EXCL) { // comment or DOCTYPE declaration?
                     _state = STATE_PROLOG_DECL;
                     return handlePrologDeclStart(isProlog);
@@ -1143,7 +1150,7 @@ public class AsyncByteArrayScanner
                 if (_inputPtr >= _inputEnd) { // nothing we can do?
                     return _currToken; // i.e. EVENT_INCOMPLETE
                 }
-                byte b = _inputBuffer[_inputPtr++];
+                byte b = _inputBuffer.get(_inputPtr++);
                 if (b == BYTE_LT) { // root element, comment, proc instr?
                     _state = STATE_TREE_SEEN_LT;
                 } else if (b == BYTE_AMP) {
@@ -1159,7 +1166,7 @@ public class AsyncByteArrayScanner
             }
             if (_state == STATE_TREE_SEEN_LT) {
                 // Ok, so we've just seen the less-than char...
-                byte b = _inputBuffer[_inputPtr++];
+                byte b = _inputBuffer.get(_inputPtr++);
                 if (b == BYTE_EXCL) { // comment or CDATA
                     _state = STATE_TREE_SEEN_EXCL;
                 } else if (b == BYTE_QMARK) {
@@ -1184,7 +1191,7 @@ public class AsyncByteArrayScanner
                 if (_inputPtr >= _inputEnd) {
                     return _currToken; // i.e. EVENT_INCOMPLETE
                 }
-                byte b = _inputBuffer[_inputPtr++];
+                byte b = _inputBuffer.get(_inputPtr++);
                 // Comment or CDATA?
                 if (b == BYTE_HYPHEN) { // Comment
                     _nextEvent = COMMENT;
@@ -1242,7 +1249,7 @@ public class AsyncByteArrayScanner
         if (_inputPtr >= _inputEnd) { // nothing we can do?
             return EVENT_INCOMPLETE;
         }
-        byte b = _inputBuffer[_inputPtr++];
+        byte b = _inputBuffer.get(_inputPtr++);
         // So far, we have seen "<!", need to know if it's DTD or COMMENT 
         if (b == BYTE_HYPHEN) {
             _nextEvent = COMMENT;
@@ -1272,7 +1279,7 @@ public class AsyncByteArrayScanner
            return null;
        }
        if (_pendingInput == PENDING_STATE_XMLDECL_LT) { // "<" at start of doc
-            if (_inputBuffer[_inputPtr] != BYTE_QMARK) { // some other 
+            if (_inputBuffer.get(_inputPtr) != BYTE_QMARK) { // some other 
                 _pendingInput = 0;
                 _state = STATE_PROLOG_SEEN_LT;
                 return Boolean.FALSE;
@@ -1284,7 +1291,7 @@ public class AsyncByteArrayScanner
             }
        }
        if (_pendingInput == PENDING_STATE_XMLDECL_LTQ) { // "<?" at start of doc
-            byte b = _inputBuffer[_inputPtr++];
+            byte b = _inputBuffer.get(_inputPtr++);
             _tokenName = parseNewName(b);
             if (_tokenName == null) { // incomplete
                 _pendingInput = PENDING_STATE_XMLDECL_TARGET;
@@ -1339,7 +1346,7 @@ public class AsyncByteArrayScanner
             switch (_state) {
             case STATE_XMLDECL_AFTER_XML: // "<?xml", need space
                 {
-                    byte b = _inputBuffer[_inputPtr++];
+                    byte b = _inputBuffer.get(_inputPtr++);
                     if (b == BYTE_SPACE || b == BYTE_CR || b == BYTE_LF || b == BYTE_TAB) {
                         _state = STATE_XMLDECL_BEFORE_VERSION;
                     } else {
@@ -1354,7 +1361,7 @@ public class AsyncByteArrayScanner
                 if (!asyncSkipSpace()) { // not enough input
                     break;
                 }
-                if ((_tokenName = parseNewName(_inputBuffer[_inputPtr++])) == null) { // incomplete
+                if ((_tokenName = parseNewName(_inputBuffer.get(_inputPtr++))) == null) { // incomplete
                     _state = STATE_XMLDECL_VERSION;
                     break;
                 }
@@ -1380,7 +1387,7 @@ public class AsyncByteArrayScanner
                     break;
                 }
                 {
-                    byte b = _inputBuffer[_inputPtr++];
+                    byte b = _inputBuffer.get(_inputPtr++);
                     if (b != BYTE_EQ) {
                         reportPrologUnexpChar(true, decodeCharForError(b), " (expected '=' after 'version' in xml declaration)");
                     }
@@ -1394,7 +1401,7 @@ public class AsyncByteArrayScanner
                 if (!asyncSkipSpace()) { // skip space, if any
                     break;
                 }
-                _elemAttrQuote = _inputBuffer[_inputPtr++];
+                _elemAttrQuote = _inputBuffer.get(_inputPtr++);
                 if (_elemAttrQuote != BYTE_QUOT && _elemAttrQuote != BYTE_APOS) {
                     reportPrologUnexpChar(true, decodeCharForError(_elemAttrQuote), " (expected '\"' or ''' in xml declaration for version value)");
                 }
@@ -1423,7 +1430,7 @@ public class AsyncByteArrayScanner
                 
             case STATE_XMLDECL_AFTER_VERSION_VALUE: // version got; need space or '?'
                 {
-                    byte b = _inputBuffer[_inputPtr++];
+                    byte b = _inputBuffer.get(_inputPtr++);
                     if (b == BYTE_QMARK) {
                         _state = STATE_XMLDECL_ENDQ;
                         continue main_loop;
@@ -1444,7 +1451,7 @@ public class AsyncByteArrayScanner
                     break;
                 }
                 {
-                    byte b = _inputBuffer[_inputPtr++];
+                    byte b = _inputBuffer.get(_inputPtr++);
                     if (b == BYTE_QMARK) {
                         _state = STATE_XMLDECL_ENDQ;
                         continue main_loop;
@@ -1487,7 +1494,7 @@ public class AsyncByteArrayScanner
                     break;
                 }
                 {
-                    byte b = _inputBuffer[_inputPtr++];
+                    byte b = _inputBuffer.get(_inputPtr++);
                     if (b != BYTE_EQ) {
                         reportPrologUnexpChar(true, decodeCharForError(b), " (expected '=' after 'encoding' in xml declaration)");
                     }
@@ -1501,7 +1508,7 @@ public class AsyncByteArrayScanner
                 if (!asyncSkipSpace()) { // skip space, if any
                     break;
                 }
-                _elemAttrQuote = _inputBuffer[_inputPtr++];
+                _elemAttrQuote = _inputBuffer.get(_inputPtr++);
                 if (_elemAttrQuote != BYTE_QUOT && _elemAttrQuote != BYTE_APOS) {
                     reportPrologUnexpChar(true, decodeCharForError(_elemAttrQuote), " (expected '\"' or ''' in xml declaration for encoding value)");
                 }
@@ -1531,7 +1538,7 @@ public class AsyncByteArrayScanner
                 
             case STATE_XMLDECL_AFTER_ENCODING_VALUE: // encoding+value gotten; need space or '?'
                 {
-                    byte b = _inputBuffer[_inputPtr++];
+                    byte b = _inputBuffer.get(_inputPtr++);
                     if (b == BYTE_QMARK) {
                         _state = STATE_XMLDECL_ENDQ;
                         continue main_loop;
@@ -1552,7 +1559,7 @@ public class AsyncByteArrayScanner
                     break;
                 }
                 {
-                    byte b = _inputBuffer[_inputPtr++];
+                    byte b = _inputBuffer.get(_inputPtr++);
                     if (b == BYTE_QMARK) {
                         _state = STATE_XMLDECL_ENDQ;
                         continue main_loop;
@@ -1585,7 +1592,7 @@ public class AsyncByteArrayScanner
                     break;
                 }
                 {
-                    byte b = _inputBuffer[_inputPtr++];
+                    byte b = _inputBuffer.get(_inputPtr++);
                     if (b != BYTE_EQ) {
                         reportPrologUnexpChar(true, decodeCharForError(b), " (expected '=' after 'standalone' in xml declaration)");
                     }
@@ -1599,7 +1606,7 @@ public class AsyncByteArrayScanner
                 if (!asyncSkipSpace()) { // skip space, if any
                     break;
                 }
-                _elemAttrQuote = _inputBuffer[_inputPtr++];
+                _elemAttrQuote = _inputBuffer.get(_inputPtr++);
                 if (_elemAttrQuote != BYTE_QUOT && _elemAttrQuote != BYTE_APOS) {
                     reportPrologUnexpChar(true, decodeCharForError(_elemAttrQuote), " (expected '\"' or ''' in xml declaration for standalone value)");
                 }
@@ -1630,8 +1637,8 @@ public class AsyncByteArrayScanner
                 if (!asyncSkipSpace()) { // skip space, if any
                     break;
                 }
-                if (_inputBuffer[_inputPtr++] != BYTE_QMARK) {
-                    reportPrologUnexpChar(true, decodeCharForError(_inputBuffer[_inputPtr-1]), " (expected '?>' to end xml declaration)");
+                if (_inputBuffer.get(_inputPtr++) != BYTE_QMARK) {
+                    reportPrologUnexpChar(true, decodeCharForError(_inputBuffer.get(_inputPtr-1)), " (expected '?>' to end xml declaration)");
                 }
                 _state = STATE_XMLDECL_ENDQ;
                 if (_inputPtr >= _inputEnd) {
@@ -1644,8 +1651,8 @@ public class AsyncByteArrayScanner
                 _tokenName = null;
                 _state = STATE_DEFAULT;
                 _nextEvent = EVENT_INCOMPLETE;
-                if (_inputBuffer[_inputPtr++] != BYTE_GT) {
-                    reportPrologUnexpChar(true, decodeCharForError(_inputBuffer[_inputPtr-1]), " (expected '>' to end xml declaration)");
+                if (_inputBuffer.get(_inputPtr++) != BYTE_GT) {
+                    reportPrologUnexpChar(true, decodeCharForError(_inputBuffer.get(_inputPtr-1)), " (expected '>' to end xml declaration)");
                 }
                 return START_DOCUMENT;
     
@@ -1702,7 +1709,7 @@ public class AsyncByteArrayScanner
                 // fall through
             case STATE_DTD_AFTER_DOCTYPE:
                 {
-                    byte b = _inputBuffer[_inputPtr++];
+                    byte b = _inputBuffer.get(_inputPtr++);
                     if (b == BYTE_SPACE || b == BYTE_CR || b == BYTE_LF || b == BYTE_TAB) {
                         _state = STATE_DTD_BEFORE_ROOT_NAME;
                     } else {
@@ -1714,7 +1721,7 @@ public class AsyncByteArrayScanner
                 if (!asyncSkipSpace()) { // not enough input
                     break;
                 }
-                if ((_tokenName = parseNewName(_inputBuffer[_inputPtr++])) == null) { // incomplete
+                if ((_tokenName = parseNewName(_inputBuffer.get(_inputPtr++))) == null) { // incomplete
                     _state = STATE_DTD_ROOT_NAME;
                     break;
                 }
@@ -1731,7 +1738,7 @@ public class AsyncByteArrayScanner
                 // fall through
             case STATE_DTD_AFTER_ROOT_NAME:
                 {
-                    byte b = _inputBuffer[_inputPtr++];
+                    byte b = _inputBuffer.get(_inputPtr++);
                     if (b == BYTE_GT) {
                         _state = STATE_DEFAULT;
                         _nextEvent = EVENT_INCOMPLETE;
@@ -1749,7 +1756,7 @@ public class AsyncByteArrayScanner
                     break;
                 }
                 {
-                    byte b = _inputBuffer[_inputPtr++];
+                    byte b = _inputBuffer.get(_inputPtr++);
                     if (b == BYTE_GT) {
                         _state = STATE_DEFAULT;
                         _nextEvent = EVENT_INCOMPLETE;
@@ -1791,7 +1798,7 @@ public class AsyncByteArrayScanner
                     
             case STATE_DTD_AFTER_PUBLIC: 
                 {
-                    byte b = _inputBuffer[_inputPtr++];
+                    byte b = _inputBuffer.get(_inputPtr++);
                     if (b == BYTE_SPACE || b == BYTE_CR || b == BYTE_LF || b == BYTE_TAB) {
                         _state = STATE_DTD_BEFORE_PUBLIC_ID;
                     } else {
@@ -1802,7 +1809,7 @@ public class AsyncByteArrayScanner
     
             case STATE_DTD_AFTER_SYSTEM: 
                 {
-                    byte b = _inputBuffer[_inputPtr++];
+                    byte b = _inputBuffer.get(_inputPtr++);
                     if (b == BYTE_SPACE || b == BYTE_CR || b == BYTE_LF || b == BYTE_TAB) {
                         _state = STATE_DTD_BEFORE_SYSTEM_ID;
                     } else {
@@ -1815,7 +1822,7 @@ public class AsyncByteArrayScanner
                 if (!asyncSkipSpace()) {
                     break;
                 }
-                _elemAttrQuote = _inputBuffer[_inputPtr++];
+                _elemAttrQuote = _inputBuffer.get(_inputPtr++);
                 if (_elemAttrQuote != BYTE_QUOT && _elemAttrQuote != BYTE_APOS) {
                     reportPrologUnexpChar(true, decodeCharForError(_elemAttrQuote), " (expected '\"' or ''' for PUBLIC ID)");
                 }
@@ -1842,7 +1849,7 @@ public class AsyncByteArrayScanner
                 // fall through
             case STATE_DTD_AFTER_PUBLIC_ID: 
                 {
-                    byte b = _inputBuffer[_inputPtr++];
+                    byte b = _inputBuffer.get(_inputPtr++);
                     if (b == BYTE_SPACE || b == BYTE_CR || b == BYTE_LF || b == BYTE_TAB) {
                         _state = STATE_DTD_BEFORE_SYSTEM_ID;
                     } else {
@@ -1855,7 +1862,7 @@ public class AsyncByteArrayScanner
                 if (!asyncSkipSpace()) {
                     break;
                 }
-                _elemAttrQuote = _inputBuffer[_inputPtr++];
+                _elemAttrQuote = _inputBuffer.get(_inputPtr++);
                 if (_elemAttrQuote != BYTE_QUOT && _elemAttrQuote != BYTE_APOS) {
                     reportPrologUnexpChar(true, decodeCharForError(_elemAttrQuote), " (expected '\"' or ''' for SYSTEM ID)");
                 }
@@ -1886,7 +1893,7 @@ public class AsyncByteArrayScanner
                     break;
                 }
                 {
-                    byte b = _inputBuffer[_inputPtr++];
+                    byte b = _inputBuffer.get(_inputPtr++);
                     if (b == BYTE_GT) {
                         _state = STATE_DEFAULT;
                         _nextEvent = EVENT_INCOMPLETE;
@@ -1909,7 +1916,7 @@ public class AsyncByteArrayScanner
                     break;
                 }
                 {
-                    byte b = _inputBuffer[_inputPtr++];
+                    byte b = _inputBuffer.get(_inputPtr++);
                     if (b != BYTE_GT) {
                         reportPrologUnexpChar(true, b, "expected '>' to end DTD");
                     }
@@ -1924,26 +1931,26 @@ public class AsyncByteArrayScanner
         return _currToken;
     }
 
-    private final boolean parseDtdId(char[] buffer, int ptr) throws XMLStreamException
+    private final boolean parseDtdId(char[] outputBuffer, int outputPtr) throws XMLStreamException
     {
         final int quote = (int) _elemAttrQuote;
         while (_inputPtr < _inputEnd) {
-            int ch = _inputBuffer[_inputPtr++] & 0xFF;
+            int ch = _inputBuffer.get(_inputPtr++) & 0xFF;
             if (ch == quote) {
-                _textBuilder.setCurrentLength(ptr);
+                _textBuilder.setCurrentLength(outputPtr);
                 return true;
             }
             // this is not exact check; but does work for all legal (valid) characters:
             if (ch <= INT_SPACE || ch > 0x7E) {
                 reportPrologUnexpChar(true, decodeCharForError((byte) ch), " (not valid in PUBLIC or SYSTEM ID)");
             }
-            if (ptr >= buffer.length) {
-                buffer = _textBuilder.finishCurrentSegment();
-                ptr = 0;
+            if (outputPtr >= outputBuffer.length) {
+                outputBuffer = _textBuilder.finishCurrentSegment();
+                outputPtr = 0;
             }
-            buffer[ptr++] = (char) ch;
+            outputBuffer[outputPtr++] = (char) ch;
         }
-        _textBuilder.setCurrentLength(ptr);
+        _textBuilder.setCurrentLength(outputPtr);
         return false;
     }
      
@@ -1955,26 +1962,26 @@ public class AsyncByteArrayScanner
      * 
      * @return True if we managed to parse the whole pseudo-attribute
      */
-    private boolean parseXmlDeclAttr(char[] buffer, int ptr) throws XMLStreamException
+    private boolean parseXmlDeclAttr(char[] outputBuffer, int outputPtr) throws XMLStreamException
     {
         final int quote = (int) _elemAttrQuote;
         while (_inputPtr < _inputEnd) {
-            int ch = _inputBuffer[_inputPtr++] & 0xFF;
+            int ch = _inputBuffer.get(_inputPtr++) & 0xFF;
             if (ch == quote) {
-                _textBuilder.setCurrentLength(ptr);
+                _textBuilder.setCurrentLength(outputPtr);
                 return true;
             }
             // this is not exact check; but does work for all legal (valid) characters:
             if (ch <= INT_SPACE || ch > INT_z) {
                 reportPrologUnexpChar(true, decodeCharForError((byte) ch), " (not valid in XML pseudo-attribute values)");
             }
-            if (ptr >= buffer.length) {
-                buffer = _textBuilder.finishCurrentSegment();
-                ptr = 0;
+            if (outputPtr >= outputBuffer.length) {
+                outputBuffer = _textBuilder.finishCurrentSegment();
+                outputPtr = 0;
             }
-            buffer[ptr++] = (char) ch;
+            outputBuffer[outputPtr++] = (char) ch;
         }
-        _textBuilder.setCurrentLength(ptr);
+        _textBuilder.setCurrentLength(outputPtr);
         return false;
     }
 
@@ -1992,7 +1999,7 @@ public class AsyncByteArrayScanner
         if (_inputPtr >= _inputEnd) {
             return EVENT_INCOMPLETE;
         }
-        return handleCDataStartMarker(_inputBuffer[_inputPtr++]);
+        return handleCDataStartMarker(_inputBuffer.get(_inputPtr++));
     }
     
     private int handleCDataStartMarker(byte b) throws XMLStreamException
@@ -2006,7 +2013,7 @@ public class AsyncByteArrayScanner
             if (_inputPtr >= _inputEnd) {
                 return EVENT_INCOMPLETE;
             }
-            b = _inputBuffer[_inputPtr++];
+            b = _inputBuffer.get(_inputPtr++);
             // fall through
         case STATE_CDATA_C:
             if (b != BYTE_D) {
@@ -2016,7 +2023,7 @@ public class AsyncByteArrayScanner
             if (_inputPtr >= _inputEnd) {
                 return EVENT_INCOMPLETE;
             }
-            b = _inputBuffer[_inputPtr++];
+            b = _inputBuffer.get(_inputPtr++);
             // fall through
         case STATE_CDATA_CD:
             if (b != BYTE_A) {
@@ -2026,7 +2033,7 @@ public class AsyncByteArrayScanner
             if (_inputPtr >= _inputEnd) {
                 return EVENT_INCOMPLETE;
             }
-            b = _inputBuffer[_inputPtr++];
+            b = _inputBuffer.get(_inputPtr++);
             // fall through
         case STATE_CDATA_CDA:
             if (b != BYTE_T) {
@@ -2036,7 +2043,7 @@ public class AsyncByteArrayScanner
             if (_inputPtr >= _inputEnd) {
                 return EVENT_INCOMPLETE;
             }
-            b = _inputBuffer[_inputPtr++];
+            b = _inputBuffer.get(_inputPtr++);
             // fall through
         case STATE_CDATA_CDAT:
             if (b != BYTE_A) {
@@ -2046,7 +2053,7 @@ public class AsyncByteArrayScanner
             if (_inputPtr >= _inputEnd) {
                 return EVENT_INCOMPLETE;
             }
-            b = _inputBuffer[_inputPtr++];
+            b = _inputBuffer.get(_inputPtr++);
             // fall through
         case STATE_CDATA_CDATA:
             if (b != BYTE_LBRACKET) {
@@ -2082,7 +2089,7 @@ public class AsyncByteArrayScanner
             }
             switch (_state) {
             case STATE_DEFAULT:
-                _tokenName = parseNewName(_inputBuffer[_inputPtr++]);
+                _tokenName = parseNewName(_inputBuffer.get(_inputPtr++));
                 if (_tokenName == null) {
                     _state = STATE_PI_IN_TARGET;
                     return EVENT_INCOMPLETE;
@@ -2096,10 +2103,10 @@ public class AsyncByteArrayScanner
             case STATE_PI_AFTER_TARGET:
                 // Need ws or "?>"
                 {
-                    byte b = _inputBuffer[_inputPtr++];
+                    byte b = _inputBuffer.get(_inputPtr++);
                     if (b == BYTE_QMARK) {
                         // Quick check, can we see '>' as well? All done, if so
-                        if (_inputPtr < _inputEnd && _inputBuffer[_inputPtr] == BYTE_GT) {
+                        if (_inputPtr < _inputEnd && _inputBuffer.get(_inputPtr) == BYTE_GT) {
                             ++_inputPtr;
                             break main_loop; // means we are done
                         }
@@ -2116,8 +2123,8 @@ public class AsyncByteArrayScanner
                         _textBuilder.resetWithEmpty();
                         // Quick check, perhaps we'll see end marker?
                         if ((_inputPtr+1) < _inputEnd
-                            && _inputBuffer[_inputPtr] == BYTE_QMARK
-                            && _inputBuffer[_inputPtr+1] == BYTE_GT) {
+                            && _inputBuffer.get(_inputPtr) == BYTE_QMARK
+                            && _inputBuffer.get(_inputPtr+1) == BYTE_GT) {
                             _inputPtr += 2;
                             break main_loop; // means we are done
                         }
@@ -2140,7 +2147,7 @@ public class AsyncByteArrayScanner
             case STATE_PI_AFTER_TARGET_QMARK:
                 {
                     // Must get '>' following '?' we saw right after name
-                    byte b = _inputBuffer[_inputPtr++];
+                    byte b = _inputBuffer.get(_inputPtr++);
                     // Otherwise, it's an error
                     if (b != BYTE_GT) {
                         reportMissingPISpace(decodeCharForError(b));
@@ -2175,7 +2182,7 @@ public class AsyncByteArrayScanner
         if (_inputPtr >= _inputEnd) {
             return EVENT_INCOMPLETE;
         }
-        byte b = _inputBuffer[_inputPtr++];
+        byte b = _inputBuffer.get(_inputPtr++);
         
         if (_state == STATE_DEFAULT) {
             if (b != BYTE_HYPHEN) {
@@ -2215,7 +2222,7 @@ public class AsyncByteArrayScanner
     private boolean asyncSkipSpace() throws XMLStreamException
     {
         while (_inputPtr < _inputEnd) {
-            byte b = _inputBuffer[_inputPtr];
+            byte b = _inputBuffer.get(_inputPtr);
             if ((b & 0xFF) > INT_SPACE) {
                 // hmmmh. Shouldn't this be handled someplace else?
                 if (_pendingInput == PENDING_STATE_CR) {
@@ -2232,7 +2239,7 @@ public class AsyncByteArrayScanner
                     _pendingInput = PENDING_STATE_CR;
                     break;
                 }
-                if (_inputBuffer[_inputPtr] == BYTE_LF) {
+                if (_inputBuffer.get(_inputPtr) == BYTE_LF) {
                     ++_inputPtr;
                 }
                 markLF();
@@ -2252,7 +2259,7 @@ public class AsyncByteArrayScanner
     protected int handleEntityStartingToken() throws XMLStreamException
     {
         _textBuilder.resetWithEmpty();
-        byte b = _inputBuffer[_inputPtr++]; // we know one is available
+        byte b = _inputBuffer.get(_inputPtr++); // we know one is available
         if (b == BYTE_HASH) { // numeric character entity
             _textBuilder.resetWithEmpty();
             _state = STATE_TREE_NUMERIC_ENTITY_START;
@@ -2322,7 +2329,7 @@ public class AsyncByteArrayScanner
     protected int handleNumericEntityStartingToken() throws XMLStreamException
     {
         if (_pendingInput == PENDING_STATE_ENT_SEEN_HASH) {
-            byte b = _inputBuffer[_inputPtr]; // we know one is available
+            byte b = _inputBuffer.get(_inputPtr); // we know one is available
             _entityValue = 0;
             if (b == BYTE_x) { // 'x' marks hex
                 _pendingInput = PENDING_STATE_ENT_IN_HEX_DIGIT;
@@ -2363,7 +2370,7 @@ public class AsyncByteArrayScanner
     {
         int value = _entityValue;
         while (_inputPtr < _inputEnd) {
-            byte b = _inputBuffer[_inputPtr++];
+            byte b = _inputBuffer.get(_inputPtr++);
             if (b == BYTE_SEMICOLON) {
                 _entityValue = value;
                 return true;
@@ -2396,7 +2403,7 @@ public class AsyncByteArrayScanner
     {
         int value = _entityValue;
         while (_inputPtr < _inputEnd) {
-            byte b = _inputBuffer[_inputPtr++];
+            byte b = _inputBuffer.get(_inputPtr++);
             if (b == BYTE_SEMICOLON) {
                 _entityValue = value;
                 return true;
@@ -2426,7 +2433,7 @@ public class AsyncByteArrayScanner
     protected final int decodeGeneralEntity(PName entityName) throws XMLStreamException
     {
         // First things first: verify that we got semicolon afterwards
-        byte b = _inputBuffer[_inputPtr++];
+        byte b = _inputBuffer.get(_inputPtr++);
         if (b != BYTE_SEMICOLON) {
             throwUnexpectedChar(decodeCharForError(b), " expected ';' following entity name (\""+entityName.getPrefixedName()+"\")");
         }
@@ -2500,7 +2507,7 @@ public class AsyncByteArrayScanner
                     }
                     // Ok, got a space, can move on
                 } else {
-                    b = _inputBuffer[_inputPtr++];
+                    b = _inputBuffer.get(_inputPtr++);
                     c = (int) b & 0xFF;
                     
                     if (c <= INT_SPACE) {
@@ -2511,7 +2518,7 @@ public class AsyncByteArrayScanner
                                 _pendingInput = PENDING_STATE_CR;
                                 return EVENT_INCOMPLETE;
                             }
-                            if (_inputBuffer[_inputPtr] == BYTE_LF) {
+                            if (_inputBuffer.get(_inputPtr) == BYTE_LF) {
                                 ++_inputPtr;
                             }
                             markLF();
@@ -2547,7 +2554,7 @@ public class AsyncByteArrayScanner
                         return EVENT_INCOMPLETE;
                     }
                 }
-                b = _inputBuffer[_inputPtr++];
+                b = _inputBuffer.get(_inputPtr++);
                 c = (int) b & 0xFF;
 
                 while (c <= INT_SPACE) {
@@ -2558,7 +2565,7 @@ public class AsyncByteArrayScanner
                             _pendingInput = PENDING_STATE_CR;
                             return EVENT_INCOMPLETE;
                         }
-                        if (_inputBuffer[_inputPtr] == BYTE_LF) {
+                        if (_inputBuffer.get(_inputPtr) == BYTE_LF) {
                             ++_inputPtr;
                         }
                         markLF();
@@ -2568,7 +2575,7 @@ public class AsyncByteArrayScanner
                     if (_inputPtr >= _inputEnd) {
                         return EVENT_INCOMPLETE;
                     }
-                    b = _inputBuffer[_inputPtr++];
+                    b = _inputBuffer.get(_inputPtr++);
                     c = (int) b & 0xFF;
                 }
 
@@ -2636,7 +2643,7 @@ public class AsyncByteArrayScanner
 
             case STATE_SE_SEEN_SLASH:
                 {
-                    b = _inputBuffer[_inputPtr++];
+                    b = _inputBuffer.get(_inputPtr++);
                     if (b != BYTE_GT) {
                         throwUnexpectedChar(decodeCharForError(b), " expected '>'");
                     }
@@ -2755,16 +2762,16 @@ public class AsyncByteArrayScanner
              */
             return handleEndElement();
         }
-        byte[] buf = _inputBuffer;
+        ByteBuffer buf = _inputBuffer;
         
         // First all full chunks of 4 bytes (if any)
         --size;
         for (int qix = 0; qix < size; ++qix) {
             int ptr = _inputPtr;
-            int q = (buf[ptr] << 24)
-                | ((buf[ptr+1] & 0xFF) << 16)
-                | ((buf[ptr+2] & 0xFF) << 8)
-                | ((buf[ptr+3] & 0xFF))
+            int q = (buf.get(ptr) << 24)
+                | ((buf.get(ptr+1) & 0xFF) << 16)
+                | ((buf.get(ptr+2) & 0xFF) << 8)
+                | ((buf.get(ptr+3) & 0xFF))
                 ;
             _inputPtr += 4;
             // match?
@@ -2777,13 +2784,13 @@ public class AsyncByteArrayScanner
          * tricky as we don't actually fully know byte length...
          */
         int lastQ = _tokenName.getQuad(size);
-        int q = buf[_inputPtr++] & 0xFF;
+        int q = buf.get(_inputPtr++) & 0xFF;
         if (q != lastQ) { // need second byte?
-            q = (q << 8) | (buf[_inputPtr++] & 0xFF);
+            q = (q << 8) | (buf.get(_inputPtr++) & 0xFF);
             if (q != lastQ) { // need third byte?
-                q = (q << 8) | (buf[_inputPtr++] & 0xFF);
+                q = (q << 8) | (buf.get(_inputPtr++) & 0xFF);
                 if (q != lastQ) { // need full 4 bytes?
-                    q = (q << 8) | (buf[_inputPtr++] & 0xFF);
+                    q = (q << 8) | (buf.get(_inputPtr++) & 0xFF);
                     if (q != lastQ) { // still no match? failure!
                         reportUnexpectedEndTag(_tokenName.getPrefixedName());
                     }
@@ -2791,7 +2798,7 @@ public class AsyncByteArrayScanner
             }
         }
         // Trailing space?
-        int i2 = _inputBuffer[_inputPtr++] & 0xFF;
+        int i2 = _inputBuffer.get(_inputPtr++) & 0xFF;
         while (i2 <= INT_SPACE) {
             if (i2 == INT_LF) {
                 markLF();
@@ -2802,7 +2809,7 @@ public class AsyncByteArrayScanner
                     _state = STATE_EE_NEED_GT;
                     return EVENT_INCOMPLETE;
                 }
-                if (_inputBuffer[_inputPtr] == BYTE_LF) {
+                if (_inputBuffer.get(_inputPtr) == BYTE_LF) {
                     ++_inputPtr;
                 }
                 markLF();
@@ -2814,7 +2821,7 @@ public class AsyncByteArrayScanner
                 _state = STATE_EE_NEED_GT;
                 return EVENT_INCOMPLETE;
             }
-            i2 = _inputBuffer[_inputPtr++] & 0xFF;
+            i2 = _inputBuffer.get(_inputPtr++) & 0xFF;
         }
         if (i2 != INT_GT) {
             throwUnexpectedChar(decodeCharForError((byte)i2), " expected space or closing '>'");
@@ -2836,7 +2843,7 @@ public class AsyncByteArrayScanner
                     if (_inputPtr >= _inputEnd) {
                         return EVENT_INCOMPLETE;
                     }
-                    _currQuad = (_currQuad << 8) | (_inputBuffer[_inputPtr++] & 0xFF);
+                    _currQuad = (_currQuad << 8) | (_inputBuffer.get(_inputPtr++) & 0xFF);
                 }
                 // match?
                 if (_currQuad != elemName.getQuad(_quadCount)) {
@@ -2852,7 +2859,7 @@ public class AsyncByteArrayScanner
                     return EVENT_INCOMPLETE;
                 }
                 int q = (_currQuad << 8);
-                q |= (_inputBuffer[_inputPtr++] & 0xFF);
+                q |= (_inputBuffer.get(_inputPtr++) & 0xFF);
                 _currQuad = q;
                 if (q == lastQ) { // match
                     break;
@@ -2880,7 +2887,7 @@ public class AsyncByteArrayScanner
             if (_inputPtr >= _inputEnd) {
                 return EVENT_INCOMPLETE;
             }
-            int i2 = _inputBuffer[_inputPtr++] & 0xFF;
+            int i2 = _inputBuffer.get(_inputPtr++) & 0xFF;
             if (i2 <= INT_SPACE) {
                 if (i2 == INT_LF) {
                     markLF();
@@ -2889,7 +2896,7 @@ public class AsyncByteArrayScanner
                         _pendingInput = PENDING_STATE_CR;
                         return EVENT_INCOMPLETE;
                     }
-                    if (_inputBuffer[_inputPtr] == BYTE_LF) {
+                    if (_inputBuffer.get(_inputPtr) == BYTE_LF) {
                         ++_inputPtr;
                     }
                     markLF();
@@ -2930,7 +2937,7 @@ public class AsyncByteArrayScanner
                     _pendingInput = PENDING_STATE_CR;
                     return EVENT_INCOMPLETE;
                 }
-                if (_inputBuffer[_inputPtr] == BYTE_LF) {
+                if (_inputBuffer.get(_inputPtr) == BYTE_LF) {
                     ++_inputPtr;
                 }
                 markLF();
@@ -2949,7 +2956,7 @@ public class AsyncByteArrayScanner
             case XmlCharTypes.CT_MULTIBYTE_3:
                 if ((_inputEnd - _inputPtr) < 2) {
                     if (_inputEnd > _inputPtr) { // 2 bytes available
-                        int d = (int) _inputBuffer[_inputPtr++] & 0xFF;
+                        int d = (int) _inputBuffer.get(_inputPtr++) & 0xFF;
                         c |= (d << 8);
                     }
                     _pendingInput = c;
@@ -2960,10 +2967,10 @@ public class AsyncByteArrayScanner
             case XmlCharTypes.CT_MULTIBYTE_4:
                 if ((_inputEnd - _inputPtr) < 3) {
                     if (_inputEnd > _inputPtr) { // at least 2 bytes?
-                        int d = (int) _inputBuffer[_inputPtr++] & 0xFF;
+                        int d = (int) _inputBuffer.get(_inputPtr++) & 0xFF;
                         c |= (d << 8);
                         if (_inputEnd > _inputPtr) { // 3 bytes?
-                            d = (int) _inputBuffer[_inputPtr++] & 0xFF;
+                            d = (int) _inputBuffer.get(_inputPtr++) & 0xFF;
                             c |= (d << 16);
                         }
                     }
@@ -3025,7 +3032,7 @@ public class AsyncByteArrayScanner
         }
 
         final int[] TYPES = _charTypes.TEXT_CHARS;
-        final byte[] inputBuffer = _inputBuffer;
+        final ByteBuffer inputBuffer = _inputBuffer;
         char[] outputBuffer = _textBuilder.getBufferWithoutReset();
         // Should have just one code point (one or two chars). Assert?
         int outPtr = _textBuilder.getCurrentLength();
@@ -3052,7 +3059,7 @@ public class AsyncByteArrayScanner
                     }
                 }
                 while (ptr < max) {
-                    c = (int) inputBuffer[ptr++] & 0xFF;
+                    c = (int) inputBuffer.get(ptr++) & 0xFF;
                     if (TYPES[c] != 0) {
                         _inputPtr = ptr;
                         break ascii_loop;
@@ -3071,7 +3078,7 @@ public class AsyncByteArrayScanner
                         _pendingInput = PENDING_STATE_CR;
                         break main_loop;
                     }
-                    if (inputBuffer[_inputPtr] == BYTE_LF) {
+                    if (inputBuffer.get(_inputPtr) == BYTE_LF) {
                         ++_inputPtr;
                     }
                     markLF();
@@ -3091,7 +3098,7 @@ public class AsyncByteArrayScanner
             case XmlCharTypes.CT_MULTIBYTE_3:
                 if ((_inputEnd - _inputPtr) < 2) {
                     if (_inputEnd > _inputPtr) { // 2 bytes available
-                        int d = (int) _inputBuffer[_inputPtr++] & 0xFF;
+                        int d = (int) _inputBuffer.get(_inputPtr++) & 0xFF;
                         c |= (d << 8);
                     }
                     _pendingInput = c;
@@ -3102,10 +3109,10 @@ public class AsyncByteArrayScanner
             case XmlCharTypes.CT_MULTIBYTE_4:
                 if ((_inputEnd - _inputPtr) < 3) {
                     if (_inputEnd > _inputPtr) { // at least 2 bytes?
-                        int d = (int) _inputBuffer[_inputPtr++] & 0xFF;
+                        int d = (int) _inputBuffer.get(_inputPtr++) & 0xFF;
                         c |= (d << 8);
                         if (_inputEnd > _inputPtr) { // 3 bytes?
-                            d = (int) _inputBuffer[_inputPtr++] & 0xFF;
+                            d = (int) _inputBuffer.get(_inputPtr++) & 0xFF;
                             c |= (d << 16);
                         }
                     }
@@ -3157,7 +3164,7 @@ public class AsyncByteArrayScanner
                     int count = 1;
                     byte b = BYTE_NULL;
                     while (_inputPtr < _inputEnd) {
-                        b = inputBuffer[_inputPtr];
+                        b = inputBuffer.get(_inputPtr);
                         if (b != BYTE_RBRACKET) {
                             break;
                         }
@@ -3209,50 +3216,50 @@ public class AsyncByteArrayScanner
          */
         int ptr = _inputPtr;
         if ((ptr  + 3) <= _inputEnd) {
-            byte b = _inputBuffer[ptr++];
+            byte b = _inputBuffer.get(ptr++);
             if (b == BYTE_HASH) { // numeric character entity
-                if (_inputBuffer[ptr] == BYTE_x) {
+                if (_inputBuffer.get(ptr) == BYTE_x) {
                     return handleHexEntityInCharacters(ptr+1);
                 }
                 return handleDecEntityInCharacters(ptr);
             }
             // general entity; maybe one of pre-defined ones
             if (b == BYTE_a) { // amp or apos?
-                b = _inputBuffer[ptr++];
+                b = _inputBuffer.get(ptr++);
                 if (b == BYTE_m) {
                     if ((ptr + 1) < _inputPtr
-                            && _inputBuffer[ptr] == BYTE_p
-                            && _inputBuffer[ptr+1] == BYTE_SEMICOLON) {
+                            && _inputBuffer.get(ptr) == BYTE_p
+                            && _inputBuffer.get(ptr+1) == BYTE_SEMICOLON) {
                         _inputPtr = ptr + 2;
                         return INT_AMP;
                     }
                 } else if (b == BYTE_p) {
                     if ((ptr + 2) < _inputPtr
-                            && _inputBuffer[ptr] == BYTE_o
-                            && _inputBuffer[ptr+1] == BYTE_s
-                            && _inputBuffer[ptr+2] == BYTE_SEMICOLON) {
+                            && _inputBuffer.get(ptr) == BYTE_o
+                            && _inputBuffer.get(ptr+1) == BYTE_s
+                            && _inputBuffer.get(ptr+2) == BYTE_SEMICOLON) {
                         _inputPtr = ptr + 3;
                         return INT_APOS;
                     }
                 }
             } else if (b == BYTE_g) { // gt?
-                if (_inputBuffer[ptr] == BYTE_t
-                        && _inputBuffer[ptr+1] == BYTE_SEMICOLON) {
+                if (_inputBuffer.get(ptr) == BYTE_t
+                        && _inputBuffer.get(ptr+1) == BYTE_SEMICOLON) {
                     _inputPtr = ptr + 2;
                     return INT_GT;
                 }
             } else if (b == BYTE_l) { // lt?
-                if (_inputBuffer[ptr] == BYTE_t
-                        && _inputBuffer[ptr+1] == BYTE_SEMICOLON) {
+                if (_inputBuffer.get(ptr) == BYTE_t
+                        && _inputBuffer.get(ptr+1) == BYTE_SEMICOLON) {
                     _inputPtr = ptr + 2;
                     return INT_LT;
                 }
             } else if (b == BYTE_q) { // quot?
                 if ((ptr + 3) < _inputPtr
-                        && _inputBuffer[ptr] == BYTE_u
-                        && _inputBuffer[ptr+1] == BYTE_o
-                        && _inputBuffer[ptr+2] == BYTE_t
-                        && _inputBuffer[ptr+3] == BYTE_SEMICOLON) {
+                        && _inputBuffer.get(ptr)== BYTE_u
+                        && _inputBuffer.get(ptr+1) == BYTE_o
+                        && _inputBuffer.get(ptr+2) == BYTE_t
+                        && _inputBuffer.get(ptr+3) == BYTE_SEMICOLON) {
                     _inputPtr = ptr + 4;
                     return INT_APOS;
                 }
@@ -3264,7 +3271,7 @@ public class AsyncByteArrayScanner
 
     protected int handleDecEntityInCharacters(int ptr) throws XMLStreamException
     {
-        byte b = _inputBuffer[ptr++];
+        byte b = _inputBuffer.get(ptr++);
         final int end = _inputEnd;
         int value = 0;
         do {
@@ -3279,7 +3286,7 @@ public class AsyncByteArrayScanner
             if (ptr >= end) {
                 return 0;
             }
-            b = _inputBuffer[ptr++];
+            b = _inputBuffer.get(ptr++);
         } while (b != BYTE_SEMICOLON);
         _inputPtr = ptr;
         verifyXmlChar(value);
@@ -3288,7 +3295,7 @@ public class AsyncByteArrayScanner
     
     protected int handleHexEntityInCharacters(int ptr) throws XMLStreamException
     {
-        byte b = _inputBuffer[ptr++];
+        byte b = _inputBuffer.get(ptr++);
         final int end = _inputEnd;
         int value = 0;
         do {
@@ -3309,7 +3316,7 @@ public class AsyncByteArrayScanner
             if (ptr >= end) {
                 return 0;
             }
-            b = _inputBuffer[ptr++];
+            b = _inputBuffer.get(ptr++);
         } while (b != BYTE_SEMICOLON);
         _inputPtr = ptr;
         verifyXmlChar(value);
@@ -3335,7 +3342,7 @@ public class AsyncByteArrayScanner
         // Possible \r\n linefeed?
         if (c < 0) { // markers are all negative
             if (c == PENDING_STATE_CR) {
-                if (_inputBuffer[_inputPtr] == BYTE_LF) {
+                if (_inputBuffer.get(_inputPtr) == BYTE_LF) {
                     ++_inputPtr;
                 }
                 markLF();
@@ -3356,14 +3363,14 @@ public class AsyncByteArrayScanner
         case XmlCharTypes.CT_MULTIBYTE_3:
             {
                 // Ok... so do we have one or two pending bytes?
-                int next = _inputBuffer[_inputPtr++] & 0xFF;
+                int next = _inputBuffer.get(_inputPtr++) & 0xFF;
                 int c2 = (c >> 8);
                 if (c2 == 0) { // just one; need two more
                     if (_inputPtr >= _inputEnd) { // but got only one
                         _pendingInput = c | (next << 8);
                         return false;
                     }
-                    int c3 = _inputBuffer[_inputPtr++] & 0xFF;
+                    int c3 = _inputBuffer.get(_inputPtr++) & 0xFF;
                     c = decodeUtf8_3(c, next, c3);
                 } else { // had two, got one, bueno:
                     c = decodeUtf8_3((c & 0xFF), c2, next);
@@ -3373,19 +3380,19 @@ public class AsyncByteArrayScanner
             break;
         case XmlCharTypes.CT_MULTIBYTE_4:
             {
-                int next = (int) _inputBuffer[_inputPtr++] & 0xFF;
+                int next = (int) _inputBuffer.get(_inputPtr++) & 0xFF;
                 // Only had one?
                 if ((c >> 8) == 0) { // ok, so need 3 more
                     if (_inputPtr >= _inputEnd) { // just have 1
                         _pendingInput = c | (next << 8);
                         return false;
                     }
-                    int c2 = _inputBuffer[_inputPtr++] & 0xFF;
+                    int c2 = _inputBuffer.get(_inputPtr++) & 0xFF;
                     if (_inputPtr >= _inputEnd) { // almost, got 2
                         _pendingInput = c | (next << 8) | (c2 << 16);
                         return false;
                     }
-                    int c3 = _inputBuffer[_inputPtr++] & 0xFF;
+                    int c3 = _inputBuffer.get(_inputPtr++) & 0xFF;
                     c = decodeUtf8_4(c, next, c2, c3);
                 } else { // had two or three
                     int c2 = (c >> 8) & 0xFF;
@@ -3396,7 +3403,7 @@ public class AsyncByteArrayScanner
                             _pendingInput = c | (next << 16);
                             return false;
                         }
-                        c3 = _inputBuffer[_inputPtr++] & 0xFF;
+                        c3 = _inputBuffer.get(_inputPtr++) & 0xFF;
                         c = decodeUtf8_4((c & 0xFF), c2, next, c3);
                     } else { // had three, got last
                         c = decodeUtf8_4((c & 0xFF), c2, c3, next);
@@ -3438,7 +3445,7 @@ public class AsyncByteArrayScanner
         }
 
         final int[] TYPES = _charTypes.TEXT_CHARS;
-        final byte[] inputBuffer = _inputBuffer;
+        final ByteBuffer inputBuffer = _inputBuffer;
 
         main_loop:
         while (true) {
@@ -3452,7 +3459,7 @@ public class AsyncByteArrayScanner
                     break main_loop;
                 }
                 while (ptr < max) {
-                    c = (int) inputBuffer[ptr++] & 0xFF;
+                    c = (int) inputBuffer.get(ptr++) & 0xFF;
                     if (TYPES[c] != 0) {
                         _inputPtr = ptr;
                         break ascii_loop;
@@ -3470,7 +3477,7 @@ public class AsyncByteArrayScanner
                         _pendingInput = PENDING_STATE_CR;
                         break main_loop;
                     }
-                    if (inputBuffer[_inputPtr] == BYTE_LF) {
+                    if (inputBuffer.get(_inputPtr) == BYTE_LF) {
                         ++_inputPtr;
                     }
                     markLF();
@@ -3489,7 +3496,7 @@ public class AsyncByteArrayScanner
             case XmlCharTypes.CT_MULTIBYTE_3:
                 if ((_inputEnd - _inputPtr) < 2) {
                     if (_inputEnd > _inputPtr) { // 2 bytes available
-                        int d = (int) _inputBuffer[_inputPtr++] & 0xFF;
+                        int d = (int) _inputBuffer.get(_inputPtr++) & 0xFF;
                         c |= (d << 8);
                     }
                     _pendingInput = c;
@@ -3500,10 +3507,10 @@ public class AsyncByteArrayScanner
             case XmlCharTypes.CT_MULTIBYTE_4:
                 if ((_inputEnd - _inputPtr) < 3) {
                     if (_inputEnd > _inputPtr) { // at least 2 bytes?
-                        int d = (int) _inputBuffer[_inputPtr++] & 0xFF;
+                        int d = (int) _inputBuffer.get(_inputPtr++) & 0xFF;
                         c |= (d << 8);
                         if (_inputEnd > _inputPtr) { // 3 bytes?
-                            d = (int) _inputBuffer[_inputPtr++] & 0xFF;
+                            d = (int) _inputBuffer.get(_inputPtr++) & 0xFF;
                             c |= (d << 16);
                         }
                     }
@@ -3541,7 +3548,7 @@ public class AsyncByteArrayScanner
                     int count = 1;
                     byte b = BYTE_NULL;
                     while (_inputPtr < _inputEnd) {
-                        b = inputBuffer[_inputPtr];
+                        b = inputBuffer.get(_inputPtr);
                         if (b != BYTE_RBRACKET) {
                             break;
                         }
@@ -3576,14 +3583,14 @@ public class AsyncByteArrayScanner
                 switch (_pendingInput) {
                 case PENDING_STATE_CR:
                     _pendingInput = 0;
-                    if (_inputBuffer[_inputPtr] == BYTE_LF) {
+                    if (_inputBuffer.get(_inputPtr) == BYTE_LF) {
                         ++_inputPtr;
                     }
                     markLF();
                     return true;
                 case PENDING_STATE_TEXT_AMP:
                     {
-                        byte b = _inputBuffer[_inputPtr++];
+                        byte b = _inputBuffer.get(_inputPtr++);
                         if (b == BYTE_HASH) {
                             _pendingInput = PENDING_STATE_TEXT_AMP_HASH;
                             break;
@@ -3603,7 +3610,7 @@ public class AsyncByteArrayScanner
                     return true; // no matter what, we are done
                 case PENDING_STATE_TEXT_AMP_HASH:
                     _entityValue = 0;
-                    if (_inputBuffer[_inputPtr] == BYTE_x) {
+                    if (_inputBuffer.get(_inputPtr) == BYTE_x) {
                         ++_inputPtr;
                         if (decodeHexEntity()) {
                             _pendingInput = 0;
@@ -3649,7 +3656,7 @@ public class AsyncByteArrayScanner
                     return true;
 
                 case PENDING_STATE_TEXT_BRACKET1:
-                    if (_inputBuffer[_inputPtr] != BYTE_RBRACKET) {
+                    if (_inputBuffer.get(_inputPtr) != BYTE_RBRACKET) {
                         _pendingInput = 0;
                         return true;
                     }
@@ -3660,7 +3667,7 @@ public class AsyncByteArrayScanner
                 case PENDING_STATE_TEXT_BRACKET2:
                     // may get sequence...
                     {
-                        byte b = _inputBuffer[_inputPtr];
+                        byte b = _inputBuffer.get(_inputPtr);
                         if (b == BYTE_RBRACKET) {
                             ++_inputPtr;
                             break;
@@ -3695,14 +3702,14 @@ public class AsyncByteArrayScanner
         case XmlCharTypes.CT_MULTIBYTE_3:
             {
                 // Ok... so do we have one or two pending bytes?
-                int next = _inputBuffer[_inputPtr++] & 0xFF;
+                int next = _inputBuffer.get(_inputPtr++) & 0xFF;
                 int c2 = (c >> 8);
                 if (c2 == 0) { // just one; need two more
                     if (_inputPtr >= _inputEnd) { // but got only one
                         _pendingInput = c | (next << 8);
                         return false;
                     }
-                    int c3 = _inputBuffer[_inputPtr++] & 0xFF;
+                    int c3 = _inputBuffer.get(_inputPtr++) & 0xFF;
                     decodeUtf8_3(c, next, c3);
                 } else { // had two, got one, bueno:
                     decodeUtf8_3((c & 0xFF), c2, next);
@@ -3711,19 +3718,19 @@ public class AsyncByteArrayScanner
             break;
         case XmlCharTypes.CT_MULTIBYTE_4:
             {
-                int next = (int) _inputBuffer[_inputPtr++] & 0xFF;
+                int next = (int) _inputBuffer.get(_inputPtr++) & 0xFF;
                 // Only had one?
                 if ((c >> 8) == 0) { // ok, so need 3 more
                     if (_inputPtr >= _inputEnd) { // just have 1
                         _pendingInput = c | (next << 8);
                         return false;
                     }
-                    int c2 = _inputBuffer[_inputPtr++] & 0xFF;
+                    int c2 = _inputBuffer.get(_inputPtr++) & 0xFF;
                     if (_inputPtr >= _inputEnd) { // almost, got 2
                         _pendingInput = c | (next << 8) | (c2 << 16);
                         return false;
                     }
-                    int c3 = _inputBuffer[_inputPtr++] & 0xFF;
+                    int c3 = _inputBuffer.get(_inputPtr++) & 0xFF;
                     decodeUtf8_4(c, next, c2, c3);
                 } else { // had two or three
                     int c2 = (c >> 8) & 0xFF;
@@ -3734,7 +3741,7 @@ public class AsyncByteArrayScanner
                             _pendingInput = c | (next << 16);
                             return false;
                         }
-                        c3 = _inputBuffer[_inputPtr++] & 0xFF;
+                        c3 = _inputBuffer.get(_inputPtr++) & 0xFF;
                         decodeUtf8_4((c & 0xFF), c2, next, c3);
                     } else { // had three, got last
                         decodeUtf8_4((c & 0xFF), c2, c3, next);
@@ -3765,50 +3772,50 @@ public class AsyncByteArrayScanner
          */
         int ptr = _inputPtr;
         if ((ptr  + 3) <= _inputEnd) {
-            byte b = _inputBuffer[ptr++];
+            byte b = _inputBuffer.get(ptr++);
             if (b == BYTE_HASH) { // numeric character entity
-                if (_inputBuffer[ptr] == BYTE_x) {
+                if (_inputBuffer.get(ptr) == BYTE_x) {
                     return handleHexEntityInCharacters(ptr+1);
                 }
                 return handleDecEntityInCharacters(ptr);
             }
             // general entity; maybe one of pre-defined ones
             if (b == BYTE_a) { // amp or apos?
-                b = _inputBuffer[ptr++];
+                b = _inputBuffer.get(ptr++);
                 if (b == BYTE_m) {
                     if ((ptr + 1) < _inputPtr
-                            && _inputBuffer[ptr] == BYTE_p
-                            && _inputBuffer[ptr+1] == BYTE_SEMICOLON) {
+                            && _inputBuffer.get(ptr) == BYTE_p
+                            && _inputBuffer.get(ptr+1) == BYTE_SEMICOLON) {
                         _inputPtr = ptr + 2; // NOTE: do skip semicolon as well
                         return INT_AMP;
                     }
                 } else if (b == BYTE_p) {
                     if ((ptr + 2) < _inputPtr
-                            && _inputBuffer[ptr] == BYTE_o
-                            && _inputBuffer[ptr+1] == BYTE_s
-                            && _inputBuffer[ptr+2] == BYTE_SEMICOLON) {
+                            && _inputBuffer.get(ptr) == BYTE_o
+                            && _inputBuffer.get(ptr+1) == BYTE_s
+                            && _inputBuffer.get(ptr+2) == BYTE_SEMICOLON) {
                         _inputPtr = ptr + 3;
                         return INT_APOS;
                     }
                 }
             } else if (b == BYTE_g) { // gt?
-                if (_inputBuffer[ptr] == BYTE_t
-                        && _inputBuffer[ptr+1] == BYTE_SEMICOLON) {
+                if (_inputBuffer.get(ptr) == BYTE_t
+                        && _inputBuffer.get(ptr+1) == BYTE_SEMICOLON) {
                     _inputPtr = ptr + 2;
                     return INT_GT;
                 }
             } else if (b == BYTE_l) { // lt?
-                if (_inputBuffer[ptr] == BYTE_t
-                        && _inputBuffer[ptr+1] == BYTE_SEMICOLON) {
+                if (_inputBuffer.get(ptr) == BYTE_t
+                        && _inputBuffer.get(ptr+1) == BYTE_SEMICOLON) {
                     _inputPtr = ptr + 2;
                     return INT_LT;
                 }
             } else if (b == BYTE_q) { // quot?
                 if ((ptr + 3) < _inputPtr
-                        && _inputBuffer[ptr] == BYTE_u
-                        && _inputBuffer[ptr+1] == BYTE_o
-                        && _inputBuffer[ptr+2] == BYTE_t
-                        && _inputBuffer[ptr+3] == BYTE_SEMICOLON) {
+                        && _inputBuffer.get(ptr) == BYTE_u
+                        && _inputBuffer.get(ptr+1) == BYTE_o
+                        && _inputBuffer.get(ptr+2) == BYTE_t
+                        && _inputBuffer.get(ptr+3) == BYTE_SEMICOLON) {
                     _inputPtr = ptr + 4;
                     return INT_APOS;
                 }
@@ -3876,7 +3883,7 @@ public class AsyncByteArrayScanner
                     }
                 }
                 while (_inputPtr < max) {
-                    c = (int) _inputBuffer[_inputPtr++] & 0xFF;
+                    c = (int) _inputBuffer.get(_inputPtr++) & 0xFF;
                     if (TYPES[c] != 0) {
                         break ascii_loop;
                     }
@@ -3892,7 +3899,7 @@ public class AsyncByteArrayScanner
                     _pendingInput = PENDING_STATE_CR;
                     return false;
                 }
-                if (_inputBuffer[_inputPtr] == BYTE_LF) {
+                if (_inputBuffer.get(_inputPtr) == BYTE_LF) {
                     ++_inputPtr;
                 }
                 // fall through
@@ -3913,7 +3920,7 @@ public class AsyncByteArrayScanner
             case XmlCharTypes.CT_MULTIBYTE_3:
                 if ((_inputEnd - _inputPtr) < 2) {
                     if (_inputEnd > _inputPtr) { // 2 bytes available
-                        int d = (int) _inputBuffer[_inputPtr++] & 0xFF;
+                        int d = (int) _inputBuffer.get(_inputPtr++) & 0xFF;
                         c |= (d << 8);
                     }
                     _pendingInput = c;
@@ -3924,10 +3931,10 @@ public class AsyncByteArrayScanner
             case XmlCharTypes.CT_MULTIBYTE_4:
                 if ((_inputEnd - _inputPtr) < 3) {
                     if (_inputEnd > _inputPtr) { // at least 2 bytes?
-                        int d = (int) _inputBuffer[_inputPtr++] & 0xFF;
+                        int d = (int) _inputBuffer.get(_inputPtr++) & 0xFF;
                         c |= (d << 8);
                         if (_inputEnd > _inputPtr) { // 3 bytes?
-                            d = (int) _inputBuffer[_inputPtr++] & 0xFF;
+                            d = (int) _inputBuffer.get(_inputPtr++) & 0xFF;
                             c |= (d << 16);
                         }
                     }
@@ -4004,13 +4011,13 @@ public class AsyncByteArrayScanner
         int ch;
 
         if (_pendingInput == PENDING_STATE_ATTR_VALUE_AMP) {
-            byte b = _inputBuffer[_inputPtr++];
+            byte b = _inputBuffer.get(_inputPtr++);
             if (b == BYTE_HASH) { // numeric character entity
                 _pendingInput = PENDING_STATE_ATTR_VALUE_AMP_HASH;
                 if (_inputPtr >= _inputEnd) {
                     return false;
                 }
-                if (_inputBuffer[_inputPtr] == BYTE_x) {
+                if (_inputBuffer.get(_inputPtr) == BYTE_x) {
                     _pendingInput = PENDING_STATE_ATTR_VALUE_AMP_HASH_X;
                     ++_inputPtr;
                     if (_inputPtr >= _inputEnd) {
@@ -4033,7 +4040,7 @@ public class AsyncByteArrayScanner
                 }
             }
         } else if (_pendingInput == PENDING_STATE_ATTR_VALUE_AMP_HASH) {
-            if (_inputBuffer[_inputPtr] == BYTE_x) {
+            if (_inputBuffer.get(_inputPtr) == BYTE_x) {
                 _pendingInput = PENDING_STATE_ATTR_VALUE_AMP_HASH_X;
                 ++_inputPtr;
                 if (_inputPtr >= _inputEnd) {
@@ -4099,14 +4106,14 @@ public class AsyncByteArrayScanner
         case XmlCharTypes.CT_MULTIBYTE_3:
             {
                 // Ok... so do we have one or two pending bytes?
-                int next = _inputBuffer[_inputPtr++] & 0xFF;
+                int next = _inputBuffer.get(_inputPtr++) & 0xFF;
                 int c2 = (c >> 8);
                 if (c2 == 0) { // just one; need two more
                     if (_inputPtr >= _inputEnd) { // but got only one
                         _pendingInput = c | (next << 8);
                         return 0;
                     }
-                    int c3 = _inputBuffer[_inputPtr++] & 0xFF;
+                    int c3 = _inputBuffer.get(_inputPtr++) & 0xFF;
                     c = decodeUtf8_3(c, next, c3);
                 } else { // had two, got one, bueno:
                     c = decodeUtf8_3((c & 0xFF), c2, next);
@@ -4115,19 +4122,19 @@ public class AsyncByteArrayScanner
             }
         case XmlCharTypes.CT_MULTIBYTE_4:
             {
-                int next = (int) _inputBuffer[_inputPtr++] & 0xFF;
+                int next = (int) _inputBuffer.get(_inputPtr++) & 0xFF;
                 // Only had one?
                 if ((c >> 8) == 0) { // ok, so need 3 more
                     if (_inputPtr >= _inputEnd) { // just have 1
                         _pendingInput = c | (next << 8);
                         return 0;
                     }
-                    int c2 = _inputBuffer[_inputPtr++] & 0xFF;
+                    int c2 = _inputBuffer.get(_inputPtr++) & 0xFF;
                     if (_inputPtr >= _inputEnd) { // almost, got 2
                         _pendingInput = c | (next << 8) | (c2 << 16);
                         return 0;
                     }
-                    int c3 = _inputBuffer[_inputPtr++] & 0xFF;
+                    int c3 = _inputBuffer.get(_inputPtr++) & 0xFF;
                     c = decodeUtf8_4(c, next, c2, c3);
                 } else { // had two or three
                     int c2 = (c >> 8) & 0xFF;
@@ -4138,7 +4145,7 @@ public class AsyncByteArrayScanner
                             _pendingInput = c | (next << 16);
                             return 0;
                         }
-                        c3 = _inputBuffer[_inputPtr++] & 0xFF;
+                        c3 = _inputBuffer.get(_inputPtr++) & 0xFF;
                         c = decodeUtf8_4((c & 0xFF), c2, next, c3);
                     } else { // had three, got last
                         c = decodeUtf8_4((c & 0xFF), c2, c3, next);
@@ -4154,7 +4161,7 @@ public class AsyncByteArrayScanner
     
     private final int handleDecEntityInAttribute(boolean starting) throws XMLStreamException
     {
-        byte b = _inputBuffer[_inputPtr++]; // we know one is available
+        byte b = _inputBuffer.get(_inputPtr++); // we know one is available
         if (starting) {
             int ch = (int) b;
             if (ch < INT_0 || ch > INT_9) { // invalid entity
@@ -4165,7 +4172,7 @@ public class AsyncByteArrayScanner
             if (_inputPtr >= _inputEnd) {
                 return 0;
             }
-            b = _inputBuffer[_inputPtr++];
+            b = _inputBuffer.get(_inputPtr++);
         }
         while (b != BYTE_SEMICOLON) {
             int ch = ((int) b) - INT_0;
@@ -4180,7 +4187,7 @@ public class AsyncByteArrayScanner
             if (_inputPtr >= _inputEnd) {
                 return 0;
             }
-            b = _inputBuffer[_inputPtr++];
+            b = _inputBuffer.get(_inputPtr++);
         }
         verifyXmlChar(_entityValue);
         _pendingInput = 0;
@@ -4190,7 +4197,7 @@ public class AsyncByteArrayScanner
     private final int handleHexEntityInAttribute(boolean starting)
         throws XMLStreamException
     {
-        byte b = _inputBuffer[_inputPtr++]; // we know one is available
+        byte b = _inputBuffer.get(_inputPtr++); // we know one is available
         if (starting) {
             int ch = (int) b;
             if (ch < INT_0 || ch > INT_9) { // invalid entity
@@ -4201,7 +4208,7 @@ public class AsyncByteArrayScanner
             if (_inputPtr >= _inputEnd) {
                 return 0;
             }
-            b = _inputBuffer[_inputPtr++];
+            b = _inputBuffer.get(_inputPtr++);
         }
         while (b != BYTE_SEMICOLON) {
             int ch = (int) b;
@@ -4222,7 +4229,7 @@ public class AsyncByteArrayScanner
             if (_inputPtr >= _inputEnd) {
                 return 0;
             }
-            b = _inputBuffer[_inputPtr++];
+            b = _inputBuffer.get(_inputPtr++);
         }
         verifyXmlChar(_entityValue);
         _pendingInput = 0;
@@ -4241,14 +4248,14 @@ public class AsyncByteArrayScanner
             _pendingInput = PENDING_STATE_ATTR_VALUE_AMP;
             return -1;
         }
-        byte b = _inputBuffer[_inputPtr++];
+        byte b = _inputBuffer.get(_inputPtr++);
         if (b == BYTE_HASH) { // numeric character entity
             _pendingInput = PENDING_STATE_ATTR_VALUE_AMP_HASH;
             if (_inputPtr >= _inputEnd) {
                 return -1;
             }
             int ch;
-            if (_inputBuffer[_inputPtr] == BYTE_x) {
+            if (_inputBuffer.get(_inputPtr) == BYTE_x) {
                 _pendingInput = PENDING_STATE_ATTR_VALUE_AMP_HASH_X;
                 ++_inputPtr;
                 if (_inputPtr >= _inputEnd) {
@@ -4311,7 +4318,7 @@ public class AsyncByteArrayScanner
                     }
                 }
                 while (_inputPtr < max) {
-                    c = (int) _inputBuffer[_inputPtr++] & 0xFF;
+                    c = (int) _inputBuffer.get(_inputPtr++) & 0xFF;
                     if (TYPES[c] != 0) {
                         break ascii_loop;
                     }
@@ -4327,7 +4334,7 @@ public class AsyncByteArrayScanner
                     _pendingInput = PENDING_STATE_CR;
                     return false;
                 }
-                if (_inputBuffer[_inputPtr] == BYTE_LF) {
+                if (_inputBuffer.get(_inputPtr) == BYTE_LF) {
                     ++_inputPtr;
                 }
                 // fall through
@@ -4348,7 +4355,7 @@ public class AsyncByteArrayScanner
             case XmlCharTypes.CT_MULTIBYTE_3:
                 if ((_inputEnd - _inputPtr) < 2) {
                     if (_inputEnd > _inputPtr) { // 2 bytes available
-                        int d = (int) _inputBuffer[_inputPtr++] & 0xFF;
+                        int d = (int) _inputBuffer.get(_inputPtr++) & 0xFF;
                         c |= (d << 8);
                     }
                     _pendingInput = c;
@@ -4359,10 +4366,10 @@ public class AsyncByteArrayScanner
             case XmlCharTypes.CT_MULTIBYTE_4:
                 if ((_inputEnd - _inputPtr) < 3) {
                     if (_inputEnd > _inputPtr) { // at least 2 bytes?
-                        int d = (int) _inputBuffer[_inputPtr++] & 0xFF;
+                        int d = (int) _inputBuffer.get(_inputPtr++) & 0xFF;
                         c |= (d << 8);
                         if (_inputEnd > _inputPtr) { // 3 bytes?
-                            d = (int) _inputBuffer[_inputPtr++] & 0xFF;
+                            d = (int) _inputBuffer.get(_inputPtr++) & 0xFF;
                             c |= (d << 16);
                         }
                     }
@@ -4452,13 +4459,13 @@ public class AsyncByteArrayScanner
         int ch;
 
         if (_pendingInput == PENDING_STATE_ATTR_VALUE_AMP) {
-            byte b = _inputBuffer[_inputPtr++];
+            byte b = _inputBuffer.get(_inputPtr++);
             if (b == BYTE_HASH) { // numeric character entity
                 _pendingInput = PENDING_STATE_ATTR_VALUE_AMP_HASH;
                 if (_inputPtr >= _inputEnd) {
                     return false;
                 }
-                if (_inputBuffer[_inputPtr] == BYTE_x) {
+                if (_inputBuffer.get(_inputPtr) == BYTE_x) {
                     _pendingInput = PENDING_STATE_ATTR_VALUE_AMP_HASH_X;
                     ++_inputPtr;
                     if (_inputPtr >= _inputEnd) {
@@ -4481,7 +4488,7 @@ public class AsyncByteArrayScanner
                 }
             }
         } else if (_pendingInput == PENDING_STATE_ATTR_VALUE_AMP_HASH) {
-            if (_inputBuffer[_inputPtr] == BYTE_x) {
+            if (_inputBuffer.get(_inputPtr) == BYTE_x) {
                 _pendingInput = PENDING_STATE_ATTR_VALUE_AMP_HASH_X;
                 ++_inputPtr;
                 if (_inputPtr >= _inputEnd) {
@@ -4579,7 +4586,7 @@ public class AsyncByteArrayScanner
                 if (_inputPtr >= _inputEnd) {
                     return null; // all pointers have been set
                 }
-                q = _inputBuffer[_inputPtr++] & 0xFF;
+                q = _inputBuffer.get(_inputPtr++) & 0xFF;
                 /* Since name char validity is checked later on, we only
                  * need to be able to reliably see the end of the name...
                  * and those are simple enough so that we can just
@@ -4601,7 +4608,7 @@ public class AsyncByteArrayScanner
                     _currQuadBytes = 1;
                     return null;
                 }
-                i = _inputBuffer[_inputPtr++] & 0xFF;
+                i = _inputBuffer.get(_inputPtr++) & 0xFF;
                 if (i < 65) { // 'A'
                     if (i < 45 || i > 58 || i == 47) {
                         return findPName(q, 1);
@@ -4616,7 +4623,7 @@ public class AsyncByteArrayScanner
                     _currQuadBytes = 2;
                     return null;
                 }
-                i = _inputBuffer[_inputPtr++] & 0xFF;
+                i = _inputBuffer.get(_inputPtr++) & 0xFF;
                 if (i < 65) { // 'A'
                     if (i < 45 || i > 58 || i == 47) {
                         return findPName(q, 2);
@@ -4631,7 +4638,7 @@ public class AsyncByteArrayScanner
                     _currQuadBytes = 3;
                     return null;
                 }
-                i = _inputBuffer[_inputPtr++] & 0xFF;
+                i = _inputBuffer.get(_inputPtr++) & 0xFF;
                 if (i < 65) { // 'A'
                     if (i < 45 || i > 58 || i == 47) {
                         return findPName(q, 3);
@@ -4680,7 +4687,7 @@ public class AsyncByteArrayScanner
                 if (_inputPtr >= _inputEnd) {
                     return null; // all pointers have been set
                 }
-                q = _inputBuffer[_inputPtr++] & 0xFF;
+                q = _inputBuffer.get(_inputPtr++) & 0xFF;
                 /* Since name char validity is checked later on, we only
                  * need to be able to reliably see the end of the name...
                  * and those are simple enough so that we can just
@@ -4714,7 +4721,7 @@ public class AsyncByteArrayScanner
                     _currQuadBytes = 1;
                     return null;
                 }
-                i = _inputBuffer[_inputPtr++] & 0xFF;
+                i = _inputBuffer.get(_inputPtr++) & 0xFF;
                 if (i < 65) { // 'A'
                     if (i < 45 || i > 58 || i == 47) {
                         return findPName(q, 1);
@@ -4729,7 +4736,7 @@ public class AsyncByteArrayScanner
                     _currQuadBytes = 2;
                     return null;
                 }
-                i = _inputBuffer[_inputPtr++] & 0xFF;
+                i = _inputBuffer.get(_inputPtr++) & 0xFF;
                 if (i < 65) { // 'A'
                     if (i < 45 || i > 58 || i == 47) {
                         // lt or gt?
@@ -4755,7 +4762,7 @@ public class AsyncByteArrayScanner
                     _currQuadBytes = 3;
                     return null;
                 }
-                i = _inputBuffer[_inputPtr++] & 0xFF;
+                i = _inputBuffer.get(_inputPtr++) & 0xFF;
                 if (i < 65) { // 'A'
                     if (i < 45 || i > 58 || i == 47) {
                         // amp?
@@ -4811,7 +4818,7 @@ public class AsyncByteArrayScanner
             return false;
         }
         _pendingInput = 0;
-        if (_inputBuffer[_inputPtr] == BYTE_LF) {
+        if (_inputBuffer.get(_inputPtr) == BYTE_LF) {
             ++_inputPtr;
         }
         ++_currRow;
@@ -4832,7 +4839,7 @@ public class AsyncByteArrayScanner
      */
     protected final int decodeUtf8_2(int c) throws XMLStreamException
     {
-        int d = (int) _inputBuffer[_inputPtr++];
+        int d = (int) _inputBuffer.get(_inputPtr++);
         if ((d & 0xC0) != 0x080) {
             reportInvalidOther(d & 0xFF, _inputPtr);
         }
@@ -4841,7 +4848,7 @@ public class AsyncByteArrayScanner
 
     protected final void skipUtf8_2(int c) throws XMLStreamException
     {
-        int d = (int) _inputBuffer[_inputPtr++];
+        int d = (int) _inputBuffer.get(_inputPtr++);
         if ((d & 0xC0) != 0x080) {
             reportInvalidOther(d & 0xFF, _inputPtr);
         }
@@ -4856,12 +4863,12 @@ public class AsyncByteArrayScanner
         throws XMLStreamException
     {
         c1 &= 0x0F;
-        int d = (int) _inputBuffer[_inputPtr++];
+        int d = (int) _inputBuffer.get(_inputPtr++);
         if ((d & 0xC0) != 0x080) {
             reportInvalidOther(d & 0xFF, _inputPtr);
         }
         int c = (c1 << 6) | (d & 0x3F);
-        d = (int) _inputBuffer[_inputPtr++];
+        d = (int) _inputBuffer.get(_inputPtr++);
         if ((d & 0xC0) != 0x080) {
             reportInvalidOther(d & 0xFF, _inputPtr);
         }
@@ -4899,17 +4906,17 @@ public class AsyncByteArrayScanner
     protected final int decodeUtf8_4(int c)
         throws XMLStreamException
     {
-        int d = (int) _inputBuffer[_inputPtr++];
+        int d = (int) _inputBuffer.get(_inputPtr++);
         if ((d & 0xC0) != 0x080) {
             reportInvalidOther(d & 0xFF, _inputPtr);
         }
         c = ((c & 0x07) << 6) | (d & 0x3F);
-        d = (int) _inputBuffer[_inputPtr++];
+        d = (int) _inputBuffer.get(_inputPtr++);
         if ((d & 0xC0) != 0x080) {
             reportInvalidOther(d & 0xFF, _inputPtr);
         }
         c = (c << 6) | (d & 0x3F);
-        d = (int) _inputBuffer[_inputPtr++];
+        d = (int) _inputBuffer.get(_inputPtr++);
         if ((d & 0xC0) != 0x080) {
             reportInvalidOther(d & 0xFF, _inputPtr);
         }

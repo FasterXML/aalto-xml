@@ -1,5 +1,7 @@
 package com.fasterxml.aalto;
 
+import java.nio.ByteBuffer;
+
 import javax.xml.stream.XMLStreamException;
 
 public interface AsyncByteBufferFeeder extends AsyncInputFeeder
@@ -8,15 +10,11 @@ public interface AsyncByteBufferFeeder extends AsyncInputFeeder
       * Method that can be called to feed more data, if (and only if)
       * {@link AsyncInputFeeder#needMoreInput} returns true.
       * 
-      * @param data Byte array that containts data to feed: caller must ensure data remains
-      *    stable until it is fully processed (which is true when {@link #needMoreInput}
-      *    returns true)
-      * @param offset Offset within array where input data to process starts
-      * @param len Length of input data within array to process.
+      * @param buffer Buffer that contains additional input to read
       * 
       * @throws XMLStreamException if the state is such that this method should not be called
       *   (has not yet consumed existing input data, or has been marked as closed)
       */
-     public void feedInput(byte[] data, int offset, int len) throws XMLStreamException;
+     public void feedInput(ByteBuffer buffer) throws XMLStreamException;
 
 }

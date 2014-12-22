@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.net.URL;
+import java.nio.ByteBuffer;
 
 import javax.xml.stream.*;
 import javax.xml.stream.util.XMLEventAllocator;
@@ -41,6 +42,7 @@ import org.xml.sax.InputSource;
 
 import com.fasterxml.aalto.*;
 import com.fasterxml.aalto.async.AsyncByteArrayScanner;
+import com.fasterxml.aalto.async.AsyncByteBufferScanner;
 import com.fasterxml.aalto.async.AsyncStreamReaderImpl;
 import com.fasterxml.aalto.dom.DOMReaderImpl;
 import com.fasterxml.aalto.evt.EventAllocatorImpl;
@@ -120,30 +122,22 @@ public final class InputFactoryImpl
      */
 
     @Override
-    public XMLEventReader createXMLEventReader(InputStream in)
-        throws XMLStreamException
-    {
+    public XMLEventReader createXMLEventReader(InputStream in) throws XMLStreamException {
         return createXMLEventReader(in, null);
     }
 
     @Override
-    public XMLEventReader createXMLEventReader(InputStream in, String enc)
-        throws XMLStreamException
-    {
+    public XMLEventReader createXMLEventReader(InputStream in, String enc) throws XMLStreamException {
         return constructER(constructSR(in, enc, true));
     }
 
     @Override
-    public XMLEventReader createXMLEventReader(Reader r)
-        throws XMLStreamException
-    {
+    public XMLEventReader createXMLEventReader(Reader r) throws XMLStreamException {
         return createXMLEventReader(null, r);
     }
 
     @Override
-    public XMLEventReader createXMLEventReader(javax.xml.transform.Source source)
-        throws XMLStreamException
-    {
+    public XMLEventReader createXMLEventReader(javax.xml.transform.Source source) throws XMLStreamException {
         return constructER(constructSR(source, true));
     }
 
@@ -374,17 +368,23 @@ public final class InputFactoryImpl
          return new AsyncStreamReaderImpl<AsyncByteArrayFeeder>(scanner);
     }
 
-    /*
-    public AsyncXMLStreamReader<AsyncByteArrayFeeder> createAsyncFor(final IllegalCharHandler illegalCharHandler)
-    {
-        // TODO: pass system and/or public ids?
+    @Override
+    public AsyncXMLStreamReader<AsyncByteBufferFeeder> createAsyncForByteBuffer() {
         ReaderConfig cfg = getNonSharedConfig(null, null, null, false, false);
-         cfg.setActualEncoding("UTF-8");
-         cfg.setIllegalCharHandler(illegalCharHandler);
-         return new AsyncStreamReaderImpl<AsyncByteArrayFeeder>(new AsyncByteArrayScannerImpl(cfg));
+        cfg.setActualEncoding("UTF-8");
+        return new AsyncStreamReaderImpl<AsyncByteBufferFeeder>(new AsyncByteBufferScanner(cfg));
     }
-    */
-    
+
+    @Override
+    public AsyncXMLStreamReader<AsyncByteBufferFeeder> createAsyncFor(ByteBuffer input) throws XMLStreamException
+    {
+        ReaderConfig cfg = getNonSharedConfig(null, null, null, false, false);
+        cfg.setActualEncoding("UTF-8");
+        AsyncByteBufferScanner scanner = new AsyncByteBufferScanner(cfg);
+        scanner.feedInput(input);
+        return new AsyncStreamReaderImpl<AsyncByteBufferFeeder>(scanner);
+    }
+
     /*
     /**********************************************************************
     /* Internal/package methods
@@ -586,8 +586,7 @@ public final class InputFactoryImpl
         }
     }
 
-    public XMLEventReader2 constructER(XMLStreamReader2 sr)
-    {
+    public XMLEventReader2 constructER(XMLStreamReader2 sr) {
         return new EventReaderImpl(createEventAllocator(), sr);
     }
 

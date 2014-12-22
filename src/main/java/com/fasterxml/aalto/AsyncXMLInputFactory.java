@@ -63,7 +63,7 @@ public abstract class AsyncXMLInputFactory
      * 
      * @return Non-blocking stream reader without any input
      */
-//    public abstract AsyncXMLStreamReader<AsyncByteBufferFeeder> createAsyncForByteBuffer();
+    public abstract AsyncXMLStreamReader<AsyncByteBufferFeeder> createAsyncForByteBuffer();
     
     /**
      * Method for constructing a non-blocking {@link XMLStreamReader2} instance
@@ -79,6 +79,6 @@ public abstract class AsyncXMLInputFactory
      * 
      * @return Non-blocking stream reader initialized with given input
      */
-//    public abstract AsyncXMLStreamReader<AsyncByteBufferFeeder> createAsyncFor(ByteBuffer input)
-//      throws XMLStreamException;
+    public abstract AsyncXMLStreamReader<AsyncByteBufferFeeder> createAsyncFor(ByteBuffer input)
+      throws XMLStreamException;
 }
