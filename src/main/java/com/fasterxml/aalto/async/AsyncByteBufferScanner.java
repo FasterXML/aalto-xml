@@ -923,10 +923,12 @@ public class AsyncByteBufferScanner
     /**********************************************************************
      */
 
+    @Override
     public final boolean needMoreInput() {
         return (_inputPtr >=_inputEnd) && !_endOfInput;
     }
 
+    @Override
     public void feedInput(ByteBuffer buffer) throws XMLStreamException
     {
         // Must not have remaining input

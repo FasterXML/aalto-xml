@@ -919,10 +919,12 @@ public class AsyncByteArrayScanner
     /**********************************************************************
      */
 
+    @Override
     public final boolean needMoreInput() {
         return (_inputPtr >=_inputEnd) && !_endOfInput;
     }
 
+    @Override
     public void feedInput(byte[] buf, int start, int len) throws XMLStreamException
     {
         // Must not have remaining input

@@ -313,6 +313,7 @@ public abstract class AsyncByteScanner
         super(cfg);
     }
 
+    @Override
     public void endOfInput() {
         _endOfInput = true;
     }
