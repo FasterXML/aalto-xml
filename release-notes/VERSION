@@ -1,10 +1,14 @@
 Project: aalto-xml
-Version: 0.9.10 (xx-Jul-2014)
+
+------------------------------------------------------------------------
+= Releases
+------------------------------------------------------------------------
+
+0.9.10 (xx-Jan-2015)
 
 #18: Improve location handling, access
  (requested by "wanghaopu@github")
-
-== History: ==
+- Refactored async API/implementation, to allow ByteBuffer-backed sources
 
 0.9.9 (19-Aug-2013)
 
