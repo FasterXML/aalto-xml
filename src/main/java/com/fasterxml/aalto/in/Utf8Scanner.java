@@ -19,6 +19,7 @@ import java.io.*;
 
 import javax.xml.stream.XMLStreamException;
 
+import com.fasterxml.aalto.impl.ErrorConsts;
 import com.fasterxml.aalto.util.DataUtil;
 import com.fasterxml.aalto.util.XmlCharTypes;
 import com.fasterxml.aalto.util.XmlChars;
@@ -49,6 +50,34 @@ public final class Utf8Scanner
     /**********************************************************************
      */
 
+    @Override
+    protected final void finishToken() throws XMLStreamException
+    {
+        _tokenIncomplete = false;
+        switch (_currToken) {
+        case PROCESSING_INSTRUCTION:
+            finishPI();
+            break;
+        case CHARACTERS:
+            finishCharacters();
+            break;
+        case COMMENT:
+            finishComment();
+            break;
+        case SPACE:
+            finishSpace();
+            break;
+        case DTD:
+            finishDTD(true); // true -> get text
+            break;
+        case CDATA:
+            finishCData();
+            break;
+        default:
+            ErrorConsts.throwInternalError();
+        }
+    }
+    
     @Override
     protected int handleStartElement(byte b)
         throws XMLStreamException

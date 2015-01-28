@@ -136,20 +136,7 @@ public abstract class InputBootstrapper
      * input source, check its encoding, read xml declaration if
      * there is one, and finally create a scanner for actual parsing.
      */
-    public final XmlScanner bootstrap()
-        throws XMLStreamException
-    {
-        try {
-            return doBootstrap();
-        } catch (IOException ioe) {
-            throw new IoStreamException(ioe);
-        } finally {
-            _config.freeSmallCBuffer(mKeyword);
-        }
-    }
-
-    public abstract XmlScanner doBootstrap()
-        throws IOException, XMLStreamException;
+    public abstract XmlScanner bootstrap() throws XMLStreamException;
 
     /*
     /**********************************************************************
@@ -161,8 +148,7 @@ public abstract class InputBootstrapper
      * Method that will parse xml declaration, which at this point is
      * known to exist.
      */
-    protected void readXmlDeclaration()
-        throws IOException, XMLStreamException
+    protected void readXmlDeclaration() throws IOException, XMLStreamException
     {
         int c = getNextAfterWs(false);
 

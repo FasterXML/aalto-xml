@@ -22,7 +22,6 @@ import javax.xml.stream.Location;
 import javax.xml.stream.XMLReporter;
 import javax.xml.stream.XMLStreamException;
 
-
 import com.fasterxml.aalto.impl.ErrorConsts;
 import com.fasterxml.aalto.impl.IoStreamException;
 import com.fasterxml.aalto.impl.LocationImpl;
@@ -44,10 +43,10 @@ public final class CharSourceBootstrapper
     final static char CHAR_BOM_MARKER = (char) 0xFEFF;
 
     /*
-    ////////////////////////////////////////
-    // Configuration
-    ////////////////////////////////////////
-    */
+    /**********************************************************************
+    /* Configuration
+    /**********************************************************************
+     */
 
     /**
      * Underlying Reader to use for reading content.
@@ -55,10 +54,10 @@ public final class CharSourceBootstrapper
     final Reader _in;
 
     /*
-    ///////////////////////////////////////////////////////////////
-    // Input buffering
-    ///////////////////////////////////////////////////////////////
-    */
+    /**********************************************************************
+    /* Input buffering
+    /**********************************************************************
+     */
 
     final char[] _inputBuffer;
 
@@ -71,9 +70,9 @@ public final class CharSourceBootstrapper
     private int _inputLast;
 
     /*
-    ////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////
     // Life-cycle
-    ////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////
      */
 
     private CharSourceBootstrapper(ReaderConfig cfg, Reader r)
@@ -106,8 +105,18 @@ public final class CharSourceBootstrapper
     }
 
     @Override
-    public XmlScanner doBootstrap()
-        throws IOException, XMLStreamException
+    public final XmlScanner bootstrap() throws XMLStreamException
+    {
+        try {
+            return doBootstrap();
+        } catch (IOException ioe) {
+            throw new IoStreamException(ioe);
+        } finally {
+            _config.freeSmallCBuffer(mKeyword);
+        }
+    }
+    
+    public XmlScanner doBootstrap() throws IOException, XMLStreamException
     {
         if (_inputPtr >= _inputLast) {
             initialLoad(7);
@@ -345,13 +354,12 @@ public final class CharSourceBootstrapper
     }
 
     /*
-    /////////////////////////////////////////////////////
-    // Internal methods, single-byte access methods
-    /////////////////////////////////////////////////////
-    */
+    /**********************************************************************
+    /* Internal methods, single-byte access methods
+    /**********************************************************************
+     */
 
-    protected char nextChar()
-        throws IOException, XMLStreamException
+    protected char nextChar() throws IOException, XMLStreamException
     {
         if (_inputPtr >= _inputLast) {
             loadMore();
@@ -359,8 +367,7 @@ public final class CharSourceBootstrapper
         return _inputBuffer[_inputPtr++];
     }
 
-    protected void skipCRLF(char lf)
-        throws IOException, XMLStreamException
+    protected void skipCRLF(char lf) throws IOException, XMLStreamException
     {
         if (lf == '\r') {
             char c = (_inputPtr < _inputLast) ?

@@ -390,36 +390,11 @@ public abstract class XmlScanner
     public abstract int nextFromTree() throws XMLStreamException;
 
     /**
-     * This token is called to ensure that the current token/event has been
+     * This method is called to ensure that the current token/event has been
      * completely parsed, such that we have all the data needed to return
      * it (textual content, PI data, comment text etc)
      */
-    protected final void finishToken() throws XMLStreamException
-    {
-        _tokenIncomplete = false;
-        switch (_currToken) {
-        case PROCESSING_INSTRUCTION:
-            finishPI();
-            break;
-        case CHARACTERS:
-            finishCharacters();
-            break;
-        case COMMENT:
-            finishComment();
-            break;
-        case SPACE:
-            finishSpace();
-            break;
-        case DTD:
-            finishDTD(true); // true -> get text
-            break;
-        case CDATA:
-            finishCData();
-            break;
-        default:
-            throw new Error("Internal error, unexpected incomplete token type "+ErrorConsts.tokenTypeDesc(_currToken));
-        }
-    }
+    protected abstract void finishToken() throws XMLStreamException;
 
     /**
      * This method is called to essentially skip remaining of the
@@ -1507,14 +1482,12 @@ public abstract class XmlScanner
     }
 
     // Thrown when ']]>' found in text content
-    protected void reportIllegalCDataEnd()
-        throws XMLStreamException
+    protected void reportIllegalCDataEnd() throws XMLStreamException
     {
         reportInputProblem("String ']]>' not allowed in textual content, except as the end marker of CDATA section");
     }
 
-    protected void throwUnexpectedChar(int i, String msg)
-        throws XMLStreamException
+    protected void throwUnexpectedChar(int i, String msg) throws XMLStreamException
     {
         // But first, let's check illegals
         if (i < 32 && i != '\r' && i != '\n' && i != '\t') {
@@ -1525,14 +1498,12 @@ public abstract class XmlScanner
         reportInputProblem(excMsg);
     }
 
-    protected void throwNullChar()
-        throws XMLStreamException
+    protected void throwNullChar() throws XMLStreamException
     {
         reportInputProblem("Illegal character (NULL, unicode 0) encountered: not valid in any content");
     }
 
-    protected char handleInvalidXmlChar(int i)
-        throws XMLStreamException
+    protected char handleInvalidXmlChar(int i) throws XMLStreamException
     {
     	
     	final IllegalCharHandler iHandler = _config.getIllegalCharHandler();

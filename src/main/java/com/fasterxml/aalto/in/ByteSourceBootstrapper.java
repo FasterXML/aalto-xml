@@ -111,10 +111,20 @@ public final class ByteSourceBootstrapper
         return new ByteSourceBootstrapper(cfg, inputBuffer, inputStart, inputLen);
     }
 
-    @SuppressWarnings("resource")
     @Override
-    public XmlScanner doBootstrap()
-        throws IOException, XMLStreamException
+    public final XmlScanner bootstrap() throws XMLStreamException
+    {
+        try {
+            return doBootstrap();
+        } catch (IOException ioe) {
+            throw new IoStreamException(ioe);
+        } finally {
+            _config.freeSmallCBuffer(mKeyword);
+        }
+    }
+    
+    @SuppressWarnings("resource")
+    public XmlScanner doBootstrap() throws IOException, XMLStreamException
     {
         String normEnc = null;
 

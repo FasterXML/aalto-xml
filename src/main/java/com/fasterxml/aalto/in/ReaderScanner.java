@@ -126,8 +126,7 @@ public final class ReaderScanner
     }
 
     @Override
-    protected void _closeSource()
-        throws IOException
+    protected void _closeSource() throws IOException
     {
         if (_in != null) {
             _in.close();
@@ -141,6 +140,34 @@ public final class ReaderScanner
     /**********************************************************************
      */
 
+    @Override
+    protected final void finishToken() throws XMLStreamException
+    {
+        _tokenIncomplete = false;
+        switch (_currToken) {
+        case PROCESSING_INSTRUCTION:
+            finishPI();
+            break;
+        case CHARACTERS:
+            finishCharacters();
+            break;
+        case COMMENT:
+            finishComment();
+            break;
+        case SPACE:
+            finishSpace();
+            break;
+        case DTD:
+            finishDTD(true); // true -> get text
+            break;
+        case CDATA:
+            finishCData();
+            break;
+        default:
+            ErrorConsts.throwInternalError();
+        }
+    }
+    
     // // // First, main iteration methods
 
     @Override
@@ -315,8 +342,7 @@ public final class ReaderScanner
     /**********************************************************************
      */
 
-    protected final int handlePrologDeclStart(boolean isProlog)
-        throws XMLStreamException
+    protected final int handlePrologDeclStart(boolean isProlog) throws XMLStreamException
     {
         if (_inputPtr >= _inputEnd) {
             loadMoreGuaranteed();

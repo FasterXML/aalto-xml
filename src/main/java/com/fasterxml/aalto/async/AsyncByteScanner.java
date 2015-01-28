@@ -384,6 +384,35 @@ public abstract class AsyncByteScanner
     /* Second-level parsing; character content (in tree)
     /**********************************************************************
      */
+
+    @Override
+    protected final void finishToken() throws XMLStreamException
+    {
+        _tokenIncomplete = false;
+        switch (_currToken) {
+        case PROCESSING_INSTRUCTION:
+            finishPI();
+            break;
+        case CHARACTERS:
+            finishCharacters();
+            break;
+        case COMMENT:
+            finishComment();
+            break;
+        case SPACE:
+            finishSpace();
+            break;
+        case DTD:
+            finishDTD(true); // true -> get text
+            break;
+        case CDATA:
+            finishCData();
+            break;
+        default:
+            ErrorConsts.throwInternalError();
+        }
+    }
+    
     /**
      * Method called to initialize state for CHARACTERS event, after
      * just a single byte has been seen. What needs to be done next
