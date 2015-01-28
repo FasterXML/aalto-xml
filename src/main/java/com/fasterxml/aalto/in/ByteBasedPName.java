@@ -62,6 +62,10 @@ public abstract class ByteBasedPName
 
     public abstract boolean equals(int[] quads, int qlen);
 
+    public abstract boolean hashEquals(int h, int quad1, int quad2);
+
+    public abstract boolean hashEquals(int h, int[] quads, int qlen);
+    
     /*
     //////////////////////////////////////////////////////////
     // Redefined standard methods

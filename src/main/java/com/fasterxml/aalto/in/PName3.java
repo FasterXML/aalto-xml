@@ -57,6 +57,20 @@ public final class PName3
     }
 
     @Override
+    public boolean hashEquals(int h, int quad1, int quad2) {
+        // Implies quad length < 3, never matches
+        return false;
+    }
+
+    @Override
+    public boolean hashEquals(int h, int[] quads, int qlen) {
+        return (h == mHash) && (qlen == 3)
+                && (quads[0] == mQuad1)
+                && (quads[1] == mQuad2)
+                && (quads[2] == mQuad3);
+    }
+
+    @Override
     public int getFirstQuad() {
         return mQuad1;
     }

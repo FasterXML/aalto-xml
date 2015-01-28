@@ -786,17 +786,13 @@ System.err.println("DEBUG: ]");
 
         public ByteBasedPName find(int hash, int firstQuad, int secondQuad)
         {
-            if (mName.hashCode() == hash) {
-                if (mName.equals(firstQuad, secondQuad)) {
-                    return mName;
-                }
+            if (mName.hashEquals(hash, firstQuad, secondQuad)) {
+                return mName;
             }
             for (Bucket curr = mNext; curr != null; curr = curr.mNext) {
                 ByteBasedPName currName = curr.mName;
-                if (currName.hashCode() == hash) {
-                    if (currName.equals(firstQuad, secondQuad)) {
-                        return currName;
-                    }
+                if (currName.hashEquals(hash, firstQuad, secondQuad)) {
+                    return currName;
                 }
             }
             return null;
@@ -804,17 +800,13 @@ System.err.println("DEBUG: ]");
 
         public ByteBasedPName find(int hash, int[] quads, int qlen)
         {
-            if (mName.hashCode() == hash) {
-                if (mName.equals(quads, qlen)) {
-                    return mName;
-                }
+            if (mName.hashEquals(hash, quads, qlen)) {
+                return mName;
             }
             for (Bucket curr = mNext; curr != null; curr = curr.mNext) {
                 ByteBasedPName currName = curr.mName;
-                if (currName.hashCode() == hash) {
-                    if (currName.equals(quads, qlen)) {
-                        return currName;
-                    }
+                if (currName.hashEquals(hash, quads, qlen)) {
+                    return currName;
                 }
             }
             return null;

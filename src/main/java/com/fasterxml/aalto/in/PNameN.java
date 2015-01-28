@@ -74,6 +74,30 @@ public final class PNameN
     }
 
     @Override
+    public boolean hashEquals(int h, int quad1, int quad2) {
+        if ((h == mHash) && (mQuadLen < 3)) {
+            if (mQuadLen == 1) {
+                return (mQuads[0] == quad1) && (quad2 == 0);
+            }
+            return (mQuads[0] == quad1) && (mQuads[1] == quad2);
+        }
+        return false;
+    }
+
+    @Override
+    public boolean hashEquals(int h, int[] quads, int qlen) {
+        if ((h == mHash) && (qlen == mQuadLen)) {
+            for (int i = 0; i < qlen; ++i) {
+                if (quads[i] != mQuads[i]) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        return false;
+    }
+    
+    @Override
     public int getFirstQuad() {
         return mQuads[0];
     }
@@ -84,8 +108,7 @@ public final class PNameN
     }
 
     @Override
-    public int getQuad(int index)
-    {
+    public int getQuad(int index) {
         return (index < mQuadLen) ? mQuads[index] : 0;
     }
 
