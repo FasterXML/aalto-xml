@@ -6,7 +6,7 @@
   <parent>
     <groupId>com.fasterxml</groupId>
     <artifactId>oss-parent</artifactId>
-    <version>12</version>
+    <version>19</version>
   </parent>
 
   <artifactId>aalto-xml</artifactId>
