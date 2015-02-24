@@ -54,8 +54,8 @@ public final class Utf8XmlWriter
         if (_out == null || len == 0) {
             return;
         }
-        if (mSurrogate != 0) {
-            outputSurrogates(mSurrogate, cbuf[offset]);
+        if (_surrogate != 0) {
+            outputSurrogates(_surrogate, cbuf[offset]);
             ++offset;
             --len;
         }
@@ -169,7 +169,7 @@ public final class Utf8XmlWriter
             if (ch <= SURR2_LAST) { // yes, outside of BMP
                 // Do we have second part?
                 if (inputOffset >= inputLen) { // nope... have to note down
-                    mSurrogate = ch;
+                    _surrogate = ch;
                 } else {
                     outputSurrogates(ch, cbuf[inputOffset]);
                     ++inputOffset;
@@ -199,7 +199,7 @@ public final class Utf8XmlWriter
             if (ch <= SURR2_LAST) { // yes, outside of BMP
                 // Do we have second part?
                 if (inputOffset >= inputLen) { // nope... have to note down
-                    mSurrogate = ch;
+                    _surrogate = ch;
                 } else {
                     outputSurrogates(ch, cbuf[inputOffset]);
                     ++inputOffset;

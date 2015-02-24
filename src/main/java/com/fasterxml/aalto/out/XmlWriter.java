@@ -64,13 +64,15 @@ public abstract class XmlWriter
      */
     protected char[] _copyBuffer;
 
+    protected final int _copyBufferLen;
+    
     /**
      * Indicates whether output is to be compliant; if false, is to be
      * xml 1.0 compliant, if true, xml 1.1 compliant.
      */
     protected boolean _xml11 = false;
 
-    protected final boolean mCfgNsAware;
+    protected final boolean _cfgNsAware;
 
     /*
     /**********************************************************************
@@ -111,8 +113,9 @@ public abstract class XmlWriter
     {
         _config = cfg;
         _copyBuffer = cfg.allocMediumCBuffer(DEFAULT_COPYBUFFER_LEN);
-
-        mCfgNsAware = cfg.isNamespaceAware();
+        _copyBufferLen = _copyBuffer.length;
+        
+        _cfgNsAware = cfg.isNamespaceAware();
         mCheckContent = cfg.willCheckContent();
         mCheckNames = cfg.willCheckNames();
     }

@@ -21,7 +21,6 @@ import javax.xml.stream.Location;
 import javax.xml.stream.XMLStreamException;
 
 import com.fasterxml.aalto.WFCException;
-import com.fasterxml.aalto.impl.IoStreamException;
 import com.fasterxml.aalto.util.XmlConsts;
 
 /**

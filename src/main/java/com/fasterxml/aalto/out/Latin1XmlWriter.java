@@ -55,8 +55,8 @@ public final class Latin1XmlWriter
         if (_out == null || len == 0) {
             return;
         }
-        if (mSurrogate != 0) {
-            outputSurrogates(mSurrogate, cbuf[offset]);
+        if (_surrogate != 0) {
+            outputSurrogates(_surrogate, cbuf[offset]);
             ++offset;
             --len;
         }

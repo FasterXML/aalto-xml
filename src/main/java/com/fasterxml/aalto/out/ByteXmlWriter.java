@@ -123,16 +123,7 @@ public abstract class ByteXmlWriter
      * some of the methods, possibly depending on encoding),
      * the first part is temporarily stored within this member variable.
      */
-    protected int mSurrogate = 0;
-
-    /**
-     * Temporary copy buffer, in which character content from Strings
-     * can be copied to first (since {@link String#getChars} can be
-     * drastically faster than {@link String#charAt}!), to be converted
-     */
-    protected char[] mCopyBuffer;
-
-    protected final int mCopyBufferLen;
+    protected int _surrogate = 0;
 
     /*
     ////////////////////////////////////////////////
@@ -143,7 +134,7 @@ public abstract class ByteXmlWriter
     /**
      * Validation tables used for verifying validity (and need for quoting)
      */
-    final protected XmlCharTypes mCharTypes;
+    final protected XmlCharTypes _charTypes;
 
     /*
     ////////////////////////////////////////////////
@@ -157,10 +148,8 @@ public abstract class ByteXmlWriter
         _out = out;
         _outputBuffer = cfg.allocFullBBuffer(DEFAULT_FULL_BUFFER_SIZE);
         _outputBufferLen = _outputBuffer.length;
-        mCopyBuffer = cfg.allocFullCBuffer(DEFAULT_COPY_BUFFER_SIZE);
-        mCopyBufferLen = mCopyBuffer.length;
         _outputPtr = 0;
-        mCharTypes = charTypes;
+        _charTypes = charTypes;
     }
 
     @Override
@@ -310,9 +299,9 @@ public abstract class ByteXmlWriter
             _config.freeFullBBuffer(_outputBuffer);
             _outputBuffer = null;
         }
-        if (mCopyBuffer != null) {
-            _config.freeFullCBuffer(mCopyBuffer);
-            mCopyBuffer = null;
+        if (_copyBuffer != null) {
+            _config.freeFullCBuffer(_copyBuffer);
+            _copyBuffer = null;
         }
     }
 
@@ -347,7 +336,7 @@ public abstract class ByteXmlWriter
         throws IOException, XMLStreamException
     {
         while (len > 0) {
-            char[] buf = mCopyBuffer;
+            char[] buf = _copyBuffer;
             final int blen = buf.length;
             final int len2 = (len < blen) ? len : blen;
             text.getChars(offset, offset+len2, buf, 0);
@@ -375,7 +364,7 @@ public abstract class ByteXmlWriter
     public final void writeStartTagStart(WName name)
         throws IOException, XMLStreamException
     {
-        if (mSurrogate != 0) {
+        if (_surrogate != 0) {
             throwUnpairedSurrogate();
         }
         int ptr = _outputPtr;
@@ -394,7 +383,7 @@ public abstract class ByteXmlWriter
         throws IOException, XMLStreamException
     {
         // inlined writeRaw(), gets called so often
-        if (mSurrogate != 0) {
+        if (_surrogate != 0) {
             throwUnpairedSurrogate();
         }
         if (_outputPtr >= _outputBufferLen) {
@@ -422,7 +411,7 @@ public abstract class ByteXmlWriter
     public final void writeEndTag(WName name)
         throws IOException, XMLStreamException
     {
-        if (mSurrogate != 0) {
+        if (_surrogate != 0) {
             throwUnpairedSurrogate();
         }
         int ptr = _outputPtr;
@@ -460,11 +449,11 @@ public abstract class ByteXmlWriter
     {
         int vlen = value.length();
         // Let's off-line rare case:
-        if (vlen > mCopyBufferLen) {
+        if (vlen > _copyBufferLen) {
             writeLongAttribute(name, value, vlen);
             return;
         }
-        char[] cbuf = mCopyBuffer;
+        char[] cbuf = _copyBuffer;
         if (vlen > 0) {
             value.getChars(0, vlen, cbuf, 0);
         }
@@ -475,7 +464,7 @@ public abstract class ByteXmlWriter
     public final void writeAttribute(WName name, char[] vbuf, int offset, int vlen)
         throws IOException, XMLStreamException
     {
-        if (mSurrogate != 0) {
+        if (_surrogate != 0) {
             throwUnpairedSurrogate();
         }
 
@@ -526,7 +515,7 @@ public abstract class ByteXmlWriter
 
         main_loop:
         while (offset < len) {
-            final int[] charTypes = mCharTypes.ATTR_CHARS;
+            final int[] charTypes = _charTypes.ATTR_CHARS;
 
             inner_loop:
             while (true) {
@@ -581,8 +570,8 @@ public abstract class ByteXmlWriter
     protected final void writeAttrValue(char[] vbuf, int offset, int len)
         throws IOException, XMLStreamException
     {
-        if (mSurrogate != 0) {
-            outputSurrogates(mSurrogate, vbuf[offset]);
+        if (_surrogate != 0) {
+            outputSurrogates(_surrogate, vbuf[offset]);
             ++offset;
             --len;
         }
@@ -591,7 +580,7 @@ public abstract class ByteXmlWriter
 
         main_loop:
         while (offset < len) {
-            final int[] charTypes = mCharTypes.ATTR_CHARS;
+            final int[] charTypes = _charTypes.ATTR_CHARS;
 
             inner_loop:
             while (true) {
@@ -622,12 +611,12 @@ public abstract class ByteXmlWriter
                     break;
                 default:
                     writeAsEntity(ch);
+                    break;
                 }
             } else {
                 offset = outputMultiByteChar(ch, vbuf, offset, len);
+                continue main_loop;
             }
-
-            _outputBuffer[_outputPtr++] = (byte) ch;
         }
     }
 
@@ -649,7 +638,7 @@ public abstract class ByteXmlWriter
         writeRaw(BYTE_EQ, BYTE_QUOT);
         int offset = 0;
         while (vlen > 0) {
-            char[] buf = mCopyBuffer;
+            char[] buf = _copyBuffer;
             final int blen = buf.length;
             int len2 = (vlen < blen) ? vlen : blen;
             value.getChars(offset, offset+len2, buf, 0);
@@ -722,7 +711,7 @@ public abstract class ByteXmlWriter
     private final void writeAttrNameEqQ(WName name)
         throws IOException, XMLStreamException
     {
-        if (mSurrogate != 0) {
+        if (_surrogate != 0) {
             throwUnpairedSurrogate();
         }
         // Enough room for ' attr="' part?
@@ -766,7 +755,7 @@ public abstract class ByteXmlWriter
         int len = data.length();
         int offset = 0;
         while (len > 0) {
-            char[] buf = mCopyBuffer;
+            char[] buf = _copyBuffer;
             int blen = buf.length;
 
             // Can write all the rest?
@@ -811,7 +800,7 @@ public abstract class ByteXmlWriter
 
         main_loop:
         while (offset < len) {
-            final int[] charTypes = mCharTypes.OTHER_CHARS;
+            final int[] charTypes = _charTypes.OTHER_CHARS;
 
             inner_loop:
             while (true) {
@@ -885,12 +874,12 @@ public abstract class ByteXmlWriter
         final int len = text.length();
 
         // Not so common case, let's offline:
-        if (len > mCopyBufferLen) {
+        if (len > _copyBufferLen) {
             longWriteCharacters(text);
             return;
         }
         if (len > 0) {
-            char[] buf = mCopyBuffer;
+            char[] buf = _copyBuffer;
             text.getChars(0, len, buf, 0);
             writeCharacters(buf, 0, len);
         }
@@ -901,7 +890,7 @@ public abstract class ByteXmlWriter
     {
         int offset = 0;
         int len = text.length();
-        char[] buf = mCopyBuffer;
+        char[] buf = _copyBuffer;
 
         do {
             final int blen = buf.length;
@@ -917,8 +906,8 @@ public abstract class ByteXmlWriter
     public final void writeCharacters(char[] cbuf, int offset, int len)
         throws IOException, XMLStreamException
     {
-        if (mSurrogate != 0) {
-            outputSurrogates(mSurrogate, cbuf[offset]);
+        if (_surrogate != 0) {
+            outputSurrogates(_surrogate, cbuf[offset]);
             ++offset;
             --len;
         }
@@ -936,7 +925,7 @@ public abstract class ByteXmlWriter
 
         main_loop:
         while (offset < len) {
-            final int[] charTypes = mCharTypes.TEXT_CHARS;
+            final int[] charTypes = _charTypes.TEXT_CHARS;
 
             inner_loop:
             while (true) {
@@ -1033,7 +1022,7 @@ public abstract class ByteXmlWriter
 
         main_loop:
         while (offset < len) {
-            final int[] charTypes = mCharTypes.TEXT_CHARS;
+            final int[] charTypes = _charTypes.TEXT_CHARS;
 
             inner_loop:
             while (true) {
@@ -1081,7 +1070,7 @@ public abstract class ByteXmlWriter
                 case CT_MULTIBYTE_2: // 3, 4 and N can never occur
                     // To off-line or not?
                     output2ByteChar(ch);
-                    break;
+                    continue main_loop;
                 case CT_RBRACKET: // may need to quote as well...
                     // Let's not quote if known not to be followed by '>'
                     if (offset >= len || cbuf[offset] == '>') {
@@ -1114,7 +1103,7 @@ public abstract class ByteXmlWriter
     public void writeTypedValue(AsciiValueEncoder enc)
         throws IOException, XMLStreamException
     {
-        if (mSurrogate != 0) {
+        if (_surrogate != 0) {
             throwUnpairedSurrogate();
         }
         int free = _outputBufferLen - _outputPtr;
@@ -1179,7 +1168,7 @@ public abstract class ByteXmlWriter
         int len = data.length();
         int offset = 0;
         while (len > 0) {
-            char[] buf = mCopyBuffer;
+            char[] buf = _copyBuffer;
             final int blen = buf.length;
             int len2 = (len < blen) ? len : blen;
             // Nope, can only do part
@@ -1212,7 +1201,7 @@ public abstract class ByteXmlWriter
 
         main_loop:
         while (offset < len) {
-            final int[] charTypes = mCharTypes.OTHER_CHARS;
+            final int[] charTypes = _charTypes.OTHER_CHARS;
 
             inner_loop:
             while (true) {
@@ -1301,7 +1290,7 @@ public abstract class ByteXmlWriter
 
         main_loop:
         while (offset < len) {
-            final int[] charTypes = mCharTypes.OTHER_CHARS;
+            final int[] charTypes = _charTypes.OTHER_CHARS;
 
             inner_loop:
             while (true) {
@@ -1379,7 +1368,7 @@ public abstract class ByteXmlWriter
             int len = data.length();
             int offset = 0;
             while (len > 0) {
-                char[] buf = mCopyBuffer;
+                char[] buf = _copyBuffer;
                 int blen = buf.length;
 
                 // Can write all the rest?
@@ -1408,7 +1397,7 @@ public abstract class ByteXmlWriter
         int offset = 0;
 
         while (len > 0) {
-            char[] buf = mCopyBuffer;
+            char[] buf = _copyBuffer;
             final int blen = buf.length;
             int len2 = (len < blen) ? len : blen;
             data.getChars(offset, offset+len2, buf, 0);
@@ -1425,8 +1414,8 @@ public abstract class ByteXmlWriter
         if (_out == null) {
             return;
         }
-        if (mSurrogate != 0) { // can this actually happen?
-            reportNwfContent(ErrorConsts.WERR_SPACE_CONTENT, (int)mSurrogate, offset-1);
+        if (_surrogate != 0) { // can this actually happen?
+            reportNwfContent(ErrorConsts.WERR_SPACE_CONTENT, (int)_surrogate, offset-1);
         }
 
         len += offset; // now marks the end
@@ -1509,7 +1498,7 @@ public abstract class ByteXmlWriter
     protected final void writeRaw(byte b)
         throws IOException
     {
-        if (mSurrogate != 0) {
+        if (_surrogate != 0) {
             throwUnpairedSurrogate();
         }
         if (_outputPtr >= _outputBufferLen) {
@@ -1521,7 +1510,7 @@ public abstract class ByteXmlWriter
     protected final void writeRaw(byte b1, byte b2)
         throws IOException
     {
-        if (mSurrogate != 0) {
+        if (_surrogate != 0) {
             throwUnpairedSurrogate();
         }
         if ((_outputPtr + 1) >= _outputBufferLen) {
@@ -1540,7 +1529,7 @@ public abstract class ByteXmlWriter
     protected final void writeRaw(byte[] buf, int offset, int len)
         throws IOException
     {
-        if (mSurrogate != 0) {
+        if (_surrogate != 0) {
             throwUnpairedSurrogate();
         }
 
@@ -1574,8 +1563,8 @@ public abstract class ByteXmlWriter
     protected final void throwUnpairedSurrogate()
         throws IOException
     {
-        int surr = mSurrogate;
-        mSurrogate = 0;
+        int surr = _surrogate;
+        _surrogate = 0;
         throwUnpairedSurrogate(surr);
     }
 
