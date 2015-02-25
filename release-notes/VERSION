@@ -6,6 +6,8 @@ Project: aalto-xml
 
 0.9.11 (not yet released)
 
+#8: Improve error-reporting when trying to use `getElementText()` on
+  async parser
 #10: Support for capturing EVENT_INCOMPLETE with XMLEventReader
  (suggested by Henry S, bblfish@github)
 #23: Fix buffer-smashing bug in loadAndRetain()
