@@ -9,26 +9,26 @@ import org.codehaus.stax2.XMLStreamLocation2;
 public class LocationImpl
     implements XMLStreamLocation2
 {
-    private final static LocationImpl sEmptyLocation = new LocationImpl("", "", -1, -1, -1);
+    private final static LocationImpl EMPTY = new LocationImpl("", "", -1, -1, -1);
 
-    final protected String mPublicId, mSystemId;
+    final protected String _publicId, _systemId;
     
-    final protected int mCharOffset;
-    final protected int mCol, mRow;
+    final protected int _charOffset;
+    final protected int _col, _row;
 
-    transient protected  String mDesc = null;
+    transient protected  String _desc = null;
 
     public LocationImpl(String pubId, String sysId,
                         int charOffset, int row, int col)
     {
-        mPublicId = pubId;
-        mSystemId = sysId;
+        _publicId = pubId;
+        _systemId = sysId;
         /* Overflow? Can obviously only handle limited range of overflows,
          * but let's do that at least?
          */
-        mCharOffset = (charOffset < 0) ? Integer.MAX_VALUE : charOffset;
-        mCol = col;
-        mRow = row;
+        _charOffset = (charOffset < 0) ? Integer.MAX_VALUE : charOffset;
+        _col = col;
+        _row = row;
     }
 
     /**
@@ -45,23 +45,23 @@ public class LocationImpl
     }
 
     public static LocationImpl getEmptyLocation() {
-        return sEmptyLocation;
+        return EMPTY;
     }
 
     @Override
-    public int getCharacterOffset() { return mCharOffset; }
+    public int getCharacterOffset() { return _charOffset; }
 
     @Override
-    public int getColumnNumber() { return mCol; }
+    public int getColumnNumber() { return _col; }
 
     @Override
-    public int getLineNumber() { return mRow; }
+    public int getLineNumber() { return _row; }
     
     @Override
-    public String getPublicId() { return mPublicId; }
+    public String getPublicId() { return _publicId; }
 
     @Override
-    public String getSystemId() { return mSystemId; }
+    public String getSystemId() { return _systemId; }
 
     /*
     /**********************************************************************
@@ -84,12 +84,12 @@ public class LocationImpl
     @Override
     public String toString()
     {
-        if (mDesc == null) {
+        if (_desc == null) {
             StringBuffer sb = new StringBuffer(100);
             appendDesc(sb);
-            mDesc = sb.toString();
+            _desc = sb.toString();
         }
-        return mDesc;
+        return _desc;
     }
 
     /*
@@ -102,20 +102,20 @@ public class LocationImpl
     {
         String srcId;
 
-        if (mSystemId != null) {
+        if (_systemId != null) {
             sb.append("[row,col,system-id]: ");
-            srcId = mSystemId;
-        } else if (mPublicId != null) {
+            srcId = _systemId;
+        } else if (_publicId != null) {
             sb.append("[row,col,public-id]: ");
-            srcId = mPublicId;
+            srcId = _publicId;
         } else {
             sb.append("[row,col {unknown-source}]: ");
             srcId = null;
         }
         sb.append('[');
-        sb.append(mRow);
+        sb.append(_row);
         sb.append(',');
-        sb.append(mCol);
+        sb.append(_col);
 
         if (srcId != null) {
             sb.append(',');

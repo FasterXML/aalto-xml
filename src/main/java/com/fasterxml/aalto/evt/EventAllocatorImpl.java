@@ -15,9 +15,12 @@
 package com.fasterxml.aalto.evt;
 
 import javax.xml.stream.*;
+import javax.xml.stream.events.XMLEvent;
 import javax.xml.stream.util.XMLEventAllocator;
 
 import org.codehaus.stax2.ri.evt.Stax2EventAllocatorImpl;
+
+import com.fasterxml.aalto.AsyncXMLStreamReader;
 
 /**
  * Specialized event allocator implementation. Beyond additions needed
@@ -88,10 +91,18 @@ public final class EventAllocatorImpl
 
     /*
     /**********************************************************************
-    /* Overridable methods
+    /* Overriden methods
     /**********************************************************************
      */
 
+    public XMLEvent allocate(XMLStreamReader r) throws XMLStreamException
+    {
+        if (r.getEventType() == AsyncXMLStreamReader.EVENT_INCOMPLETE) {
+            return IncompleteEvent.instance();
+        }
+        return super.allocate(r);
+    }
+    
     /**
      * Method used to get the {@link Location} object to use for
      * an event to create. Base implementation just calls stream

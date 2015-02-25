@@ -350,11 +350,9 @@ public final class InputFactoryImpl
     }
 
     @Override
-    public AsyncXMLStreamReader<AsyncByteArrayFeeder> createAsyncFor(byte[] input) {
-        ReaderConfig cfg = getNonSharedConfig(null, null, null, false, false);
-        cfg.setActualEncoding("UTF-8");
-        AsyncByteArrayScanner scanner = new AsyncByteArrayScanner(cfg);
-        return new AsyncStreamReaderImpl<AsyncByteArrayFeeder>(scanner);
+    public AsyncXMLStreamReader<AsyncByteArrayFeeder> createAsyncFor(byte[] input) throws XMLStreamException
+    {
+        return createAsyncFor(input, 0, input.length);
     }
 
     @Override
@@ -438,7 +436,6 @@ public final class InputFactoryImpl
         return StreamReaderImpl.construct(ByteSourceBootstrapper.construct(cfg, in));
     }
 
-    @SuppressWarnings("resource")
     protected XMLStreamReader2 constructSR(javax.xml.transform.Source src,
                                           boolean forEventReader)
         throws XMLStreamException
@@ -516,7 +513,6 @@ public final class InputFactoryImpl
         throw new XMLStreamException("Can not create Stax reader for the Source passed -- neither reader, input stream nor system id was accessible; can not use other types of sources (like embedded SAX streams)");
     }
 
-    @SuppressWarnings("resource")
     protected XMLStreamReader2 constructSR2(Stax2Source ss, boolean forEventReader)
         throws XMLStreamException
     {
@@ -556,7 +552,6 @@ public final class InputFactoryImpl
         throw new IllegalArgumentException("Can not create stream reader for given Stax2Source: neither InputStream nor Reader available");
     }
 
-    @SuppressWarnings("resource")
     protected XMLStreamReader2 constructSR(URL src, boolean forEventReader)
         throws XMLStreamException
     {
@@ -571,7 +566,6 @@ public final class InputFactoryImpl
         return StreamReaderImpl.construct(ByteSourceBootstrapper.construct(cfg, in));
     }
 
-    @SuppressWarnings("resource")
     protected XMLStreamReader2 constructSR(File f, boolean forEventReader)
         throws XMLStreamException
     {

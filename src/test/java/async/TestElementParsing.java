@@ -10,6 +10,27 @@ import com.fasterxml.aalto.util.IllegalCharHandler;
 
 public class TestElementParsing extends AsyncTestBase
 {
+    /**
+     * Trivial test to verify basic operation with a full buffer.
+     */
+    public void testTrivial() throws Exception
+    {
+        AsyncXMLInputFactory f = new InputFactoryImpl();
+        AsyncXMLStreamReader<AsyncByteArrayFeeder> sr = f.createAsyncFor("<root>a</root>".getBytes("UTF-8"));
+        assertTokenType(START_DOCUMENT, sr.next());
+        assertTokenType(START_ELEMENT, sr.next());
+        assertEquals("root", sr.getLocalName());
+        assertTokenType(CHARACTERS, sr.next());
+        assertEquals("a", sr.getText());
+        assertTokenType(END_ELEMENT, sr.next());
+        assertEquals("root", sr.getLocalName());
+        // no input to see (could still get a PI, comment etc), so
+        assertTokenType(AsyncXMLStreamReader.EVENT_INCOMPLETE, sr.next());
+        sr.getInputFeeder().endOfInput();
+        
+        assertTokenType(END_DOCUMENT, sr.next());
+    }
+    
     public void testRootElement() throws Exception
     {
         // let's try with different chunking, addition (or not) of space

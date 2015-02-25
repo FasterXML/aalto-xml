@@ -195,7 +195,6 @@ public final class OutputFactoryImpl
      * @param autoCloseOutput Whether writer should automatically close the
      *   output stream or Writer, when close() is called on stream writer.
      */
-    @SuppressWarnings("resource")
     private XMLStreamWriter2 createSW(OutputStream out, Writer w, String enc,
                                       boolean forceAutoClose)
         throws XMLStreamException
@@ -287,7 +286,6 @@ public final class OutputFactoryImpl
         return new NonRepairingStreamWriter(cfg, xw, symbols);
     }
 
-    @SuppressWarnings("resource")
     private XMLStreamWriter2 createSW(Result res) throws XMLStreamException
     {
         OutputStream out = null;

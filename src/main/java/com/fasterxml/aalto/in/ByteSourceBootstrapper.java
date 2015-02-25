@@ -122,8 +122,7 @@ public final class ByteSourceBootstrapper
             _config.freeSmallCBuffer(mKeyword);
         }
     }
-    
-    @SuppressWarnings("resource")
+
     public XmlScanner doBootstrap() throws IOException, XMLStreamException
     {
         String normEnc = null;

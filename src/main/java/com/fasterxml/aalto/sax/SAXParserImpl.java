@@ -331,7 +331,6 @@ class SAXParserImpl
     /**********************************************************************
      */
 
-    @SuppressWarnings("resource")
     @Override
     public void parse(InputSource input) throws SAXException
     {

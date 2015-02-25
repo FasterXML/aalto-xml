@@ -49,9 +49,7 @@ public class TestStreamCopier
         return (XMLOutputFactory2) f;
     }
 
-    @SuppressWarnings("resource")
-    protected void test(String input, OutputStream out)
-        throws Exception
+    protected void test(String input, OutputStream out) throws Exception
     {
         XMLInputFactory2 ifact = getFactory();
         XMLOutputFactory2 of = getOutputFactory();

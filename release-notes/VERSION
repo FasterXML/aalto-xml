@@ -6,10 +6,15 @@ Project: aalto-xml
 
 0.9.11 (not yet released)
 
+#10: Support for capturing EVENT_INCOMPLETE with XMLEventReader
+ (suggested by Henry S, bblfish@github)
 #23: Fix buffer-smashing bug in loadAndRetain()
  (reported by Steven T, stebulus@github)
 #26: `ByteXmlWriter` outputs extra characters on buffer boundaries
  (reported by Vasily K, elDracoRus@github)
+- Fix a bug with `AsyncXMLInputFactory.createAsyncFor(byte[])`; was not feeding
+  initial input.
+- Update to Stax2-api 4.0.0 (no major changes but has working generic signatures)
 
 0.9.10 (23-Feb-2015)
 
@@ -23,7 +28,7 @@ Project: aalto-xml
  (contributed by jakeri@github)
 #21: Remove JAXP/SAX auto-registration from META-INF, to avoid conflicts
  (suggested by Dave P)
-* Minor improvement to AsyncUtfScanner.handleNsValuePending to avoid problems
+* Minor improvement to `AsyncUtfScanner.handleNsValuePending()` to avoid problems
   with split (across chunk boundary) namespace declaration.
 
 

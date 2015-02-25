@@ -36,7 +36,7 @@ public class TestCDataParsing extends AsyncTestBase
             _testCDataSkip(999, SPC);
         }
     }
-    
+
     /*
     /**********************************************************************
     /* Secondary test methods
@@ -44,7 +44,7 @@ public class TestCDataParsing extends AsyncTestBase
      */
 
     private final static String XML = "<root><![CDATA[cdata\r\n&] ]] stuff]]>...<![CDATA[this\r\r and Unicode: "+UNICODE_SEGMENT+"!]]></root>";
-    
+
     private void _testCData(int chunkSize, String SPC) throws Exception
     {
         AsyncXMLInputFactory f = new InputFactoryImpl();

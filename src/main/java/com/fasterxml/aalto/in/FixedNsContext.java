@@ -157,10 +157,10 @@ public final class FixedNsContext
             throw new IllegalArgumentException("Illegal to pass null/empty prefix as argument.");
         }
         if (nsURI.equals(XMLConstants.XML_NS_URI)) {
-            return new SingletonIterator(XMLConstants.XML_NS_PREFIX);
+            return SingletonIterator.create(XMLConstants.XML_NS_PREFIX);
         }
         if (nsURI.equals(XMLConstants.XMLNS_ATTRIBUTE_NS_URI)) {
-            return new SingletonIterator(XMLConstants.XMLNS_ATTRIBUTE);
+            return SingletonIterator.create(XMLConstants.XMLNS_ATTRIBUTE);
         }
 
         String[] ns = _declarationData;
@@ -195,7 +195,7 @@ public final class FixedNsContext
             return all.iterator();
         }
         if (first != null) {
-            return new SingletonIterator(first);
+            return SingletonIterator.create(first);
         }
         return EmptyIterator.getInstance();
     }
