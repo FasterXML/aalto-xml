@@ -6,6 +6,8 @@ Project: aalto-xml
 
 0.9.11 (not yet released)
 
+#23: Fix buffer-smashing bug in loadAndRetain()
+ (reported by Steven T, stebulus@github)
 #26: `ByteXmlWriter` outputs extra characters on buffer boundaries
  (reported by Vasily K, elDracoRus@github)
 
