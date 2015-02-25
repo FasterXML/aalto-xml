@@ -11,6 +11,8 @@ Aalto is licensed under [Apache License 2.0](http://www.apache.org/licenses/LICE
 * [Project Wiki](https://github.com/FasterXML/aalto-xml/wiki) (docs, downloads)
 * [FasterXML Aalto Wiki](http://wiki.fasterxml.com/AaltoHome)
 * [Aalto tutorial](http://www.studytrails.com/java/xml/aalto/java-xml-aalto-introduction.jsp) (by [StudyTrails](http://www.studytrails.com))
+* Cowtown blog:
+    * [Non-blocking XML parsing with Aalto 0.9.7](http://www.cowtowncoder.com/blog/archives/2011/03/entry_451.html)
 
 ## Usage
 
