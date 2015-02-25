@@ -38,7 +38,6 @@ public class TestLongerContent extends BaseTestCase
     
     public void _testLongerWithMultiByte(boolean byteBased, boolean useCData) throws Exception
     {
-        
         final int COUNT = 199999;
 
         ByteArrayOutputStream bytes;

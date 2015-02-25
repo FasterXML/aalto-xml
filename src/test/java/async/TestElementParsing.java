@@ -1,6 +1,7 @@
 package async;
 
 import javax.xml.stream.XMLStreamConstants;
+import javax.xml.stream.XMLStreamException;
 
 import com.fasterxml.aalto.AsyncByteArrayFeeder;
 import com.fasterxml.aalto.AsyncXMLInputFactory;
@@ -10,6 +11,8 @@ import com.fasterxml.aalto.util.IllegalCharHandler;
 
 public class TestElementParsing extends AsyncTestBase
 {
+    private final AsyncXMLInputFactory ASYNC_F = new InputFactoryImpl();
+
     /**
      * Trivial test to verify basic operation with a full buffer.
      */
@@ -131,6 +134,24 @@ public class TestElementParsing extends AsyncTestBase
             _testElementsWithAttrs(999, true, SPC);
         }
     }
+
+    // [#8]: give useful exception for `getElementText()`
+    public void testGetElementText() throws Exception
+    {
+        AsyncXMLStreamReader<AsyncByteArrayFeeder> sr = ASYNC_F.createAsyncFor("<root>foo</r".getBytes("UTF-8"));
+
+        assertTokenType(START_DOCUMENT, sr.next());
+        assertTokenType(START_ELEMENT, sr.next());
+        assertEquals("root", sr.getLocalName());
+
+        try {
+            sr.getElementText();
+        } catch (XMLStreamException e) {
+            verifyException(e, "Can not use text-aggregating methods");
+        }
+        
+        sr.close();
+    }
     
     /*
     /**********************************************************************
@@ -140,10 +161,9 @@ public class TestElementParsing extends AsyncTestBase
 
     private void _testEmptyRoot(int chunkSize, String XML) throws Exception
     {
-        AsyncXMLInputFactory f = new InputFactoryImpl();
-        AsyncXMLStreamReader<AsyncByteArrayFeeder> sr = f.createAsyncForByteArray();
+        AsyncXMLStreamReader<AsyncByteArrayFeeder> sr = ASYNC_F.createAsyncForByteArray();
         AsyncReaderWrapperForByteArray reader = new AsyncReaderWrapperForByteArray(sr, chunkSize, XML);
-
+        
         // should start with START_DOCUMENT, but for now skip
         int t = verifyStart(reader);
         assertTokenType(START_ELEMENT, t);
@@ -159,8 +179,7 @@ public class TestElementParsing extends AsyncTestBase
 
     private void _testElements(int chunkSize, String SPC) throws Exception
     {
-        AsyncXMLInputFactory f = new InputFactoryImpl();
-        AsyncXMLStreamReader<AsyncByteArrayFeeder> sr = f.createAsyncForByteArray();
+        AsyncXMLStreamReader<AsyncByteArrayFeeder> sr = ASYNC_F.createAsyncForByteArray();
 //        final String XML = SPC+"<root attr='1&amp;2'><leaf xmlns='abc' a   ='3'\rb=''  /></root>";
         final String XML = SPC+"<root attr='1&amp;2'><leaf xmlns='abc' a   ='3'\rxmlns:foo='bar'  b=''  /></root>";
         AsyncReaderWrapperForByteArray reader = new AsyncReaderWrapperForByteArray(sr, chunkSize, XML);
@@ -205,8 +224,7 @@ public class TestElementParsing extends AsyncTestBase
 
     private void _testElementsWithAttrs(int chunkSize, boolean checkValues, String SPC) throws Exception
     {
-        AsyncXMLInputFactory f = new InputFactoryImpl();
-        AsyncXMLStreamReader<AsyncByteArrayFeeder> sr = f.createAsyncForByteArray();
+        AsyncXMLStreamReader<AsyncByteArrayFeeder> sr = ASYNC_F.createAsyncForByteArray();
 //        final String XML = SPC+"<root attr='1&amp;2'><leaf xmlns='abc' a   ='3'\rb=''  /></root>";
         final String XML = SPC+"<root attr='1&#62;2, 2&#x3C;1' />";
         AsyncReaderWrapperForByteArray reader = new AsyncReaderWrapperForByteArray(sr, chunkSize, XML);
@@ -233,8 +251,7 @@ public class TestElementParsing extends AsyncTestBase
 
     private void _testElementsWithUTF8Attrs(int chunkSize, boolean checkValues, String SPC) throws Exception
     {
-        AsyncXMLInputFactory f = new InputFactoryImpl();
-        AsyncXMLStreamReader<AsyncByteArrayFeeder> sr = f.createAsyncForByteArray();
+        AsyncXMLStreamReader<AsyncByteArrayFeeder> sr = ASYNC_F.createAsyncForByteArray();
         final String VALUE = "Gr\u00e4"; 
         final String XML = SPC+"<root attr='"+VALUE+"' />";
         AsyncReaderWrapperForByteArray reader = new AsyncReaderWrapperForByteArray(sr, chunkSize, XML);
@@ -262,8 +279,7 @@ public class TestElementParsing extends AsyncTestBase
     private void _testElementsWithIllegalChars(int chunkSize, boolean checkValues, String SPC) throws Exception
     {
         char replaced = ' ';
-        InputFactoryImpl f = new InputFactoryImpl();
-        AsyncXMLStreamReader<AsyncByteArrayFeeder> sr = f.createAsyncForByteArray();
+        AsyncXMLStreamReader<AsyncByteArrayFeeder> sr = ASYNC_F.createAsyncForByteArray();
         sr.getConfig().setIllegalCharHandler(new IllegalCharHandler.ReplacingIllegalCharHandler(replaced));
         char illegal = 22;
         final String VALUE = "Gr" + illegal; 

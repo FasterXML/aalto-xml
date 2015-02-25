@@ -16,7 +16,6 @@ public class TestAsyncViaEventReader extends AsyncTestBase
     {
         AsyncXMLInputFactory f = new InputFactoryImpl();
         AsyncXMLStreamReader<AsyncByteArrayFeeder> sr = f.createAsyncFor("<root>a</r".getBytes("UTF-8"));
-//        AsyncReaderWrapperForByteArray reader = new AsyncReaderWrapperForByteArray(sr, 3, "<root>abc</root>";
 
         assertTokenType(START_DOCUMENT, sr.next());
         
