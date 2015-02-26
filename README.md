@@ -35,6 +35,7 @@ Non-blocking parsing interface is extension of basic Stax (and Stax2) API, with 
 * AsyncInputFeeder contains methods for feeding input.
 
 Typical usage pattern is one where block of input is fed to parser, and zero or more complete events are read using basic 'XMLStreamReader.next()' method; and once 'EVENT_INCOMPLETE' is returned, more input needs to be given. AsyncXMLStreamReader itself does not buffer input beyond a single block; caller is responsible for additional buffering, if any.
+See [Async parsing](Code-sample:-Async-parsing) for details.
 
 ### Aalto Design goals
 
