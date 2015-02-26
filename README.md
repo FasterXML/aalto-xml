@@ -28,14 +28,33 @@ Blocking XML parsing is done using one of standard interfaces:
 
 Non-blocking parsing interface is extension of basic Stax (and Stax2) API, with extensions defined in 'com.fasterxml.aalto' package::
 
-* AsyncXMLInputFactory offers factory methods for creating non-blocking parsers
-* AsyncXMLStreamReader is extended type that non-blocking parsers implement
- * AsyncXMLStreamReader.EVENT_INCOMPLETE (value 257; just outside range reserved by Stax API) is used to denote "not yet available" (without more data)
- * Method "getInputFeeder()" is used to access object of type 'AsyncInputFeeder' used to feed input non-blocking way
-* AsyncInputFeeder contains methods for feeding input.
+* `AsyncXMLInputFactory` offers factory methods for creating non-blocking parsers
+* `AsyncXMLStreamReader` is extended type that non-blocking parsers implement
+ * `AsyncXMLStreamReader.EVENT_INCOMPLETE` (value 257; just outside range reserved by Stax API) is used to denote "not yet available" (without more data)
+ * Method `getInputFeeder()` is used to access object of type 'AsyncInputFeeder' used to feed input non-blocking way
+* `AsyncInputFeeder` contains methods for feeding input.
 
 Typical usage pattern is one where block of input is fed to parser, and zero or more complete events are read using basic 'XMLStreamReader.next()' method; and once 'EVENT_INCOMPLETE' is returned, more input needs to be given. AsyncXMLStreamReader itself does not buffer input beyond a single block; caller is responsible for additional buffering, if any.
 See [Async parsing](Code-sample:-Async-parsing) for details.
+
+Construction of `AsyncXMLInputFactory` is simple; instance may be constructed with or without initial content to parse:
+
+```java
+AsyncXMLInputFactory f = new InputFactoryImpl();
+AsyncXMLStreamReader<AsyncByteArrayFeeder> parser = f.createAsyncFor(byteArray);
+```
+
+and more content is feed via `AsyncInputFeeder` when getting `EVENT_INCOMPLETE` via `parser.next()`:
+
+```java
+parser.getInputFeeder().feedInput(b, offset, dataLength);
+```
+
+or, if no more input available, indicate end-of-content with
+
+```java
+parser.getInputFeeder().endOfInput();
+```
 
 ### Aalto Design goals
 
