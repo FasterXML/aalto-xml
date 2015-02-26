@@ -1,6 +1,8 @@
 # Overview
 
-Aalto XML processor is an ultra-high performance next generation Stax XML processor implementation. It also implements SAX2 API.
+Aalto XML processor is an ultra-high performance next generation Stax XML processor implementation, implementing both
+basic Stax API (`javax.xml.stream`) and Stax2 API extension (`org.codehaus.woodstox.stax2`).
+In additiona, it also implements SAX2 API.
 
 Additionally Aalto implements a non-blocking (asynchronous) Stax parser; non-blocking API is a minimalistic extension above Stax/Stax2 API to allow indication of "not yet available" token (EVENT_INCOMPLETE) as well as feeding of input (since InputStream can not be used as it blocks)
 
@@ -12,7 +14,7 @@ Aalto is licensed under [Apache License 2.0](http://www.apache.org/licenses/LICE
 * [FasterXML Aalto Wiki](http://wiki.fasterxml.com/AaltoHome)
 * [Aalto tutorial](http://www.studytrails.com/java/xml/aalto/java-xml-aalto-introduction.jsp) (by [StudyTrails](http://www.studytrails.com))
 * Cowtown blog:
-    * [Non-blocking XML parsing with Aalto 0.9.7](http://www.cowtowncoder.com/blog/archives/2011/03/entry_451.html)
+    * [Non-blocking XML parsing with Aalto 0.9.7](http://www.cowtowncoder.com/blog/archives/2011/03/entry_451.html) (note: minor changes to API since then)
 
 ## Usage
 
@@ -60,5 +62,17 @@ parser.getInputFeeder().endOfInput();
 
 * Ultra-high performance parsing by making the Common Case Fast (similar to original RISC manifesto). This may mean limiting functionality, but never compromising correctness. XML 1.0 compliancy is not sacrificed for speed.
 * Allow non-block, asynchronous parsing: it should be possible to "feed" more input and incrementally get more XML events out, without forcing the current thread to block on I/O read operation. 
+
+### Dependency
+
+Aalto dependency is usually added via Maven repository, so something like:
+
+```xml
+<dependency>
+  <groupId>com.fasterxml</groupId>
+  <artifactId>aalto-xml</artifactId>
+  <version>0.9.11</version>
+</dependency>
+```
 
 
