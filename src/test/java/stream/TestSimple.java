@@ -92,7 +92,6 @@ public class TestSimple extends base.BaseTestCase
     /**********************************************************************
      */
 
-
     XMLStreamReader2 createReader(String content, String enc, boolean useBytes)
         throws IOException, XMLStreamException
     {
@@ -102,5 +101,4 @@ public class TestSimple extends base.BaseTestCase
         }
         return (XMLStreamReader2) F2.createXMLStreamReader(new StringReader(content));
     }
-
 }
