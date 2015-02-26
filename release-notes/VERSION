@@ -4,7 +4,7 @@ Project: aalto-xml
 = Releases
 ------------------------------------------------------------------------
 
-0.9.11 (not yet released)
+0.9.11 (26-Feb-2015)
 
 #8: Improve error-reporting when trying to use `getElementText()` on
   async parser
