@@ -74,5 +74,4 @@ public class TestCommentParsing extends AsyncTestBase
         assertTokenType(END_DOCUMENT, reader.nextToken());
         assertFalse(sr.hasNext());
     }
-
 }

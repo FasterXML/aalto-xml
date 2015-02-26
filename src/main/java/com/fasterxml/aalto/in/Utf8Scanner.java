@@ -1311,8 +1311,27 @@ public final class Utf8Scanner
         }
     }
 
-    private final void skipUtf8_4(int c)
-        throws XMLStreamException
+    private final void skipUtf8_4(int c) throws XMLStreamException
+    {
+        if ((_inputPtr + 4) > _inputEnd) {
+            skipUtf8_4Slow(c);
+            return;
+        }
+        int d = (int) _inputBuffer[_inputPtr++];
+        if ((d & 0xC0) != 0x080) {
+            reportInvalidOther(d & 0xFF, _inputPtr);
+        }
+        d = (int) _inputBuffer[_inputPtr++];
+        if ((d & 0xC0) != 0x080) {
+            reportInvalidOther(d & 0xFF, _inputPtr);
+        }
+        d = (int) _inputBuffer[_inputPtr++];
+        if ((d & 0xC0) != 0x080) {
+            reportInvalidOther(d & 0xFF, _inputPtr);
+        }
+    }
+
+    private final void skipUtf8_4Slow(int c) throws XMLStreamException
     {
         if (_inputPtr >= _inputEnd) {
             loadMoreGuaranteed();
@@ -1324,6 +1343,7 @@ public final class Utf8Scanner
         if (_inputPtr >= _inputEnd) {
             loadMoreGuaranteed();
         }
+        d = (int) _inputBuffer[_inputPtr++];
         if ((d & 0xC0) != 0x080) {
             reportInvalidOther(d & 0xFF, _inputPtr);
         }

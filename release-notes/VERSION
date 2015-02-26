@@ -14,6 +14,8 @@ Project: aalto-xml
  (reported by Steven T, stebulus@github)
 #26: `ByteXmlWriter` outputs extra characters on buffer boundaries
  (reported by Vasily K, elDracoRus@github)
+#27: com.fasterxml.aalto.WFCException: Illegal XML character ((CTRL-CHAR, code 128))
+ (reported by Ilya, intracer@github)
 - Fix a bug with `AsyncXMLInputFactory.createAsyncFor(byte[])`; was not feeding
   initial input.
 - Update to Stax2-api 4.0.0 (no major changes but has working generic signatures)
