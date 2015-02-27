@@ -8,6 +8,10 @@ Additionally Aalto implements a non-blocking (asynchronous) Stax parser; non-blo
 
 Aalto is licensed under [Apache License 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
+## Status
+
+[![Build Status](https://travis-ci.org/FasterXML/aalto-xml.svg)](https://travis-ci.org/FasterXML/aalto-xml)
+
 ## Documentation
 
 * [Project Wiki](https://github.com/FasterXML/aalto-xml/wiki) (docs, downloads)
