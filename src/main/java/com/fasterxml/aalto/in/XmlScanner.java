@@ -260,7 +260,7 @@ public abstract class XmlScanner
      * to {@link #getNonTransientNamespaceContext}, iff this would
      * still be a valid context.
      */
-    protected FixedNsContext _lastNsContext = FixedNsContext.EMPTY_CONTEXT;
+    protected FixedNsContext _lastNsContext = FixedNsContext.newEmptyContext();
 
     /*
     /**********************************************************************

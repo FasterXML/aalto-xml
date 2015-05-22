@@ -14,12 +14,8 @@ import org.codehaus.stax2.ri.SingletonIterator;
 public final class FixedNsContext
     implements NamespaceContext
 {
-    /**
-     * We can share and reuse "no bindings" instance.
-     */
-    public final static FixedNsContext EMPTY_CONTEXT;
-    static  {
-        EMPTY_CONTEXT = new FixedNsContext(null, new String[0]);
+    public static FixedNsContext newEmptyContext() {
+        return new FixedNsContext(null, new String[0]);
     }
 
     /*
@@ -209,7 +205,7 @@ public final class FixedNsContext
     @Override
         public String toString()
     {
-        if (this == EMPTY_CONTEXT) {
+        if (_lastDeclaration == null && _declarationData.length == 0) {
             return "[EMPTY non-transient NsContext]";
         }
         StringBuilder sb = new StringBuilder();
