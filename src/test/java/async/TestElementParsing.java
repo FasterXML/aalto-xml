@@ -4,10 +4,13 @@ import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 
 import com.fasterxml.aalto.AsyncByteArrayFeeder;
+import com.fasterxml.aalto.AsyncByteBufferFeeder;
 import com.fasterxml.aalto.AsyncXMLInputFactory;
 import com.fasterxml.aalto.AsyncXMLStreamReader;
 import com.fasterxml.aalto.stax.InputFactoryImpl;
 import com.fasterxml.aalto.util.IllegalCharHandler;
+
+import java.nio.ByteBuffer;
 
 public class TestElementParsing extends AsyncTestBase
 {
@@ -16,22 +19,59 @@ public class TestElementParsing extends AsyncTestBase
     /**
      * Trivial test to verify basic operation with a full buffer.
      */
-    public void testTrivial() throws Exception
+    public void testTrivial_array() throws Exception
     {
-        AsyncXMLInputFactory f = new InputFactoryImpl();
-        AsyncXMLStreamReader<AsyncByteArrayFeeder> sr = f.createAsyncFor("<root>a</root>".getBytes("UTF-8"));
-        assertTokenType(START_DOCUMENT, sr.next());
-        assertTokenType(START_ELEMENT, sr.next());
-        assertEquals("root", sr.getLocalName());
-        assertTokenType(CHARACTERS, sr.next());
-        assertEquals("a", sr.getText());
-        assertTokenType(END_ELEMENT, sr.next());
-        assertEquals("root", sr.getLocalName());
-        // no input to see (could still get a PI, comment etc), so
-        assertTokenType(AsyncXMLStreamReader.EVENT_INCOMPLETE, sr.next());
-        sr.getInputFeeder().endOfInput();
-        
-        assertTokenType(END_DOCUMENT, sr.next());
+        final AsyncXMLInputFactory f = new InputFactoryImpl();
+        AsyncXMLStreamReader<AsyncByteArrayFeeder> sr = null;
+        try {
+            sr = f.createAsyncFor("<root>a</root>".getBytes("UTF-8"));
+
+            assertTokenType(START_DOCUMENT, sr.next());
+            assertTokenType(START_ELEMENT, sr.next());
+            assertEquals("root", sr.getLocalName());
+            assertTokenType(CHARACTERS, sr.next());
+            assertEquals("a", sr.getText());
+            assertTokenType(END_ELEMENT, sr.next());
+            assertEquals("root", sr.getLocalName());
+            // no input to see (could still get a PI, comment etc), so
+            assertTokenType(AsyncXMLStreamReader.EVENT_INCOMPLETE, sr.next());
+            sr.getInputFeeder().endOfInput();
+
+            assertTokenType(END_DOCUMENT, sr.next());
+        } finally {
+            if(sr != null) {
+                sr.close();
+            }
+        }
+    }
+
+    /**
+     * Trivial test to verify basic operation with a full buffer.
+     */
+    public void testTrivial_buffer() throws Exception
+    {
+        final AsyncXMLInputFactory f = new InputFactoryImpl();
+        AsyncXMLStreamReader<AsyncByteBufferFeeder> sr = null;
+        try {
+            sr = f.createAsyncFor(ByteBuffer.wrap("<root>a</root>".getBytes("UTF-8")));
+
+            assertTokenType(START_DOCUMENT, sr.next());
+            assertTokenType(START_ELEMENT, sr.next());
+            assertEquals("root", sr.getLocalName());
+            assertTokenType(CHARACTERS, sr.next());
+            assertEquals("a", sr.getText());
+            assertTokenType(END_ELEMENT, sr.next());
+            assertEquals("root", sr.getLocalName());
+            // no input to see (could still get a PI, comment etc), so
+            assertTokenType(AsyncXMLStreamReader.EVENT_INCOMPLETE, sr.next());
+            sr.getInputFeeder().endOfInput();
+
+            assertTokenType(END_DOCUMENT, sr.next());
+        } finally {
+            if(sr != null) {
+                sr.close();
+            }
+        }
     }
     
     public void testRootElement() throws Exception
@@ -136,21 +176,49 @@ public class TestElementParsing extends AsyncTestBase
     }
 
     // [#8]: give useful exception for `getElementText()`
-    public void testGetElementText() throws Exception
+    public void testGetElementText_array() throws Exception
     {
-        AsyncXMLStreamReader<AsyncByteArrayFeeder> sr = ASYNC_F.createAsyncFor("<root>foo</r".getBytes("UTF-8"));
-
-        assertTokenType(START_DOCUMENT, sr.next());
-        assertTokenType(START_ELEMENT, sr.next());
-        assertEquals("root", sr.getLocalName());
-
+        AsyncXMLStreamReader<AsyncByteArrayFeeder> sr = null;
         try {
-            sr.getElementText();
-        } catch (XMLStreamException e) {
-            verifyException(e, "Can not use text-aggregating methods");
+            sr = ASYNC_F.createAsyncFor("<root>foo</r".getBytes("UTF-8"));
+
+            assertTokenType(START_DOCUMENT, sr.next());
+            assertTokenType(START_ELEMENT, sr.next());
+            assertEquals("root", sr.getLocalName());
+
+            try {
+                sr.getElementText();
+            } catch (XMLStreamException e) {
+                verifyException(e, "Can not use text-aggregating methods");
+            }
+        } finally {
+            if(sr != null) {
+                sr.close();
+            }
         }
-        
-        sr.close();
+    }
+
+    // [#8]: give useful exception for `getElementText()`
+    public void testGetElementText_buffer() throws Exception
+    {
+        AsyncXMLStreamReader<AsyncByteBufferFeeder> sr = null;
+        try {
+            sr = ASYNC_F.createAsyncFor(ByteBuffer.wrap("<root>foo</r".getBytes("UTF-8")));
+
+            assertTokenType(START_DOCUMENT, sr.next());
+            assertTokenType(START_ELEMENT, sr.next());
+            assertEquals("root", sr.getLocalName());
+
+            try {
+                sr.getElementText();
+            } catch (XMLStreamException e) {
+                verifyException(e, "Can not use text-aggregating methods");
+            }
+        } finally {
+            if(sr != null) {
+                sr.close();
+            }
+        }
     }
     
     /*
@@ -159,11 +227,35 @@ public class TestElementParsing extends AsyncTestBase
     /**********************************************************************
      */
 
-    private void _testEmptyRoot(int chunkSize, String XML) throws Exception
+    private void _testEmptyRoot(final int chunkSize, final String XML) throws Exception
     {
-        AsyncXMLStreamReader<AsyncByteArrayFeeder> sr = ASYNC_F.createAsyncForByteArray();
-        AsyncReaderWrapperForByteArray reader = new AsyncReaderWrapperForByteArray(sr, chunkSize, XML);
-        
+        //test for byte array
+        AsyncXMLStreamReader<AsyncByteArrayFeeder> sr_array = null;
+        try {
+            sr_array = ASYNC_F.createAsyncForByteArray();
+            final AsyncReaderWrapperForByteArray reader_array = new AsyncReaderWrapperForByteArray(sr_array, chunkSize, XML);
+            _testEmptyRoot(sr_array, reader_array);
+        } finally {
+            if(sr_array != null) {
+                sr_array.close();
+            }
+        }
+
+        //test for byte buffer
+        AsyncXMLStreamReader<AsyncByteBufferFeeder> sr_buffer = null;
+        try {
+            sr_buffer = ASYNC_F.createAsyncForByteBuffer();
+            final AsyncReaderWrapperForByteBuffer reader_buffer = new AsyncReaderWrapperForByteBuffer(sr_buffer, chunkSize, XML);
+            _testEmptyRoot(sr_buffer, reader_buffer);
+        } finally {
+            if(sr_buffer != null) {
+                sr_buffer.close();
+            }
+        }
+    }
+
+    private void _testEmptyRoot(final AsyncXMLStreamReader<?> sr, final AsyncReaderWrapper reader) throws Exception
+    {
         // should start with START_DOCUMENT, but for now skip
         int t = verifyStart(reader);
         assertTokenType(START_ELEMENT, t);
@@ -177,13 +269,38 @@ public class TestElementParsing extends AsyncTestBase
         assertFalse(sr.hasNext());
     }
 
-    private void _testElements(int chunkSize, String SPC) throws Exception
+    private void _testElements(final int chunkSize, final String SPC) throws Exception
     {
-        AsyncXMLStreamReader<AsyncByteArrayFeeder> sr = ASYNC_F.createAsyncForByteArray();
 //        final String XML = SPC+"<root attr='1&amp;2'><leaf xmlns='abc' a   ='3'\rb=''  /></root>";
-        final String XML = SPC+"<root attr='1&amp;2'><leaf xmlns='abc' a   ='3'\rxmlns:foo='bar'  b=''  /></root>";
-        AsyncReaderWrapperForByteArray reader = new AsyncReaderWrapperForByteArray(sr, chunkSize, XML);
+        final String XML = SPC + "<root attr='1&amp;2'><leaf xmlns='abc' a   ='3'\rxmlns:foo='bar'  b=''  /></root>";
 
+        //test for byte array
+        AsyncXMLStreamReader<AsyncByteArrayFeeder> sr_array = null;
+        try {
+            sr_array = ASYNC_F.createAsyncForByteArray();
+            final AsyncReaderWrapperForByteArray reader_array = new AsyncReaderWrapperForByteArray(sr_array, chunkSize, XML);
+            _testElements(sr_array, reader_array);
+        } finally {
+            if (sr_array != null) {
+                sr_array.close();
+            }
+        }
+
+        //test for byte buffer
+        AsyncXMLStreamReader<AsyncByteBufferFeeder> sr_buffer = null;
+        try {
+            sr_buffer = ASYNC_F.createAsyncForByteBuffer();
+            final AsyncReaderWrapperForByteBuffer reader_buffer = new AsyncReaderWrapperForByteBuffer(sr_buffer, chunkSize, XML);
+            _testElements(sr_buffer, reader_buffer);
+        } finally {
+            if (sr_buffer != null) {
+                sr_buffer.close();
+            }
+        }
+    }
+
+    private void _testElements(final AsyncXMLStreamReader<?> sr, final AsyncReaderWrapper reader) throws Exception
+    {
         // should start with START_DOCUMENT, but for now skip
         int t = verifyStart(reader);
         assertTokenType(START_ELEMENT, t);
@@ -222,13 +339,38 @@ public class TestElementParsing extends AsyncTestBase
         assertFalse(sr.hasNext());
     }
 
-    private void _testElementsWithAttrs(int chunkSize, boolean checkValues, String SPC) throws Exception
+    private void _testElementsWithAttrs(final int chunkSize, final boolean checkValues, final String SPC) throws Exception
     {
-        AsyncXMLStreamReader<AsyncByteArrayFeeder> sr = ASYNC_F.createAsyncForByteArray();
 //        final String XML = SPC+"<root attr='1&amp;2'><leaf xmlns='abc' a   ='3'\rb=''  /></root>";
-        final String XML = SPC+"<root attr='1&#62;2, 2&#x3C;1' />";
-        AsyncReaderWrapperForByteArray reader = new AsyncReaderWrapperForByteArray(sr, chunkSize, XML);
+        final String XML = SPC + "<root attr='1&#62;2, 2&#x3C;1' />";
 
+        //test for byte array
+        AsyncXMLStreamReader<AsyncByteArrayFeeder> sr_array = null;
+        try {
+            sr_array = ASYNC_F.createAsyncForByteArray();
+            final AsyncReaderWrapperForByteArray reader_array = new AsyncReaderWrapperForByteArray(sr_array, chunkSize, XML);
+            _testElementsWithAttrs(sr_array, reader_array, checkValues);
+        } finally {
+            if (sr_array != null) {
+                sr_array.close();
+            }
+        }
+
+        //test for byte buffer
+        AsyncXMLStreamReader<AsyncByteBufferFeeder> sr_buffer = null;
+        try {
+            sr_buffer = ASYNC_F.createAsyncForByteBuffer();
+            final AsyncReaderWrapperForByteBuffer reader_buffer = new AsyncReaderWrapperForByteBuffer(sr_buffer, chunkSize, XML);
+            _testElementsWithAttrs(sr_buffer, reader_buffer, checkValues);
+        } finally {
+            if (sr_buffer != null) {
+                sr_buffer.close();
+            }
+        }
+    }
+
+    private void _testElementsWithAttrs(final AsyncXMLStreamReader<?> sr, final AsyncReaderWrapper reader, final boolean checkValues) throws Exception
+    {
         // should start with START_DOCUMENT, but for now skip
         int t = verifyStart(reader);
         assertTokenType(START_ELEMENT, t);
@@ -249,13 +391,38 @@ public class TestElementParsing extends AsyncTestBase
         assertFalse(sr.hasNext());
     }
 
-    private void _testElementsWithUTF8Attrs(int chunkSize, boolean checkValues, String SPC) throws Exception
+    private void _testElementsWithUTF8Attrs(final int chunkSize, final boolean checkValues, final String SPC) throws Exception
     {
-        AsyncXMLStreamReader<AsyncByteArrayFeeder> sr = ASYNC_F.createAsyncForByteArray();
-        final String VALUE = "Gr\u00e4"; 
-        final String XML = SPC+"<root attr='"+VALUE+"' />";
-        AsyncReaderWrapperForByteArray reader = new AsyncReaderWrapperForByteArray(sr, chunkSize, XML);
+        final String VALUE = "Gr\u00e4";
+        final String XML = SPC + "<root attr='" + VALUE + "' />";
 
+        //test for byte array
+        AsyncXMLStreamReader<AsyncByteArrayFeeder> sr_array = null;
+        try {
+            sr_array = ASYNC_F.createAsyncForByteArray();
+            final AsyncReaderWrapperForByteArray reader_array = new AsyncReaderWrapperForByteArray(sr_array, chunkSize, XML);
+            _testElementsWithUTF8Attrs(sr_array, reader_array, checkValues, VALUE);
+        } finally {
+            if (sr_array != null) {
+                sr_array.close();
+            }
+        }
+
+        //test for byte buffer
+        AsyncXMLStreamReader<AsyncByteBufferFeeder> sr_buffer = null;
+        try {
+            sr_buffer = ASYNC_F.createAsyncForByteBuffer();
+            final AsyncReaderWrapperForByteBuffer reader_buffer = new AsyncReaderWrapperForByteBuffer(sr_buffer, chunkSize, XML);
+            _testElementsWithUTF8Attrs(sr_buffer, reader_buffer, checkValues, VALUE);
+        } finally {
+            if (sr_buffer != null) {
+                sr_buffer.close();
+            }
+        }
+    }
+
+    private void _testElementsWithUTF8Attrs(final AsyncXMLStreamReader<?> sr, final AsyncReaderWrapper reader, final boolean checkValues, final String VALUE) throws Exception
+    {
         // should start with START_DOCUMENT, but for now skip
         int t = verifyStart(reader);
         assertTokenType(START_ELEMENT, t);
@@ -276,17 +443,43 @@ public class TestElementParsing extends AsyncTestBase
         assertFalse(sr.hasNext());
     }
     
-    private void _testElementsWithIllegalChars(int chunkSize, boolean checkValues, String SPC) throws Exception
+    private void _testElementsWithIllegalChars(final int chunkSize, final boolean checkValues, final String SPC) throws Exception
     {
         char replaced = ' ';
-        AsyncXMLStreamReader<AsyncByteArrayFeeder> sr = ASYNC_F.createAsyncForByteArray();
-        sr.getConfig().setIllegalCharHandler(new IllegalCharHandler.ReplacingIllegalCharHandler(replaced));
         char illegal = 22;
-        final String VALUE = "Gr" + illegal; 
-        final String VALUE_REPL  = "Gr" + replaced;
-        final String XML = SPC+"<root attr='"+VALUE+"' />";
-        AsyncReaderWrapperForByteArray reader = new AsyncReaderWrapperForByteArray(sr, chunkSize, XML);
+        final String VALUE = "Gr" + illegal;
+        final String VALUE_REPL = "Gr" + replaced;
+        final String XML = SPC + "<root attr='" + VALUE + "' />";
 
+        //test for byte array
+        AsyncXMLStreamReader<AsyncByteArrayFeeder> sr_array = null;
+        try {
+            sr_array = ASYNC_F.createAsyncForByteArray();
+            sr_array.getConfig().setIllegalCharHandler(new IllegalCharHandler.ReplacingIllegalCharHandler(replaced));
+            final AsyncReaderWrapperForByteArray reader_array = new AsyncReaderWrapperForByteArray(sr_array, chunkSize, XML);
+            _testElementsWithIllegalChars(sr_array, reader_array, checkValues, VALUE_REPL);
+        } finally {
+            if (sr_array != null) {
+                sr_array.close();
+            }
+        }
+
+        //test for byte buffer
+        AsyncXMLStreamReader<AsyncByteBufferFeeder> sr_buffer = null;
+        try {
+            sr_buffer = ASYNC_F.createAsyncForByteBuffer();
+            sr_buffer.getConfig().setIllegalCharHandler(new IllegalCharHandler.ReplacingIllegalCharHandler(replaced));
+            final AsyncReaderWrapperForByteBuffer reader_buffer = new AsyncReaderWrapperForByteBuffer(sr_buffer, chunkSize, XML);
+            _testElementsWithIllegalChars(sr_buffer, reader_buffer, checkValues, VALUE_REPL);
+        } finally {
+            if (sr_buffer != null) {
+                sr_buffer.close();
+            }
+        }
+    }
+
+    private void _testElementsWithIllegalChars(final AsyncXMLStreamReader<?> sr, final AsyncReaderWrapper reader, final boolean checkValues, final String VALUE_REPL) throws Exception
+    {
         // should start with START_DOCUMENT, but for now skip
         int t = verifyStart(reader);
         assertTokenType(START_ELEMENT, t);
@@ -306,5 +499,4 @@ public class TestElementParsing extends AsyncTestBase
         assertTokenType(XMLStreamConstants.END_DOCUMENT, reader.nextToken());
         assertFalse(sr.hasNext());
     }
-    
 }

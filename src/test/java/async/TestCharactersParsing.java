@@ -3,6 +3,7 @@ package async;
 import javax.xml.stream.XMLStreamConstants;
 
 import com.fasterxml.aalto.AsyncByteArrayFeeder;
+import com.fasterxml.aalto.AsyncByteBufferFeeder;
 import com.fasterxml.aalto.AsyncXMLInputFactory;
 import com.fasterxml.aalto.AsyncXMLStreamReader;
 import com.fasterxml.aalto.stax.InputFactoryImpl;
@@ -93,13 +94,39 @@ public class TestCharactersParsing extends AsyncTestBase
     /**********************************************************************
      */
     
-    private void _testLinefeeds(int chunkSize, boolean checkValues, String SPC) throws Exception
+    private void _testLinefeeds(final int chunkSize, final boolean checkValues, final String SPC) throws Exception
     {
-        AsyncXMLInputFactory f = new InputFactoryImpl();
-        AsyncXMLStreamReader<AsyncByteArrayFeeder> sr = f.createAsyncForByteArray();
-        final String XML = SPC+"<root>\rFirst\r\nSecond\nThird: "+UNICODE_SEGMENT+"</root>";
-        AsyncReaderWrapperForByteArray reader = new AsyncReaderWrapperForByteArray(sr, chunkSize, XML);
+        final String XML = SPC + "<root>\rFirst\r\nSecond\nThird: " + UNICODE_SEGMENT + "</root>";
 
+        final AsyncXMLInputFactory f = new InputFactoryImpl();
+
+        //test for byte array
+        AsyncXMLStreamReader<AsyncByteArrayFeeder> sr_array = null;
+        try {
+            sr_array = f.createAsyncForByteArray();
+            final AsyncReaderWrapperForByteArray reader_array = new AsyncReaderWrapperForByteArray(sr_array, chunkSize, XML);
+            _testLinefeeds(sr_array, reader_array, checkValues);
+        } finally {
+            if(sr_array != null) {
+                sr_array.close();
+            }
+        }
+
+        //test for byte buffer
+        AsyncXMLStreamReader<AsyncByteBufferFeeder> sr_buffer = null;
+        try {
+            sr_buffer = f.createAsyncForByteBuffer();
+            final AsyncReaderWrapperForByteBuffer reader_buffer = new AsyncReaderWrapperForByteBuffer(sr_buffer, chunkSize, XML);
+            _testLinefeeds(sr_buffer, reader_buffer, checkValues);
+        } finally {
+            if(sr_buffer != null) {
+                sr_buffer.close();
+            }
+        }
+    }
+
+    private void _testLinefeeds(final AsyncXMLStreamReader<?> sr, final AsyncReaderWrapper reader, final boolean checkValues) throws Exception
+    {
         assertTokenType(START_ELEMENT, verifyStart(reader));
         if (checkValues) {
             assertEquals("root", sr.getLocalName());
@@ -123,13 +150,39 @@ public class TestCharactersParsing extends AsyncTestBase
         assertFalse(sr.hasNext());
     }
 
-    private void _testTextWithEntities(int chunkSize, boolean checkValues, String SPC) throws Exception
+    private void _testTextWithEntities(final int chunkSize, final boolean checkValues, final String SPC) throws Exception
     {
-        AsyncXMLInputFactory f = new InputFactoryImpl();
-        AsyncXMLStreamReader<AsyncByteArrayFeeder> sr = f.createAsyncForByteArray();
-        final String XML = SPC+"<root>a&lt;b\rMOT</root>";
-        AsyncReaderWrapperForByteArray reader = new AsyncReaderWrapperForByteArray(sr, chunkSize, XML);
+        final String XML = SPC + "<root>a&lt;b\rMOT</root>";
 
+        final AsyncXMLInputFactory f = new InputFactoryImpl();
+
+        //test for byte array
+        AsyncXMLStreamReader<AsyncByteArrayFeeder> sr_array = null;
+        try {
+            sr_array = f.createAsyncForByteArray();
+            final AsyncReaderWrapperForByteArray reader_array = new AsyncReaderWrapperForByteArray(sr_array, chunkSize, XML);
+            _testTextWithEntities(sr_array, reader_array, checkValues);
+        } finally {
+            if (sr_array != null) {
+                sr_array.close();
+            }
+        }
+
+        //test for byte buffer
+        AsyncXMLStreamReader<AsyncByteBufferFeeder> sr_buffer = null;
+        try {
+            sr_buffer = f.createAsyncForByteBuffer();
+            final AsyncReaderWrapperForByteBuffer reader_buffer = new AsyncReaderWrapperForByteBuffer(sr_buffer, chunkSize, XML);
+            _testTextWithEntities(sr_buffer, reader_buffer, checkValues);
+        } finally {
+            if (sr_buffer != null) {
+                sr_buffer.close();
+            }
+        }
+    }
+
+    private void _testTextWithEntities(final AsyncXMLStreamReader<?> sr, final AsyncReaderWrapper reader, final boolean checkValues) throws Exception
+    {
         // should start with START_DOCUMENT, but for now skip
         int t = verifyStart(reader);
         assertTokenType(START_ELEMENT, t);
@@ -153,13 +206,39 @@ public class TestCharactersParsing extends AsyncTestBase
         assertFalse(sr.hasNext());
     }
 
-    private void _testTextWithNumericEntities(int chunkSize, boolean checkValues, String SPC) throws Exception
+    private void _testTextWithNumericEntities(final int chunkSize, final boolean checkValues, final String SPC) throws Exception
     {
-        AsyncXMLInputFactory f = new InputFactoryImpl();
-        AsyncXMLStreamReader<AsyncByteArrayFeeder> sr = f.createAsyncForByteArray();
-        final String XML = SPC+"<root>&#60;tag&#x3e;!</root>";
-        AsyncReaderWrapperForByteArray reader = new AsyncReaderWrapperForByteArray(sr, chunkSize, XML);
+        final String XML = SPC + "<root>&#60;tag&#x3e;!</root>";
 
+        final AsyncXMLInputFactory f = new InputFactoryImpl();
+
+        //test for byte array
+        AsyncXMLStreamReader<AsyncByteArrayFeeder> sr_array = null;
+        try {
+            sr_array = f.createAsyncForByteArray();
+            final AsyncReaderWrapperForByteArray reader_array = new AsyncReaderWrapperForByteArray(sr_array, chunkSize, XML);
+            _testTextWithNumericEntities(sr_array, reader_array, checkValues);
+        } finally {
+            if (sr_array != null) {
+                sr_array.close();
+            }
+        }
+
+        //test for byte buffer
+        AsyncXMLStreamReader<AsyncByteBufferFeeder> sr_buffer = null;
+        try {
+            sr_buffer = f.createAsyncForByteBuffer();
+            final AsyncReaderWrapperForByteBuffer reader_buffer = new AsyncReaderWrapperForByteBuffer(sr_buffer, chunkSize, XML);
+            _testTextWithNumericEntities(sr_buffer, reader_buffer, checkValues);
+        } finally {
+            if (sr_buffer != null) {
+                sr_buffer.close();
+            }
+        }
+    }
+
+    private void _testTextWithNumericEntities(final AsyncXMLStreamReader<?> sr, final AsyncReaderWrapper reader, final boolean checkValues) throws Exception
+    {
         // should start with START_DOCUMENT, but for now skip
         int t = verifyStart(reader);
         assertTokenType(START_ELEMENT, t);
