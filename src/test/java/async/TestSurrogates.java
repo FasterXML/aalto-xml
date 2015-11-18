@@ -1,6 +1,7 @@
 package async;
 
 import com.fasterxml.aalto.AsyncByteArrayFeeder;
+import com.fasterxml.aalto.AsyncByteBufferFeeder;
 import com.fasterxml.aalto.AsyncXMLInputFactory;
 import com.fasterxml.aalto.AsyncXMLStreamReader;
 import com.fasterxml.aalto.stax.InputFactoryImpl;
@@ -38,11 +39,37 @@ public class TestSurrogates extends AsyncTestBase
         }
     }
     
-    private void _testWithSurrogate(String spaces, int chunkSize) throws Exception
+    private void _testWithSurrogate(final String spaces, final int chunkSize) throws Exception
     {
-        AsyncXMLInputFactory f = new InputFactoryImpl();
-        AsyncXMLStreamReader<AsyncByteArrayFeeder> sr = f.createAsyncForByteArray();
-        AsyncReaderWrapperForByteArray reader = new AsyncReaderWrapperForByteArray(sr, chunkSize, spaces+DOC);
+        final AsyncXMLInputFactory f = new InputFactoryImpl();
+
+        //test for byte array
+        AsyncXMLStreamReader<AsyncByteArrayFeeder> sr_array = null;
+        try {
+            sr_array = f.createAsyncForByteArray();
+            final AsyncReaderWrapperForByteArray reader_array = new AsyncReaderWrapperForByteArray(sr_array, chunkSize, spaces + DOC);
+            _testWithSurrogate(sr_array, reader_array);
+        } finally {
+            if (sr_array != null) {
+                sr_array.close();
+            }
+        }
+
+        //test for byte buffer
+        AsyncXMLStreamReader<AsyncByteBufferFeeder> sr_buffer = null;
+        try {
+            sr_buffer = f.createAsyncForByteBuffer();
+            final AsyncReaderWrapperForByteBuffer reader_buffer = new AsyncReaderWrapperForByteBuffer(sr_buffer, chunkSize, spaces + DOC);
+            _testWithSurrogate(sr_buffer, reader_buffer);
+        } finally {
+            if (sr_buffer != null) {
+                sr_buffer.close();
+            }
+        }
+    }
+
+    private void _testWithSurrogate(final AsyncXMLStreamReader<?> sr, final AsyncReaderWrapper reader) throws Exception
+    {
         int t = verifyStart(reader);
         assertTokenType(START_ELEMENT, t);
         assertEquals("value", sr.getLocalName());
@@ -52,20 +79,44 @@ public class TestSurrogates extends AsyncTestBase
         assertTokenType(END_ELEMENT, reader.currentToken());
         assertEquals("value", sr.getLocalName());
         assertTokenType(END_DOCUMENT, reader.nextToken());
-        sr.close();
     }
 
-    private void _testSkipWithSurrogate(String spaces, int chunkSize) throws Exception
+    private void _testSkipWithSurrogate(final String spaces, final int chunkSize) throws Exception
     {
-        AsyncXMLInputFactory f = new InputFactoryImpl();
-        AsyncXMLStreamReader<AsyncByteArrayFeeder> sr = f.createAsyncForByteArray();
-        AsyncReaderWrapperForByteArray reader = new AsyncReaderWrapperForByteArray(sr, chunkSize, spaces+DOC);
+        final AsyncXMLInputFactory f = new InputFactoryImpl();
+
+        //test for byte array
+        AsyncXMLStreamReader<AsyncByteArrayFeeder> sr_array = null;
+        try {
+            sr_array = f.createAsyncForByteArray();
+            final AsyncReaderWrapperForByteArray reader_array = new AsyncReaderWrapperForByteArray(sr_array, chunkSize, spaces + DOC);
+            _testSkipWithSurrogate(sr_array, reader_array);
+        } finally {
+            if (sr_array != null) {
+                sr_array.close();
+            }
+        }
+
+        //test for byte buffer
+        AsyncXMLStreamReader<AsyncByteBufferFeeder> sr_buffer = null;
+        try {
+            sr_buffer = f.createAsyncForByteBuffer();
+            final AsyncReaderWrapperForByteBuffer reader_buffer = new AsyncReaderWrapperForByteBuffer(sr_buffer, chunkSize, spaces + DOC);
+            _testSkipWithSurrogate(sr_buffer, reader_buffer);
+        } finally {
+            if (sr_buffer != null) {
+                sr_buffer.close();
+            }
+        }
+    }
+
+    private void _testSkipWithSurrogate(final AsyncXMLStreamReader<?> sr, final AsyncReaderWrapper reader) throws Exception
+    {
         int t = verifyStart(reader);
         assertTokenType(START_ELEMENT, t);
         assertTokenType(CHARACTERS, reader.nextToken());
         assertTokenType(END_ELEMENT, reader.nextToken());
         assertTokenType(END_DOCUMENT, reader.nextToken());
         assertFalse(sr.hasNext());
-        sr.close();
     }
 }

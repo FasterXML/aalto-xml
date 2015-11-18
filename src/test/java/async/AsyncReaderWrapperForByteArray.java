@@ -10,7 +10,7 @@ import com.fasterxml.aalto.AsyncXMLStreamReader;
 /**
  * Helper class used with async parser
  */
-public class AsyncReaderWrapperForByteArray
+public class AsyncReaderWrapperForByteArray implements AsyncReaderWrapper
 {
     private final AsyncXMLStreamReader<AsyncByteArrayFeeder> _streamReader;
     private final byte[] _xml;
@@ -32,14 +32,17 @@ public class AsyncReaderWrapperForByteArray
         }
     }
 
+    @Override
     public String currentText() throws XMLStreamException {
         return _streamReader.getText();
     }
-    
+
+    @Override
     public int currentToken() throws XMLStreamException {
         return _streamReader.getEventType();
     }
-    
+
+    @Override
     public int nextToken() throws XMLStreamException
     {
         int token;

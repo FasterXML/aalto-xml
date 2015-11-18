@@ -6,6 +6,7 @@ import javax.xml.stream.XMLStreamException;
 
 
 import com.fasterxml.aalto.AsyncByteArrayFeeder;
+import com.fasterxml.aalto.AsyncByteBufferFeeder;
 import com.fasterxml.aalto.AsyncXMLInputFactory;
 import com.fasterxml.aalto.AsyncXMLStreamReader;
 import com.fasterxml.aalto.stax.InputFactoryImpl;
@@ -79,12 +80,39 @@ public class TestDoctypeParsing extends AsyncTestBase
     /**********************************************************************
      */
     
-    private void _testSimplest(String spaces, int chunkSize) throws Exception
+    private void _testSimplest(final String spaces, final int chunkSize) throws Exception
     {
-        String XML = spaces+"<!DOCTYPE root>  <root />";
-        AsyncXMLInputFactory f = new InputFactoryImpl();
-        AsyncXMLStreamReader<AsyncByteArrayFeeder> sr = f.createAsyncForByteArray();
-        AsyncReaderWrapperForByteArray reader = new AsyncReaderWrapperForByteArray(sr, chunkSize, XML);
+        final String XML = spaces + "<!DOCTYPE root>  <root />";
+
+        final AsyncXMLInputFactory f = new InputFactoryImpl();
+
+        //test for byte array
+        AsyncXMLStreamReader<AsyncByteArrayFeeder> sr_array = null;
+        try {
+            sr_array = f.createAsyncForByteArray();
+            final AsyncReaderWrapperForByteArray reader_array = new AsyncReaderWrapperForByteArray(sr_array, chunkSize, XML);
+            _testSimplest(sr_array, reader_array);
+        } finally {
+            if (sr_array != null) {
+                sr_array.close();
+            }
+        }
+
+        //test for byte buffer
+        AsyncXMLStreamReader<AsyncByteBufferFeeder> sr_buffer = null;
+        try {
+            sr_buffer = f.createAsyncForByteBuffer();
+            final AsyncReaderWrapperForByteBuffer reader_buffer = new AsyncReaderWrapperForByteBuffer(sr_buffer, chunkSize, XML);
+            _testSimplest(sr_buffer, reader_buffer);
+        } finally {
+            if (sr_buffer != null) {
+                sr_buffer.close();
+            }
+        }
+    }
+
+    private void _testSimplest(final AsyncXMLStreamReader<?> sr, final AsyncReaderWrapper reader) throws Exception
+    {
         int t = verifyStart(reader);
         assertTokenType(DTD, t);
         // as per Stax API, can't call getLocalName (ugh), but Stax2 gives us this:
@@ -93,59 +121,137 @@ public class TestDoctypeParsing extends AsyncTestBase
         assertTokenType(END_ELEMENT, reader.nextToken());
     }
 
-    private void _testWithIds(String spaces, int chunkSize) throws Exception
+    private void _testWithIds(final String spaces, final int chunkSize) throws Exception
     {
         final String PUBLIC_ID = "some-id";
         final String SYSTEM_ID = "file:/something";
-        String XML = spaces+"<!DOCTYPE root PUBLIC '"+PUBLIC_ID+"' \""+SYSTEM_ID+"\"><root/>";
-        AsyncXMLInputFactory f = new InputFactoryImpl();
-        AsyncXMLStreamReader<AsyncByteArrayFeeder> sr = f.createAsyncForByteArray();
-        AsyncReaderWrapperForByteArray reader = new AsyncReaderWrapperForByteArray(sr, chunkSize, XML);
+        final String XML = spaces + "<!DOCTYPE root PUBLIC '" + PUBLIC_ID + "' \"" + SYSTEM_ID + "\"><root/>";
+
+        final AsyncXMLInputFactory f = new InputFactoryImpl();
+
+        //test for byte array
+        AsyncXMLStreamReader<AsyncByteArrayFeeder> sr_array = null;
+        try {
+            sr_array = f.createAsyncForByteArray();
+            final AsyncReaderWrapperForByteArray reader_array = new AsyncReaderWrapperForByteArray(sr_array, chunkSize, XML);
+            _testWithIds(sr_array, reader_array, PUBLIC_ID, SYSTEM_ID);
+        } finally {
+            if (sr_array != null) {
+                sr_array.close();
+            }
+        }
+
+        //test for byte buffer
+        AsyncXMLStreamReader<AsyncByteBufferFeeder> sr_buffer = null;
+        try {
+            sr_buffer = f.createAsyncForByteBuffer();
+            final AsyncReaderWrapperForByteBuffer reader_buffer = new AsyncReaderWrapperForByteBuffer(sr_buffer, chunkSize, XML);
+            _testWithIds(sr_buffer, reader_buffer, PUBLIC_ID, SYSTEM_ID);
+        } finally {
+            if (sr_buffer != null) {
+                sr_buffer.close();
+            }
+        }
+    }
+
+    private void _testWithIds(final AsyncXMLStreamReader<?> sr, final AsyncReaderWrapper reader, final String PUBLIC_ID, final String SYSTEM_ID) throws Exception
+    {
         int t = verifyStart(reader);
         assertTokenType(DTD, t);
         assertTokenType(DTD, sr.getEventType());
         assertEquals("root", sr.getPrefixedName());
-        assertEquals(SYSTEM_ID, sr.getDTDInfo().getDTDSystemId());
         assertEquals(PUBLIC_ID, sr.getDTDInfo().getDTDPublicId());
+        assertEquals(SYSTEM_ID, sr.getDTDInfo().getDTDSystemId());
 
         assertTokenType(START_ELEMENT, reader.nextToken());
         assertTokenType(END_ELEMENT, reader.nextToken());
-        sr.close();
     }
 
-    private void _testFull(String spaces, boolean checkValue, int chunkSize) throws Exception
+    private void _testFull(final String spaces, final boolean checkValue, final int chunkSize) throws Exception
     {
-        final String INTERNAL_SUBSET = "<!--My dtd-->\n"
-            +"<!ELEMENT html (head, body)>"
-            +"<!ATTLIST head title CDATA #IMPLIED>"
-            ;
         final String SYSTEM_ID = "file:/something";
-        String XML = spaces+"<!DOCTYPE root SYSTEM '"+SYSTEM_ID+"' ["+INTERNAL_SUBSET+"]>\n<root/>";
-        AsyncXMLInputFactory f = new InputFactoryImpl();
-        AsyncXMLStreamReader<AsyncByteArrayFeeder> sr = f.createAsyncForByteArray();
-        AsyncReaderWrapperForByteArray reader = new AsyncReaderWrapperForByteArray(sr, chunkSize, XML);
+        final String INTERNAL_SUBSET = "<!--My dtd-->\n"
+                + "<!ELEMENT html (head, body)>"
+                + "<!ATTLIST head title CDATA #IMPLIED>";
+        String XML = spaces + "<!DOCTYPE root SYSTEM '" + SYSTEM_ID + "' [" + INTERNAL_SUBSET + "]>\n<root/>";
+
+        final AsyncXMLInputFactory f = new InputFactoryImpl();
+
+        //test for byte array
+        AsyncXMLStreamReader<AsyncByteArrayFeeder> sr_array = null;
+        try {
+            sr_array = f.createAsyncForByteArray();
+            final AsyncReaderWrapperForByteArray reader_array = new AsyncReaderWrapperForByteArray(sr_array, chunkSize, XML);
+            _testFull(sr_array, reader_array, checkValue, SYSTEM_ID, INTERNAL_SUBSET);
+        } finally {
+            if (sr_array != null) {
+                sr_array.close();
+            }
+        }
+
+        //test for byte buffer
+        AsyncXMLStreamReader<AsyncByteBufferFeeder> sr_buffer = null;
+        try {
+            sr_buffer = f.createAsyncForByteBuffer();
+            final AsyncReaderWrapperForByteBuffer reader_buffer = new AsyncReaderWrapperForByteBuffer(sr_buffer, chunkSize, XML);
+            _testFull(sr_buffer, reader_buffer, checkValue, SYSTEM_ID, INTERNAL_SUBSET);
+        } finally {
+            if (sr_buffer != null) {
+                sr_buffer.close();
+            }
+        }
+    }
+
+    private void _testFull(final AsyncXMLStreamReader<?> sr, final AsyncReaderWrapper reader, final boolean checkValue, final String SYSTEM_ID, final String INTERNAL_SUBSET) throws Exception
+    {
         int t = verifyStart(reader);
         assertTokenType(DTD, t);
         if (checkValue) {
             assertNull(sr.getDTDInfo().getDTDPublicId());
             assertEquals(SYSTEM_ID, sr.getDTDInfo().getDTDSystemId());
             assertEquals("root", sr.getPrefixedName());
-            String subset = sr.getText();
+            final String subset = sr.getText();
             assertEquals(INTERNAL_SUBSET, subset);
         }
         assertTokenType(START_ELEMENT, reader.nextToken());
         assertTokenType(END_ELEMENT, reader.nextToken());
         assertTokenType(END_DOCUMENT, reader.nextToken());
         assertFalse(sr.hasNext());
-        sr.close();
     }
 
-    private void _testInvalidDup(String spaces, int chunkSize) throws Exception
+    private void _testInvalidDup(final String spaces, final int chunkSize) throws Exception
     {
-        String XML = spaces+"<!DOCTYPE root> <!DOCTYPE root> <root />";
-        AsyncXMLInputFactory f = new InputFactoryImpl();
-        AsyncXMLStreamReader<AsyncByteArrayFeeder> sr = f.createAsyncForByteArray();
-        AsyncReaderWrapperForByteArray reader = new AsyncReaderWrapperForByteArray(sr, chunkSize, XML);
+        final String XML = spaces + "<!DOCTYPE root> <!DOCTYPE root> <root />";
+
+        final AsyncXMLInputFactory f = new InputFactoryImpl();
+
+        //test for byte array
+        AsyncXMLStreamReader<AsyncByteArrayFeeder> sr_array = null;
+        try {
+            sr_array = f.createAsyncForByteArray();
+            final AsyncReaderWrapperForByteArray reader_array = new AsyncReaderWrapperForByteArray(sr_array, chunkSize, XML);
+            _testInvalidDup(sr_array, reader_array);
+        } finally {
+            if (sr_array != null) {
+                sr_array.close();
+            }
+        }
+
+        //test for byte buffer
+        AsyncXMLStreamReader<AsyncByteBufferFeeder> sr_buffer = null;
+        try {
+            sr_buffer = f.createAsyncForByteBuffer();
+            final AsyncReaderWrapperForByteBuffer reader_buffer = new AsyncReaderWrapperForByteBuffer(sr_buffer, chunkSize, XML);
+            _testInvalidDup(sr_buffer, reader_buffer);
+        } finally {
+            if (sr_buffer != null) {
+                sr_buffer.close();
+            }
+        }
+    }
+
+    private void _testInvalidDup(final AsyncXMLStreamReader<?> sr, final AsyncReaderWrapper reader) throws Exception
+    {
         int t = verifyStart(reader);
         assertTokenType(DTD, t);
         assertEquals("root", sr.getPrefixedName());
@@ -156,7 +262,5 @@ public class TestDoctypeParsing extends AsyncTestBase
         } catch (XMLStreamException e) {
             verifyException(e, "Duplicate DOCTYPE declaration");
         }
-        sr.close();
     }
-
 }

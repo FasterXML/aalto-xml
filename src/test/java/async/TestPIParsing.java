@@ -1,6 +1,7 @@
 package async;
 
 import com.fasterxml.aalto.AsyncByteArrayFeeder;
+import com.fasterxml.aalto.AsyncByteBufferFeeder;
 import com.fasterxml.aalto.AsyncXMLInputFactory;
 import com.fasterxml.aalto.AsyncXMLStreamReader;
 import com.fasterxml.aalto.stax.InputFactoryImpl;
@@ -41,11 +42,37 @@ public class TestPIParsing extends AsyncTestBase
 
     private final static String XML = "<?p    i ?><root><?pi \nwith\r\ndata??><?x \nfoo> "+UNICODE_SEGMENT+" bar? ?></root><?proc    \r?>";
     
-    private void _testPI(String spaces, int chunkSize) throws Exception
+    private void _testPI(final String spaces, final int chunkSize) throws Exception
     {
-        AsyncXMLInputFactory f = new InputFactoryImpl();
-        AsyncXMLStreamReader<AsyncByteArrayFeeder> sr = f.createAsyncForByteArray();
-        AsyncReaderWrapperForByteArray reader = new AsyncReaderWrapperForByteArray(sr, chunkSize, spaces+XML);
+        final AsyncXMLInputFactory f = new InputFactoryImpl();
+
+        //test for byte array
+        AsyncXMLStreamReader<AsyncByteArrayFeeder> sr_array = null;
+        try {
+            sr_array = f.createAsyncForByteArray();
+            final AsyncReaderWrapperForByteArray reader_array = new AsyncReaderWrapperForByteArray(sr_array, chunkSize, spaces + XML);
+            _testPI(sr_array, reader_array);
+        } finally {
+            if (sr_array != null) {
+                sr_array.close();
+            }
+        }
+
+        //test for byte buffer
+        AsyncXMLStreamReader<AsyncByteBufferFeeder> sr_buffer = null;
+        try {
+            sr_buffer = f.createAsyncForByteBuffer();
+            final AsyncReaderWrapperForByteBuffer reader_buffer = new AsyncReaderWrapperForByteBuffer(sr_buffer, chunkSize, spaces + XML);
+            _testPI(sr_buffer, reader_buffer);
+        } finally {
+            if (sr_buffer != null) {
+                sr_buffer.close();
+            }
+        }
+    }
+
+    private void _testPI(final AsyncXMLStreamReader<?> sr, final AsyncReaderWrapper reader) throws Exception
+    {
         int t = verifyStart(reader);
         assertTokenType(PROCESSING_INSTRUCTION, t);
         assertEquals("p", sr.getPITarget());
@@ -66,11 +93,37 @@ public class TestPIParsing extends AsyncTestBase
         assertTokenType(END_DOCUMENT, reader.nextToken());
     }
 
-    private void _testPISkip(String spaces, int chunkSize) throws Exception
+    private void _testPISkip(final String spaces, final int chunkSize) throws Exception
     {
-        AsyncXMLInputFactory f = new InputFactoryImpl();
-        AsyncXMLStreamReader<AsyncByteArrayFeeder> sr = f.createAsyncForByteArray();
-        AsyncReaderWrapperForByteArray reader = new AsyncReaderWrapperForByteArray(sr, chunkSize, spaces+XML);
+        final AsyncXMLInputFactory f = new InputFactoryImpl();
+
+        //test for byte array
+        AsyncXMLStreamReader<AsyncByteArrayFeeder> sr_array = null;
+        try {
+            sr_array = f.createAsyncForByteArray();
+            final AsyncReaderWrapperForByteArray reader_array = new AsyncReaderWrapperForByteArray(sr_array, chunkSize, spaces + XML);
+            _testPISkip(sr_array, reader_array);
+        } finally {
+            if (sr_array != null) {
+                sr_array.close();
+            }
+        }
+
+        //test for byte buffer
+        AsyncXMLStreamReader<AsyncByteBufferFeeder> sr_buffer = null;
+        try {
+            sr_buffer = f.createAsyncForByteBuffer();
+            final AsyncReaderWrapperForByteBuffer reader_buffer = new AsyncReaderWrapperForByteBuffer(sr_buffer, chunkSize, spaces + XML);
+            _testPISkip(sr_buffer, reader_buffer);
+        } finally {
+            if (sr_buffer != null) {
+                sr_buffer.close();
+            }
+        }
+    }
+
+    private void _testPISkip(final AsyncXMLStreamReader<?> sr, final AsyncReaderWrapper reader) throws Exception
+    {
         int t = verifyStart(reader);
         assertTokenType(PROCESSING_INSTRUCTION, t);
         assertTokenType(START_ELEMENT, reader.nextToken());
