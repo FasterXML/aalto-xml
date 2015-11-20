@@ -123,8 +123,8 @@ public class TestDoctypeParsing extends AsyncTestBase
 
     private void _testWithIds(final String spaces, final int chunkSize) throws Exception
     {
-        final String PUBLIC_ID = "some-id";
-        final String SYSTEM_ID = "file:/something";
+        final String PUBLIC_ID = "-//OASIS//DTD DITA Topic//EN";
+        final String SYSTEM_ID = "file:/topic.dtd";
         final String XML = spaces + "<!DOCTYPE root PUBLIC '" + PUBLIC_ID + "' \"" + SYSTEM_ID + "\"><root/>";
 
         final AsyncXMLInputFactory f = new InputFactoryImpl();
