@@ -619,6 +619,30 @@ public abstract class AsyncByteScanner
         _textBuilder.append((char) charFromEntity);
     }
 
+    /**
+     * Checks that a character for a PublicId
+     * is valid {@see http://www.w3.org/TR/xml/#NT-PubidLiteral}
+     *
+     * @param c A character
+     * @return true if the character is valid for use in the Public ID
+     * of an XML doctype declaration
+     */
+    protected boolean validPublicIdChar(int c) {
+        return
+            c == 0xA ||                     //<LF>
+            c == 0xD ||                     //<CR>
+            c == 0x20 ||                    //<SPACE>
+            (c >= '@' && c <= 'Z') ||       //@[A-Z]
+            (c >= 'a' && c <= 'z') ||
+            c == '!' ||
+            (c >= 0x23 && c <= 0x25) ||     //#$%
+            (c >= 0x27 && c <= 0x2F) ||     //'()*+,-./
+            (c >= ':' && c <= ';') ||
+            c == '=' ||
+            c == '?' ||
+            c == '_';
+    }
+
     /*
     /**********************************************************************
     /* Internal methods, error handling

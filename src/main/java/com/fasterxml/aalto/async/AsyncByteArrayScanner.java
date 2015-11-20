@@ -1823,7 +1823,7 @@ public class AsyncByteArrayScanner
                 }
                 {
                     char[] buf = _textBuilder.resetWithEmpty();
-                    if (_inputPtr >= _inputEnd || !parseDtdId(buf, 0)) {
+                    if (_inputPtr >= _inputEnd || !parseDtdId(buf, 0, false)) {
                         _state = STATE_DTD_PUBLIC_ID;
                         break;
                     }
@@ -1833,7 +1833,7 @@ public class AsyncByteArrayScanner
                 continue main_loop;
     
             case STATE_DTD_PUBLIC_ID: 
-                if (!parseDtdId(_textBuilder.getBufferWithoutReset(), _textBuilder.getCurrentLength())) {
+                if (!parseDtdId(_textBuilder.getBufferWithoutReset(), _textBuilder.getCurrentLength(), false)) {
                     break;
                 }
                 verifyAndSetPublicId();
@@ -1863,7 +1863,7 @@ public class AsyncByteArrayScanner
                 }
                 {
                     char[] buf = _textBuilder.resetWithEmpty();
-                    if (_inputPtr >= _inputEnd || !parseDtdId(buf, 0)) {
+                    if (_inputPtr >= _inputEnd || !parseDtdId(buf, 0, true)) {
                         _state = STATE_DTD_SYSTEM_ID;
                         break;
                     }
@@ -1873,7 +1873,7 @@ public class AsyncByteArrayScanner
                 continue main_loop;
 
             case STATE_DTD_SYSTEM_ID: 
-                if (!parseDtdId(_textBuilder.getBufferWithoutReset(), _textBuilder.getCurrentLength())) {
+                if (!parseDtdId(_textBuilder.getBufferWithoutReset(), _textBuilder.getCurrentLength(), true)) {
                     break;
                 }
                 verifyAndSetSystemId();
@@ -1926,7 +1926,7 @@ public class AsyncByteArrayScanner
         return _currToken;
     }
 
-    private final boolean parseDtdId(char[] buffer, int ptr) throws XMLStreamException
+    private final boolean parseDtdId(char[] buffer, int ptr, boolean system) throws XMLStreamException
     {
         final int quote = (int) _elemAttrQuote;
         while (_inputPtr < _inputEnd) {
@@ -1935,9 +1935,8 @@ public class AsyncByteArrayScanner
                 _textBuilder.setCurrentLength(ptr);
                 return true;
             }
-            // this is not exact check; but does work for all legal (valid) characters:
-            if (ch <= INT_SPACE || ch > 0x7E) {
-                reportPrologUnexpChar(true, decodeCharForError((byte) ch), " (not valid in PUBLIC or SYSTEM ID)");
+            if (!system && !validPublicIdChar(ch)) {
+                reportPrologUnexpChar(true, decodeCharForError((byte) ch), " (not valid in " + (system ? "SYSTEM" : "PUBLIC") + " ID)");
             }
             if (ptr >= buffer.length) {
                 buffer = _textBuilder.finishCurrentSegment();
