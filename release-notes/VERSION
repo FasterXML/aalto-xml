@@ -4,6 +4,11 @@ Project: aalto-xml
 = Releases
 ------------------------------------------------------------------------
 
+1.0.0 (not released yet)
+
+#34: DTD Id parsing issue for public ids
+ (contributed by Adam R)
+
 0.9.11 (26-Feb-2015)
 
 #8: Improve error-reporting when trying to use `getElementText()` on
