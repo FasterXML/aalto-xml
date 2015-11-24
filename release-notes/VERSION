@@ -4,7 +4,7 @@ Project: aalto-xml
 = Releases
 ------------------------------------------------------------------------
 
-1.0.0 (not released yet)
+1.0.0 (23-Nov-2015)
 
 #29: Multi-threading bug in XmlScanner/FixedNsContext
  (reported by Barry C, bcoughlan
