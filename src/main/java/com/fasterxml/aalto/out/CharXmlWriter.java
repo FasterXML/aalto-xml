@@ -1209,8 +1209,8 @@ public final class CharXmlWriter
         if (_outputPtr > 0 && _out != null) {
             int ptr = _outputPtr;
             // Need to update location info, to keep it in sync
-            mLocPastChars += ptr;
-            mLocRowStartOffset -= ptr;
+            _locPastChars += ptr;
+            _locRowStartOffset -= ptr;
             _outputPtr = 0;
             _out.write(_outputBuffer, 0, ptr);
         }

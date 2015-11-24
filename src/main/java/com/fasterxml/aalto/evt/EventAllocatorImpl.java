@@ -95,6 +95,7 @@ public final class EventAllocatorImpl
     /**********************************************************************
      */
 
+    @Override
     public XMLEvent allocate(XMLStreamReader r) throws XMLStreamException
     {
         if (r.getEventType() == AsyncXMLStreamReader.EVENT_INCOMPLETE) {

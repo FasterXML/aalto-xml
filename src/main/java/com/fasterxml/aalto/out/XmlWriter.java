@@ -83,15 +83,15 @@ public abstract class XmlWriter
     /**
      * Number of characters output prior to currently buffered output
      */
-    protected int mLocPastChars = 0;
+    protected int _locPastChars = 0;
 
-    protected int mLocRowNr = 1;
+    protected int _locRowNr = 1;
 
     /**
      * Offset of the first character on this line. May be negative, if
      * the offset was in a buffer that has been flushed out.
      */
-    protected int mLocRowStartOffset = 0;
+    protected int _locRowStartOffset = 0;
 
     /*
     ////////////////////////////////////////////////
@@ -99,9 +99,9 @@ public abstract class XmlWriter
     ////////////////////////////////////////////////
      */
 
-    final protected boolean mCheckContent;
+    final protected boolean _checkContent;
 
-    final protected boolean mCheckNames;
+    final protected boolean _checkNames;
 
     /*
     ///////////////////////////////////////////////////////
@@ -116,8 +116,8 @@ public abstract class XmlWriter
         _copyBufferLen = _copyBuffer.length;
         
         _cfgNsAware = cfg.isNamespaceAware();
-        mCheckContent = cfg.willCheckContent();
-        mCheckNames = cfg.willCheckNames();
+        _checkContent = cfg.willCheckContent();
+        _checkNames = cfg.willCheckNames();
     }
 
     /*
@@ -318,15 +318,15 @@ public abstract class XmlWriter
      */
 
     public int getRow() {
-        return mLocRowNr;
+        return _locRowNr;
     }
 
     public int getColumn() {
-        return (getOutputPtr() - mLocRowStartOffset) + 1;
+        return (getOutputPtr() - _locRowStartOffset) + 1;
     }
 
     public int getAbsOffset() {
-        return mLocPastChars +getOutputPtr();
+        return _locPastChars +getOutputPtr();
     }
 
     /*

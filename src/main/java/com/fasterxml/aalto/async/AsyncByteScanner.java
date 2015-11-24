@@ -621,11 +621,12 @@ public abstract class AsyncByteScanner
 
     /**
      * Checks that a character for a PublicId
-     * is valid {@see http://www.w3.org/TR/xml/#NT-PubidLiteral}
      *
      * @param c A character
      * @return true if the character is valid for use in the Public ID
      * of an XML doctype declaration
+     *
+     * @see "http://www.w3.org/TR/xml/#NT-PubidLiteral"
      */
     protected boolean validPublicIdChar(int c) {
         return

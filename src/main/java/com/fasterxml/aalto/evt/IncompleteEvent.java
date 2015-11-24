@@ -11,8 +11,8 @@ import com.fasterxml.aalto.AsyncXMLStreamReader;
 import com.fasterxml.aalto.impl.LocationImpl;
 
 /**
- * Bogus {@link XmlEvent} returned when the next event is not yet available,
- * in case of non-blocking (async) parsing.
+ * Bogus {@link javax.xml.stream.events.XMLEvent} returned when the next event
+ * is not yet available, in case of non-blocking (async) parsing.
  */
 public class IncompleteEvent extends BaseEventImpl
 {

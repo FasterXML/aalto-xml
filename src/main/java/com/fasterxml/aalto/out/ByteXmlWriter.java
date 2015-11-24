@@ -828,7 +828,7 @@ public abstract class ByteXmlWriter
                     reportInvalidChar(ch);
                 case CT_WS_CR: // No way to escape within CDATA
                 case CT_WS_LF:
-                    ++mLocRowNr;
+                    ++_locRowNr;
                     break;
                 case CT_OUTPUT_MUST_QUOTE: // == MULTIBYTE_N value
                     reportFailedEscaping("CDATA", ch);
@@ -942,7 +942,7 @@ public abstract class ByteXmlWriter
                     if (ch != '\n') {
                         break inner_loop;
                     }
-                    ++mLocRowNr;
+                    ++_locRowNr;
                 }
                 _outputBuffer[ptr++] = (byte) ch;
                 if (++offset >= len) {
@@ -960,10 +960,11 @@ public abstract class ByteXmlWriter
                     // !!! TBI: line count
                     // Also, CR to be quoted?
                     if (_config.willEscapeCR()) {
+                        _outputPtr = ptr;
                         break;
                     }
                     _outputBuffer[ptr++] = (byte)ch;
-                    ++mLocRowNr;
+                    ++_locRowNr;
                     continue main_loop;
                 case CT_WS_LF: // never occurs (handled in loop), but don't want to leave gaps
                     break;
@@ -1034,7 +1035,7 @@ public abstract class ByteXmlWriter
                     if (ch != '\n') {
                         break inner_loop;
                     }
-                    ++mLocRowNr;
+                    ++_locRowNr;
                 }
                 if (_outputPtr >= _outputBufferLen) {
                     flushBuffer();
@@ -1058,7 +1059,7 @@ public abstract class ByteXmlWriter
                         writeAsEntity(ch);
                         continue main_loop;
                     }
-                    ++mLocRowNr;
+                    ++_locRowNr;
                     break;
                 case CT_WS_LF: // can not occur, handled above, but let's keep sequence
                     break;
@@ -1229,7 +1230,7 @@ public abstract class ByteXmlWriter
                     reportInvalidChar(ch);
                 case CT_WS_CR: // No way to escape within CDATA
                 case CT_WS_LF:
-                    ++mLocRowNr;
+                    ++_locRowNr;
                     break;
                 case CT_OUTPUT_MUST_QUOTE: // == MULTIBYTE_N value
                     reportFailedEscaping("comment", ch);
@@ -1318,7 +1319,7 @@ public abstract class ByteXmlWriter
                     reportInvalidChar(ch);
                 case CT_WS_CR: // No way to escape within CDATA
                 case CT_WS_LF:
-                    ++mLocRowNr;
+                    ++_locRowNr;
                     break;
                 case CT_OUTPUT_MUST_QUOTE: // == MULTIBYTE_N value
                     reportFailedEscaping("processing instruction", ch);
@@ -1588,8 +1589,8 @@ public abstract class ByteXmlWriter
         if (_outputPtr > 0 && _out != null) {
             int ptr = _outputPtr;
             // Need to update location info, to keep it in sync
-            mLocPastChars += ptr;
-            mLocRowStartOffset -= ptr;
+            _locPastChars += ptr;
+            _locRowStartOffset -= ptr;
             _outputPtr = 0;
             _out.write(_outputBuffer, 0, ptr);
         }

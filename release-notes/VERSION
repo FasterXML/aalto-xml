@@ -8,6 +8,8 @@ Project: aalto-xml
 
 #29: Multi-threading bug in XmlScanner/FixedNsContext
  (reported by Barry C, bcoughlan
+#32: ByteXmlWriter bug
+ (reported by ukmtk@github)
 #34: DTD Id parsing issue for public ids
  (contributed by Adam R)
 
