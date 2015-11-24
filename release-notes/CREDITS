@@ -1,0 +1,14 @@
+Here are people who have contributed to the development of Aalto XML processor.
+(version numbers in brackets indicate release in which the problem was fixed)
+
+Tatu Saloranta, tatu.saloranta@iki.fi: author
+
+Adam Retter (adamretter@github)
+
+ * Contributed fix for #34: DTD Id parsing issue for public ids
+  (1.0.0)
+
+Barry Coughlan (bcoughlan@github):
+
+ * Reported #29: Multi-threading bug in XmlScanner/FixedNsContext
+  (1.0.0)

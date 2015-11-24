@@ -66,6 +66,16 @@ public final class FixedNsContext
         if (currLastDecl == _lastDeclaration) {
             return this;
         }
+        // [aalto-xml#29]: Do not try reusing EMPTY_CONTEXT
+        if (this == EMPTY_CONTEXT) {
+            ArrayList<String> tmp = new ArrayList<String>();
+            for (NsDeclaration curr = currLastDecl; curr != null; curr = curr.getPrev()) {
+                tmp.add(curr.getPrefix());
+                tmp.add(curr.getCurrNsURI());
+            }
+            return new FixedNsContext(currLastDecl, tmp.toArray(new String[tmp.size()]));
+        }
+
         if (_tmpDecl == null) {
             _tmpDecl = new ArrayList<String>();
         } else {
@@ -75,8 +85,7 @@ public final class FixedNsContext
             _tmpDecl.add(curr.getPrefix());
             _tmpDecl.add(curr.getCurrNsURI());
         }
-        String[] data = _tmpDecl.toArray(new String[_tmpDecl.size()]);
-        return new FixedNsContext(currLastDecl, data);
+        return new FixedNsContext(currLastDecl, _tmpDecl.toArray(new String[_tmpDecl.size()]));
     }
 
     /*
@@ -207,7 +216,7 @@ public final class FixedNsContext
      */
 
     @Override
-        public String toString()
+    public String toString()
     {
         if (this == EMPTY_CONTEXT) {
             return "[EMPTY non-transient NsContext]";

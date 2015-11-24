@@ -6,6 +6,8 @@ Project: aalto-xml
 
 1.0.0 (not released yet)
 
+#29: Multi-threading bug in XmlScanner/FixedNsContext
+ (reported by Barry C, bcoughlan
 #34: DTD Id parsing issue for public ids
  (contributed by Adam R)
 
