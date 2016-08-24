@@ -4192,6 +4192,7 @@ public class AsyncByteArrayScanner
         throws XMLStreamException
     {
         byte b = _inputBuffer[_inputPtr++]; // we know one is available
+        boolean firstLoop = starting;
         while (b != BYTE_SEMICOLON) {
             int ch = (int) b;
             if (ch <= INT_9 && ch >= INT_0) {
@@ -4204,7 +4205,10 @@ public class AsyncByteArrayScanner
                 throwUnexpectedChar(decodeCharForError(b), " expected a hex digit (0-9a-fA-F) for character entity");
             }
             int value = ch;
-            if (!starting) {
+            if (firstLoop) {
+            	_pendingInput = PENDING_STATE_ATTR_VALUE_HEX_DIGIT;
+            	firstLoop = false;
+            } else {
             	value += (_entityValue << 4);
                 if (value > MAX_UNICODE_CHAR) { // Overflow?
                     reportEntityOverflow();
