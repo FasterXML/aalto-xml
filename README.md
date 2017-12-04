@@ -50,7 +50,10 @@ Construction of `AsyncXMLInputFactory` is simple; instance may be constructed wi
 
 ```java
 AsyncXMLInputFactory f = new InputFactoryImpl();
+// IF there is content use this:
 AsyncXMLStreamReader<AsyncByteArrayFeeder> parser = f.createAsyncFor(byteArray);
+// If NO CONTENT yet available, just use this:
+AsyncXMLStreamReader<AsyncByteArrayFeeder> parser = f.createAsyncForByteArray();
 ```
 
 and more content is feed via `AsyncInputFeeder` when getting `EVENT_INCOMPLETE` via `parser.next()`:
