@@ -633,6 +633,7 @@ public abstract class AsyncByteScanner
             c == 0xA ||                     //<LF>
             c == 0xD ||                     //<CR>
             c == 0x20 ||                    //<SPACE>
+            (c >= '0' && c <= '9') ||       //[0-9]
             (c >= '@' && c <= 'Z') ||       //@[A-Z]
             (c >= 'a' && c <= 'z') ||
             c == '!' ||
