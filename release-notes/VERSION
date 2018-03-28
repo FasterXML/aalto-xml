@@ -8,6 +8,8 @@ Project: aalto-xml
 
 #40: Parsing error on hexadecimal character reference in attribute value
  (reported by bfreuden@github)
+#53: AsyncByteScanner.validPublicIdChar() incorrectly rejects digits
+ (reported by David M)
 - Add "Automatic-Module-Name" for Java 9
 
 1.0.0 (23-Nov-2015)

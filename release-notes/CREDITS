@@ -12,3 +12,8 @@ Barry Coughlan (bcoughlan@github):
 
  * Reported #29: Multi-threading bug in XmlScanner/FixedNsContext
   (1.0.0)
+
+David Moles (dmolesUC3@github)
+ * Reported, contributed fix for #53: AsyncByteScanner.validPublicIdChar()
+   incorrectly rejects digits
+  (1.1.0)
