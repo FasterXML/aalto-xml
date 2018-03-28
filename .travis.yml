@@ -7,4 +7,3 @@ jdk:
 branches:
   only:
     - master
-

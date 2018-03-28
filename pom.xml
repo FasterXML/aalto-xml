@@ -64,7 +64,7 @@ org.xml.sax, org.xml.sax.ext, org.xml.sax.helpers</osgi.import>
     <dependency>
       <groupId>org.codehaus.woodstox</groupId>
       <artifactId>stax2-api</artifactId>
-      <version>4.1-SNAPSHOT</version>
+      <version>4.1</version>
     </dependency>
     <!--
      | Test dependencies
