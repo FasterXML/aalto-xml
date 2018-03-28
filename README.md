@@ -18,7 +18,6 @@ Aalto is licensed under [Apache License 2.0](http://www.apache.org/licenses/LICE
 ## Documentation
 
 * [Project Wiki](https://github.com/FasterXML/aalto-xml/wiki) (docs, downloads)
-* [FasterXML Aalto Wiki](http://wiki.fasterxml.com/AaltoHome)
 * [Aalto tutorial](http://www.studytrails.com/java/xml/aalto/java-xml-aalto-introduction.jsp) (by [StudyTrails](http://www.studytrails.com))
 * Cowtown blog:
     * [Non-blocking XML parsing with Aalto 0.9.7](http://www.cowtowncoder.com/blog/archives/2011/03/entry_451.html) (note: minor changes to API since then)
@@ -30,8 +29,8 @@ Aalto is licensed under [Apache License 2.0](http://www.apache.org/licenses/LICE
 Blocking XML parsing is done using one of standard interfaces:
 
 * Stax (javax.xml.stream) interface -- countless tutorials exist.
-    * Also implements Stax2 extension (http://wiki.fasterxml.com/WoodstoxStax2)
-    * StaxMate (http://wiki.fasterxml.com/StaxMateHome) is a good companion library for more convenient access
+    * Also implements [Stax2](../../../stax2-api)  extension
+    * [StaxMate](../../../StaxMate) is a good companion library for more convenient access
 
 ### Non-blocking ("async") XML parsing
 
