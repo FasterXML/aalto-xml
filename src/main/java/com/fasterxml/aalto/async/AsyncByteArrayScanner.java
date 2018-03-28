@@ -50,7 +50,6 @@ public class AsyncByteArrayScanner
      */
     protected int _origBufferLen;
 
-    
     /*
     /**********************************************************************
     /* Instance construction
@@ -3130,7 +3129,7 @@ public class AsyncByteArrayScanner
                 break main_loop;
             case XmlCharTypes.CT_AMP:
                 c = handleEntityInCharacters();
-                if (c == 0) { // not a succesfully expanded char entity
+                if (c == 0) { // not a successfully expanded char entity
                     // _inputPtr set by entity expansion method
                     --_inputPtr;
                     break main_loop;

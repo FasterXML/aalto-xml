@@ -4,6 +4,12 @@ Project: aalto-xml
 = Releases
 ------------------------------------------------------------------------
 
+1.1.0 (not yet released)
+
+#40: Parsing error on hexadecimal character reference in attribute value
+ (reported by bfreuden@github)
+- Add "Automatic-Module-Name" for Java 9
+
 1.0.0 (23-Nov-2015)
 
 #29: Multi-threading bug in XmlScanner/FixedNsContext
