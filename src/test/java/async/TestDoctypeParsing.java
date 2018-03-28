@@ -38,6 +38,20 @@ public class TestDoctypeParsing extends AsyncTestBase
         }
     }
 
+    public void testWithPublicId() throws Exception
+    {
+        final String PUBLIC_ID = "-//W3C//DTD XHTML 1.0 Strict//EN";
+        final String SYSTEM_ID = "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd";
+        for (int spaces = 0; spaces < 3; ++spaces) {
+            String SPC = spaces(spaces);
+            _testWithIds(SPC, 1, PUBLIC_ID, SYSTEM_ID);
+            _testWithIds(SPC, 2, PUBLIC_ID, SYSTEM_ID);
+            _testWithIds(SPC, 3, PUBLIC_ID, SYSTEM_ID);
+            _testWithIds(SPC, 6, PUBLIC_ID, SYSTEM_ID);
+            _testWithIds(SPC, 900, PUBLIC_ID, SYSTEM_ID);
+        }
+    }
+
     public void testParseFull() throws Exception
     {
         for (int spaces = 0; spaces < 3; ++spaces) {
@@ -125,6 +139,10 @@ public class TestDoctypeParsing extends AsyncTestBase
     {
         final String PUBLIC_ID = "-//OASIS//DTD DITA Topic//EN";
         final String SYSTEM_ID = "file:/topic.dtd";
+        _testWithIds(spaces, chunkSize, PUBLIC_ID, SYSTEM_ID);
+    }
+
+    private void _testWithIds(String spaces, int chunkSize, String PUBLIC_ID, String SYSTEM_ID) throws Exception {
         final String XML = spaces + "<!DOCTYPE root PUBLIC '" + PUBLIC_ID + "' \"" + SYSTEM_ID + "\"><root/>";
 
         final AsyncXMLInputFactory f = new InputFactoryImpl();
