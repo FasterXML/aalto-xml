@@ -355,11 +355,10 @@ public abstract class StreamWriterBase
 
         _verifyWriteCData();
         // Also, do we do textual content validation?
-        if (_vldContent == XMLValidator.CONTENT_ALLOW_VALIDATABLE_TEXT
-            && _validator != null) {
-            /* Last arg is false, since we do not know if more text
-             * may be added with additional calls
-             */
+        if ((_vldContent == XMLValidator.CONTENT_ALLOW_VALIDATABLE_TEXT)
+            && (_validator != null)) {
+            // Last arg is false, since we do not know if more text
+            // may be added with additional calls
             _validator.validateText(data, false);
         }
 
@@ -382,9 +381,8 @@ public abstract class StreamWriterBase
             _closeStartElement(_stateEmptyElement);
         }
 
-        /* If outside the main element tree, must be all white space,
-         * so let's call appropriate method:
-         */
+        // If outside the main element tree, must be all white space,
+        // so let's call appropriate method:
         if (inPrologOrEpilog()) {
             writeSpace(text, start, len);
             return;
@@ -401,9 +399,8 @@ public abstract class StreamWriterBase
             }
         } else if (_vldContent == XMLValidator.CONTENT_ALLOW_VALIDATABLE_TEXT) {
             if (_validator != null) {
-                /* Last arg is false, since we do not know if more text
-                 * may be added with additional calls
-                 */
+                // Last arg is false, since we do not know if more text
+                // may be added with additional calls
                 _validator.validateText(text, start, len, false);
             }
         }
@@ -1140,8 +1137,7 @@ public abstract class StreamWriterBase
     public XMLStreamLocation2 getLocation()
     {
         return new LocationImpl(null, null, // pub/sys ids not yet known
-                                _xmlWriter.getAbsOffset(),
-                                _xmlWriter.getRow(), _xmlWriter.getColumn());
+                _xmlWriter.getAbsOffset(), _xmlWriter.getRow(), _xmlWriter.getColumn());
     }
 
     @Override

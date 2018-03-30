@@ -30,9 +30,9 @@ public final class NonRepairingStreamWriter
     extends StreamWriterBase
 {
     /*
-    /////////////////////////////////////////////////////
-    // Construction, init
-    /////////////////////////////////////////////////////
+    /**********************************************************************
+    /* Construction, init
+    /**********************************************************************
      */
 
     public NonRepairingStreamWriter(WriterConfig cfg, XmlWriter writer,
@@ -42,10 +42,9 @@ public final class NonRepairingStreamWriter
     }
 
     /*
-    /////////////////////////////////////////////////////
-    // Implementations of abstract methods from base class,
-    // Stax 1.0 methods
-    /////////////////////////////////////////////////////
+    /**********************************************************************
+    /* Implementations of abstract methods from base class, Stax 1.0 methods
+    /**********************************************************************
      */
 
     @Override
@@ -203,10 +202,9 @@ public final class NonRepairingStreamWriter
     }
 
     /*
-    /////////////////////////////////////////////////////
-    // Implementations of abstract methods from base class,
-    // Stax2 Typed API Access (v3.0)
-    /////////////////////////////////////////////////////
+    /**********************************************************************
+    /* Implementations of abstract methods from base class, Stax2 Typed API Access (v3.0)
+    /**********************************************************************
      */
 
     @Override

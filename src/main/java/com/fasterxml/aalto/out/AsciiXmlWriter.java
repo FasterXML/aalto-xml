@@ -30,9 +30,9 @@ public final class AsciiXmlWriter
     final static int LAST_VALID_CHAR = 0x7F;
 
     /*
-    ////////////////////////////////////////////////
-    // Life-cycle
-    ////////////////////////////////////////////////
+    /**********************************************************************
+    /* Life-cycle
+    /**********************************************************************
      */
 
     public AsciiXmlWriter(WriterConfig cfg, OutputStream out)

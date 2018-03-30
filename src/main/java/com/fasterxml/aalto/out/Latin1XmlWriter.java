@@ -33,9 +33,9 @@ public final class Latin1XmlWriter
     final static int LAST_VALID_CHAR = 0xFF;
 
     /*
-    ////////////////////////////////////////////////
-    // Life-cycle
-    ////////////////////////////////////////////////
+    /**********************************************************************
+    /* Life-cycle
+    /**********************************************************************
      */
 
     public Latin1XmlWriter(WriterConfig cfg, OutputStream out)

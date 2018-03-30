@@ -30,7 +30,6 @@ import com.fasterxml.aalto.util.XmlConsts;
 public final class Utf8XmlWriter
     extends ByteXmlWriter
 {
-
     /*
     ////////////////////////////////////////////////
     // Life-cycle

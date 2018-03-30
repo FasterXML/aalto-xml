@@ -6,7 +6,7 @@
   <parent>
     <groupId>com.fasterxml</groupId>
     <artifactId>oss-parent</artifactId>
-    <version>32</version>
+    <version>33</version>
   </parent>
 
   <artifactId>aalto-xml</artifactId>
@@ -102,6 +102,7 @@ org.xml.sax, org.xml.sax.ext, org.xml.sax.helpers</osgi.import>
           <excludes>
             <exclude>**/Base*</exclude>
             <exclude>**/*$*</exclude>
+	        <exclude>failing/*.java</exclude>
           </excludes>
           <reportFormat>${surefire.format}</reportFormat>
           <useFile>${surefire.usefile}</useFile>

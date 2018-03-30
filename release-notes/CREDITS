@@ -17,3 +17,7 @@ David Moles (dmolesUC3@github)
  * Reported, contributed fix for #53: AsyncByteScanner.validPublicIdChar()
    incorrectly rejects digits
   (1.1.0)
+
+Mike Conley (conleym@github)
+ * Reported #35: Carriage return (\r) dropped by `XMLStreamWriter` implementation
+  (1.1.0)

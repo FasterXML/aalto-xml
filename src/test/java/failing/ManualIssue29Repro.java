@@ -1,4 +1,4 @@
-package manual;
+package failing;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
@@ -17,7 +17,7 @@ import com.fasterxml.aalto.stax.InputFactoryImpl;
 /**
  * Manually runnable reproduction of [aalto-xml#29]
  */
-public class Issue29Repro implements Runnable
+public class ManualIssue29Repro implements Runnable
 {
     private static String xml = "<?xml version='1.0'?><stream:stream xmlns='jabber:client' xmlns:stream='http://etherx.jabber.org/streams' id='4095288169' from='localhost' version='1.0' xml:lang='en'>";
     private static int NUM_THREADS = 5;
@@ -28,7 +28,7 @@ public class Issue29Repro implements Runnable
         ExecutorService ex = Executors.newFixedThreadPool(NUM_THREADS);
 
         for (int i = 0; i < 100000; i++) {
-            ex.submit(new Issue29Repro(i));
+            ex.submit(new ManualIssue29Repro(i));
         }
 
         ex.shutdown();
@@ -37,7 +37,7 @@ public class Issue29Repro implements Runnable
 
     private final int count;
 
-    public Issue29Repro(int count) {
+    public ManualIssue29Repro(int count) {
         this.count = count;
     }
 
