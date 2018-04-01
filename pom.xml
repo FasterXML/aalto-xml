@@ -98,6 +98,7 @@ org.xml.sax, org.xml.sax.ext, org.xml.sax.helpers</osgi.import>
         <configuration>
           <includes>
             <include>**/Test*.java</include>
+            <include>**/*Test.java</include>
           </includes>
           <excludes>
             <exclude>**/Base*</exclude>

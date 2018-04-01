@@ -177,7 +177,7 @@ public abstract class StreamScanner
          * element (one root-level start tag)
          */
         if (b == BYTE_SLASH || !isProlog) {
-            reportPrologUnexpChar(isProlog, decodeCharForError(b), " (unbalanced start/end tags?)");
+            reportPrologUnexpElement(isProlog, b);
         }
         return handleStartElement(b);
     }

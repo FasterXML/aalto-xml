@@ -231,7 +231,7 @@ public final class ReaderScanner
          * element (one root-level start tag)
          */
         if (c == '/' || !isProlog) {
-            reportPrologUnexpChar(isProlog, c, " (unbalanced start/end tags?)");
+            reportPrologUnexpElement(isProlog, c);
         }
         return handleStartElement(c);
     }

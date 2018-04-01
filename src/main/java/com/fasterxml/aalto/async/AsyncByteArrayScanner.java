@@ -1063,8 +1063,8 @@ public class AsyncByteArrayScanner
                     _state = STATE_DEFAULT;
                     return handlePI();
                 }
-                if (b == BYTE_SLASH || !isProlog) {
-                    reportPrologUnexpChar(isProlog, decodeCharForError(b), " (unbalanced start/end tags?)");
+                if (!isProlog || (b == BYTE_SLASH)) {
+                    reportPrologUnexpElement(isProlog, b);
                 }
                 return handleStartElementStart(b);
             }

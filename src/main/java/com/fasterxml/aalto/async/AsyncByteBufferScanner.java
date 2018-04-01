@@ -1072,7 +1072,7 @@ public class AsyncByteBufferScanner
                     return handlePI();
                 }
                 if (b == BYTE_SLASH || !isProlog) {
-                    reportPrologUnexpChar(isProlog, decodeCharForError(b), " (unbalanced start/end tags?)");
+                    reportPrologUnexpElement(isProlog, b);
                 }
                 return handleStartElementStart(b);
             }

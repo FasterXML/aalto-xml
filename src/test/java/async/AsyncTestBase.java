@@ -2,7 +2,9 @@ package async;
 
 import javax.xml.stream.XMLStreamException;
 
+import com.fasterxml.aalto.AsyncXMLInputFactory;
 import com.fasterxml.aalto.AsyncXMLStreamReader;
+import com.fasterxml.aalto.stax.InputFactoryImpl;
 
 abstract class AsyncTestBase extends base.BaseTestCase
 {
@@ -12,7 +14,13 @@ abstract class AsyncTestBase extends base.BaseTestCase
     protected final static char UNICODE_3BYTES = (char) 0x4567;
 
     protected final static String UNICODE_SEGMENT = "["+UNICODE_2BYTES+"/"+UNICODE_3BYTES+"]";
-    
+
+    protected AsyncXMLInputFactory newAsyncInputFactory()
+    {
+        // Can hard-code things here, being Aalto-specific tests.
+        return new InputFactoryImpl();
+    }
+
     public static String spaces(int count) 
     {
         return SPACES.substring(0, Math.min(SPACES.length(), count));

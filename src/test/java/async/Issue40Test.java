@@ -32,14 +32,14 @@ import com.fasterxml.aalto.stax.InputFactoryImpl;
  *                    | '&#x' [0-9a-fA-F]+ ';'  <-- here
  *  
  */
-public class Issue40 {
-	
+public class Issue40Test extends AsyncTestBase
+{
 	static AsyncXMLInputFactory FACTORY = new InputFactoryImpl();
 	static String HEADER = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?><root att=\"";
 	static String FOOTER = "\"></root>";
 
-	@Test
-	public void testHexEntitiesInAttributes() throws XMLStreamException {
+	public void testHexEntitiesInAttributes() throws XMLStreamException
+	{
 		// non-regression of the fix 
 		testHexEntityInAttribute("&#x0A;", "\n" /*expected string value*/);
 		testHexEntityInAttribute("&#x0a;", "\n" /*expected string value*/);
@@ -59,7 +59,8 @@ public class Issue40 {
 	}
 
 	private void testHexEntityInAttribute(String entity, String expectedStringValue)
-			throws XMLStreamException {
+			throws XMLStreamException
+	{
 		AsyncXMLStreamReader<AsyncByteArrayFeeder> parser = FACTORY.createAsyncFor((HEADER + entity + FOOTER).getBytes(StandardCharsets.UTF_8));
 		assertEquals(AsyncXMLStreamReader.START_DOCUMENT, parser.next());
 		assertEquals(AsyncXMLStreamReader.START_ELEMENT, parser.next());
@@ -67,7 +68,5 @@ public class Issue40 {
 		assertEquals(expectedStringValue, parser.getAttributeValue(0));
 		assertEquals(AsyncXMLStreamReader.END_ELEMENT, parser.next());
 		assertEquals("root", parser.getName().getLocalPart());
-		
 	}
-	
 }

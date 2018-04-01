@@ -15,6 +15,7 @@ Project: aalto-xml
 #46: 3-byte Unicode character causes an extra character to be appended by
   `XMLStreamWriter2.writeRaw()`
  (reported by philippe-tr@github)
+#52: Non-informative fail message for multiple root elements, in async parsing mode
 #53: AsyncByteScanner.validPublicIdChar() incorrectly rejects digits
  (reported by David M)
 - Add "Automatic-Module-Name" for Java 9

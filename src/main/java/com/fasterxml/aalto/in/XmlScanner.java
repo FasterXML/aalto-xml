@@ -1344,6 +1344,27 @@ public abstract class XmlScanner
                            +(isNsDecl ? "namespace declaration" : "attribute value"));
     }
 
+    protected void reportPrologUnexpElement(boolean isProlog, int ch)
+        throws XMLStreamException
+    {
+        if (ch < 0) { // just to be safe, in case caller passed signed byte
+            ch &= 0x7FFFF;
+        }
+        if (ch == '/') { // end element
+            if (isProlog) {
+                reportInputProblem("Unexpected end element in prolog: malformed XML document, expected root element");
+            }
+            reportInputProblem("Unexpected end element in epilog: malformed XML document (unbalanced start/end tags?)");
+        }
+
+        // Otherwise, likely start element. But check for invalid white space for funsies
+        if (ch < 32) {
+            String type = isProlog ? ErrorConsts.SUFFIX_IN_PROLOG : ErrorConsts.SUFFIX_IN_EPILOG;
+            throwUnexpectedChar(ch, "Unrecognized directive "+type);
+        }
+        reportInputProblem("Second root element in content: malformed XML document, only one allowed");
+    }
+    
     protected void reportPrologUnexpChar(boolean isProlog, int ch, String msg)
         throws XMLStreamException
     {
