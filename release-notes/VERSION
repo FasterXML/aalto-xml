@@ -10,6 +10,8 @@ Project: aalto-xml
  (reported by Mike C)
 #40: Parsing error on hexadecimal character reference in attribute value
  (reported by bfreuden@github)
+#45: Unicode: surrogate pairs encoded invalidly after x number of chars
+ (reported by JervenBolleman@github)
 #53: AsyncByteScanner.validPublicIdChar() incorrectly rejects digits
  (reported by David M)
 - Add "Automatic-Module-Name" for Java 9

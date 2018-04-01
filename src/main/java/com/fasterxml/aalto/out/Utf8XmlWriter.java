@@ -30,17 +30,17 @@ import com.fasterxml.aalto.util.XmlConsts;
 public final class Utf8XmlWriter
     extends ByteXmlWriter
 {
-    /*
-    ////////////////////////////////////////////////
-    // Life-cycle
-    ////////////////////////////////////////////////
-     */
-
     public Utf8XmlWriter(WriterConfig cfg, OutputStream out)
     {
         super(cfg, out, OutputCharTypes.getUtf8CharTypes());
     }
 
+    /*
+    /**********************************************************************
+    /* Abstract method implementations
+    /**********************************************************************
+     */
+    
     @Override
     public int getHighestEncodable() {
         return XmlConsts.MAX_UNICODE_CHAR;
@@ -120,9 +120,9 @@ public final class Utf8XmlWriter
     }
 
     /*
-    ////////////////////////////////////////////////////
-    // Internal methods, low-level write
-    ////////////////////////////////////////////////////
+    /**********************************************************************
+    /* Internal methods, low-level write
+    /**********************************************************************
      */
 
     @Override

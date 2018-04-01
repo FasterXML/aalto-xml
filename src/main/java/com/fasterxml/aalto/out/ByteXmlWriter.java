@@ -912,15 +912,13 @@ public abstract class ByteXmlWriter
             --len;
         }
 
-        /* Ok, let's offline (what's sure to be) slow case first:
-         * (with multi-byte chars, others may be, too).
-         */
+        // Ok, let's offline (what's sure to be) slow case first:
+        // (with multi-byte chars, others may be, too).
         int ptr = _outputPtr;
         if ((ptr + len) > _outputBufferLen) {
             writeSplitCharacters(cbuf, offset, len);
             return;
         }
-
         len += offset; // now marks the end
 
         main_loop:
@@ -934,11 +932,9 @@ public abstract class ByteXmlWriter
                     break inner_loop;
                 }
                 if (charTypes[ch] != XmlCharTypes.CT_OK) {
-                    /* This may look weird, but profiling showed that
-                     * handling of lfs for indentation has measurable
-                     * effect; plus, that checking it here will not
-                     * slow down inner loop either
-                     */
+                    // This may look weird, but profiling showed that handling of LFs
+                    // for indentation has measurable effect; plus, that checking it
+                    // here will not slow down inner loop either
                     if (ch != '\n') {
                         break inner_loop;
                     }
@@ -1082,9 +1078,9 @@ public abstract class ByteXmlWriter
                 default:
                     break;
                 }
-            } else {
-                writeAsEntity(ch);
-                continue main_loop;
+            } else { // beyond 2-byte encodables; 3-byte, surrogates?
+                offset = outputMultiByteChar(ch, cbuf, offset, len);
+                continue;
             }
 
             if (_outputPtr >= _outputBufferLen) {
@@ -1585,7 +1581,7 @@ public abstract class ByteXmlWriter
     protected final void flushBuffer()
         throws IOException
     {
-        if (_outputPtr > 0 && _out != null) {
+        if ((_outputPtr > 0) && (_out != null)) {
             int ptr = _outputPtr;
             // Need to update location info, to keep it in sync
             _locPastChars += ptr;
