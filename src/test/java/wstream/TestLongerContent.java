@@ -14,9 +14,9 @@ public class TestLongerContent extends BaseTestCase
 {
     final static String TEXT_UTF8_2BYTES = "\u00C0"+"c\u00C7ent! ";
 
-    final XMLOutputFactory2 OUTPUT_FACTORY = getNewOutputFactory();
+    final XMLOutputFactory2 OUTPUT_FACTORY = newOutputFactory();
 
-    final XMLInputFactory2 INPUT_FACTORY = getNewInputFactory();
+    final XMLInputFactory2 INPUT_FACTORY = newInputFactory();
     
     // To test [#26]
 

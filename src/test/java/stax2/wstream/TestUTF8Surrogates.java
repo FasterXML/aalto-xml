@@ -1,10 +1,8 @@
-package wstream;
+package stax2.wstream;
 
 import java.io.ByteArrayOutputStream;
 
 import org.codehaus.stax2.XMLStreamWriter2;
-
-import stax2.wstream.BaseWriterTest;
 
 public class TestUTF8Surrogates extends BaseWriterTest
 {

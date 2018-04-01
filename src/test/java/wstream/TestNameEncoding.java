@@ -129,7 +129,7 @@ public class TestNameEncoding
         throws IOException, XMLStreamException
     {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        XMLStreamWriter sw = getNewOutputFactory().createXMLStreamWriter(bos, enc);
+        XMLStreamWriter sw = newOutputFactory().createXMLStreamWriter(bos, enc);
         sw.writeStartDocument(enc, "1.0");
         sw.writeStartElement(name);
         sw.writeEndElement();
@@ -157,7 +157,7 @@ public class TestNameEncoding
         throws IOException, XMLStreamException
     {
         // Let's ensure it's a new factory, to minimize caching probs
-        XMLInputFactory2 f = getNewInputFactory();
+        XMLInputFactory2 f = newInputFactory();
         return f.createXMLStreamReader(new ByteArrayInputStream(content));
     }
 }

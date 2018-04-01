@@ -35,12 +35,12 @@ public abstract class BaseTestCase
     protected XMLInputFactory2 getInputFactory()
     {
         if (mInputFactory == null) {
-            mInputFactory = getNewInputFactory();
+            mInputFactory = newInputFactory();
         }
         return mInputFactory;
     }
 
-    protected XMLInputFactory2 getNewInputFactory()
+    protected XMLInputFactory2 newInputFactory()
     {
         // Can hard-code things here, being Aalto-specific tests.
         return new InputFactoryImpl();
@@ -49,12 +49,12 @@ public abstract class BaseTestCase
     protected XMLOutputFactory2 getOutputFactory()
     {
         if (mOutputFactory == null) {
-            mOutputFactory = getNewOutputFactory();
+            mOutputFactory = newOutputFactory();
         }
         return mOutputFactory;
     }
 
-    protected XMLOutputFactory2 getNewOutputFactory()
+    protected XMLOutputFactory2 newOutputFactory()
     {
         // Can hard-code things here, being Aalto-specific tests.
         return new OutputFactoryImpl();

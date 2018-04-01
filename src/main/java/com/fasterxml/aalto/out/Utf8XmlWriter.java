@@ -83,13 +83,9 @@ public final class Utf8XmlWriter
             char ch = cbuf[offset++];
             if (ch < 0x800) { // 2-byte?
                 output2ByteChar(ch);
-            } else {
-                offset = outputMultiByteChar(ch, cbuf, offset, len);
+                continue;
             }
-            if (_outputPtr >= _outputBufferLen) {
-                flushBuffer();
-            }
-            _outputBuffer[_outputPtr++] = (byte)ch;
+            offset = outputMultiByteChar(ch, cbuf, offset, len);
         }
     }
 

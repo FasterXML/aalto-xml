@@ -11,7 +11,7 @@ import org.codehaus.stax2.XMLStreamReader2;
 
 public class TestSimple extends base.BaseTestCase
 {
-    private final XMLInputFactory2 F2 = getNewInputFactory();
+    private final XMLInputFactory2 F2 = newInputFactory();
     
     public void testNamespacesBytes() throws Exception {
         _testNamespaces(true);

@@ -51,7 +51,7 @@ public class TestSurrogates extends base.BaseTestCase
     /**********************************************************************
      */
 
-    private final XMLInputFactory2 F2 = getNewInputFactory();
+    private final XMLInputFactory2 F2 = newInputFactory();
     
     XMLStreamReader2 createReader(String content, boolean useBytes)
         throws IOException, XMLStreamException

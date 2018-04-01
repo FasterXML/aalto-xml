@@ -12,7 +12,7 @@ import base.BaseTestCase;
 // root. Related to [#7]
 public class TestIndentation extends BaseTestCase
 {
-    final XMLOutputFactory2 OUTPUT_FACTORY = getNewOutputFactory();
+    final XMLOutputFactory2 OUTPUT_FACTORY = newOutputFactory();
 
     public void testRootLevelIndentBytes() throws Exception
     {

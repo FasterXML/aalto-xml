@@ -79,7 +79,7 @@ public class TestDTDSkimming extends base.BaseTestCase
         throws IOException, XMLStreamException
     {
         // Let's ensure it's a new factory, to minimize caching probs
-        XMLInputFactory2 f = getNewInputFactory();
+        XMLInputFactory2 f = newInputFactory();
         if (enc == null) { // reader-based
             return (XMLStreamReader2) f.createXMLStreamReader(new StringReader(content));
         }

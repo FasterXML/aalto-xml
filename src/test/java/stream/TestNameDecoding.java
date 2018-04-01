@@ -64,7 +64,7 @@ public class TestNameDecoding
         throws IOException, XMLStreamException
     {
         // Let's ensure it's a new factory, to minimize caching probs
-        XMLInputFactory2 f = getNewInputFactory();
+        XMLInputFactory2 f = newInputFactory();
         byte[] data = content.getBytes(enc);
         return f.createXMLStreamReader(new ByteArrayInputStream(data));
     }
