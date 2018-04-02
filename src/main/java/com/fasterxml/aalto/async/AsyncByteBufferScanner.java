@@ -4201,7 +4201,7 @@ public class AsyncByteBufferScanner
         byte b = _inputBuffer.get(_inputPtr++); // we know one is available
         if (starting) {
             int ch = (int) b;
-            if (ch < INT_0 || ch > INT_9) { // invalid entity
+            if ((ch < INT_0 || ch > INT_9) && (ch < INT_a || ch > INT_f) && (ch < INT_A || ch > INT_F)) { // invalid entity
                 throwUnexpectedChar(decodeCharForError(b), " expected a hex digit (0-9a-fA-F) for character entity");
             }
             _pendingInput = PENDING_STATE_ATTR_VALUE_HEX_DIGIT;
