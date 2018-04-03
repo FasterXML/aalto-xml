@@ -75,6 +75,14 @@ org.xml.sax, org.xml.sax.ext, org.xml.sax.helpers</osgi.import>
       <version>${version.junit}</version>
       <scope>test</scope>
     </dependency>
+
+    <!-- since 1.1, may start test validation; need Woodstox for that -->
+    <dependency>
+      <groupId>com.fasterxml.woodstox</groupId>
+      <artifactId>woodstox-core</artifactId>
+      <version>5.1.0</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
   <build>

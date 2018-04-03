@@ -1,4 +1,4 @@
-package sax;
+package com.fasterxml.aalto.sax;
 
 import java.io.*;
 

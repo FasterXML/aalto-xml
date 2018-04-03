@@ -1,4 +1,4 @@
-package evt;
+package com.fasterxml.aalto.evt;
 
 import java.io.*;
 import javax.xml.stream.*;

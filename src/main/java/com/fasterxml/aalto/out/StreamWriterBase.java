@@ -342,8 +342,7 @@ public abstract class StreamWriterBase
 
     @Override
     public abstract void writeAttribute(String prefix, String nsURI,
-                                        String localName, String value)
-        throws XMLStreamException;
+            String localName, String value) throws XMLStreamException;
 
     @Override
     public void writeCData(String data) throws XMLStreamException

@@ -94,9 +94,9 @@ public abstract class XmlWriter
     protected int _locRowStartOffset = 0;
 
     /*
-    ////////////////////////////////////////////////
-    // Validation
-    ////////////////////////////////////////////////
+    /**********************************************************************
+    /* Validation
+    /**********************************************************************
      */
 
     final protected boolean _checkContent;
@@ -104,9 +104,9 @@ public abstract class XmlWriter
     final protected boolean _checkNames;
 
     /*
-    ///////////////////////////////////////////////////////
-    // Life-cycle
-    ///////////////////////////////////////////////////////
+    /**********************************************************************
+    /* Life-cycle
+    /**********************************************************************
      */
 
     protected XmlWriter(WriterConfig cfg)
@@ -157,10 +157,9 @@ public abstract class XmlWriter
     public abstract int getHighestEncodable();
 
     /*
-    ////////////////////////////////////////////////////
-    // Basic methods for communicating with underlying
-    // stream or writer
-    ////////////////////////////////////////////////////
+    /**********************************************************************
+    /* Basic methods for communicating with underlying stream or writer
+    /**********************************************************************
      */
 
     /**
@@ -188,9 +187,9 @@ public abstract class XmlWriter
     public abstract void flush() throws IOException;
 
     /*
-    ////////////////////////////////////////////////////
-    // Write methods, non-elem/attr, textual
-    ////////////////////////////////////////////////////
+    /**********************************************************************
+    /* Write methods, non-elem/attr, textual
+    /**********************************************************************
      */
 
     /**
@@ -256,11 +255,11 @@ public abstract class XmlWriter
         throws IOException, XMLStreamException;
 
     /*
-    ////////////////////////////////////////////////////
-    // Write methods, elements
-    ////////////////////////////////////////////////////
+    /**********************************************************************
+    /* Write methods, elements
+    /**********************************************************************
      */
-               
+
     /**
      *<p>
      * Note: can throw XMLStreamException, if name checking is enabled,
@@ -281,9 +280,9 @@ public abstract class XmlWriter
         throws IOException, XMLStreamException;
 
     /*
-    ////////////////////////////////////////////////////
-    // Write methods, attributes/ns, textual
-    ////////////////////////////////////////////////////
+    /**********************************************************************
+    /* Write methods, attributes/ns, textual
+    /**********************************************************************
      */
 
     /**
@@ -300,9 +299,9 @@ public abstract class XmlWriter
         throws IOException, XMLStreamException;
 
     /*
-    ////////////////////////////////////////////////////
-    // Write methods, Typed
-    ////////////////////////////////////////////////////
+    /**********************************************************************
+    /* Write methods, Typed
+    /**********************************************************************
      */
 
     public abstract void writeTypedValue(AsciiValueEncoder enc)
@@ -312,9 +311,9 @@ public abstract class XmlWriter
         throws IOException, XMLStreamException;
 
     /*
-    ////////////////////////////////////////////////////
-    // Location information
-    ////////////////////////////////////////////////////
+    /**********************************************************************
+    /* Location information
+    /**********************************************************************
      */
 
     public int getRow() {
@@ -330,9 +329,9 @@ public abstract class XmlWriter
     }
 
     /*
-    ////////////////////////////////////////////////////
-    // Helper methods for sub-classes
-    ////////////////////////////////////////////////////
+    /**********************************************************************
+    /* Helper methods for sub-classes
+    /**********************************************************************
      */
 
     /**
@@ -471,7 +470,6 @@ public abstract class XmlWriter
         } catch (IOException ioe) {
             throw new IoStreamException(ioe);
         }
-
         throw new XMLStreamException(msg);
     }
 

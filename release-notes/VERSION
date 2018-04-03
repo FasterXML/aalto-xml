@@ -4,7 +4,7 @@ Project: aalto-xml
 = Releases
 ------------------------------------------------------------------------
 
-1.1.0 (not yet released)
+1.1.0 (03-Apr-2018)
 
 #35: Carriage return (\r) dropped by `XMLStreamWriter` implementation
  (reported by Mike C)

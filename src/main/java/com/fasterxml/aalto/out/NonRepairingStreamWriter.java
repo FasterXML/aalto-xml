@@ -159,9 +159,8 @@ public final class NonRepairingStreamWriter
             throwOutputError(ErrorConsts.WERR_NS_NO_ELEM);
         }
         _writeNamespace(prefix, nsURI);
-        /* 31-Jan-2008, tatus: Stax TCK expects an implicit prefix
-         *  addition binding. So let's do that, then
-         */
+        // 31-Jan-2008, tatus: Stax TCK expects an implicit prefix
+        //  addition binding. So let's do that, then
         setPrefix(prefix, nsURI);
     }
 
