@@ -34,7 +34,6 @@ public class AsyncByteBufferScanner
     extends AsyncByteScanner
     implements AsyncByteBufferFeeder
 {
-    
     /*
     /**********************************************************************
     /* Input buffer handling
@@ -54,7 +53,6 @@ public class AsyncByteBufferScanner
      */
     protected int _origBufferLen;
 
-    
     /*
     /**********************************************************************
     /* Instance construction
@@ -4201,11 +4199,17 @@ public class AsyncByteBufferScanner
         byte b = _inputBuffer.get(_inputPtr++); // we know one is available
         if (starting) {
             int ch = (int) b;
-            if (ch < INT_0 || ch > INT_9) { // invalid entity
+            if (ch <= INT_9 && ch >= INT_0) {
+                ch -= INT_0;
+            } else if (ch <= INT_F && ch >= INT_A) {
+                ch = 10 + (ch - INT_A);
+            } else  if (ch <= INT_f && ch >= INT_a) {
+                ch = 10 + (ch - INT_a);
+            } else {
                 throwUnexpectedChar(decodeCharForError(b), " expected a hex digit (0-9a-fA-F) for character entity");
             }
             _pendingInput = PENDING_STATE_ATTR_VALUE_HEX_DIGIT;
-            _entityValue = ch - INT_0;
+            _entityValue = ch;
             if (_inputPtr >= _inputEnd) {
                 return 0;
             }

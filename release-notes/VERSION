@@ -19,6 +19,7 @@ Project: aalto-xml
 #53: AsyncByteScanner.validPublicIdChar() incorrectly rejects digits
  (reported by David M)
 - Add "Automatic-Module-Name" for Java 9
+- Minor fix to handling of hexadecimal character entities in attribute values.
 
 1.0.0 (23-Nov-2015)
 
