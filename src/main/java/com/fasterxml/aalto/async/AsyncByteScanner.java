@@ -355,8 +355,8 @@ public abstract class AsyncByteScanner
         /* 09-Feb-2011, tatu: For now, we will only accept UTF-8 and ASCII; could
          *   expand in future (Latin-1 should be doable)
          */
-        if (CharsetNames.CS_UTF8 != enc && CharsetNames.CS_US_ASCII != enc) {
-            reportInputProblem("Unsupported encoding '"+enc+"': only UTF-8 and US-ASCII support by async parser");
+        if (CharsetNames.CS_UTF8 != enc && CharsetNames.CS_US_ASCII != enc && CharsetNames.CS_ISO_LATIN1 != enc) {
+            reportInputProblem("Unsupported encoding '"+enc+"': only UTF-8, ISO-8859-1, and US-ASCII support by async parser");
         }
     }
 
