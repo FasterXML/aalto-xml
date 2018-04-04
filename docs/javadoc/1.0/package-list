@@ -1,0 +1,12 @@
+com.fasterxml.aalto
+com.fasterxml.aalto.async
+com.fasterxml.aalto.dom
+com.fasterxml.aalto.evt
+com.fasterxml.aalto.impl
+com.fasterxml.aalto.in
+com.fasterxml.aalto.io
+com.fasterxml.aalto.out
+com.fasterxml.aalto.sax
+com.fasterxml.aalto.stax
+com.fasterxml.aalto.util
+test
