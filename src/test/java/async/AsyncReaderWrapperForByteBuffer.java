@@ -26,6 +26,10 @@ public class AsyncReaderWrapperForByteBuffer implements AsyncReaderWrapper
         this(sr, 1, xmlString);
     }
     
+    public AsyncReaderWrapperForByteBuffer(AsyncXMLStreamReader<AsyncByteBufferFeeder> sr, byte[] xmlBytes) {
+        this(sr, 1, xmlBytes);
+    }
+
     public AsyncReaderWrapperForByteBuffer(AsyncXMLStreamReader<AsyncByteBufferFeeder> sr, int bytesPerCall, String xmlString)
     {
         _streamReader = sr;
@@ -36,6 +40,15 @@ public class AsyncReaderWrapperForByteBuffer implements AsyncReaderWrapper
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public AsyncReaderWrapperForByteBuffer(AsyncXMLStreamReader<AsyncByteBufferFeeder> sr, int bytesPerCall,
+            byte[] xmlBytes)
+    {
+        _streamReader = sr;
+        _bytesPerFeed = bytesPerCall;
+        _xml = xmlBytes;
+        _buf = ByteBuffer.allocate(_bytesPerFeed);
     }
 
     @Override

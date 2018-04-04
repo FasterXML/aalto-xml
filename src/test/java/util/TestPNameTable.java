@@ -37,7 +37,7 @@ public class TestPNameTable
             for (int j = i; --j >= 0; ) {
                 PName other = tryToFind(table, names[j]);
                 if (other == null) {
-System.err.println("FAIL: table('"+names[j]+"') == "+table.toDebugString());
+//System.err.println("FAIL: table('"+names[j]+"') == "+table.toDebugString());
                     fail("Should have found '"+names[j]+"' (entry #"+j+" out of "+i+")");
                 }
                 assertEquals(names[j], other.getPrefixedName());
@@ -46,9 +46,9 @@ System.err.println("FAIL: table('"+names[j]+"') == "+table.toDebugString());
     }
 
     /*
-    ////////////////////////////////////////////////
-    // Internal methods
-    ////////////////////////////////////////////////
+    /**********************************************************************
+    /* Internal methods
+    /**********************************************************************
      */
 
     PName tryToFind(ByteBasedPNameTable table, String word)

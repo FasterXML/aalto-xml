@@ -47,28 +47,16 @@ public class TestPIParsing extends AsyncTestBase
         final AsyncXMLInputFactory f = new InputFactoryImpl();
 
         //test for byte array
-        AsyncXMLStreamReader<AsyncByteArrayFeeder> sr_array = null;
-        try {
-            sr_array = f.createAsyncForByteArray();
-            final AsyncReaderWrapperForByteArray reader_array = new AsyncReaderWrapperForByteArray(sr_array, chunkSize, spaces + XML);
-            _testPI(sr_array, reader_array);
-        } finally {
-            if (sr_array != null) {
-                sr_array.close();
-            }
-        }
+        AsyncXMLStreamReader<AsyncByteArrayFeeder> sr_array = f.createAsyncForByteArray();
+        final AsyncReaderWrapperForByteArray reader_array = new AsyncReaderWrapperForByteArray(sr_array, chunkSize, spaces + XML);
+        _testPI(sr_array, reader_array);
+        sr_array.close();
 
         //test for byte buffer
-        AsyncXMLStreamReader<AsyncByteBufferFeeder> sr_buffer = null;
-        try {
-            sr_buffer = f.createAsyncForByteBuffer();
-            final AsyncReaderWrapperForByteBuffer reader_buffer = new AsyncReaderWrapperForByteBuffer(sr_buffer, chunkSize, spaces + XML);
-            _testPI(sr_buffer, reader_buffer);
-        } finally {
-            if (sr_buffer != null) {
-                sr_buffer.close();
-            }
-        }
+        AsyncXMLStreamReader<AsyncByteBufferFeeder> sr_buffer = f.createAsyncForByteBuffer();
+        final AsyncReaderWrapperForByteBuffer reader_buffer = new AsyncReaderWrapperForByteBuffer(sr_buffer, chunkSize, spaces + XML);
+        _testPI(sr_buffer, reader_buffer);
+        sr_buffer.close();
     }
 
     private void _testPI(final AsyncXMLStreamReader<?> sr, final AsyncReaderWrapper reader) throws Exception
@@ -98,28 +86,16 @@ public class TestPIParsing extends AsyncTestBase
         final AsyncXMLInputFactory f = new InputFactoryImpl();
 
         //test for byte array
-        AsyncXMLStreamReader<AsyncByteArrayFeeder> sr_array = null;
-        try {
-            sr_array = f.createAsyncForByteArray();
-            final AsyncReaderWrapperForByteArray reader_array = new AsyncReaderWrapperForByteArray(sr_array, chunkSize, spaces + XML);
-            _testPISkip(sr_array, reader_array);
-        } finally {
-            if (sr_array != null) {
-                sr_array.close();
-            }
-        }
+        AsyncXMLStreamReader<AsyncByteArrayFeeder> sr_array = f.createAsyncForByteArray();
+        final AsyncReaderWrapperForByteArray reader_array = new AsyncReaderWrapperForByteArray(sr_array, chunkSize, spaces + XML);
+        _testPISkip(sr_array, reader_array);
+        sr_array.close();
 
         //test for byte buffer
-        AsyncXMLStreamReader<AsyncByteBufferFeeder> sr_buffer = null;
-        try {
-            sr_buffer = f.createAsyncForByteBuffer();
-            final AsyncReaderWrapperForByteBuffer reader_buffer = new AsyncReaderWrapperForByteBuffer(sr_buffer, chunkSize, spaces + XML);
-            _testPISkip(sr_buffer, reader_buffer);
-        } finally {
-            if (sr_buffer != null) {
-                sr_buffer.close();
-            }
-        }
+        AsyncXMLStreamReader<AsyncByteBufferFeeder> sr_buffer = f.createAsyncForByteBuffer();
+        final AsyncReaderWrapperForByteBuffer reader_buffer = new AsyncReaderWrapperForByteBuffer(sr_buffer, chunkSize, spaces + XML);
+        _testPISkip(sr_buffer, reader_buffer);
+        sr_buffer.close();
     }
 
     private void _testPISkip(final AsyncXMLStreamReader<?> sr, final AsyncReaderWrapper reader) throws Exception

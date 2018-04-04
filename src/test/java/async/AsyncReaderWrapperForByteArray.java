@@ -20,6 +20,10 @@ public class AsyncReaderWrapperForByteArray implements AsyncReaderWrapper
     public AsyncReaderWrapperForByteArray(AsyncXMLStreamReader<AsyncByteArrayFeeder> sr, String xmlString) {
         this(sr, 1, xmlString);
     }
+
+    public AsyncReaderWrapperForByteArray(AsyncXMLStreamReader<AsyncByteArrayFeeder> sr, byte[] xmlBytes) {
+        this(sr, 1, xmlBytes);
+    }
     
     public AsyncReaderWrapperForByteArray(AsyncXMLStreamReader<AsyncByteArrayFeeder> sr, int bytesPerCall, String xmlString)
     {
@@ -30,6 +34,13 @@ public class AsyncReaderWrapperForByteArray implements AsyncReaderWrapper
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public AsyncReaderWrapperForByteArray(AsyncXMLStreamReader<AsyncByteArrayFeeder> sr, int bytesPerCall, byte[] xmlBytes)
+    {
+        _streamReader = sr;
+        _bytesPerFeed = bytesPerCall;
+        _xml = xmlBytes;
     }
 
     @Override

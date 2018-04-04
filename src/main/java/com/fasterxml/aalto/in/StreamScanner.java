@@ -24,6 +24,7 @@ import com.fasterxml.aalto.impl.ErrorConsts;
 import com.fasterxml.aalto.impl.IoStreamException;
 import com.fasterxml.aalto.util.DataUtil;
 import com.fasterxml.aalto.util.TextBuilder;
+import com.fasterxml.aalto.util.XmlCharTypes;
 
 /**
  * Base class for various byte stream based scanners (generally one
@@ -34,7 +35,7 @@ public abstract class StreamScanner
 {
     /*
     /**********************************************************************
-    /* Configuration
+    /* Configuration, input, buffering
     /**********************************************************************
      */
 
@@ -43,14 +44,34 @@ public abstract class StreamScanner
      */
     protected InputStream _in;
 
+    protected byte[] _inputBuffer;
+
     /*
     /**********************************************************************
-    /* Input buffering
+    /* Character, name decoding
     /**********************************************************************
      */
 
-    protected byte[] _inputBuffer;
+    /**
+     * This is a simple container object that is used to access the
+     * decoding tables for characters. Indirection is needed since
+     * we actually support multiple utf-8 compatible encodings, not
+     * just utf-8 itself.
+     */
+    protected final XmlCharTypes _charTypes;
 
+    /**
+     * For now, symbol table contains prefixed names. In future it is
+     * possible that they may be split into prefixes and local names?
+     */
+    protected final ByteBasedPNameTable _symbols;
+
+    /**
+     * This buffer is used for name parsing. Will be expanded if/as
+     * needed; 32 ints can hold names 128 ascii chars long.
+     */
+    protected int[] _quadBuffer = new int[32];
+    
     /*
     /**********************************************************************
     /* Life-cycle
@@ -61,6 +82,9 @@ public abstract class StreamScanner
             byte[] buffer, int ptr, int last)
     {
         super(cfg);
+        _charTypes = cfg.getCharTypes();
+        _symbols = cfg.getBBSymbols();
+        
         _in = in;
         _inputBuffer = buffer;
         _inputPtr = ptr;
@@ -71,15 +95,18 @@ public abstract class StreamScanner
     protected void _releaseBuffers()
     {
         super._releaseBuffers();
-        /* Note: if we have block input (_in == null), the buffer we
-         * use is not owned by scanner, can't recycle.
-         * Also note that this method will always get called before
-         * _closeSource(); so that _in won't be cleared before we
-         * have a chance to see it.
-         */
-        if (_in != null && _inputBuffer != null) {
-            _config.freeFullBBuffer(_inputBuffer);
-            _inputBuffer = null;
+        if (_symbols.maybeDirty()) {
+            _config.updateBBSymbols(_symbols);
+        }
+        // Note: if we have block input (_in == null), the buffer we use is
+        // not owned by scanner, can't recycle.
+        // Also note that this method will always get called before _closeSource()
+        // so that _in won't be cleared before we  have a chance to see it.
+        if (_in != null) {
+            if (_inputBuffer != null) {
+                _config.freeFullBBuffer(_inputBuffer);
+                _inputBuffer = null;
+            }
         }
     }
 
@@ -1208,10 +1235,16 @@ public abstract class StreamScanner
         return findPName(lastQuad, quads, qlen, lastByteCount);
     }
 
+    protected final PName addPName(int hash, int[] quads, int qlen, int lastQuadBytes)
+        throws XMLStreamException
+    {
+        return addUTFPName(_symbols, _charTypes, hash, quads, qlen, lastQuadBytes);
+    }
+    
     /*
-    ////////////////////////////////////////////////
-    // Other parsing helper methods
-    ////////////////////////////////////////////////
+    /**********************************************************************
+    /* Other parsing helper methods
+    /**********************************************************************
      */
 
     /**

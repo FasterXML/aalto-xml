@@ -29,11 +29,11 @@ public class XmlCharTypes
     public final static int CT_INVALID = 1; // either invalid xml in general, or in this context
     public final static int CT_WS_CR = 2;
     public final static int CT_WS_LF = 3;
+
     public final static int CT_MULTIBYTE_N = 4; // (too) long encoding
     public final static int CT_MULTIBYTE_2 = 5; // 2-byte encoding
     public final static int CT_MULTIBYTE_3 = 6; // 3-byte encoding
     public final static int CT_MULTIBYTE_4 = 7; // 4-byte encoding
-
 
     // Constants for regular char types
 

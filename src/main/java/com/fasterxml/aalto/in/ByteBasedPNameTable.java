@@ -35,9 +35,9 @@ public final class ByteBasedPNameTable
     final static int LAST_VALID_BUCKET = 0xFE;
 
     /*
-    /////////////////////////////////////////////////////
-    // Main table state
-    /////////////////////////////////////////////////////    
+    /**********************************************************************
+    /* Main table state
+    /**********************************************************************
      */
 
     // // // First, global information
@@ -102,9 +102,9 @@ public final class ByteBasedPNameTable
     private transient boolean mNeedRehash;
 
     /*
-    /////////////////////////////////////////////////////
-    // Sharing, versioning
-    /////////////////////////////////////////////////////    
+    /**********************************************************************
+    /* Sharing, versioning
+    /**********************************************************************
      */
 
     // // // Which of the buffers may be shared (and are copy-on-write)?
@@ -136,16 +136,14 @@ public final class ByteBasedPNameTable
     private boolean mCollListShared;
 
     /*
-    /////////////////////////////////////////////////////
-    // Construction, merging
-    /////////////////////////////////////////////////////
+    /**********************************************************************
+    /* Construction, merging
+    /**********************************************************************
      */
 
     public ByteBasedPNameTable(int hashSize)
     {
-        /* Sanity check: let's now allow hash sizes below certain
-         * min. value
-         */
+        // Sanity check: let's now allow hash sizes below certain min. value
         if (hashSize < MIN_HASH_SIZE) {
             hashSize = MIN_HASH_SIZE;
         } else {
@@ -237,9 +235,9 @@ public final class ByteBasedPNameTable
     }
 
     /*
-    /////////////////////////////////////////////////////
-    // API, accessors
-    /////////////////////////////////////////////////////
+    /**********************************************************************
+    /* API, accessors
+    /**********************************************************************
      */
 
     @Override
@@ -356,15 +354,16 @@ public final class ByteBasedPNameTable
     }
 
     /*
-    /////////////////////////////////////////////////////
-    // API, mutators
-    /////////////////////////////////////////////////////
+    /**********************************************************************
+    /* API, mutators
+    /**********************************************************************
      */
 
     public ByteBasedPName addSymbol(int hash, String symbolStr, int colonIx,
                                     int firstQuad, int secondQuad)
     {
-        ByteBasedPName symbol = ByteBasedPNameFactory.getInstance().constructPName(hash, symbolStr, colonIx, firstQuad, secondQuad);
+        ByteBasedPName symbol = ByteBasedPNameFactory.getInstance().constructPName(hash,
+                symbolStr, colonIx, firstQuad, secondQuad);
         doAddSymbol(hash, symbol);
         return symbol;
     }
@@ -372,15 +371,16 @@ public final class ByteBasedPNameTable
     public ByteBasedPName addSymbol(int hash, String symbolStr, int colonIx,
                            int[] quads, int qlen)
     {
-        ByteBasedPName symbol = ByteBasedPNameFactory.getInstance().constructPName(hash, symbolStr, colonIx, quads, qlen);
+        ByteBasedPName symbol = ByteBasedPNameFactory.getInstance().constructPName(hash,
+                symbolStr, colonIx, quads, qlen);
         doAddSymbol(hash, symbol);
         return symbol;
     }
 
     /*
-    /////////////////////////////////////////////////////
-    // Helper methods
-    /////////////////////////////////////////////////////
+    /**********************************************************************
+    /* Helper methods
+    /**********************************************************************
      */
 
     public final static int calcHash(int firstQuad)
@@ -432,9 +432,9 @@ public final class ByteBasedPNameTable
     }
 
     /*
-    /////////////////////////////////////////////////////
-    // Standard methods
-    /////////////////////////////////////////////////////
+    /**********************************************************************
+    /* Standard methods
+    /**********************************************************************
      */
 
     @Override
@@ -476,6 +476,7 @@ public final class ByteBasedPNameTable
     }
 
     // Not really a std method... but commonly useful
+    /*
     public String toDebugString()
     {
         StringBuilder sb = new StringBuilder();
@@ -511,11 +512,12 @@ public final class ByteBasedPNameTable
         }
         return sb.toString();
     }
+    */
 
     /*
-    /////////////////////////////////////////////////////
-    // Internal methods
-    /////////////////////////////////////////////////////
+    /**********************************************************************
+    /* Internal methods
+    /**********************************************************************
      */
 
     private void doAddSymbol(int hash, ByteBasedPName symbol)
@@ -759,9 +761,9 @@ System.err.println("DEBUG: ]");
     }
 
     /*
-    /////////////////////////////////////////////////////
-    // Helper classes
-    /////////////////////////////////////////////////////
+    /**********************************************************************
+    /* Helper classes
+    /**********************************************************************
      */
 
     final static class Bucket
@@ -812,6 +814,7 @@ System.err.println("DEBUG: ]");
             return null;
         }
 
+        /*
         public String toDebugString()
         {
             StringBuilder sb = new StringBuilder();
@@ -826,5 +829,6 @@ System.err.println("DEBUG: ]");
             sb.append("NULL]");
             return sb.toString();
         }
+        */
     }
 }
