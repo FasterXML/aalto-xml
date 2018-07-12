@@ -87,3 +87,4 @@ Aalto dependency is usually added via Maven repository, so something like:
 ### Related
 
 * [Utility library based on Aalto](https://github.com/skjolber/async-stax-utils)
+* [Tool for obfuscating XML (uses Aalto for parsing)](https://github.com/adamretter/duplicitous)
