@@ -4,7 +4,7 @@ Project: aalto-xml
 = Releases
 ------------------------------------------------------------------------
 
-1.1.1 (not yet released)
+1.1.1 (19-Sep-2018)
 
 #59: Support Latin-1 (ISO-8859-1) via Async parser
  (requested by Adam R)
