@@ -24,7 +24,7 @@ public final class PName3
         mQuad3 = quads[2];
     }
 
-    PName3(String pname, String prefix, String ln, int hash, int q1, int q2, int q3)
+    public PName3(String pname, String prefix, String ln, int hash, int q1, int q2, int q3)
     {
         super(pname, prefix, ln, hash);
         mQuad1 = q1;

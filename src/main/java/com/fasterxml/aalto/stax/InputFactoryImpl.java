@@ -394,9 +394,7 @@ public final class InputFactoryImpl
      * is needed. This is usually done when a new reader is constructed.
      */
     public ReaderConfig getNonSharedConfig(String systemId, String publicId,
-                                           String extEncoding,
-                                           boolean forEventReader,
-                                           boolean forceAutoClose)
+            String extEncoding, boolean forEventReader, boolean forceAutoClose)
     {
         ReaderConfig cfg = _config.createNonShared(publicId, systemId, extEncoding);
         if (forEventReader) {
@@ -421,7 +419,7 @@ public final class InputFactoryImpl
     }
 
     protected XMLStreamReader2 constructSR(String systemId, Reader r,
-                                           boolean forEventReader)
+            boolean forEventReader)
         throws XMLStreamException
     {
         ReaderConfig cfg = getNonSharedConfig(null, systemId, null, forEventReader, false);
@@ -429,7 +427,7 @@ public final class InputFactoryImpl
     }
 
     protected XMLStreamReader2 constructSR(String systemId, InputStream in,
-                                        boolean forEventReader)
+            boolean forEventReader)
         throws XMLStreamException
     {
         ReaderConfig cfg = getNonSharedConfig(null, systemId, null, forEventReader, false);
@@ -437,7 +435,7 @@ public final class InputFactoryImpl
     }
 
     protected XMLStreamReader2 constructSR(javax.xml.transform.Source src,
-                                          boolean forEventReader)
+            boolean forEventReader)
         throws XMLStreamException
     {
         if (src instanceof Stax2Source) {

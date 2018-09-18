@@ -1,12 +1,8 @@
 package async;
 
-import static org.junit.Assert.assertEquals;
-
 import java.nio.charset.StandardCharsets;
 
 import javax.xml.stream.XMLStreamException;
-
-import org.junit.Test;
 
 import com.fasterxml.aalto.AsyncByteArrayFeeder;
 import com.fasterxml.aalto.AsyncXMLInputFactory;

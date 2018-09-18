@@ -80,10 +80,11 @@ Aalto dependency is usually added via Maven repository, so something like:
 <dependency>
     <groupId>com.fasterxml</groupId>
     <artifactId>aalto-xml</artifactId>
-    <version>1.0.0</version>
+    <version>1.1.0</version>
 </dependency>
 ```
 
 ### Related
 
 * [Utility library based on Aalto](https://github.com/skjolber/async-stax-utils)
+* [Tool for obfuscating XML (uses Aalto for parsing)](https://github.com/adamretter/duplicitous)

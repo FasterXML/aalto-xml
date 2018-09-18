@@ -18,28 +18,16 @@ public class TestXmlDeclaration extends AsyncTestBase
         for (final String XML : new String[] { "   <root />", "<root/>" }) {
             for (final int chunkSize : CHUNK_SIZES) {
                 //test for byte array
-                AsyncXMLStreamReader<AsyncByteArrayFeeder> sr_array = null;
-                try {
-                    sr_array = f.createAsyncForByteArray();
-                    final AsyncReaderWrapperForByteArray reader_array = new AsyncReaderWrapperForByteArray(sr_array, chunkSize, XML);
-                    _testNoDeclaration(sr_array, reader_array);
-                } finally {
-                    if(sr_array != null) {
-                        sr_array.close();
-                    }
-                }
+                AsyncXMLStreamReader<AsyncByteArrayFeeder> sr_array = f.createAsyncForByteArray();
+                final AsyncReaderWrapperForByteArray reader_array = new AsyncReaderWrapperForByteArray(sr_array, chunkSize, XML);
+                _testNoDeclaration(sr_array, reader_array);
+                sr_array.close();
 
                 //test for byte buffer
-                AsyncXMLStreamReader<AsyncByteBufferFeeder> sr_buffer = null;
-                try {
-                    sr_buffer = f.createAsyncForByteBuffer();
-                    final AsyncReaderWrapperForByteBuffer reader_buffer = new AsyncReaderWrapperForByteBuffer(sr_buffer, chunkSize, XML);
-                    _testNoDeclaration(sr_buffer, reader_buffer);
-                } finally {
-                    if(sr_buffer != null) {
-                        sr_buffer.close();
-                    }
-                }
+                AsyncXMLStreamReader<AsyncByteBufferFeeder> sr_buffer = f.createAsyncForByteBuffer();
+                final AsyncReaderWrapperForByteBuffer reader_buffer = new AsyncReaderWrapperForByteBuffer(sr_buffer, chunkSize, XML);
+                _testNoDeclaration(sr_buffer, reader_buffer);
+                sr_buffer.close();
             }
         }
     }
@@ -65,28 +53,16 @@ public class TestXmlDeclaration extends AsyncTestBase
 
         for (final int chunkSize : CHUNK_SIZES) {
             //test for byte array
-            AsyncXMLStreamReader<AsyncByteArrayFeeder> sr_array = null;
-            try {
-                sr_array = f.createAsyncForByteArray();
-                final AsyncReaderWrapperForByteArray reader_array = new AsyncReaderWrapperForByteArray(sr_array, chunkSize, XML);
-                _testVersionOnlyDeclaration(sr_array, reader_array);
-            } finally {
-                if(sr_array != null) {
-                    sr_array.close();
-                }
-            }
+            AsyncXMLStreamReader<AsyncByteArrayFeeder> sr_array = f.createAsyncForByteArray();
+            final AsyncReaderWrapperForByteArray reader_array = new AsyncReaderWrapperForByteArray(sr_array, chunkSize, XML);
+            _testVersionOnlyDeclaration(sr_array, reader_array);
+            sr_array.close();
 
             //test for byte buffer
-            AsyncXMLStreamReader<AsyncByteBufferFeeder> sr_buffer = null;
-            try {
-                sr_buffer = f.createAsyncForByteBuffer();
-                final AsyncReaderWrapperForByteBuffer reader_buffer = new AsyncReaderWrapperForByteBuffer(sr_buffer, chunkSize, XML);
-                _testVersionOnlyDeclaration(sr_buffer, reader_buffer);
-            } finally {
-                if(sr_buffer != null) {
-                    sr_buffer.close();
-                }
-            }
+            AsyncXMLStreamReader<AsyncByteBufferFeeder> sr_buffer = f.createAsyncForByteBuffer();
+            final AsyncReaderWrapperForByteBuffer reader_buffer = new AsyncReaderWrapperForByteBuffer(sr_buffer, chunkSize, XML);
+            _testVersionOnlyDeclaration(sr_buffer, reader_buffer);
+            sr_buffer.close();
         }
     }
 
@@ -110,28 +86,16 @@ public class TestXmlDeclaration extends AsyncTestBase
 
         for (final int chunkSize : CHUNK_SIZES) {
             //test for byte array
-            AsyncXMLStreamReader<AsyncByteArrayFeeder> sr_array = null;
-            try {
-                sr_array = f.createAsyncForByteArray();
-                final AsyncReaderWrapperForByteArray reader_array = new AsyncReaderWrapperForByteArray(sr_array, chunkSize, XML);
-                _testEncodingDeclaration(sr_array, reader_array);
-            } finally {
-                if(sr_array != null) {
-                    sr_array.close();
-                }
-            }
+            AsyncXMLStreamReader<AsyncByteArrayFeeder> sr_array = f.createAsyncForByteArray();
+            final AsyncReaderWrapperForByteArray reader_array = new AsyncReaderWrapperForByteArray(sr_array, chunkSize, XML);
+            _testEncodingDeclaration(sr_array, reader_array);
+            sr_array.close();
 
             //test for byte buffer
-            AsyncXMLStreamReader<AsyncByteBufferFeeder> sr_buffer = null;
-            try {
-                sr_buffer = f.createAsyncForByteBuffer();
-                final AsyncReaderWrapperForByteBuffer reader_buffer = new AsyncReaderWrapperForByteBuffer(sr_buffer, chunkSize, XML);
-                _testEncodingDeclaration(sr_buffer, reader_buffer);
-            } finally {
-                if(sr_buffer != null) {
-                    sr_buffer.close();
-                }
-            }
+            AsyncXMLStreamReader<AsyncByteBufferFeeder> sr_buffer = f.createAsyncForByteBuffer();
+            final AsyncReaderWrapperForByteBuffer reader_buffer = new AsyncReaderWrapperForByteBuffer(sr_buffer, chunkSize, XML);
+            _testEncodingDeclaration(sr_buffer, reader_buffer);
+            sr_buffer.close();
         }
     }
 
@@ -155,28 +119,16 @@ public class TestXmlDeclaration extends AsyncTestBase
 
         for (final int chunkSize : CHUNK_SIZES) {
             //test for byte array
-            AsyncXMLStreamReader<AsyncByteArrayFeeder> sr_array = null;
-            try {
-                sr_array = f.createAsyncForByteArray();
-                final AsyncReaderWrapperForByteArray reader_array = new AsyncReaderWrapperForByteArray(sr_array, chunkSize, XML);
-                _testStandAloneDeclaration(sr_array, reader_array);
-            } finally {
-                if(sr_array != null) {
-                    sr_array.close();
-                }
-            }
+            AsyncXMLStreamReader<AsyncByteArrayFeeder> sr_array = f.createAsyncForByteArray();
+            final AsyncReaderWrapperForByteArray reader_array = new AsyncReaderWrapperForByteArray(sr_array, chunkSize, XML);
+            _testStandAloneDeclaration(sr_array, reader_array);
+            sr_array.close();
 
             //test for byte buffer
-            AsyncXMLStreamReader<AsyncByteBufferFeeder> sr_buffer = null;
-            try {
-                sr_buffer = f.createAsyncForByteBuffer();
-                final AsyncReaderWrapperForByteBuffer reader_buffer = new AsyncReaderWrapperForByteBuffer(sr_buffer, chunkSize, XML);
-                _testStandAloneDeclaration(sr_buffer, reader_buffer);
-            } finally {
-                if(sr_buffer != null) {
-                    sr_buffer.close();
-                }
-            }
+            AsyncXMLStreamReader<AsyncByteBufferFeeder> sr_buffer = f.createAsyncForByteBuffer();
+            final AsyncReaderWrapperForByteBuffer reader_buffer = new AsyncReaderWrapperForByteBuffer(sr_buffer, chunkSize, XML);
+            _testStandAloneDeclaration(sr_buffer, reader_buffer);
+            sr_buffer.close();
         }
     }
 
@@ -201,28 +153,16 @@ public class TestXmlDeclaration extends AsyncTestBase
 
         for (final int chunkSize : CHUNK_SIZES) {
             //test for byte array
-            AsyncXMLStreamReader<AsyncByteArrayFeeder> sr_array = null;
-            try {
-                sr_array = f.createAsyncForByteArray();
-                final AsyncReaderWrapperForByteArray reader_array = new AsyncReaderWrapperForByteArray(sr_array, chunkSize, XML);
-                _testStandAloneDeclaration2(sr_array, reader_array);
-            } finally {
-                if(sr_array != null) {
-                    sr_array.close();
-                }
-            }
+            AsyncXMLStreamReader<AsyncByteArrayFeeder> sr_array = f.createAsyncForByteArray();
+            final AsyncReaderWrapperForByteArray reader_array = new AsyncReaderWrapperForByteArray(sr_array, chunkSize, XML);
+            _testStandAloneDeclaration2(sr_array, reader_array);
+            sr_array.close();
 
             //test for byte buffer
-            AsyncXMLStreamReader<AsyncByteBufferFeeder> sr_buffer = null;
-            try {
-                sr_buffer = f.createAsyncForByteBuffer();
-                final AsyncReaderWrapperForByteBuffer reader_buffer = new AsyncReaderWrapperForByteBuffer(sr_buffer, chunkSize, XML);
-                _testStandAloneDeclaration2(sr_buffer, reader_buffer);
-            } finally {
-                if(sr_buffer != null) {
-                    sr_buffer.close();
-                }
-            }
+            AsyncXMLStreamReader<AsyncByteBufferFeeder> sr_buffer = f.createAsyncForByteBuffer();
+            final AsyncReaderWrapperForByteBuffer reader_buffer = new AsyncReaderWrapperForByteBuffer(sr_buffer, chunkSize, XML);
+            _testStandAloneDeclaration2(sr_buffer, reader_buffer);
+            sr_buffer.close();
         }
     }
 

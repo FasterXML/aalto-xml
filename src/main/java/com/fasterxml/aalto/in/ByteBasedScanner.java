@@ -102,32 +102,6 @@ public abstract class ByteBasedScanner
 
     /*
     /**********************************************************************
-    /* Symbol and character handling
-    /**********************************************************************
-     */
-
-    /**
-     * This buffer is used for name parsing. Will be expanded if/as
-     * needed; 32 ints can hold names 128 ascii chars long.
-     */
-    protected int[] _quadBuffer = new int[32];
-
-    /**
-     * For now, symbol table contains prefixed names. In future it is
-     * possible that they may be split into prefixes and local names?
-     */
-    protected final ByteBasedPNameTable _symbols;
-
-    /**
-     * This is a simple container object that is used to access the
-     * decoding tables for characters. Indirection is needed since
-     * we actually support multiple utf-8 compatible encodings, not
-     * just utf-8 itself.
-     */
-    protected final XmlCharTypes _charTypes;
-
-    /*
-    /**********************************************************************
     /* Parsing state
     /**********************************************************************
      */
@@ -149,20 +123,11 @@ public abstract class ByteBasedScanner
     protected ByteBasedScanner(ReaderConfig cfg)
     {
         super(cfg);
-        _symbols = cfg.getBBSymbols();
-        _charTypes = cfg.getCharTypes();
         _pastBytesOrChars = 0; // should it be passed by caller?
         _rowStartOffset = 0; // should probably be passed by caller...
     }
 
-    @Override
-    protected void _releaseBuffers()
-    {
-        super._releaseBuffers();
-        if (_symbols.maybeDirty()) {
-            _config.updateBBSymbols(_symbols);
-        }
-    }
+//    @Override protected abstract void _releaseBuffers();
 
     @Override
     protected abstract void _closeSource() throws IOException;
@@ -242,12 +207,6 @@ public abstract class ByteBasedScanner
     protected abstract int decodeCharForError(byte b)
         throws XMLStreamException;
 
-    protected final PName addPName(int hash, int[] quads, int qlen, int lastQuadBytes)
-        throws XMLStreamException
-    {
-        return addUtfPName(_charTypes, hash, quads, qlen, lastQuadBytes);
-    }
-
     /*
     /**********************************************************************
     /* And then shared functionality for sub-classes
@@ -259,17 +218,17 @@ public abstract class ByteBasedScanner
      * currently it is quite hard to refactor it, so it'll have to
      * stay here until better place is found
      */
-    protected final PName addUtfPName(XmlCharTypes charTypes, int hash, int[] quads, int qlen, int lastQuadBytes)
+    protected final PName addUTFPName(ByteBasedPNameTable symbols, XmlCharTypes charTypes,
+            int hash, int[] quads, int qlen, int lastQuadBytes)
         throws XMLStreamException
     {
         // 4 bytes per quad, except last one maybe less
         int byteLen = (qlen << 2) - 4 + lastQuadBytes;
 
-        /* And last one is not correctly aligned (leading zero bytes instead
-         * need to shift a bit, instead of trailing). Only need to shift it
-         * for UTF-8 decoding; need revert for storage (since key will not
-         * be aligned, to optimize lookup speed)
-         */
+        // And last one is not correctly aligned (leading zero bytes instead
+        // need to shift a bit, instead of trailing). Only need to shift it
+        // for UTF-8 decoding; need revert for storage (since key will not
+        // be aligned, to optimize lookup speed)
         int lastQuad;
 
         if (lastQuadBytes < 4) {
@@ -474,7 +433,7 @@ public abstract class ByteBasedScanner
         if (lastQuadBytes < 4) {
             quads[qlen-1] = lastQuad;
         }
-        return _symbols.addSymbol(hash, baseName, last_colon, quads, qlen);
+        return symbols.addSymbol(hash, baseName, last_colon, quads, qlen);
     }
 
     /*

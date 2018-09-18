@@ -93,7 +93,7 @@ public class TestCharactersParsing extends AsyncTestBase
     /* Secondary test methods
     /**********************************************************************
      */
-    
+
     private void _testLinefeeds(final int chunkSize, final boolean checkValues, final String SPC) throws Exception
     {
         final String XML = SPC + "<root>\rFirst\r\nSecond\nThird: " + UNICODE_SEGMENT + "</root>";
@@ -101,31 +101,20 @@ public class TestCharactersParsing extends AsyncTestBase
         final AsyncXMLInputFactory f = new InputFactoryImpl();
 
         //test for byte array
-        AsyncXMLStreamReader<AsyncByteArrayFeeder> sr_array = null;
-        try {
-            sr_array = f.createAsyncForByteArray();
-            final AsyncReaderWrapperForByteArray reader_array = new AsyncReaderWrapperForByteArray(sr_array, chunkSize, XML);
-            _testLinefeeds(sr_array, reader_array, checkValues);
-        } finally {
-            if(sr_array != null) {
-                sr_array.close();
-            }
-        }
+        AsyncXMLStreamReader<AsyncByteArrayFeeder> sr_array = f.createAsyncForByteArray();
+        final AsyncReaderWrapperForByteArray reader_array = new AsyncReaderWrapperForByteArray(sr_array, chunkSize, XML);
+        _testLinefeeds(sr_array, reader_array, checkValues);
+        sr_array.close();
 
         //test for byte buffer
-        AsyncXMLStreamReader<AsyncByteBufferFeeder> sr_buffer = null;
-        try {
-            sr_buffer = f.createAsyncForByteBuffer();
-            final AsyncReaderWrapperForByteBuffer reader_buffer = new AsyncReaderWrapperForByteBuffer(sr_buffer, chunkSize, XML);
-            _testLinefeeds(sr_buffer, reader_buffer, checkValues);
-        } finally {
-            if(sr_buffer != null) {
-                sr_buffer.close();
-            }
-        }
+        AsyncXMLStreamReader<AsyncByteBufferFeeder> sr_buffer = f.createAsyncForByteBuffer();
+        final AsyncReaderWrapperForByteBuffer reader_buffer = new AsyncReaderWrapperForByteBuffer(sr_buffer, chunkSize, XML);
+        _testLinefeeds(sr_buffer, reader_buffer, checkValues);
+        sr_buffer.close();
     }
 
-    private void _testLinefeeds(final AsyncXMLStreamReader<?> sr, final AsyncReaderWrapper reader, final boolean checkValues) throws Exception
+    private void _testLinefeeds(final AsyncXMLStreamReader<?> sr, final AsyncReaderWrapper reader,
+            final boolean checkValues) throws Exception
     {
         assertTokenType(START_ELEMENT, verifyStart(reader));
         if (checkValues) {

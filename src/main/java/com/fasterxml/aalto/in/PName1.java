@@ -24,12 +24,11 @@ package com.fasterxml.aalto.in;
  * and to a lesser degree performance. Both are achieved for short
  * Strings by avoiding another level of indirection (via quad arrays)
  */
-public final class PName1
-    extends ByteBasedPName
+public final class PName1 extends ByteBasedPName
 {
     final int mQuad;
 
-    PName1(String pname, String prefix, String ln, int hash, 
+    public PName1(String pname, String prefix, String ln, int hash, 
            int quad)
     {
         super(pname, prefix, ln, hash);

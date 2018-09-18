@@ -30,7 +30,7 @@ public final class PName2
     final int mQuad1;
     final int mQuad2;
 
-    PName2(String pname, String prefix, String ln, int hash,
+    public PName2(String pname, String prefix, String ln, int hash,
            int quad1, int quad2)
     {
         super(pname, prefix, ln, hash);

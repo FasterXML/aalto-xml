@@ -166,9 +166,9 @@ public final class ReaderConfig
      */
 
     private ReaderConfig(String publicId, String systemId, String extEnc,
-                         EncodingContext encCtxt, int flags, int flagMods,
-                         XMLReporter rep, XMLResolver res,
-                         UriCanonicalizer canonicalizer)
+            EncodingContext encCtxt, int flags, int flagMods,
+            XMLReporter rep, XMLResolver res,
+            UriCanonicalizer canonicalizer)
     {
         super(flags, flagMods);
         mPublicId = publicId;
@@ -240,7 +240,11 @@ public final class ReaderConfig
         }
     }
     
-    // // // Explicit property setters
+    /*
+    /**********************************************************************
+    /* Additional configuration setters
+    /**********************************************************************
+     */
 
     // // Stax:
 
@@ -285,8 +289,8 @@ public final class ReaderConfig
     public ReaderConfig createNonShared(String publicId, String systemId, String extEnc)
     {
         return new ReaderConfig(publicId, systemId, extEnc, mEncCtxt,
-                                _flags, _flagMods,
-                                mReporter, mResolver, mCanonicalizer);
+                _flags, _flagMods,
+                mReporter, mResolver, mCanonicalizer);
     }
 
     @Override
@@ -694,7 +698,7 @@ public final class ReaderConfig
 
     public void updateCBSymbols(CharBasedPNameTable sym)
     {
-            mEncCtxt.updateSymbols(sym);
+        mEncCtxt.updateSymbols(sym);
     }
 
     public XmlCharTypes getCharTypes()
@@ -710,7 +714,7 @@ public final class ReaderConfig
         }
         throw new Error("Internal error, unknown encoding '"+mActualEncoding+"'");
     }
-    
+
     /*
     /**********************************************************************
     /* Helper classes

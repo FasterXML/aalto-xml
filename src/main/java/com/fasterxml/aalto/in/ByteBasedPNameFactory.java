@@ -31,9 +31,9 @@ public final class ByteBasedPNameFactory
     //private final static boolean DO_INTERN = false;
 
     /*
-    //////////////////////////////////////////////////////////
-    // Life-cycle
-    //////////////////////////////////////////////////////////
+    /**********************************************************************
+    /* Life-cycle
+    /**********************************************************************
      */
 
     private final static ByteBasedPNameFactory sInstance = new ByteBasedPNameFactory();
@@ -43,9 +43,9 @@ public final class ByteBasedPNameFactory
     public static ByteBasedPNameFactory getInstance() { return sInstance; }
 
     /*
-    //////////////////////////////////////////////////////////
-    // Public API
-    //////////////////////////////////////////////////////////
+    /**********************************************************************
+    /* Public API
+    /**********************************************************************
      */
 
     public ByteBasedPName constructPName(int hash, String pname, int colonIx,

@@ -1526,12 +1526,11 @@ public abstract class XmlScanner
 
     protected char handleInvalidXmlChar(int i) throws XMLStreamException
     {
+        final IllegalCharHandler iHandler = _config.getIllegalCharHandler();
     	
-    	final IllegalCharHandler iHandler = _config.getIllegalCharHandler();
-    	
-    	if (iHandler != null) {
-    		return iHandler.convertIllegalChar(i);
-    	}
+        if (iHandler != null) {
+    		    return iHandler.convertIllegalChar(i);
+        }
     	
         char c = (char) i;
         if (c == CHAR_NULL) {

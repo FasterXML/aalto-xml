@@ -71,6 +71,27 @@ public class AsyncByteArrayScanner
 
     /*
     /**********************************************************************
+    /* Implementation for low-level accessors
+    /**********************************************************************
+     */
+    
+    @Override
+    protected final byte _currentByte() throws XMLStreamException {
+        return _inputBuffer[_inputPtr];
+    }
+
+    @Override
+    protected final byte _nextByte() throws XMLStreamException {
+        return _inputBuffer[_inputPtr++];
+    }
+
+    @Override
+    protected final byte _prevByte() throws XMLStreamException {
+        return _inputBuffer[_inputPtr-1];
+    }
+
+    /*
+    /**********************************************************************
     /* Parsing, comments
     /**********************************************************************
      */
@@ -430,7 +451,8 @@ public class AsyncByteArrayScanner
     /* Parsing, internal DTD subset
     /**********************************************************************
      */
-    
+
+    @Override
     protected final boolean handleDTDInternalSubset(boolean init) throws XMLStreamException
     {
         char[] outputBuffer;
@@ -952,146 +974,6 @@ public class AsyncByteArrayScanner
      */
 
     @Override
-    public final int nextFromProlog(boolean isProlog) throws XMLStreamException
-    {
-        // Had fully complete event? Need to reset state etc:
-        if (_currToken != EVENT_INCOMPLETE) {
-            // First: keep track of where event started
-            setStartLocation();
-            
-            // yet one more special case: after START_DOCUMENT need to check things...
-            if (_currToken == START_DOCUMENT) {
-                _currToken = EVENT_INCOMPLETE;
-                if (_tokenName != null) {
-                    _nextEvent = PROCESSING_INSTRUCTION;
-                    _state = STATE_PI_AFTER_TARGET;
-                    checkPITargetName(_tokenName);
-                    return handlePI();
-                }
-            } else {
-                _currToken = _nextEvent = EVENT_INCOMPLETE;
-                _state = STATE_DEFAULT;
-            }
-        }
-        // Ok, do we know which event it will be?
-        if (_nextEvent == EVENT_INCOMPLETE) { // nope
-            // The very first thing: XML declaration handling
-            if (_state == STATE_PROLOG_INITIAL) {
-                if (_inputPtr >= _inputEnd) {
-                    return _currToken;
-                }
-                // Ok: see if we have what looks like XML declaration; process:
-                if (_pendingInput != 0) { // already parsing (potential) XML declaration
-                    Boolean b = startXmlDeclaration(); // is or may be XML declaration, so:
-                    if (b == null) { // not yet known; bail out
-                        return EVENT_INCOMPLETE;
-                    }
-                    // no real XML declaration; syntesize one:
-                    if (b == Boolean.FALSE) {
-                        _currToken = START_DOCUMENT;
-                        return START_DOCUMENT;
-                    }
-                    return handleXmlDeclaration();
-                }
-                if (_inputBuffer[_inputPtr] == BYTE_LT) { // first byte, see if it could be XML declaration
-                    ++_inputPtr;
-                    _pendingInput = PENDING_STATE_XMLDECL_LT;
-                    Boolean b = startXmlDeclaration(); // is or may be XML declaration, so:
-                    if (b == null) {
-                        return EVENT_INCOMPLETE;
-                    }
-                    if (b == Boolean.FALSE) {
-                        _currToken = START_DOCUMENT;
-                        return START_DOCUMENT;
-                    }
-                    return handleXmlDeclaration();
-                }
-                // can't be XML declaration
-                _state = STATE_DEFAULT;
-                _currToken = START_DOCUMENT;
-                return START_DOCUMENT;
-            }
-
-            // First: did we have a lone CR at the end of the buffer?
-            if (_pendingInput != 0) { // yup
-                if (!handlePartialCR()) {
-                    return _currToken;
-                }
-            }
-            while (_state == STATE_DEFAULT) {
-                if (_inputPtr >= _inputEnd) { // no more input available
-                    if (_endOfInput) { // for good? That may be fine
-                        setStartLocation();
-                        return TOKEN_EOI;
-                    }
-                    return _currToken;
-                }
-                byte b = _inputBuffer[_inputPtr++];
-
-                /* Really should get white space or '<'... anything else is
-                 * pretty much an error.
-                 */
-                if (b == BYTE_LT) { // root element, comment, proc instr?
-                    _state = STATE_PROLOG_SEEN_LT;
-                    break;
-                }
-                if (b == BYTE_SPACE || b == BYTE_CR
-                    || b == BYTE_LF || b == BYTE_TAB) {
-                    // Prolog/epilog ws is to be skipped, not part of Infoset
-                    if (!asyncSkipSpace()) { // ran out of input?
-                        if (_endOfInput) { // for good? That may be fine
-                            setStartLocation();
-                            return TOKEN_EOI;
-                        }
-                        return _currToken;
-                    }
-                } else {
-                    reportPrologUnexpChar(isProlog, decodeCharForError(b), null);
-                }
-            }
-            if (_state == STATE_PROLOG_SEEN_LT) {
-                if (_inputPtr >= _inputEnd) {
-                    return _currToken;
-                }
-                byte b = _inputBuffer[_inputPtr++];
-                if (b == BYTE_EXCL) { // comment or DOCTYPE declaration?
-                    _state = STATE_PROLOG_DECL;
-                    return handlePrologDeclStart(isProlog);
-                }
-                if (b == BYTE_QMARK) { // PI
-                    _nextEvent = PROCESSING_INSTRUCTION;
-                    _state = STATE_DEFAULT;
-                    return handlePI();
-                }
-                if (!isProlog || (b == BYTE_SLASH)) {
-                    reportPrologUnexpElement(isProlog, b);
-                }
-                return handleStartElementStart(b);
-            }
-            if (_state == STATE_PROLOG_DECL) {
-                return handlePrologDeclStart(isProlog);
-            }
-            // should never have anything else...
-            return throwInternal();
-        }
-        
-        // At this point, we do know the event type
-        switch (_nextEvent) {
-        case START_ELEMENT:
-            return handleStartElement();
-        case START_DOCUMENT:
-            return handleXmlDeclaration();
-        case PROCESSING_INSTRUCTION:
-            return handlePI();
-        case COMMENT:
-            return handleComment();
-        case DTD:
-            return handleDTD();
-        }
-        return throwInternal(); // should never get here
-    }
-
-    @Override
     public int nextFromTree() throws XMLStreamException
     {
         // Had a fully complete event? Need to reset state:
@@ -1234,752 +1116,6 @@ public class AsyncByteArrayScanner
 
     /*
     /**********************************************************************
-    /* Second-level parsing, prolog (XML declaration, DOCTYPE)
-    /**********************************************************************
-     */
-
-    private final int handlePrologDeclStart(boolean isProlog) throws XMLStreamException
-    {
-        if (_inputPtr >= _inputEnd) { // nothing we can do?
-            return EVENT_INCOMPLETE;
-        }
-        byte b = _inputBuffer[_inputPtr++];
-        // So far, we have seen "<!", need to know if it's DTD or COMMENT 
-        if (b == BYTE_HYPHEN) {
-            _nextEvent = COMMENT;
-            _state = STATE_DEFAULT;
-            return handleComment();
-        }
-        if (b == BYTE_D) {
-            _nextEvent = DTD;
-            _state = STATE_DEFAULT;
-            return handleDTD();
-        }
-        reportPrologUnexpChar(isProlog, decodeCharForError(b), " (expected '-' for COMMENT)");
-        return EVENT_INCOMPLETE; // never gets here
-    }
-    
-    /**
-     * Method that deals with recognizing XML declaration, but not with parsing
-     * its contents.
-     * 
-     * @return null if parsing is inconclusive (may or may not be XML declaration);
-     *   Boolean.TRUE if complete XML declaration, and Boolean.FALSE if something
-     *   else
-     */
-    private final Boolean startXmlDeclaration() throws XMLStreamException
-    {
-       if (_inputPtr >= _inputEnd) {
-           return null;
-       }
-       if (_pendingInput == PENDING_STATE_XMLDECL_LT) { // "<" at start of doc
-            if (_inputBuffer[_inputPtr] != BYTE_QMARK) { // some other 
-                _pendingInput = 0;
-                _state = STATE_PROLOG_SEEN_LT;
-                return Boolean.FALSE;
-            }
-            ++_inputPtr;
-            _pendingInput = PENDING_STATE_XMLDECL_LTQ;
-            if (_inputPtr >= _inputEnd) {
-                return null;
-            }
-       }
-       if (_pendingInput == PENDING_STATE_XMLDECL_LTQ) { // "<?" at start of doc
-            byte b = _inputBuffer[_inputPtr++];
-            _tokenName = parseNewName(b);
-            if (_tokenName == null) { // incomplete
-                _pendingInput = PENDING_STATE_XMLDECL_TARGET;
-                return null;
-            }
-            // xml or not?
-            if (!"xml".equals(_tokenName.getPrefixedName())) { // nope: some other PI
-                _pendingInput = 0;
-                _state = STATE_PI_AFTER_TARGET;
-                _nextEvent = PROCESSING_INSTRUCTION;
-                checkPITargetName(_tokenName);
-                return Boolean.FALSE;
-            }
-       } else if (_pendingInput == PENDING_STATE_XMLDECL_TARGET) { // "<?" at start of doc, part of name
-            if ((_tokenName = parsePName()) == null) { // incomplete
-                return null;
-            }
-            if (!"xml".equals(_tokenName.getPrefixedName())) {
-                _pendingInput = 0;
-                _state = STATE_PI_AFTER_TARGET;
-                _nextEvent = PROCESSING_INSTRUCTION;
-                checkPITargetName(_tokenName);
-                return Boolean.FALSE;
-            }
-        } else {
-           throwInternal();
-        }
-        _pendingInput = 0;
-        _nextEvent = START_DOCUMENT;
-        _state = STATE_XMLDECL_AFTER_XML;
-        return Boolean.TRUE;
-    }
-
-    /**
-     * Method called to complete parsing of XML declaration, once it has
-     * been reliably detected.
-     * 
-     * @return Completed token (START_DOCUMENT), if fully parsed; incomplete (EVENT_INCOMPLETE)
-     *   otherwise
-     */
-    private int handleXmlDeclaration() throws XMLStreamException
-    {
-        // First: left-over CRs?
-        if (_pendingInput == PENDING_STATE_CR) {
-            if (!handlePartialCR()) {
-                return EVENT_INCOMPLETE;
-            }
-        }
-
-        main_loop:
-        while (_inputPtr < _inputEnd) {
-            switch (_state) {
-            case STATE_XMLDECL_AFTER_XML: // "<?xml", need space
-                {
-                    byte b = _inputBuffer[_inputPtr++];
-                    if (b == BYTE_SPACE || b == BYTE_CR || b == BYTE_LF || b == BYTE_TAB) {
-                        _state = STATE_XMLDECL_BEFORE_VERSION;
-                    } else {
-                        reportPrologUnexpChar(true, decodeCharForError(b), " (expected space after 'xml' in xml declaration)");
-                    }
-                }
-                if (_inputPtr >= _inputEnd) {
-                    break;
-                }
-                // fall through
-            case STATE_XMLDECL_BEFORE_VERSION:
-                if (!asyncSkipSpace()) { // not enough input
-                    break;
-                }
-                if ((_tokenName = parseNewName(_inputBuffer[_inputPtr++])) == null) { // incomplete
-                    _state = STATE_XMLDECL_VERSION;
-                    break;
-                }
-                if (!_tokenName.hasPrefixedName("version")) {
-                    reportInputProblem("Unexpected keyword '"+_tokenName.getPrefixedName()+"' in XML declaration: expected 'version'");
-                }
-                _state = STATE_XMLDECL_AFTER_VERSION;
-                continue main_loop;
-            case STATE_XMLDECL_VERSION: // "<?xml ", part of "version"
-                if ((_tokenName = parsePName()) == null) { // incomplete
-                    break;
-                }
-                if (!_tokenName.hasPrefixedName("version")) {
-                    reportInputProblem("Unexpected keyword '"+_tokenName.getPrefixedName()+"' in XML declaration: expected 'version'");
-                }
-                _state = STATE_XMLDECL_AFTER_VERSION;
-                if (_inputPtr >= _inputEnd) {
-                    break;
-                }
-                // fall through
-            case STATE_XMLDECL_AFTER_VERSION: // "<?xml version", need space or '='
-                if (!asyncSkipSpace()) { // not enough input
-                    break;
-                }
-                {
-                    byte b = _inputBuffer[_inputPtr++];
-                    if (b != BYTE_EQ) {
-                        reportPrologUnexpChar(true, decodeCharForError(b), " (expected '=' after 'version' in xml declaration)");
-                    }
-                }
-                _state = STATE_XMLDECL_VERSION_EQ;
-                if (_inputPtr >= _inputEnd) {
-                    break;
-                }
-                // fall through
-            case STATE_XMLDECL_VERSION_EQ: // "<?xml version=", need space or quote
-                if (!asyncSkipSpace()) { // skip space, if any
-                    break;
-                }
-                _elemAttrQuote = _inputBuffer[_inputPtr++];
-                if (_elemAttrQuote != BYTE_QUOT && _elemAttrQuote != BYTE_APOS) {
-                    reportPrologUnexpChar(true, decodeCharForError(_elemAttrQuote), " (expected '\"' or ''' in xml declaration for version value)");
-                }
-                {
-                    char[] buf = _textBuilder.resetWithEmpty();
-                    if (_inputPtr >= _inputEnd || !parseXmlDeclAttr(buf, 0)) {
-                        _state = STATE_XMLDECL_VERSION_VALUE;
-                        break;
-                    }
-                }
-                verifyAndSetXmlVersion();
-                _state = STATE_XMLDECL_AFTER_VERSION_VALUE;
-                continue main_loop;
-    
-            case STATE_XMLDECL_VERSION_VALUE: // parsing version value
-                if (!parseXmlDeclAttr(_textBuilder.getBufferWithoutReset(), _textBuilder.getCurrentLength())) {
-                    _state = STATE_XMLDECL_VERSION_VALUE;
-                    break;
-                }
-                verifyAndSetXmlVersion();
-                _state = STATE_XMLDECL_AFTER_VERSION_VALUE;
-                if (_inputPtr >= _inputEnd) {
-                    break;
-                }
-                // fall through
-                
-            case STATE_XMLDECL_AFTER_VERSION_VALUE: // version got; need space or '?'
-                {
-                    byte b = _inputBuffer[_inputPtr++];
-                    if (b == BYTE_QMARK) {
-                        _state = STATE_XMLDECL_ENDQ;
-                        continue main_loop;
-                    }
-                    if (b == BYTE_SPACE || b == BYTE_CR || b == BYTE_LF || b == BYTE_TAB) {
-                        _state = STATE_XMLDECL_BEFORE_ENCODING;
-                    } else {
-                        reportPrologUnexpChar(true, decodeCharForError(b), " (expected space after version value in xml declaration)");
-                    }
-                }
-                if (_inputPtr >= _inputEnd) {
-                    break;
-                }
-                // fall through
-                
-            case STATE_XMLDECL_BEFORE_ENCODING: // version, value, space got, need '?' or 'e'
-                if (!asyncSkipSpace()) { // not enough input
-                    break;
-                }
-                {
-                    byte b = _inputBuffer[_inputPtr++];
-                    if (b == BYTE_QMARK) {
-                        _state = STATE_XMLDECL_ENDQ;
-                        continue main_loop;
-                    }
-                    if ((_tokenName = parseNewName(b)) == null) { // incomplete
-                        _state = STATE_XMLDECL_ENCODING;
-                        break;
-                    }
-                    // Can actually also get "standalone" instead...
-                    if (_tokenName.hasPrefixedName("encoding")) {
-                        _state = STATE_XMLDECL_AFTER_ENCODING;
-                    } else if (_tokenName.hasPrefixedName("standalone")) {
-                        _state = STATE_XMLDECL_AFTER_STANDALONE;
-                        continue main_loop;
-                    } else {
-                        reportInputProblem("Unexpected keyword '"+_tokenName.getPrefixedName()+"' in XML declaration: expected 'encoding'");
-                    }
-                }
-                continue main_loop;
-    
-            case STATE_XMLDECL_ENCODING: // parsing "encoding"
-                if ((_tokenName = parsePName()) == null) { // incomplete
-                    break;
-                }
-                // Can actually also get "standalone" instead...
-                if (_tokenName.hasPrefixedName("encoding")) {
-                    _state = STATE_XMLDECL_AFTER_ENCODING;
-                } else if (_tokenName.hasPrefixedName("standalone")) {
-                    _state = STATE_XMLDECL_AFTER_STANDALONE;
-                    continue main_loop;
-                } else {
-                    reportInputProblem("Unexpected keyword '"+_tokenName.getPrefixedName()+"' in XML declaration: expected 'encoding'");
-                }
-                if (_inputPtr >= _inputEnd) {
-                    break;
-                }
-                // fall through
-            case STATE_XMLDECL_AFTER_ENCODING: // got "encoding"; must get ' ' or '='
-                if (!asyncSkipSpace()) { // not enough input
-                    break;
-                }
-                {
-                    byte b = _inputBuffer[_inputPtr++];
-                    if (b != BYTE_EQ) {
-                        reportPrologUnexpChar(true, decodeCharForError(b), " (expected '=' after 'encoding' in xml declaration)");
-                    }
-                }
-                _state = STATE_XMLDECL_ENCODING_EQ;
-                if (_inputPtr >= _inputEnd) {
-                    break;
-                }
-                // fall through
-            case STATE_XMLDECL_ENCODING_EQ: // "encoding="
-                if (!asyncSkipSpace()) { // skip space, if any
-                    break;
-                }
-                _elemAttrQuote = _inputBuffer[_inputPtr++];
-                if (_elemAttrQuote != BYTE_QUOT && _elemAttrQuote != BYTE_APOS) {
-                    reportPrologUnexpChar(true, decodeCharForError(_elemAttrQuote), " (expected '\"' or ''' in xml declaration for encoding value)");
-                }
-                _state = STATE_XMLDECL_ENCODING_VALUE;
-                {
-                    char[] buf = _textBuilder.resetWithEmpty();
-                    if (_inputPtr >= _inputEnd || !parseXmlDeclAttr(buf, 0)) {
-                        _state = STATE_XMLDECL_ENCODING_VALUE;
-                        break;
-                    }
-                }
-                verifyAndSetXmlEncoding();
-                _state = STATE_XMLDECL_AFTER_ENCODING_VALUE;
-                break;
-    
-            case STATE_XMLDECL_ENCODING_VALUE: // parsing encoding value
-                if (!parseXmlDeclAttr(_textBuilder.getBufferWithoutReset(), _textBuilder.getCurrentLength())) {
-                    _state = STATE_XMLDECL_ENCODING_VALUE;
-                    break;
-                }
-                verifyAndSetXmlEncoding();
-                _state = STATE_XMLDECL_AFTER_ENCODING_VALUE;
-                if (_inputPtr >= _inputEnd) {
-                    break;
-                }
-                // fall through
-                
-            case STATE_XMLDECL_AFTER_ENCODING_VALUE: // encoding+value gotten; need space or '?'
-                {
-                    byte b = _inputBuffer[_inputPtr++];
-                    if (b == BYTE_QMARK) {
-                        _state = STATE_XMLDECL_ENDQ;
-                        continue main_loop;
-                    }
-                    if (b == BYTE_SPACE || b == BYTE_CR || b == BYTE_LF || b == BYTE_TAB) {
-                        _state = STATE_XMLDECL_BEFORE_STANDALONE;
-                    } else {
-                        reportPrologUnexpChar(true, decodeCharForError(b), " (expected space after encoding value in xml declaration)");
-                    }
-                }
-                if (_inputPtr >= _inputEnd) {
-                    break;
-                }
-                // fall through
-            
-            case STATE_XMLDECL_BEFORE_STANDALONE: // after encoding+value+space; get '?' or 's'
-                if (!asyncSkipSpace()) { // not enough input
-                    break;
-                }
-                {
-                    byte b = _inputBuffer[_inputPtr++];
-                    if (b == BYTE_QMARK) {
-                        _state = STATE_XMLDECL_ENDQ;
-                        continue main_loop;
-                    }
-                    if ((_tokenName = parseNewName(b)) == null) { // incomplete
-                        _state = STATE_XMLDECL_STANDALONE;
-                        break;
-                    }
-                    if (!_tokenName.hasPrefixedName("standalone")) {
-                        reportInputProblem("Unexpected keyword '"+_tokenName.getPrefixedName()+"' in XML declaration: expected 'standalone'");
-                    }
-                }
-                _state = STATE_XMLDECL_AFTER_STANDALONE;
-                continue main_loop;
-    
-            case STATE_XMLDECL_STANDALONE: // parsing "standalone"
-                if ((_tokenName = parsePName()) == null) { // incomplete
-                    break;
-                }
-                if (!_tokenName.hasPrefixedName("standalone")) {
-                    reportInputProblem("Unexpected keyword 'encoding' in XML declaration: expected 'standalone'");
-                }
-                _state = STATE_XMLDECL_AFTER_STANDALONE;
-                if (_inputPtr >= _inputEnd) {
-                    break;
-                }
-                // fall through
-            case STATE_XMLDECL_AFTER_STANDALONE: // got "standalone"; must get ' ' or '='
-                if (!asyncSkipSpace()) { // not enough input
-                    break;
-                }
-                {
-                    byte b = _inputBuffer[_inputPtr++];
-                    if (b != BYTE_EQ) {
-                        reportPrologUnexpChar(true, decodeCharForError(b), " (expected '=' after 'standalone' in xml declaration)");
-                    }
-                }
-                _state = STATE_XMLDECL_STANDALONE_EQ;
-                if (_inputPtr >= _inputEnd) {
-                    break;
-                }
-                // fall through
-            case STATE_XMLDECL_STANDALONE_EQ: // "standalone="
-                if (!asyncSkipSpace()) { // skip space, if any
-                    break;
-                }
-                _elemAttrQuote = _inputBuffer[_inputPtr++];
-                if (_elemAttrQuote != BYTE_QUOT && _elemAttrQuote != BYTE_APOS) {
-                    reportPrologUnexpChar(true, decodeCharForError(_elemAttrQuote), " (expected '\"' or ''' in xml declaration for standalone value)");
-                }
-                {
-                    char[] buf = _textBuilder.resetWithEmpty();
-                    if (_inputPtr >= _inputEnd || !parseXmlDeclAttr(buf, 0)) {
-                        _state = STATE_XMLDECL_STANDALONE_VALUE;
-                        break;
-                    }
-                }
-                verifyAndSetXmlStandalone();
-                _state = STATE_XMLDECL_AFTER_STANDALONE_VALUE;
-                continue main_loop;
-    
-            case STATE_XMLDECL_STANDALONE_VALUE: // encoding+value gotten; need space or '?'
-    
-                if (!parseXmlDeclAttr(_textBuilder.getBufferWithoutReset(), _textBuilder.getCurrentLength())) {
-                    _state = STATE_XMLDECL_STANDALONE_VALUE;
-                    break;
-                }
-                verifyAndSetXmlStandalone();
-                _state = STATE_XMLDECL_AFTER_STANDALONE_VALUE;
-                if (_inputPtr >= _inputEnd) {
-                    break;
-                }
-                // fall through
-            case STATE_XMLDECL_AFTER_STANDALONE_VALUE: // encoding+value gotten; need space or '?'
-                if (!asyncSkipSpace()) { // skip space, if any
-                    break;
-                }
-                if (_inputBuffer[_inputPtr++] != BYTE_QMARK) {
-                    reportPrologUnexpChar(true, decodeCharForError(_inputBuffer[_inputPtr-1]), " (expected '?>' to end xml declaration)");
-                }
-                _state = STATE_XMLDECL_ENDQ;
-                if (_inputPtr >= _inputEnd) {
-                    break;
-                }
-                // fall through
-    
-            case STATE_XMLDECL_ENDQ:
-                // Better clear up decoded name, to avoid later problems (would be taken as PI)
-                _tokenName = null;
-                _state = STATE_DEFAULT;
-                _nextEvent = EVENT_INCOMPLETE;
-                if (_inputBuffer[_inputPtr++] != BYTE_GT) {
-                    reportPrologUnexpChar(true, decodeCharForError(_inputBuffer[_inputPtr-1]), " (expected '>' to end xml declaration)");
-                }
-                return START_DOCUMENT;
-    
-            default:
-                throwInternal();
-            }
-        }
-
-        return EVENT_INCOMPLETE;
-    }
-    
-    private int handleDTD() throws XMLStreamException
-    {
-        // First: left-over CRs?
-        if (_pendingInput == PENDING_STATE_CR) {
-            if (!handlePartialCR()) {
-                return EVENT_INCOMPLETE;
-            }
-        }
-        if (_state == STATE_DTD_INT_SUBSET) {
-            if (handleDTDInternalSubset(false)) { // got it!
-                _state = STATE_DTD_EXPECT_CLOSING_GT;
-            } else {
-                return EVENT_INCOMPLETE;
-            }
-        }
-        
-        main_loop:
-        while (_inputPtr < _inputEnd) {
-            switch (_state) {
-            case STATE_DEFAULT: // seen 'D'
-                _tokenName = parseNewName(BYTE_D);
-                if (_tokenName == null) {
-                    _state = STATE_DTD_DOCTYPE;
-                    return EVENT_INCOMPLETE;
-                }
-                if (!"DOCTYPE".equals(_tokenName.getPrefixedName())) {
-                    reportPrologProblem(true, "expected 'DOCTYPE'");
-                }
-                _state = STATE_DTD_AFTER_DOCTYPE;
-                continue main_loop;
-            case STATE_DTD_DOCTYPE:
-                _tokenName = parsePName();
-                if (_tokenName == null) {
-                    _state = STATE_DTD_DOCTYPE;
-                    return EVENT_INCOMPLETE;
-                }
-                if (!"DOCTYPE".equals(_tokenName.getPrefixedName())) {
-                    reportPrologProblem(true, "expected 'DOCTYPE'");
-                }
-                if (_inputPtr >= _inputEnd) {
-                    break;
-                }
-                // fall through
-            case STATE_DTD_AFTER_DOCTYPE:
-                {
-                    byte b = _inputBuffer[_inputPtr++];
-                    if (b == BYTE_SPACE || b == BYTE_CR || b == BYTE_LF || b == BYTE_TAB) {
-                        _state = STATE_DTD_BEFORE_ROOT_NAME;
-                    } else {
-                        reportPrologUnexpChar(true, decodeCharForError(b), " (expected space after 'DOCTYPE')");
-                    }
-                }
-                // fall through (ok to skip bounds checks, async-skip does it)
-            case STATE_DTD_BEFORE_ROOT_NAME:
-                if (!asyncSkipSpace()) { // not enough input
-                    break;
-                }
-                if ((_tokenName = parseNewName(_inputBuffer[_inputPtr++])) == null) { // incomplete
-                    _state = STATE_DTD_ROOT_NAME;
-                    break;
-                }
-                _state = STATE_DTD_ROOT_NAME;
-                continue main_loop;
-            case STATE_DTD_ROOT_NAME:
-                if ((_tokenName = parsePName()) == null) { // incomplete
-                    break;
-                }
-                _state = STATE_DTD_AFTER_ROOT_NAME;
-                if (_inputPtr >= _inputEnd) {
-                    break;
-                }
-                // fall through
-            case STATE_DTD_AFTER_ROOT_NAME:
-                {
-                    byte b = _inputBuffer[_inputPtr++];
-                    if (b == BYTE_GT) {
-                        _state = STATE_DEFAULT;
-                        _nextEvent = EVENT_INCOMPLETE;
-                        return DTD;
-                    }
-                    if (b == BYTE_SPACE || b == BYTE_CR || b == BYTE_LF || b == BYTE_TAB) {
-                        _state = STATE_DTD_BEFORE_IDS;
-                    } else {
-                        reportPrologUnexpChar(true, decodeCharForError(b), " (expected space after root name in DOCTYPE declaration)");
-                    }
-                }
-                // fall through (ok to skip bounds checks, async-skip does it)
-            case STATE_DTD_BEFORE_IDS:
-                if (!asyncSkipSpace()) { // not enough input
-                    break;
-                }
-                {
-                    byte b = _inputBuffer[_inputPtr++];
-                    if (b == BYTE_GT) {
-                        _state = STATE_DEFAULT;
-                        _nextEvent = EVENT_INCOMPLETE;
-                        return DTD;
-                    }
-                    PName name;
-                    if ((name = parseNewName(b)) == null) {
-                        _state = STATE_DTD_PUBLIC_OR_SYSTEM;
-                        break;
-                    }
-                    String str = name.getPrefixedName();
-                    if ("PUBLIC".equals(str)) {
-                        _state = STATE_DTD_AFTER_PUBLIC;
-                    } else if ("SYSTEM".equals(str)) {
-                        _state = STATE_DTD_AFTER_SYSTEM;
-                    } else {
-                        reportPrologProblem(true, "unexpected token '"+str+"': expected either PUBLIC or SYSTEM");
-                    }
-                }
-                continue main_loop;
-    
-            case STATE_DTD_PUBLIC_OR_SYSTEM: 
-                {
-                    PName name;
-                    if ((name = parsePName()) == null) {
-                        _state = STATE_DTD_PUBLIC_OR_SYSTEM;
-                        break;
-                    }
-                    String str = name.getPrefixedName();
-                    if ("PUBLIC".equals(str)) {
-                        _state = STATE_DTD_AFTER_PUBLIC;
-                    } else if ("SYSTEM".equals(str)) {
-                        _state = STATE_DTD_AFTER_SYSTEM;
-                    } else {
-                        reportPrologProblem(true, "unexpected token '"+str+"': expected either PUBLIC or SYSTEM");
-                    }
-                }
-                continue main_loop;
-                    
-            case STATE_DTD_AFTER_PUBLIC: 
-                {
-                    byte b = _inputBuffer[_inputPtr++];
-                    if (b == BYTE_SPACE || b == BYTE_CR || b == BYTE_LF || b == BYTE_TAB) {
-                        _state = STATE_DTD_BEFORE_PUBLIC_ID;
-                    } else {
-                        reportPrologUnexpChar(true, decodeCharForError(b), " (expected space after PUBLIC keyword)");
-                    }
-                }
-                continue main_loop;
-    
-            case STATE_DTD_AFTER_SYSTEM: 
-                {
-                    byte b = _inputBuffer[_inputPtr++];
-                    if (b == BYTE_SPACE || b == BYTE_CR || b == BYTE_LF || b == BYTE_TAB) {
-                        _state = STATE_DTD_BEFORE_SYSTEM_ID;
-                    } else {
-                        reportPrologUnexpChar(true, decodeCharForError(b), " (expected space after SYSTEM keyword)");
-                    }
-                }
-                continue main_loop;
-    
-            case STATE_DTD_BEFORE_PUBLIC_ID: 
-                if (!asyncSkipSpace()) {
-                    break;
-                }
-                _elemAttrQuote = _inputBuffer[_inputPtr++];
-                if (_elemAttrQuote != BYTE_QUOT && _elemAttrQuote != BYTE_APOS) {
-                    reportPrologUnexpChar(true, decodeCharForError(_elemAttrQuote), " (expected '\"' or ''' for PUBLIC ID)");
-                }
-                {
-                    char[] buf = _textBuilder.resetWithEmpty();
-                    if (_inputPtr >= _inputEnd || !parseDtdId(buf, 0, false)) {
-                        _state = STATE_DTD_PUBLIC_ID;
-                        break;
-                    }
-                }
-                verifyAndSetPublicId();
-                _state = STATE_DTD_AFTER_PUBLIC_ID;
-                continue main_loop;
-    
-            case STATE_DTD_PUBLIC_ID: 
-                if (!parseDtdId(_textBuilder.getBufferWithoutReset(), _textBuilder.getCurrentLength(), false)) {
-                    break;
-                }
-                verifyAndSetPublicId();
-                _state = STATE_DTD_AFTER_PUBLIC_ID;
-                if (_inputPtr >= _inputEnd) {
-                    break;
-                }
-                // fall through
-            case STATE_DTD_AFTER_PUBLIC_ID: 
-                {
-                    byte b = _inputBuffer[_inputPtr++];
-                    if (b == BYTE_SPACE || b == BYTE_CR || b == BYTE_LF || b == BYTE_TAB) {
-                        _state = STATE_DTD_BEFORE_SYSTEM_ID;
-                    } else {
-                        reportPrologUnexpChar(true, decodeCharForError(b), " (expected space after PUBLIC ID)");
-                    }
-                }
-                // fall through (ok to skip bounds checks, async-skip does it)
-    
-            case STATE_DTD_BEFORE_SYSTEM_ID: 
-                if (!asyncSkipSpace()) {
-                    break;
-                }
-                _elemAttrQuote = _inputBuffer[_inputPtr++];
-                if (_elemAttrQuote != BYTE_QUOT && _elemAttrQuote != BYTE_APOS) {
-                    reportPrologUnexpChar(true, decodeCharForError(_elemAttrQuote), " (expected '\"' or ''' for SYSTEM ID)");
-                }
-                {
-                    char[] buf = _textBuilder.resetWithEmpty();
-                    if (_inputPtr >= _inputEnd || !parseDtdId(buf, 0, true)) {
-                        _state = STATE_DTD_SYSTEM_ID;
-                        break;
-                    }
-                }
-                verifyAndSetSystemId();
-                _state = STATE_DTD_AFTER_SYSTEM_ID;
-                continue main_loop;
-
-            case STATE_DTD_SYSTEM_ID: 
-                if (!parseDtdId(_textBuilder.getBufferWithoutReset(), _textBuilder.getCurrentLength(), true)) {
-                    break;
-                }
-                verifyAndSetSystemId();
-                _state = STATE_DTD_AFTER_SYSTEM_ID;
-                if (_inputPtr >= _inputEnd) {
-                    break;
-                }
-                // fall through
-    
-            case STATE_DTD_AFTER_SYSTEM_ID:
-                if (!asyncSkipSpace()) {
-                    break;
-                }
-                {
-                    byte b = _inputBuffer[_inputPtr++];
-                    if (b == BYTE_GT) {
-                        _state = STATE_DEFAULT;
-                        _nextEvent = EVENT_INCOMPLETE;
-                        return DTD;
-                    }
-                    if (b != BYTE_LBRACKET) {
-                        reportPrologUnexpChar(true, decodeCharForError(_elemAttrQuote), " (expected either '[' for internal subset, or '>' to end DOCTYPE)");
-                    }
-                }
-                _state = STATE_DTD_INT_SUBSET;
-                if (handleDTDInternalSubset(true)) {
-                    _state = STATE_DTD_EXPECT_CLOSING_GT;
-                } else {
-                    return EVENT_INCOMPLETE;
-                }
-                // fall through
-                
-            case STATE_DTD_EXPECT_CLOSING_GT:
-                if (!asyncSkipSpace()) {
-                    break;
-                }
-                {
-                    byte b = _inputBuffer[_inputPtr++];
-                    if (b != BYTE_GT) {
-                        reportPrologUnexpChar(true, b, "expected '>' to end DTD");
-                    }
-                }
-                _state = STATE_DEFAULT;
-                _nextEvent = EVENT_INCOMPLETE;
-                return DTD;
-            default:
-                throwInternal();
-            }
-        }
-        return _currToken;
-    }
-
-    private final boolean parseDtdId(char[] buffer, int ptr, boolean system) throws XMLStreamException
-    {
-        final int quote = (int) _elemAttrQuote;
-        while (_inputPtr < _inputEnd) {
-            int ch = _inputBuffer[_inputPtr++] & 0xFF;
-            if (ch == quote) {
-                _textBuilder.setCurrentLength(ptr);
-                return true;
-            }
-            if (!system && !validPublicIdChar(ch)) {
-                reportPrologUnexpChar(true, decodeCharForError((byte) ch), " (not valid in " + (system ? "SYSTEM" : "PUBLIC") + " ID)");
-            }
-            if (ptr >= buffer.length) {
-                buffer = _textBuilder.finishCurrentSegment();
-                ptr = 0;
-            }
-            buffer[ptr++] = (char) ch;
-        }
-        _textBuilder.setCurrentLength(ptr);
-        return false;
-    }
-     
-    /**
-     * Method called to try to parse an XML pseudo-attribute value. This is relatively
-     * simple, since we can't have linefeeds or entities; and although there are exact
-     * rules for what is allowed, we can do coarse parsing and only later on verify
-     * validity (for encoding could do stricter parsing in future?)
-     * 
-     * @return True if we managed to parse the whole pseudo-attribute
-     */
-    private boolean parseXmlDeclAttr(char[] buffer, int ptr) throws XMLStreamException
-    {
-        final int quote = (int) _elemAttrQuote;
-        while (_inputPtr < _inputEnd) {
-            int ch = _inputBuffer[_inputPtr++] & 0xFF;
-            if (ch == quote) {
-                _textBuilder.setCurrentLength(ptr);
-                return true;
-            }
-            // this is not exact check; but does work for all legal (valid) characters:
-            if (ch <= INT_SPACE || ch > INT_z) {
-                reportPrologUnexpChar(true, decodeCharForError((byte) ch), " (not valid in XML pseudo-attribute values)");
-            }
-            if (ptr >= buffer.length) {
-                buffer = _textBuilder.finishCurrentSegment();
-                ptr = 0;
-            }
-            buffer[ptr++] = (char) ch;
-        }
-        _textBuilder.setCurrentLength(ptr);
-        return false;
-    }
-
-    /*
-    /**********************************************************************
     /* Second-level parsing; character content (in tree)
     /**********************************************************************
      */
@@ -2067,8 +1203,9 @@ public class AsyncByteArrayScanner
     /* Second-level parsing; other (PI, Comment)
     /**********************************************************************
      */
-    
-    private int handlePI() throws XMLStreamException
+
+    @Override
+    protected int handlePI() throws XMLStreamException
     {
         // Most common case first:
         if (_state == STATE_PI_IN_DATA) {
@@ -2167,7 +1304,8 @@ public class AsyncByteArrayScanner
         return PROCESSING_INSTRUCTION;
     }
 
-    private final int handleComment() throws XMLStreamException
+    @Override
+    protected final int handleComment() throws XMLStreamException
     {
         if (_state == STATE_COMMENT_CONTENT) {
             return parseCommentContents();
@@ -2212,7 +1350,8 @@ public class AsyncByteArrayScanner
      * @return True, if was able to skip through the space and find
      *   a non-space byte; false if reached end-of-buffer
      */
-    private boolean asyncSkipSpace() throws XMLStreamException
+    @Override
+    protected boolean asyncSkipSpace() throws XMLStreamException
     {
         while (_inputPtr < _inputEnd) {
             byte b = _inputBuffer[_inputPtr];
@@ -2454,8 +1593,8 @@ public class AsyncByteArrayScanner
      * Method called when '<' and (what appears to be) a name
      * start character have been seen.
      */
-    protected int handleStartElementStart(byte b)
-        throws XMLStreamException
+    @Override
+    protected int handleStartElementStart(byte b) throws XMLStreamException
     {
         PName elemName = parseNewName(b);
         _nextEvent = START_ELEMENT;
@@ -2467,8 +1606,8 @@ public class AsyncByteArrayScanner
         return handleStartElement();
     }
 
-    protected int handleStartElement()
-        throws XMLStreamException
+    @Override
+    protected int handleStartElement() throws XMLStreamException
     {
         main_loop:
         while (true) {
@@ -4533,14 +3672,14 @@ public class AsyncByteArrayScanner
     /**********************************************************************
      */
 
-    protected PName parseNewName(byte b) throws XMLStreamException
+    @Override
+    protected final PName parseNewName(byte b) throws XMLStreamException
     {
         int q = b & 0xFF;
 
-        /* Let's do just quick sanity check first; a thorough check will be
-         * done later on if necessary, now we'll just do the very cheap
-         * check to catch extra spaces etc.
-         */
+        // Let's do just quick sanity check first; a thorough check will be
+        // done later on if necessary, now we'll just do the very cheap
+        // check to catch extra spaces etc.
         if (q < INT_A) { // lowest acceptable start char, except for ':' that would be allowed in non-ns mode
             throwUnexpectedChar(q, "; expected a name start character");
         }
@@ -4562,7 +3701,8 @@ public class AsyncByteArrayScanner
      *  </li>
      * </ul>
      */
-    protected PName parsePName() throws XMLStreamException
+    @Override
+    protected final PName parsePName() throws XMLStreamException
     {
         int q = _currQuad;
 
@@ -4575,12 +3715,11 @@ public class AsyncByteArrayScanner
                     return null; // all pointers have been set
                 }
                 q = _inputBuffer[_inputPtr++] & 0xFF;
-                /* Since name char validity is checked later on, we only
-                 * need to be able to reliably see the end of the name...
-                 * and those are simple enough so that we can just
-                 * compare; lookup table won't speed things up (according
-                 * to profiler)
-                 */
+
+                // Since name char validity is checked later on, we only need
+                // to be able to reliably see the end of the name... and those
+                // are simple enough so that we can just compare; lookup table
+                // won't speed things up (according to profiler)
                 if (q < 65) { // 'A'
                     // Ok; "_" (45), "." (46) and "0"-"9"/":" (48 - 57/58) still name chars
                     if (q < 45 || q > 58 || q == 47) {
@@ -4635,9 +3774,7 @@ public class AsyncByteArrayScanner
                 q = (q << 8) | i;
             }
 
-            /* If we get this far, need to add full quad into
-             * result array and update state
-             */
+            // If we get this far, need to add full quad into result array and update state
             if (_quadCount == 0) { // first quad
                 _quadBuffer[0] = q;
                 _quadCount = 1;
@@ -4796,6 +3933,7 @@ public class AsyncByteArrayScanner
      *   enough input data to do that); or false if there is no
      *   data available to check this
      */
+    @Override
     protected final boolean handlePartialCR()
     {
         // sanity check
