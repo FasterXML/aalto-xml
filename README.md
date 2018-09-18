@@ -67,6 +67,8 @@ or, if no more input available, indicate end-of-content with
 parser.getInputFeeder().endOfInput();
 ```
 
+See the [Full non-blocking parsing example](../../wiki/Code-sample:-Async-parsing) on Wiki for more details.
+
 ### Aalto Design goals
 
 * Ultra-high performance parsing by making the Common Case Fast (similar to original RISC manifesto). This may mean limiting functionality, but never compromising correctness. XML 1.0 compliancy is not sacrificed for speed.
