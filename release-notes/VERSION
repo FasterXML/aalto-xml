@@ -4,6 +4,10 @@ Project: aalto-xml
 = Releases
 ------------------------------------------------------------------------
 
+1.2.0 (not yet released)
+
+#67: Add Java 9+ module info using Moditect
+
 1.1.1 (19-Sep-2018)
 
 #59: Support Latin-1 (ISO-8859-1) via Async parser
