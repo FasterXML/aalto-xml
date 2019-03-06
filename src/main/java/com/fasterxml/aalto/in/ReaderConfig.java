@@ -68,7 +68,7 @@ public final class ReaderConfig
                       Boolean.TRUE);
         sProperties.put(XMLInputFactory.IS_VALIDATING, 
                       //Boolean.FALSE);
-                      new Integer(F_DTD_VALIDATING));
+                      Integer.valueOf(F_DTD_VALIDATING));
         sProperties.put(XMLInputFactory.IS_COALESCING, Integer.valueOf(F_COALESCING));
         sProperties.put(XMLInputFactory.IS_REPLACING_ENTITY_REFERENCES, Integer.valueOf(F_EXPAND_ENTITIES));
         sProperties.put(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, Boolean.FALSE);

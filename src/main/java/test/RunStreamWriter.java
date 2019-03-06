@@ -16,7 +16,9 @@ public class RunStreamWriter
 
     protected XMLOutputFactory getFactory() throws Exception
     {
-        return (XMLOutputFactory) Class.forName("com.fasterxml.aalto.stax.OutputFactoryImpl").newInstance();
+        return (XMLOutputFactory) Class.forName("com.fasterxml.aalto.stax.OutputFactoryImpl")
+                .getDeclaredConstructor()
+                .newInstance();
     }
 
     final String ENCODING = "ISO-8859-1";

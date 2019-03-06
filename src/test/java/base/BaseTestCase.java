@@ -86,7 +86,7 @@ public abstract class BaseTestCase
 
     protected static String tokenTypeDesc(int tt)
     {
-	String desc = (String) mTokenTypes.get(new Integer(tt));
+	String desc = (String) mTokenTypes.get(Integer.valueOf(tt));
 	return (desc == null) ? ("["+tt+"]") : desc;
     }
 

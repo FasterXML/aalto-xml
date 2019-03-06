@@ -434,6 +434,7 @@ public final class InputFactoryImpl
         return StreamReaderImpl.construct(ByteSourceBootstrapper.construct(cfg, in));
     }
 
+    @SuppressWarnings("resource")
     protected XMLStreamReader2 constructSR(javax.xml.transform.Source src,
             boolean forEventReader)
         throws XMLStreamException

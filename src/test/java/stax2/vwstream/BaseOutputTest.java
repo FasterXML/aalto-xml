@@ -16,8 +16,8 @@ abstract class BaseOutputTest
         throws XMLStreamException
     {
         XMLOutputFactory2 outf = getOutputFactory();
-        outf.setProperty(XMLStreamProperties.XSP_NAMESPACE_AWARE, new Boolean(nsAware));
-        outf.setProperty(XMLOutputFactory.IS_REPAIRING_NAMESPACES, new Boolean(repairing));
+        outf.setProperty(XMLStreamProperties.XSP_NAMESPACE_AWARE, nsAware);
+        outf.setProperty(XMLOutputFactory.IS_REPAIRING_NAMESPACES, repairing);
 
         XMLStreamWriter2 strw = (XMLStreamWriter2)outf.createXMLStreamWriter(w);
         XMLValidationSchemaFactory vd = XMLValidationSchemaFactory.newInstance(XMLValidationSchema.SCHEMA_ID_DTD);
@@ -35,7 +35,7 @@ abstract class BaseOutputTest
     {
         XMLOutputFactory2 outf = getOutputFactory();
         outf.setProperty(XMLStreamProperties.XSP_NAMESPACE_AWARE, true);
-        outf.setProperty(XMLOutputFactory.IS_REPAIRING_NAMESPACES, new Boolean(repairing));
+        outf.setProperty(XMLOutputFactory.IS_REPAIRING_NAMESPACES, repairing);
 
         XMLStreamWriter2 strw = (XMLStreamWriter2)outf.createXMLStreamWriter(w);
         XMLValidationSchemaFactory vd = XMLValidationSchemaFactory.newInstance(XMLValidationSchema.SCHEMA_ID_W3C_SCHEMA);

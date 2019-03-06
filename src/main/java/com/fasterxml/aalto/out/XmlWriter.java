@@ -417,7 +417,7 @@ public abstract class XmlWriter
                 reportInvalidChar(ch);
             }
         }
-        String msg = MessageFormat.format(ErrorConsts.WERR_NO_ESCAPING, new Object[] { type, new Integer(ch) });
+        String msg = MessageFormat.format(ErrorConsts.WERR_NO_ESCAPING, new Object[] { type, ch });
         reportNwfContent(msg);
     }
 

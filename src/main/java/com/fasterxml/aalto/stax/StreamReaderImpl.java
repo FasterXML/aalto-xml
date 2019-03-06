@@ -1364,12 +1364,14 @@ public class StreamReaderImpl
 
     // // // StAX2, per-reader configuration
 
+    @Deprecated // in base class
     @Override
     public final Object getFeature(String name) {
         // !!! TBI
         return null;
     }
 
+    @Deprecated // in base class
     @Override
     public final void setFeature(String name, Object value) {
         // !!! TBI

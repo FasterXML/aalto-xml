@@ -157,11 +157,10 @@ public final class FixedNsContext
     }
 
     @Override
-    public final Iterator<?> getPrefixes(String nsURI)
+    public final Iterator<String> getPrefixes(String nsURI)
     {
-        /* First the known offenders; invalid args, 2 predefined xml
-         * namespace prefixes
-         */
+        // First the known offenders; invalid args, 2 predefined xml
+        // namespace prefixes
         if (nsURI == null || nsURI.length() == 0) {
             throw new IllegalArgumentException("Illegal to pass null/empty prefix as argument.");
         }

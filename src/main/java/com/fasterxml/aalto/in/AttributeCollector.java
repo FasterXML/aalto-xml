@@ -597,12 +597,9 @@ public final class AttributeCollector
     private void noteDupAttr(int ix1, int ix2)
     {
         _errorMsg = MessageFormat.format(ErrorConsts.ERR_WF_DUP_ATTRS,
-                                         new Object[] {
-                                             _names[ix1].toString(),
-                                             new Integer(ix1),
-                                             _names[ix2].toString(),
-                                             new Integer(ix2)
-                                         });
+                new Object[] { _names[ix1].toString(), ix1,
+                        _names[ix2].toString(), ix2
+        });
 
     }
 }
