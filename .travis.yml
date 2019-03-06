@@ -2,10 +2,7 @@ sudo: false
 language: java
 
 jdk:
-  - openjdk7
   - openjdk8
-  - oraclejdk8
-  - openjdk10
   - openjdk11
 
 branches:
