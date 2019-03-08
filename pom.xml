@@ -151,37 +151,45 @@ org.xml.sax, org.xml.sax.ext, org.xml.sax.helpers</osgi.import>
         </executions>
       </plugin>
 
-
-      <!-- 05-Mar-2019, tatu: Uncomment to (re)generate module info: -->
-      <!--
-      <plugin>
-        <groupId>org.moditect</groupId>
-        <artifactId>moditect-maven-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>generate-module-info</id>
-            <phase>generate-sources</phase>
-            <goals>
-                <goal>generate-module-info</goal>
-            </goals>
-            <configuration>
-                <modules>
-                    <module>
-                        <artifact>
-                            <groupId>${project.groupId}</groupId>
-                            <artifactId>${project.artifactId}</artifactId>
-                            <version>1.1.1</version>
-                        </artifact>
-                    </module>
-                </modules>
-            </configuration>
-          </execution>
-
-        </executions>
-      </plugin>
-      -->
-
     </plugins>
   </build>
 
+  <profiles>
+    <profile>
+      <id>moditect</id>
+      <properties>
+        <!-- Not only do we need JDK 9+, must target later JDK too -->
+        <java.version>1.9</java.version>
+      </properties>
+      <build>
+	   <plugins>
+	      <plugin>
+	        <groupId>org.moditect</groupId>
+	        <artifactId>moditect-maven-plugin</artifactId>
+	        <executions>
+	          <execution>
+	            <id>generate-module-info</id>
+	            <phase>generate-sources</phase>
+	            <goals>
+	                <goal>generate-module-info</goal>
+	            </goals>
+	            <configuration>
+	                <modules>
+	                    <module>
+	                        <artifact>
+	                            <groupId>${project.groupId}</groupId>
+	                            <artifactId>${project.artifactId}</artifactId>
+	                            <version>1.1.1</version>
+	                        </artifact>
+	                    </module>
+	                </modules>
+	            </configuration>
+	          </execution>
+	
+	        </executions>
+	      </plugin>
+	   </plugins>
+      </build>
+    </profile>
+  </profiles>
 </project>
