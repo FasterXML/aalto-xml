@@ -170,9 +170,6 @@ org.xml.sax, org.xml.sax.ext, org.xml.sax.helpers</osgi.import>
 	          <execution>
 	            <id>generate-module-info</id>
 	            <phase>generate-sources</phase>
- <!--
-                 <phase>package</phase>
-       -->
 	            <goals>
 	                <goal>generate-module-info</goal>
 	            </goals>
@@ -182,7 +179,13 @@ org.xml.sax, org.xml.sax.ext, org.xml.sax.helpers</osgi.import>
 	                        <artifact>
 	                            <groupId>${project.groupId}</groupId>
 	                            <artifactId>${project.artifactId}</artifactId>
+<!-- 08-Mar-2019, tatu: Alas, due to JDK bug
+       https://bugs.openjdk.java.net/browse/JDK-8207162
+     this won't work...
+
 	                            <version>${project.version}</version>
+  -->
+	                            <version>1.1.1</version>
 	                        </artifact>
 	                    </module>
 	                </modules>
