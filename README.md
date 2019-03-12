@@ -22,6 +22,14 @@ Aalto is licensed under [Apache License 2.0](http://www.apache.org/licenses/LICE
 * Cowtown blog:
     * [Non-blocking XML parsing with Aalto 0.9.7](http://www.cowtowncoder.com/blog/archives/2011/03/entry_451.html) (note: minor changes to API since then)
 
+## JDK Compatibility
+
+Aalto 1.x:
+
+* Can be used on JDK versions 6 (1.6) and up
+* Needs JDK 8 or higher to build (as of Aalto `1.2.0`)
+* Contains Java 9 Module definitions starting with version `1.2.0`
+
 ## Usage
 
 ### Blocking XML parsing (Stax, SAX)
@@ -34,7 +42,7 @@ Blocking XML parsing is done using one of standard interfaces:
 
 ### Non-blocking ("async") XML parsing
 
-Non-blocking parsing interface is extension of basic Stax (and Stax2) API, with extensions defined in 'com.fasterxml.aalto' package::
+Non-blocking parsing interface is extension of basic Stax (and Stax2) API, with extensions defined in 'com.fasterxml.aalto' package:
 
 * `AsyncXMLInputFactory` offers factory methods for creating non-blocking parsers
 * `AsyncXMLStreamReader` is extended type that non-blocking parsers implement
