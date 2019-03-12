@@ -41,7 +41,7 @@ public abstract class XmlScanner
     // // // Constants:
 
     /**
-     * String that identifies CDATA section (after "<![" prefix)
+     * String that identifies CDATA section (after "&lt;![" prefix)
      */
     final protected String CDATA_STR = "CDATA[";
 
@@ -183,7 +183,7 @@ public abstract class XmlScanner
     /**
      * Flag that is used if the current state is <code>START_ELEMENT</code>
      * or <code>END_ELEMENT</code>, to indicate if the underlying physical
-     * tag is a so-called empty tag (one ending with "/>")
+     * tag is a so-called empty tag (one ending with "/&gt;")
      */
     protected boolean _isEmptyTag = false;
 
@@ -1432,7 +1432,7 @@ public abstract class XmlScanner
 
     /**
      * Called when there's an unexpected char after PI target (non-ws,
-     * not part of '?>' end marker
+     * not part of {@code '?>'} end marker
      */
     protected void reportMissingPISpace(int ch)
         throws XMLStreamException

@@ -633,13 +633,6 @@ public abstract class AsyncByteScanner
      * @param lastQuad Word with last 0 to 3 bytes of the PName; not included
      *   in the quad array
      * @param lastByteCount Number of bytes contained in lastQuad; 0 to 3.
-     * @param firstQuad First 1 to 4 bytes of the PName (4 if length
-     *    at least 4 bytes; less only if not). 
-     * @param qlen Number of quads in the array, except if less than 2
-     *    (in which case only firstQuad and lastQuad are used)
-     * @param quads Array that contains all the quads, except for the
-     *    last one, for names with more than 8 bytes (i.e. more than
-     *    2 quads)
      */
     protected final PName findPName(int lastQuad, int lastByteCount) throws XMLStreamException
     {

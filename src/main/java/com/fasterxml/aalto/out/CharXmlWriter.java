@@ -334,7 +334,7 @@ public final class CharXmlWriter
 
     /**
      * @return -1 to indicate succesful write, or index of the problematic
-     *   character in input (first ']' from "]]>" sequence, in non-fixing
+     *   character in input (first ']' from "]]&gt;" sequence, in non-fixing
      *   mode)
      */
     @Override

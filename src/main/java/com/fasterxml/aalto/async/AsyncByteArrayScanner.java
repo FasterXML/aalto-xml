@@ -240,7 +240,7 @@ public class AsyncByteArrayScanner
     /**
      * @return EVENT_INCOMPLETE, if there's not enough input to
      *   handle pending char, COMMENT, if we handled complete
-     *   "-->" end marker, or 0 to indicate something else
+     *   "--&gt;" end marker, or 0 to indicate something else
      *   was succesfully handled.
      */
     protected int handleCommentPending() throws XMLStreamException
@@ -420,7 +420,7 @@ public class AsyncByteArrayScanner
     /**
      * @return EVENT_INCOMPLETE, if there's not enough input to
      *   handle pending char, PROCESSING_INSTRUCTION, if we handled complete
-     *   "?>" end marker, or 0 to indicate something else
+     *   "?&gt;" end marker, or 0 to indicate something else
      *   was succesfully handled.
      */
     protected int handlePIPending() throws XMLStreamException
@@ -770,7 +770,7 @@ public class AsyncByteArrayScanner
     /**
      * @return EVENT_INCOMPLETE, if there's not enough input to
      *   handle pending char, CDATA, if we handled complete
-     *   "]]>" end marker, or 0 to indicate something else
+     *   "]]&gt;" end marker, or 0 to indicate something else
      *   was succesfully handled.
      */
     protected final int handleCDataPending() throws XMLStreamException
@@ -1590,7 +1590,7 @@ public class AsyncByteArrayScanner
     }
 
     /**
-     * Method called when '<' and (what appears to be) a name
+     * Method called when '&lt;' and (what appears to be) a name
      * start character have been seen.
      */
     @Override
@@ -4053,7 +4053,7 @@ public class AsyncByteArrayScanner
     }
 
     /**
-     * @return Character value <b>minus 0x10000</c>; this so that caller
+     * @return Character value <b>minus 0x10000</b>; this so that caller
      *    can readily expand it to actual surrogates
      */
     protected final int decodeUtf8_4(int c1, int c2, int c3, int c4) throws XMLStreamException

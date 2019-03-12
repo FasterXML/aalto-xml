@@ -395,8 +395,8 @@ public class StreamReaderImpl
      * this is not a text-only element.
      * Regardless of value of javax.xml.stream.isCoalescing this method always
      * returns coalesced content.
-     *<br/>Precondition: the current event is START_ELEMENT.
-     *<br/>Postcondition: the current event is the corresponding END_ELEMENT. 
+     *<br>Precondition: the current event is START_ELEMENT.
+     *<br>Postcondition: the current event is the corresponding END_ELEMENT. 
      *</blockquote>
      */
     @Override
@@ -1517,7 +1517,7 @@ public class StreamReaderImpl
 
     /**
      * @return True, if cursor points to a start or end element that is
-     *    constructed from 'empty' element (ends with '/>');
+     *    constructed from 'empty' element (ends with '/&gt;');
      *    false otherwise.
      */
     @Override
