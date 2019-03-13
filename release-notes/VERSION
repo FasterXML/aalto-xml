@@ -4,6 +4,10 @@ Project: aalto-xml
 = Releases
 ------------------------------------------------------------------------
 
+1.2.1 (not yet released)
+
+- Update `stax2-api` dependency to 4.2.0 (for JDK9 module info)
+
 1.2.0 (12-Mar-2019)
 
 #67: Add Java 9+ module info using Moditect
