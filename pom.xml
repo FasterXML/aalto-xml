@@ -128,8 +128,8 @@ org.xml.sax, org.xml.sax.ext, org.xml.sax.helpers</osgi.import>
       </plugin>
 
       <!--  04-Mar-2019, tatu: Add rudimentary JDK9+ module info. To build with JDK 8
-             will have to use `moduleInfoFile` which is crappy but anything else requires
-             JDK 9+. With Jackson 3.0 will upgrade.
+             will have to use `moduleInfoFile` which is not optimal but anything else
+            requires  JDK 9+.
         -->
       <plugin>
         <groupId>org.moditect</groupId>
@@ -152,49 +152,4 @@ org.xml.sax, org.xml.sax.ext, org.xml.sax.helpers</osgi.import>
       </plugin>
     </plugins>
   </build>
-
-  <profiles>
-    <profile>
-      <id>moditect</id>
-      <properties>
-        <!-- Not only do we need JDK 9+, must target later JDK too -->
-        <java.version>1.9</java.version>
-      </properties>
-      <build>
-	   <plugins>
-	      <plugin>
-	        <groupId>org.moditect</groupId>
-	        <artifactId>moditect-maven-plugin</artifactId>
-	        <executions>
-	          <execution>
-	            <id>generate-module-info</id>
-	            <phase>generate-sources</phase>
-	            <goals>
-	                <goal>generate-module-info</goal>
-	            </goals>
-	            <configuration>
-	                <modules>
-	                    <module>
-	                        <artifact>
-	                            <groupId>${project.groupId}</groupId>
-	                            <artifactId>${project.artifactId}</artifactId>
-<!-- 08-Mar-2019, tatu: Alas, due to JDK bug
-       https://bugs.openjdk.java.net/browse/JDK-8207162
-     this won't work...
-
-	                            <version>${project.version}</version>
-  -->
-	                            <version>1.1.1</version>
-	                        </artifact>
-	                    </module>
-	                </modules>
-	            </configuration>
-	          </execution>
-	
-	        </executions>
-	      </plugin>
-	   </plugins>
-      </build>
-    </profile>
-  </profiles>
 </project>
