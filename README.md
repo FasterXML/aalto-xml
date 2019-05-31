@@ -26,9 +26,9 @@ Aalto is licensed under [Apache License 2.0](http://www.apache.org/licenses/LICE
 
 Aalto 1.x:
 
-* Can be used on JDK versions 6 (1.6) and up
-* Needs JDK 8 or higher to build (as of Aalto `1.2.0`)
-* Contains Java 9 Module definitions starting with version `1.2.0`
+* Can be _used_ on JDK versions 6 (1.6) and up
+    * needs JDK 8 or higher to _build_ as of Aalto `1.2.0`
+* Contains Java 9 Module definition (`module-info.class`) starting with version `1.2.0`
 
 ## Usage
 
@@ -90,7 +90,7 @@ Aalto dependency is usually added via Maven repository, so something like:
 <dependency>
     <groupId>com.fasterxml</groupId>
     <artifactId>aalto-xml</artifactId>
-    <version>1.1.0</version>
+    <version>1.2.1</version>
 </dependency>
 ```
 
