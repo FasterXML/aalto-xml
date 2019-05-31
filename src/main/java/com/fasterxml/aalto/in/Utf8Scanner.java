@@ -696,14 +696,14 @@ public final class Utf8Scanner
                 throwUnexpectedChar(c, " in public identifier");
             }
 
-            // White space? Needs to be coalecsed
+            // White space? Needs to be coalesced
             if (c <= INT_SPACE) {
                 addSpace = true;
                 continue;
             }
             if (addSpace) {
                 if (outPtr >= outputBuffer.length) {
-                    outputBuffer = _textBuilder.finishCurrentSegment();
+                    _nameBuffer = outputBuffer = DataUtil.growArrayBy(outputBuffer, outputBuffer.length);
                     outPtr = 0;
                 }
                 outputBuffer[outPtr++] = ' ';

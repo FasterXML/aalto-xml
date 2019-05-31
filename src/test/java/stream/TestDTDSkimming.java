@@ -24,7 +24,31 @@ public class TestDTDSkimming extends base.BaseTestCase
         _doTestInvalidDup("UTF-8", false);
         _doTestInvalidDup("UTF-8", true);
     }
-    
+
+    // [aalto-xml#47]
+    public void testDtdIssue47() throws Exception
+    {
+        final String DOC = "<?xml version=\"1.0\" encoding=\"US-ASCII\"?>\n" + 
+                "<!DOCTYPE issue-xml PUBLIC \"-//Atypon//DTD Atypon JATS Journal Archiving and Interchange Issue XML\" \"Atypon-Issue-Xml.dtd\">\n" + 
+                "<issue-xml>\n" + 
+                "</issue-xml>";
+        XMLStreamReader2 sr = createReader(DOC, "UTF-8");
+        assertTokenType(START_DOCUMENT, sr.getEventType());
+        int t = sr.next();
+        assertTokenType(DTD, t);
+        assertEquals("issue-xml", sr.getPrefixedName());
+        assertEquals("", sr.getText());
+        assertTokenType(START_ELEMENT, sr.next());
+        assertEquals("issue-xml", sr.getLocalName());
+        assertTokenType(CHARACTERS, sr.next());
+        assertEquals("\n", sr.getText());
+        assertTokenType(END_ELEMENT, sr.next());
+        assertEquals("issue-xml", sr.getLocalName());
+        assertTokenType(END_DOCUMENT, sr.next());
+        sr.close();
+
+    }
+
     /*
     /**********************************************************************
     /* Helper methods
