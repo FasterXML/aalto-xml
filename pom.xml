@@ -83,7 +83,7 @@ org.xml.sax, org.xml.sax.ext, org.xml.sax.helpers</osgi.import>
     <dependency>
       <groupId>com.fasterxml.woodstox</groupId>
       <artifactId>woodstox-core</artifactId>
-      <version>5.2.0</version>
+      <version>5.3.0</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
