@@ -391,27 +391,6 @@ public final class WriterConfig
     /**********************************************************************
      */
 
-    public char[] allocSmallCBuffer(int minSize)
-    {
-        if (_currRecycler != null) {
-            char[] result = _currRecycler.getSmallCBuffer(minSize);
-            if (result != null) {
-                return result;
-            }
-        }
-        // Nope; no recycler, or it has no suitable buffers, let's create:
-        return new char[minSize];
-    }
-
-    public void freeSmallCBuffer(char[] buffer)
-    {
-        // Need to create (and assign) the buffer?
-        if (_currRecycler == null) {
-            _currRecycler = createRecycler();
-        }
-        _currRecycler.returnSmallCBuffer(buffer);
-    }
-
     public char[] allocMediumCBuffer(int minSize)
     {
         if (_currRecycler != null) {

@@ -1,18 +1,3 @@
-/* Woodstox Lite ("wool") XML processor
- *
- * Copyright (c) 2006- Tatu Saloranta, tatu.saloranta@iki.fi
- *
- * Licensed under the License specified in the file LICENSE which is
- * included with the source code.
- * You may not use this file except in compliance with the License.
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package com.fasterxml.aalto.util;
 
 /**
@@ -33,11 +18,11 @@ package com.fasterxml.aalto.util;
  */
 public final class BufferRecycler
 {
-    private char[] mSmallCBuffer = null; // temp buffers
-    private char[] mMediumCBuffer = null; // text collector
-    private char[] mFullCBuffer = null; // for actual parsing buffer
+    private volatile char[] mSmallCBuffer = null; // temp buffers
+    private volatile char[] mMediumCBuffer = null; // text collector
+    private volatile char[] mFullCBuffer = null; // for actual parsing buffer
 
-    private byte[] mFullBBuffer = null;
+    private volatile byte[] mFullBBuffer = null;
 
     public BufferRecycler() { }
 
@@ -45,79 +30,71 @@ public final class BufferRecycler
 
     // // Small buffers, for temporary parsing
 
-    public char[] getSmallCBuffer(int minSize)
+    public synchronized char[] getSmallCBuffer(int minSize)
     {
-        char[] result = null;
-        if (mSmallCBuffer != null && mSmallCBuffer.length >= minSize) {
-            result = mSmallCBuffer;
+        char[] result = mSmallCBuffer;
+        if (result != null && result.length >= minSize) {
             mSmallCBuffer = null;
+            return result;
         }
-//System.err.println("DEBUG: Alloc CSmall: "+result);
-        return result;
+        return null;
     }
 
-    public void returnSmallCBuffer(char[] buffer)
+    public synchronized void returnSmallCBuffer(char[] buffer)
     {
-//System.err.println("DEBUG: Return CSmall ("+buffer.length+"): "+buffer);
         mSmallCBuffer = buffer;
     }
 
     // // Medium buffers, for text output collection
 
-    public char[] getMediumCBuffer(int minSize)
+    public synchronized char[] getMediumCBuffer(int minSize)
     {
-        char[] result = null;
-        if (mMediumCBuffer != null && mMediumCBuffer.length >= minSize) {
-            result = mMediumCBuffer;
+        char[] result = mMediumCBuffer;
+        if (result != null && result.length >= minSize) {
             mMediumCBuffer = null;
+            return result;
         }
-//System.err.println("DEBUG: Alloc CMed: "+result);
-        return result;
+        return null;
     }
 
-    public void returnMediumCBuffer(char[] buffer)
+    public synchronized void returnMediumCBuffer(char[] buffer)
     {
         mMediumCBuffer = buffer;
-//System.err.println("DEBUG: Return CMed ("+buffer.length+"): "+buffer);
     }
 
     // // Full buffers, for parser buffering
 
-    public char[] getFullCBuffer(int minSize)
+    public synchronized char[] getFullCBuffer(int minSize)
     {
-        char[] result = null;
-        if (mFullCBuffer != null && mFullCBuffer.length >= minSize) {
-            result = mFullCBuffer;
+        char[] result = mFullCBuffer;
+        if (result != null && result.length >= minSize) {
             mFullCBuffer = null;
+            return result;
         }
-//System.err.println("DEBUG: Alloc CFull: "+result);
-        return result;
+        return null;
     }
 
-    public void returnFullCBuffer(char[] buffer)
+    public synchronized void returnFullCBuffer(char[] buffer)
     {
         mFullCBuffer = buffer;
-//System.err.println("DEBUG: Return CFull ("+buffer.length+"): "+buffer);
     }
 
     // // // Byte buffers:
 
     // // Full byte buffers, for byte->char conversion (Readers)
 
-    public byte[] getFullBBuffer(int minSize)
+    public synchronized byte[] getFullBBuffer(int minSize)
     {
-        byte[] result = null;
-        if (mFullBBuffer != null && mFullBBuffer.length >= minSize) {
-            result = mFullBBuffer;
+        byte[] result = mFullBBuffer;
+        if (result != null && result.length >= minSize) {
             mFullBBuffer = null;
+            return result;
         }
-//System.err.println("DEBUG: Alloc BFull: "+result);
-        return result;
+        return null;
     }
 
-    public void returnFullBBuffer(byte[] buffer)
+    public synchronized void returnFullBBuffer(byte[] buffer)
     {
         mFullBBuffer = buffer;
-//System.err.println("DEBUG: Return BFull ("+buffer.length+"): "+buffer);
     }
 }

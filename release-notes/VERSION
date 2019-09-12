@@ -4,6 +4,10 @@ Project: aalto-xml
 = Releases
 ------------------------------------------------------------------------
 
+1.2.2 (not yet released)
+
+#69: `BufferRecycler` access not safe if readers/writers used from different threads
+
 1.2.1 (31-May-2019)
 
 #47: NPE when trying to parse document with DTD declaration

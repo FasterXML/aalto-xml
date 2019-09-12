@@ -561,7 +561,6 @@ public final class ReaderConfig
 
     public char[] allocSmallCBuffer(int minSize)
     {
-//System.err.println("DEBUG: cfg, allocCSmall: "+mCurrRecycler);
         if (_currRecycler != null) {
             char[] result = _currRecycler.getSmallCBuffer(minSize);
             if (result != null) {
@@ -574,7 +573,6 @@ public final class ReaderConfig
 
     public void freeSmallCBuffer(char[] buffer)
     {
-//System.err.println("DEBUG: cfg, freeCSmall: "+buffer);
         // Need to create (and assign) the buffer?
         if (_currRecycler == null) {
             _currRecycler = createRecycler();
@@ -584,7 +582,6 @@ public final class ReaderConfig
 
     public char[] allocMediumCBuffer(int minSize)
     {
-//System.err.println("DEBUG: cfg, allocCMed: "+mCurrRecycler);
         if (_currRecycler != null) {
             char[] result = _currRecycler.getMediumCBuffer(minSize);
             if (result != null) {
@@ -596,7 +593,6 @@ public final class ReaderConfig
 
     public void freeMediumCBuffer(char[] buffer)
     {
-//System.err.println("DEBUG: cfg, freeCMed: "+buffer);
         if (_currRecycler == null) {
             _currRecycler = createRecycler();
         }
@@ -605,7 +601,6 @@ public final class ReaderConfig
 
     public char[] allocFullCBuffer(int minSize)
     {
-//System.err.println("DEBUG: cfg, allocCFull: "+mCurrRecycler);
         if (_currRecycler != null) {
             char[] result = _currRecycler.getFullCBuffer(minSize);
             if (result != null) {
@@ -617,7 +612,6 @@ public final class ReaderConfig
 
     public void freeFullCBuffer(char[] buffer)
     {
-//System.err.println("DEBUG: cfg, freeCFull: "+buffer);
         // Need to create (and assign) the buffer?
         if (_currRecycler == null) {
             _currRecycler = createRecycler();
@@ -627,7 +621,6 @@ public final class ReaderConfig
 
     public byte[] allocFullBBuffer(int minSize)
     {
-//System.err.println("DEBUG: cfg, allocBFull: "+mCurrRecycler);
         if (_currRecycler != null) {
             byte[] result = _currRecycler.getFullBBuffer(minSize);
             if (result != null) {
@@ -639,7 +632,6 @@ public final class ReaderConfig
 
     public void freeFullBBuffer(byte[] buffer)
     {
-//System.err.println("DEBUG: cfg, freeBFull: "+buffer);
         // Need to create (and assign) the buffer?
         if (_currRecycler == null) {
             _currRecycler = createRecycler();
@@ -647,13 +639,10 @@ public final class ReaderConfig
         _currRecycler.returnFullBBuffer(buffer);
     }
 
-//static int Counter = 0;
-
     private BufferRecycler createRecycler()
     {
         BufferRecycler recycler = new BufferRecycler();
         // No way to reuse/reset SoftReference, have to create new always:
-//System.err.println("DEBUG: RefCount: "+(++Counter));
         _recyclerRef.set(new SoftReference<BufferRecycler>(recycler));
         return recycler;
     }
