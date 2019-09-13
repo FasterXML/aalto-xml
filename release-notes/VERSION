@@ -4,7 +4,7 @@ Project: aalto-xml
 = Releases
 ------------------------------------------------------------------------
 
-1.2.2 (not yet released)
+1.2.2 (14-Sep-2019)
 
 #69: `BufferRecycler` access not safe if readers/writers used from different threads
 
