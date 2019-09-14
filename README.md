@@ -14,6 +14,8 @@ Aalto is licensed under [Apache License 2.0](http://www.apache.org/licenses/LICE
 ## Status
 
 [![Build Status](https://travis-ci.org/FasterXML/aalto-xml.svg)](https://travis-ci.org/FasterXML/aalto-xml)
+[![Javadoc](https://javadoc-emblem.rhcloud.com/doc/com.fasterxml/aalto-xml/badge.svg)](http://www.javadoc.io/doc/com.fasterxml/aalto-xml)
+[![Tidelift](https://tidelift.com/badges/package/maven/com.fasterxml:aalto-xml)](https://tidelift.com/subscription/pkg/maven-com-fasterxml-aalto-xml?utm_source=maven-com-fasterxml-aalto-xml&utm_medium=referral&utm_campaign=readme)
 
 ## Documentation
 
