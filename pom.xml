@@ -24,6 +24,7 @@
   <description>Ultra-high performance non-blocking XML processor (Stax/Stax2, SAX/SAX2)
   </description>
 
+  <url>https://github.com/FasterXML/aalto-xml</url>
   <scm>
     <connection>scm:git:git@github.com:FasterXML/aalto-xml.git</connection>
     <developerConnection>scm:git:git@github.com:FasterXML/aalto-xml.git</developerConnection>
