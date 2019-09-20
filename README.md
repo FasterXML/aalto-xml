@@ -17,6 +17,22 @@ Aalto is licensed under [Apache License 2.0](http://www.apache.org/licenses/LICE
 [![Javadoc](https://javadoc-emblem.rhcloud.com/doc/com.fasterxml/aalto-xml/badge.svg)](http://www.javadoc.io/doc/com.fasterxml/aalto-xml)
 [![Tidelift](https://tidelift.com/badges/package/maven/com.fasterxml:aalto-xml)](https://tidelift.com/subscription/pkg/maven-com-fasterxml-aalto-xml?utm_source=maven-com-fasterxml-aalto-xml&utm_medium=referral&utm_campaign=readme)
 
+## Support
+
+There are 2 types of support available:
+
+* Community support via mailing lists: [aalto-xml-interest](aalto-xml-interest@yahoogroups.com)
+* Optional Commercial Support is available via [Tidelift Subscriptions](https://tidelift.com/subscription/pkg/mav\
+en-com-fasterxml-aalto-xml?utm_source=maven-com-fasterxml-aalto-xml&utm_medium=referral&utm_campaign=readme)
+
+## Contributing
+
+For simple bug reports and fixes, and feature requests, please simply use projects
+[Issue Tracker](../../issues), with exception of security-related issues for which
+we recommend filing a
+[Tidelift security contact](https://tidelift.com/security) (NOTE: you do NOT have to be
+a subscriber to do this).
+
 ## Documentation
 
 * [Project Wiki](https://github.com/FasterXML/aalto-xml/wiki) (docs, downloads)
@@ -33,6 +49,18 @@ Aalto 1.x:
 * Contains Java 9 Module definition (`module-info.class`) starting with version `1.2.0`
 
 ## Usage
+
+### Dependency
+
+Aalto dependency is usually added via Maven repository, so something like:
+
+```xml
+<dependency>
+    <groupId>com.fasterxml</groupId>
+    <artifactId>aalto-xml</artifactId>
+    <version>1.2.1</version>
+</dependency>
+```
 
 ### Blocking XML parsing (Stax, SAX)
 
@@ -83,18 +111,6 @@ See the [Full non-blocking parsing example](../../wiki/Code-sample:-Async-parsin
 
 * Ultra-high performance parsing by making the Common Case Fast (similar to original RISC manifesto). This may mean limiting functionality, but never compromising correctness. XML 1.0 compliancy is not sacrificed for speed.
 * Allow non-block, asynchronous parsing: it should be possible to "feed" more input and incrementally get more XML events out, without forcing the current thread to block on I/O read operation. 
-
-### Dependency
-
-Aalto dependency is usually added via Maven repository, so something like:
-
-```xml
-<dependency>
-    <groupId>com.fasterxml</groupId>
-    <artifactId>aalto-xml</artifactId>
-    <version>1.2.1</version>
-</dependency>
-```
 
 ### Related
 
