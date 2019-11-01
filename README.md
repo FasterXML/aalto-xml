@@ -19,11 +19,15 @@ Aalto is licensed under [Apache License 2.0](http://www.apache.org/licenses/LICE
 
 ## Support
 
-There are 2 types of support available:
+### Community support
 
-* Community support via mailing lists: [aalto-xml-interest](aalto-xml-interest@yahoogroups.com)
-* Optional Commercial Support is available via [Tidelift Subscriptions](https://tidelift.com/subscription/pkg/mav\
-en-com-fasterxml-aalto-xml?utm_source=maven-com-fasterxml-aalto-xml&utm_medium=referral&utm_campaign=readme)
+Aalto XML is supported by the community via the mailing list: [aalto-xml-interest](aalto-xml-interest@yahoogroups.com)
+
+### Enterprise support
+
+Available as part of the Tidelift Subscription.
+
+The maintainers of `aalto-xml` and thousands of other packages are working with Tidelift to deliver commercial support and maintenance for the open source dependencies you use to build your applications. Save time, reduce risk, and improve code health, while paying the maintainers of the exact dependencies you use. [Learn more.](https://tidelift.com/subscription/pkg/maven-com-fasterxml-aalto-xml?utm_source=maven-com-fasterxml-aalto-xml&utm_medium=referral&utm_campaign=enterprise&utm_term=repo)
 
 ## Contributing
 
