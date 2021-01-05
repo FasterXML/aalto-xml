@@ -4,6 +4,10 @@ Project: aalto-xml
 = Releases
 ------------------------------------------------------------------------
 
+1.2.3 (not yet released)
+
+* Fix minor offset check bug in `AsyncByteArrayScanner`/`AsyncByteBufferScanner`
+
 1.2.2 (14-Sep-2019)
 
 #69: `BufferRecycler` access not safe if readers/writers used from different threads

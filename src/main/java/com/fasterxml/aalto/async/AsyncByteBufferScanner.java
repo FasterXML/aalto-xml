@@ -2364,14 +2364,14 @@ public class AsyncByteBufferScanner
             if (b == BYTE_a) { // amp or apos?
                 b = _inputBuffer.get(ptr++);
                 if (b == BYTE_m) {
-                    if ((ptr + 1) < _inputPtr
+                    if ((ptr + 1) < _inputEnd
                             && _inputBuffer.get(ptr) == BYTE_p
                             && _inputBuffer.get(ptr+1) == BYTE_SEMICOLON) {
                         _inputPtr = ptr + 2;
                         return INT_AMP;
                     }
                 } else if (b == BYTE_p) {
-                    if ((ptr + 2) < _inputPtr
+                    if ((ptr + 2) < _inputEnd
                             && _inputBuffer.get(ptr) == BYTE_o
                             && _inputBuffer.get(ptr+1) == BYTE_s
                             && _inputBuffer.get(ptr+2) == BYTE_SEMICOLON) {
@@ -2392,7 +2392,7 @@ public class AsyncByteBufferScanner
                     return INT_LT;
                 }
             } else if (b == BYTE_q) { // quot?
-                if ((ptr + 3) < _inputPtr
+                if ((ptr + 3) < _inputEnd
                         && _inputBuffer.get(ptr)== BYTE_u
                         && _inputBuffer.get(ptr+1) == BYTE_o
                         && _inputBuffer.get(ptr+2) == BYTE_t
@@ -2920,14 +2920,14 @@ public class AsyncByteBufferScanner
             if (b == BYTE_a) { // amp or apos?
                 b = _inputBuffer.get(ptr++);
                 if (b == BYTE_m) {
-                    if ((ptr + 1) < _inputPtr
+                    if ((ptr + 1) < _inputEnd
                             && _inputBuffer.get(ptr) == BYTE_p
                             && _inputBuffer.get(ptr+1) == BYTE_SEMICOLON) {
                         _inputPtr = ptr + 2; // NOTE: do skip semicolon as well
                         return INT_AMP;
                     }
                 } else if (b == BYTE_p) {
-                    if ((ptr + 2) < _inputPtr
+                    if ((ptr + 2) < _inputEnd
                             && _inputBuffer.get(ptr) == BYTE_o
                             && _inputBuffer.get(ptr+1) == BYTE_s
                             && _inputBuffer.get(ptr+2) == BYTE_SEMICOLON) {
@@ -2948,7 +2948,7 @@ public class AsyncByteBufferScanner
                     return INT_LT;
                 }
             } else if (b == BYTE_q) { // quot?
-                if ((ptr + 3) < _inputPtr
+                if ((ptr + 3) < _inputEnd
                         && _inputBuffer.get(ptr) == BYTE_u
                         && _inputBuffer.get(ptr+1) == BYTE_o
                         && _inputBuffer.get(ptr+2) == BYTE_t
@@ -2961,7 +2961,7 @@ public class AsyncByteBufferScanner
         // couldn't handle:
         return 0;
     }
-    
+
     /**
      * Coalescing mode is (and will) not be implemented for non-blocking
      * parsers, so this method should never get called.

@@ -2359,14 +2359,14 @@ public class AsyncByteArrayScanner
             if (b == BYTE_a) { // amp or apos?
                 b = _inputBuffer[ptr++];
                 if (b == BYTE_m) {
-                    if ((ptr + 1) < _inputPtr
+                    if ((ptr + 1) < _inputEnd
                             && _inputBuffer[ptr] == BYTE_p
                             && _inputBuffer[ptr+1] == BYTE_SEMICOLON) {
                         _inputPtr = ptr + 2;
                         return INT_AMP;
                     }
                 } else if (b == BYTE_p) {
-                    if ((ptr + 2) < _inputPtr
+                    if ((ptr + 2) < _inputEnd
                             && _inputBuffer[ptr] == BYTE_o
                             && _inputBuffer[ptr+1] == BYTE_s
                             && _inputBuffer[ptr+2] == BYTE_SEMICOLON) {
@@ -2387,7 +2387,7 @@ public class AsyncByteArrayScanner
                     return INT_LT;
                 }
             } else if (b == BYTE_q) { // quot?
-                if ((ptr + 3) < _inputPtr
+                if ((ptr + 3) < _inputEnd
                         && _inputBuffer[ptr] == BYTE_u
                         && _inputBuffer[ptr+1] == BYTE_o
                         && _inputBuffer[ptr+2] == BYTE_t
@@ -2915,14 +2915,14 @@ public class AsyncByteArrayScanner
             if (b == BYTE_a) { // amp or apos?
                 b = _inputBuffer[ptr++];
                 if (b == BYTE_m) {
-                    if ((ptr + 1) < _inputPtr
+                    if ((ptr + 1) < _inputEnd
                             && _inputBuffer[ptr] == BYTE_p
                             && _inputBuffer[ptr+1] == BYTE_SEMICOLON) {
                         _inputPtr = ptr + 2; // NOTE: do skip semicolon as well
                         return INT_AMP;
                     }
                 } else if (b == BYTE_p) {
-                    if ((ptr + 2) < _inputPtr
+                    if ((ptr + 2) < _inputEnd
                             && _inputBuffer[ptr] == BYTE_o
                             && _inputBuffer[ptr+1] == BYTE_s
                             && _inputBuffer[ptr+2] == BYTE_SEMICOLON) {
@@ -2943,7 +2943,7 @@ public class AsyncByteArrayScanner
                     return INT_LT;
                 }
             } else if (b == BYTE_q) { // quot?
-                if ((ptr + 3) < _inputPtr
+                if ((ptr + 3) < _inputEnd
                         && _inputBuffer[ptr] == BYTE_u
                         && _inputBuffer[ptr+1] == BYTE_o
                         && _inputBuffer[ptr+2] == BYTE_t
