@@ -33,16 +33,16 @@ public abstract class ByteBasedPName
     protected final int mHash;
 
     protected ByteBasedPName(String pname, String prefix, String ln,
-                             int hash)
+            int hash)
     {
         super(pname, prefix, ln);
         mHash = hash;
     }
 
     /*
-    //////////////////////////////////////////////////////////
-    // Specialized comparators and accessors
-    //////////////////////////////////////////////////////////
+    /**********************************************************************
+    /* Specialized comparators and accessors
+    /**********************************************************************
      */
 
     // From base class:
@@ -67,9 +67,9 @@ public abstract class ByteBasedPName
     public abstract boolean hashEquals(int h, int[] quads, int qlen);
     
     /*
-    //////////////////////////////////////////////////////////
-    // Redefined standard methods
-    //////////////////////////////////////////////////////////
+    /**********************************************************************
+    /* Overridden standard methods
+    /**********************************************************************
      */
 
     /**

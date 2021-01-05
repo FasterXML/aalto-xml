@@ -13,18 +13,18 @@ import java.io.*;
 public final class MergedStream
     extends InputStream
 {
-    final ReaderConfig mConfig;
+    private final ReaderConfig mConfig;
 
-    final InputStream mIn;
+    private final InputStream mIn;
 
-    byte[] mData;
+    private byte[] mData;
 
-    int mPtr;
+    private int mPtr;
 
-    final int mEnd;
+    private final int mEnd;
 
     public MergedStream(ReaderConfig cfg,
-                        InputStream in, byte[] buf, int start, int end)
+            InputStream in, byte[] buf, int start, int end)
     {
         mConfig = cfg;
         mIn = in;
@@ -50,7 +50,7 @@ public final class MergedStream
     }
 
     @Override
-    public void mark(int readlimit)
+    public synchronized void mark(int readlimit)
     {
         if (mData == null) {
             mIn.mark(readlimit);
@@ -84,7 +84,7 @@ public final class MergedStream
     }
 
     @Override
-    public int 	read(byte[] b, int off, int len) throws IOException
+    public int read(byte[] b, int off, int len) throws IOException
     {
         if (mData != null) {
             int avail = mEnd - mPtr;
@@ -102,7 +102,7 @@ public final class MergedStream
     }
 
     @Override
-    public void reset() throws IOException
+    public synchronized void reset() throws IOException
     {
         if (mData == null) {
             mIn.reset();
@@ -133,10 +133,10 @@ public final class MergedStream
     }
 
     /*
-    /////////////////////////////////////////
-    // Internal methods
-    /////////////////////////////////////////
-    */
+    /**********************************************************************
+    /* Internal methods
+    /**********************************************************************
+     */
 
     private void freeBuffers()
     {

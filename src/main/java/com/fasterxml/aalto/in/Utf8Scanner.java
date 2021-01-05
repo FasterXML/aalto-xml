@@ -441,7 +441,7 @@ public final class Utf8Scanner
                         }
                         markLF();
                     } else {
-                        if (c < 0) {
+                        if (c > 0x7F) {
                             c = decodeMultiByteChar(c, _inputPtr);
                             if (c < 0) { // surrogate pair
                                 c = -c;

@@ -47,23 +47,23 @@ final class OutputElement
      * reusable unused element after this one (if not part of active
      * context).
      */
-    OutputElement _parent;
+    private OutputElement _parent;
 
     /**
      * Prefixed name used for serialization.
      */
-    WName _name;
+    private WName _name;
 
     /**
      * Namespace of the element, whatever prefix part of {@link #_name}
      * maps to. Non-final to allow reuse.
      */
-    String _uri;
+    private String _uri;
 
     /*
-    ////////////////////////////////////////////
-    // Namespace binding/mapping information
-    ////////////////////////////////////////////
+    /**********************************************************************
+    /* Namespace binding/mapping information
+    /**********************************************************************
      */
 
     /**
@@ -72,14 +72,14 @@ final class OutputElement
      */
     //NamespaceContext _rootNsContext;
 
-    String _defaultNsURI = "";
+    private String _defaultNsURI = "";
 
-    NsBinder _nsBinder = null;
+    private NsBinder _nsBinder = null;
 
     /*
-    ////////////////////////////////////////////
-    // Life-cycle
-    ////////////////////////////////////////////
+    /**********************************************************************
+    /* Life-cycle
+    /**********************************************************************
      */
 
     private OutputElement()
@@ -92,8 +92,8 @@ final class OutputElement
     }
 
     private OutputElement(OutputElement parent,
-                          WName name, String uri,
-                          NsBinder binder)
+            WName name, String uri,
+            NsBinder binder)
     {
         _parent = parent;
         _name = name;
@@ -127,9 +127,9 @@ final class OutputElement
     }
 
     /*
-    ////////////////////////////////////////////
-    // Instance reuse support
-    ////////////////////////////////////////////
+    /**********************************************************************
+    /* Instance reuse support
+    /**********************************************************************
      */
 
     /**
@@ -184,9 +184,9 @@ final class OutputElement
     }
 
     /*
-    ////////////////////////////////////////////
-    // Public API, accessors
-    ////////////////////////////////////////////
+    /**********************************************************************
+    /* Public API, accessors
+    /**********************************************************************
      */
 
     public OutputElement getParent() {
@@ -238,9 +238,9 @@ final class OutputElement
     }
 
     /*
-    ////////////////////////////////////////////
-    // Public API, mutators
-    ////////////////////////////////////////////
+    /**********************************************************************
+    /* Public API, mutators
+    /**********************************************************************
      */
 
     public void setDefaultNsURI(String uri) {
@@ -272,9 +272,9 @@ final class OutputElement
     }
 
     /*
-    //////////////////////////////////////////////////
-    // NamespaceContext implementation, other ns funcs
-    //////////////////////////////////////////////////
+    /**********************************************************************
+    /* NamespaceContext implementation, other ns funcs
+    /**********************************************************************
      */
 
     public String getNamespaceURI(String prefix)
@@ -449,14 +449,15 @@ final class OutputElement
     }
 
     /*
-    ////////////////////////////////////////////
-    // Comparison (etc) methods
-    ////////////////////////////////////////////
+    /**********************************************************************
+    /* Comparison (etc) methods
+    /**********************************************************************
      */
 
+    // 04-Jan-2021, tatu: Does not seem necessary or useful; no matching "equals()" so
+    //    should probably remove. But no harm right now so leaving for the moment
     @Override
-    public int hashCode()
-    {
+    public int hashCode() {
         return _name.hashCode();
     }
 }

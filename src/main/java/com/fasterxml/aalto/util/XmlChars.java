@@ -443,8 +443,8 @@ public final class XmlChars
                 return (c != 0x37E);
             }
             if (c >= 0x2070) {
-                // 0x2070 - 0x218F are ok
-                return (c <= 0x218F);
+                // 0x2070 - 0x218F are ok (c <= 0x218F already checked)
+                return true;
             }
             // And finally, 0x200C - 0x200D
             return (c == 0x200C || c == 0x200D);

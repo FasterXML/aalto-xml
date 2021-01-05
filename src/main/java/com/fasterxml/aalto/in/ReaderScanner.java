@@ -1222,8 +1222,7 @@ public final class ReaderScanner
                     }
                     cbuf[cix++] = c;
                     c = _inputBuffer[_inputPtr-1]; // was read by decode func
-                    ok = (cix == 0) ? XmlChars.is10NameStartChar(value)
-                        : XmlChars.is10NameChar(value);
+                    ok = XmlChars.is10NameChar(value);
                 } else if (c >= 0xFFFE) {
                     c = handleInvalidXmlChar(c);
                     ok = false; // never gets here
