@@ -459,13 +459,12 @@ public final class TextBuilder
         return true;
     }
 
-    /**
+    /*
      * Method that can be used to check if the contents of the buffer end
      * in specified String.
      *
      * @return True if the textual content buffer contains ends with the
      *   specified String; false otherwise
-     */
     public boolean endsWith(String str)
     {
         int segIndex = (_segments == null) ? 0 : _segments.size();
@@ -488,9 +487,9 @@ public final class TextBuilder
                 bufIndex = buf.length-1;
             }
         }
-
         return true;
     }
+    */
 
     /**
      * Note: it is assumed that this method is not used often enough to

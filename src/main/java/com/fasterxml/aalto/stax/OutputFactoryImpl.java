@@ -188,21 +188,18 @@ public final class OutputFactoryImpl
     /**********************************************************************
      */
 
-    /**
-     * Bottleneck factory method used internally; needs to take care of passing
-     * proper settings to stream writer.
-     *
-     * @param autoCloseOutput Whether writer should automatically close the
-     *   output stream or Writer, when close() is called on stream writer.
-     */
+    // Bottleneck factory method used internally; needs to take care of passing
+    // proper settings to stream writer.
+    //
+    // @param forceAutoClose Whether writer should automatically close the
+    //   output stream or Writer, when close() is called on stream writer.
     private XMLStreamWriter2 createSW(OutputStream out, Writer w, String enc,
-                                      boolean forceAutoClose)
+            boolean forceAutoClose)
         throws XMLStreamException
     {
-        /* Need to ensure that the configuration object is not shared
-         * any more; otherwise later changes via factory could be
-         * visible half-way through output...
-         */
+        // Need to ensure that the configuration object is not shared
+        // any more; otherwise later changes via factory could be
+        // visible half-way through output...
         WriterConfig cfg = _config.createNonShared();
         if (forceAutoClose) {
             cfg.doAutoCloseOutput(true);
@@ -214,9 +211,8 @@ public final class OutputFactoryImpl
             if (enc == null) {
                 enc = XmlConsts.STAX_DEFAULT_OUTPUT_ENCODING;
             } else {
-                /* Canonical ones are interned, so we may have
-                 * normalized encoding already...
-                 */
+                // Canonical ones are interned, so we may have
+                // normalized encoding already...
                 if (enc != CharsetNames.CS_UTF8
                     && enc != CharsetNames.CS_ISO_LATIN1
                     && enc != CharsetNames.CS_US_ASCII) {

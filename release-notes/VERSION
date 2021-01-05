@@ -7,6 +7,7 @@ Project: aalto-xml
 1.2.3 (not yet released)
 
 * Fix minor offset check bug in `AsyncByteArrayScanner`/`AsyncByteBufferScanner`
+* Various minor fixes based on lgtm.com suggestions
 
 1.2.2 (14-Sep-2019)
 

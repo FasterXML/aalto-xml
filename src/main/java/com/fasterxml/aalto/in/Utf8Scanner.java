@@ -440,22 +440,20 @@ public final class Utf8Scanner
                             ++_inputPtr;
                         }
                         markLF();
-                    } else {
-                        if (c > 0x7F) {
-                            c = decodeMultiByteChar(c, _inputPtr);
-                            if (c < 0) { // surrogate pair
-                                c = -c;
-                                // Let's add first part right away:
-                                if (attrPtr >= attrBuffer.length) {
-                                    _nameBuffer = attrBuffer = DataUtil.growArrayBy(attrBuffer, attrBuffer.length);
-                                }
-                                c -= 0x10000;
-                                attrBuffer[attrPtr++] = (char) (0xD800 | (c >> 10));
-                                c = 0xDC00 | (c & 0x3FF);
-                            }
-                        } else if (c != INT_TAB) {
-                            throwInvalidSpace(c);
+                    } else if (c != INT_TAB) {
+                        throwInvalidSpace(c);
+                    }
+                } else if (c > 0x7F) {
+                    c = decodeMultiByteChar(c, _inputPtr);
+                    if (c < 0) { // surrogate pair
+                        c = -c;
+                        // Let's add first part right away:
+                        if (attrPtr >= attrBuffer.length) {
+                            _nameBuffer = attrBuffer = DataUtil.growArrayBy(attrBuffer, attrBuffer.length);
                         }
+                        c -= 0x10000;
+                        attrBuffer[attrPtr++] = (char) (0xD800 | (c >> 10));
+                        c = 0xDC00 | (c & 0x3FF);
                     }
                 }
             }
