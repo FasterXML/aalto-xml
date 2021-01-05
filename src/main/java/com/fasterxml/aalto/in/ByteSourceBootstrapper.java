@@ -543,17 +543,13 @@ public final class ByteSourceBootstrapper
             }
 
             if (c == quoteChar) {
-                return (i < len) ? i : -1;
+                return i;
             }
-
-	    if (i < len) {
-		kw[i++] = (char) c;
-	    }
+            kw[i++] = (char) c;
         }
 
-        /* If we end up this far, we ran out of buffer space... let's let
-         * caller figure that out, though
-         */
+        // If we end up this far, we ran out of buffer space... let's let
+        // caller figure that out, though
         return -1;
     }
 

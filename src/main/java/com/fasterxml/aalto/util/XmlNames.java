@@ -1,20 +1,4 @@
-/* Woodstox Lite ("wool") XML processor
- *
- * Copyright (c) 2006- Tatu Saloranta, tatu.saloranta@iki.fi
- *
- * Licensed under the License specified in the file LICENSE which is
- * included with the source code.
- * You may not use this file except in compliance with the License.
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package com.fasterxml.aalto.util;
-
 
 /**
  * Simple utility class used for checking validity of xml names.
@@ -104,18 +88,18 @@ public final class XmlNames
         }
         // And the composite, is it ok?
         int val = ((firstChar - 0xD800) << 10) + 0x10000;
-        if (val > XmlConsts.MAX_UNICODE_CHAR) {
-            return false;
-        }
-        // !!! TODO: xml 1.1 vs 1.0 rules: none valid for 1.0, many for 1.1
-        return false;
+        // 04-Jan-2021, tatu: As per lgtm.com's warning, yes, due to range checks
+        //   for first and second char, cannot exceed maximum
+//        if (val > XmlConsts.MAX_UNICODE_CHAR) {
+//           return false;
+//        }
 
-        /*
-        if (true) {
-            return false;
-        }
-        return true;
-        */
+        // !!! TODO: xml 1.1 vs 1.0 rules: none valid for 1.0, many for 1.1
+
+        // 04-Jan-2021, tatu: Hmmh. Do we really fail on all surrogate characters in
+        //   names (for now). That seems incorrect.
+
+        return false;
     }
 
 }
