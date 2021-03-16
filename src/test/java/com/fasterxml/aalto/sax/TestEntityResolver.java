@@ -1,13 +1,14 @@
 package com.fasterxml.aalto.sax;
 
 import java.io.*;
+import java.util.concurrent.CountDownLatch;
 
 import javax.xml.parsers.SAXParser;
+import javax.xml.stream.XMLInputFactory;
 
+import com.fasterxml.aalto.stax.InputFactoryImpl;
 import org.xml.sax.*;
 import org.xml.sax.helpers.DefaultHandler;
-
-import com.fasterxml.aalto.sax.*;
 
 /**
  * Simple unit tests to verify that most fundamental parsing functionality
@@ -49,6 +50,46 @@ public class TestEntityResolver
         }
     }
 
+    public void testRetainAttributeEntityReference()
+            throws Exception
+    {
+        final String XML =
+                "<!DOCTYPE root PUBLIC '//some//public//id' 'no-such-thing.dtd'>\n"
+                        +"<root b=\"&replace-me;\" />";
+
+        SAXParserFactoryImpl spf = new SAXParserFactoryImpl();
+        SAXParser sp = spf.newSAXParser();
+        DefaultHandler h = new DefaultHandler();
+        
+        try {
+            sp.parse(new InputSource(new StringReader(XML)), h);
+            fail();
+        } catch (SAXException e) {
+            verifyException(e, "General entity reference (&replace-me;) encountered in entity expanding mode: operation not (yet) implemented\n at [row,col {unknown-source}]: [2,22]");
+        }
+
+        InputFactoryImpl inputFactory = new InputFactoryImpl();
+        inputFactory.setProperty(XMLInputFactory.IS_REPLACING_ENTITY_REFERENCES, false);
+        SAXParserFactoryImpl spfKeepEntityReferences = new SAXParserFactoryImpl(inputFactory);
+        spfKeepEntityReferences.setNamespaceAware(true);
+        SAXParser spKeepEntityReferences = spfKeepEntityReferences.newSAXParser();
+
+        final CountDownLatch countDownLatch = new CountDownLatch(1);
+        spKeepEntityReferences.parse(new InputSource(new StringReader(XML)), new DefaultHandler() {
+            @Override
+            public void startElement(String uri, String localName, String qName, Attributes attributes) {
+                assertEquals("root", localName);
+                assertEquals("root", qName);
+                assertEquals(1, attributes.getLength());
+                assertEquals("&replace-me;", attributes.getValue(0));
+
+                countDownLatch.countDown();
+            }
+        });
+        
+        assertEquals(0, countDownLatch.getCount());
+    }
+    
     static class MyResolver
         implements EntityResolver
     {

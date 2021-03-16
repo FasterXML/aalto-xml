@@ -896,20 +896,22 @@ public final class ReaderScanner
                     throwUnexpectedChar(c, "'<' not allowed in attribute value");
                 case XmlCharTypes.CT_AMP:
                     {
-                        int d = handleEntityInText(false);
-                        if (d == 0) { // unexpanded general entity... not good
-                            reportUnexpandedEntityInAttr(attrName, false);
-                        }
-                        // Ok; does it need a surrogate though? (over 16 bits)
-                        if ((d >> 16) != 0) {
-                            d -= 0x10000;
-                            attrBuffer[attrPtr++] = (char) (0xD800 | (d >> 10));
-                            d = 0xDC00 | (d & 0x3FF);
-                            if (attrPtr >= attrBuffer.length) {
-                                attrBuffer = _attrCollector.valueBufferFull();
+                        if (_config.willExpandEntities()) {
+                            int d = handleEntityInText(false);
+                            if (d == 0) { // unexpanded general entity... not good
+                                reportUnexpandedEntityInAttr(attrName, false);
                             }
+                            // Ok; does it need a surrogate though? (over 16 bits)
+                            if ((d >> 16) != 0) {
+                                d -= 0x10000;
+                                attrBuffer[attrPtr++] = (char) (0xD800 | (d >> 10));
+                                d = 0xDC00 | (d & 0x3FF);
+                                if (attrPtr >= attrBuffer.length) {
+                                    attrBuffer = _attrCollector.valueBufferFull();
+                                }
+                            }
+                            c = (char) d;
                         }
-                        c = (char) d;
                     }
                     break;
                 case XmlCharTypes.CT_ATTR_QUOTE:

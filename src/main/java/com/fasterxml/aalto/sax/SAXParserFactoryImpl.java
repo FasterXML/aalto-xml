@@ -37,6 +37,11 @@ public class SAXParserFactoryImpl
 {
     final InputFactoryImpl mStaxFactory;
 
+    public SAXParserFactoryImpl(InputFactoryImpl inputFactory)
+    {   
+        mStaxFactory = inputFactory;
+    }
+    
     public SAXParserFactoryImpl()
     {
         // defaults should be fine...
