@@ -264,7 +264,7 @@ class SAXParserImpl
                 // !!! TBI
                 return true;
             case EXTERNAL_GENERAL_ENTITIES:
-                return ((Boolean) _staxFactory.getProperty(AaltoInputProperties.P_EXPAND_GENERAL_ENTITIES)).booleanValue();     
+                return !((Boolean) _staxFactory.getProperty(AaltoInputProperties.P_RETAIN_GENERAL_ENTITIES)).booleanValue();     
             default:
             }
         } else {

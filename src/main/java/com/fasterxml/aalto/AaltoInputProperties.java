@@ -8,9 +8,9 @@ package com.fasterxml.aalto;
 public final class AaltoInputProperties {
 
     /**
-     * Feature controlling whether general entities are expanded or retained.
+     * Feature controlling whether general entities are retained.
      *
      * @since 1.3
      */
-    public final static String P_EXPAND_GENERAL_ENTITIES = "com.fasterxml.aalto.expandGeneralEntities";
+    public final static String P_RETAIN_GENERAL_ENTITIES = "com.fasterxml.aalto.retainGeneralEntities";
 }

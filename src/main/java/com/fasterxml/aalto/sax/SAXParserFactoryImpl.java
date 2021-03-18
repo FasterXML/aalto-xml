@@ -70,7 +70,7 @@ public class SAXParserFactoryImpl
             case IS_STANDALONE: // read-only, but only during parsing
                 return true;
             case EXTERNAL_GENERAL_ENTITIES:
-                return ((Boolean) mStaxFactory.getProperty(AaltoInputProperties.P_EXPAND_GENERAL_ENTITIES)).booleanValue();
+                return !((Boolean) mStaxFactory.getProperty(AaltoInputProperties.P_RETAIN_GENERAL_ENTITIES)).booleanValue();
             default:
             }
         } else {
@@ -98,7 +98,7 @@ public class SAXParserFactoryImpl
 
             switch (stdFeat) {
             case EXTERNAL_GENERAL_ENTITIES:
-                mStaxFactory.setProperty(AaltoInputProperties.P_EXPAND_GENERAL_ENTITIES, enabled);
+                mStaxFactory.setProperty(AaltoInputProperties.P_RETAIN_GENERAL_ENTITIES, !enabled);
                 ok = true;
                 break;
             case EXTERNAL_PARAMETER_ENTITIES:

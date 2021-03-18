@@ -42,10 +42,10 @@ public final class ReaderConfig
     final static int F_AUTO_CLOSE_INPUT = 0x2000;
 
     // Custom flags:
-    final static int F_EXPAND_GENERAL_ENTITIES = 0x3000;
+    final static int F_RETAIN_GENERAL_ENTITIES = 0x4000;
 
     /**
-     * These are the default settigs for XMLInputFactory.
+     * These are the default settings for XMLInputFactory.
      */
     final static int DEFAULT_FLAGS =
         F_NS_AWARE
@@ -57,8 +57,7 @@ public final class ReaderConfig
         | F_INTERN_NS_URIS
         // and will report CDATA as such (and not as CHARACTERS)
         | F_REPORT_CDATA
-        | F_PRESERVE_LOCATION
-        | F_EXPAND_GENERAL_ENTITIES
+        | F_PRESERVE_LOCATION 
         ;
 
     private final static HashMap<String, Object> sProperties;
@@ -102,7 +101,7 @@ public final class ReaderConfig
         sProperties.put(XMLInputFactory2.P_DTD_OVERRIDE, null);
 
         // Custom ones
-        sProperties.put(AaltoInputProperties.P_EXPAND_GENERAL_ENTITIES, Integer.valueOf(F_EXPAND_GENERAL_ENTITIES));
+        sProperties.put(AaltoInputProperties.P_RETAIN_GENERAL_ENTITIES, Integer.valueOf(F_RETAIN_GENERAL_ENTITIES));
     }
 
     /**
@@ -284,6 +283,10 @@ public final class ReaderConfig
         setFlag(F_REPORT_CDATA, state);
     }
 
+    public void doRetainGeneralEntities(boolean state) {
+        setFlag(F_RETAIN_GENERAL_ENTITIES, state);
+    }
+    
     /*
     /**********************************************************************
     /* Common accessors from CommonConfig
@@ -418,7 +421,7 @@ public final class ReaderConfig
 
     // // // Custom properties
 
-    public boolean willExpandGeneralEntities() { return hasFlag(F_EXPAND_GENERAL_ENTITIES); }
+    public boolean willRetainGeneralEntities() { return hasFlag(F_RETAIN_GENERAL_ENTITIES); }
 
     /*
     /**********************************************************************
