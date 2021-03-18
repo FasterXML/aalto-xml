@@ -6,5 +6,11 @@ package com.fasterxml.aalto;
  * {@link javax.xml.stream.XMLInputFactory}.
  */
 public final class AaltoInputProperties {
+
+    /**
+     * Feature controlling whether general entities are expanded or retained.
+     *
+     * @since 1.3
+     */
     public final static String P_EXPAND_GENERAL_ENTITIES = "com.fasterxml.aalto.expandGeneralEntities";
 }
