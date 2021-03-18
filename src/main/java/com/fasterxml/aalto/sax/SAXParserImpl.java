@@ -22,6 +22,7 @@ import javax.xml.parsers.SAXParser;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 
+import com.fasterxml.aalto.AaltoInputProperties;
 import org.xml.sax.*;
 import org.xml.sax.ext.Attributes2;
 import org.xml.sax.ext.DeclHandler;
@@ -262,6 +263,8 @@ class SAXParserImpl
             case IS_STANDALONE: // read-only, but only during parsing
                 // !!! TBI
                 return true;
+            case EXTERNAL_GENERAL_ENTITIES:
+                return ((Boolean) _staxFactory.getProperty(AaltoInputProperties.P_EXPAND_GENERAL_ENTITIES)).booleanValue();     
             default:
             }
         } else {

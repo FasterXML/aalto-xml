@@ -5,6 +5,7 @@ import java.util.*;
 
 import javax.xml.stream.*;
 
+import com.fasterxml.aalto.AaltoInputProperties;
 import org.codehaus.stax2.XMLInputFactory2;
 
 import com.fasterxml.aalto.impl.CommonConfig;
@@ -41,6 +42,7 @@ public final class ReaderConfig
     final static int F_AUTO_CLOSE_INPUT = 0x2000;
 
     // Custom flags:
+    final static int F_EXPAND_GENERAL_ENTITIES = 0x3000;
 
     /**
      * These are the default settigs for XMLInputFactory.
@@ -56,6 +58,7 @@ public final class ReaderConfig
         // and will report CDATA as such (and not as CHARACTERS)
         | F_REPORT_CDATA
         | F_PRESERVE_LOCATION
+        | F_EXPAND_GENERAL_ENTITIES
         ;
 
     private final static HashMap<String, Object> sProperties;
@@ -98,7 +101,8 @@ public final class ReaderConfig
         // !!! Not really implemented, but let's recognize it
         sProperties.put(XMLInputFactory2.P_DTD_OVERRIDE, null);
 
-        // Custom ones?
+        // Custom ones
+        sProperties.put(AaltoInputProperties.P_EXPAND_GENERAL_ENTITIES, Integer.valueOf(F_EXPAND_GENERAL_ENTITIES));
     }
 
     /**
@@ -412,6 +416,9 @@ public final class ReaderConfig
 
     public boolean hasInternNsURIsBeenEnabled() { return hasExplicitFlag(F_INTERN_NS_URIS); }
 
+    // // // Custom properties
+
+    public boolean willExpandGeneralEntities() { return hasFlag(F_EXPAND_GENERAL_ENTITIES); }
 
     /*
     /**********************************************************************

@@ -18,6 +18,7 @@ package com.fasterxml.aalto.sax;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
+import com.fasterxml.aalto.AaltoInputProperties;
 import org.xml.sax.SAXNotRecognizedException;
 import org.xml.sax.SAXNotSupportedException;
 
@@ -36,11 +37,6 @@ public class SAXParserFactoryImpl
     extends SAXParserFactory
 {
     final InputFactoryImpl mStaxFactory;
-
-    public SAXParserFactoryImpl(InputFactoryImpl inputFactory)
-    {   
-        mStaxFactory = inputFactory;
-    }
     
     public SAXParserFactoryImpl()
     {
@@ -73,6 +69,8 @@ public class SAXParserFactoryImpl
             switch (stdFeat) {
             case IS_STANDALONE: // read-only, but only during parsing
                 return true;
+            case EXTERNAL_GENERAL_ENTITIES:
+                return ((Boolean) mStaxFactory.getProperty(AaltoInputProperties.P_EXPAND_GENERAL_ENTITIES)).booleanValue();
             default:
             }
         } else {
@@ -100,7 +98,8 @@ public class SAXParserFactoryImpl
 
             switch (stdFeat) {
             case EXTERNAL_GENERAL_ENTITIES:
-                ok = !enabled;
+                mStaxFactory.setProperty(AaltoInputProperties.P_EXPAND_GENERAL_ENTITIES, enabled);
+                ok = true;
                 break;
             case EXTERNAL_PARAMETER_ENTITIES:
                 ok = !enabled;

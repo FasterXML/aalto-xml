@@ -896,7 +896,7 @@ public final class ReaderScanner
                     throwUnexpectedChar(c, "'<' not allowed in attribute value");
                 case XmlCharTypes.CT_AMP:
                     {
-                        if (_config.willExpandEntities()) {
+                        if (_config.willExpandGeneralEntities()) {
                             int d = handleEntityInText(false);
                             if (d == 0) { // unexpanded general entity... not good
                                 reportUnexpandedEntityInAttr(attrName, false);

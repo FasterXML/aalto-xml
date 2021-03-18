@@ -67,11 +67,9 @@ public class TestEntityResolver
         } catch (SAXException e) {
             verifyException(e, "General entity reference (&replace-me;) encountered in entity expanding mode: operation not (yet) implemented\n at [row,col {unknown-source}]: [2,22]");
         }
-
-        InputFactoryImpl inputFactory = new InputFactoryImpl();
-        inputFactory.setProperty(XMLInputFactory.IS_REPLACING_ENTITY_REFERENCES, false);
-        SAXParserFactoryImpl spfKeepEntityReferences = new SAXParserFactoryImpl(inputFactory);
-        spfKeepEntityReferences.setNamespaceAware(true);
+        
+        SAXParserFactoryImpl spfKeepEntityReferences = new SAXParserFactoryImpl();
+        spfKeepEntityReferences.setFeature("http://xml.org/sax/features/external-general-entities", false);
         SAXParser spKeepEntityReferences = spfKeepEntityReferences.newSAXParser();
 
         final CountDownLatch countDownLatch = new CountDownLatch(1);
