@@ -42,7 +42,7 @@ public final class ReaderConfig
     final static int F_AUTO_CLOSE_INPUT = 0x2000;
 
     // Custom flags:
-    final static int F_RETAIN_GENERAL_ENTITIES = 0x4000;
+    final static int F_RETAIN_ATTRIBUTE_GENERAL_ENTITIES = 0x4000;
 
     /**
      * These are the default settings for XMLInputFactory.
@@ -101,7 +101,7 @@ public final class ReaderConfig
         sProperties.put(XMLInputFactory2.P_DTD_OVERRIDE, null);
 
         // Custom ones
-        sProperties.put(AaltoInputProperties.P_RETAIN_GENERAL_ENTITIES, Integer.valueOf(F_RETAIN_GENERAL_ENTITIES));
+        sProperties.put(AaltoInputProperties.P_RETAIN_ATTRIBUTE_GENERAL_ENTITIES, Integer.valueOf(F_RETAIN_ATTRIBUTE_GENERAL_ENTITIES));
     }
 
     /**
@@ -283,8 +283,8 @@ public final class ReaderConfig
         setFlag(F_REPORT_CDATA, state);
     }
 
-    public void doRetainGeneralEntities(boolean state) {
-        setFlag(F_RETAIN_GENERAL_ENTITIES, state);
+    public void doRetainAttributeGeneralEntities(boolean state) {
+        setFlag(F_RETAIN_ATTRIBUTE_GENERAL_ENTITIES, state);
     }
     
     /*
@@ -421,7 +421,7 @@ public final class ReaderConfig
 
     // // // Custom properties
 
-    public boolean willRetainGeneralEntities() { return hasFlag(F_RETAIN_GENERAL_ENTITIES); }
+    public boolean willRetainAttributeGeneralEntities() { return hasFlag(F_RETAIN_ATTRIBUTE_GENERAL_ENTITIES); }
 
     /*
     /**********************************************************************

@@ -8,9 +8,9 @@ package com.fasterxml.aalto;
 public final class AaltoInputProperties {
 
     /**
-     * Feature controlling whether general entities are retained.
+     * Feature controlling whether general entities in attributes are retained.
      *
      * @since 1.3
      */
-    public final static String P_RETAIN_GENERAL_ENTITIES = "com.fasterxml.aalto.retainGeneralEntities";
+    public final static String P_RETAIN_ATTRIBUTE_GENERAL_ENTITIES = "com.fasterxml.aalto.retainAttributeGeneralEntities";
 }

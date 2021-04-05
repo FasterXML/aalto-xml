@@ -830,7 +830,7 @@ public final class ReaderScanner
      * simplify main method, which makes code more maintainable
      * and possibly easier for JIT/HotSpot to optimize.
      */
-    private final int collectValue(int attrPtr, char quoteChar, PName attrName)
+    private int collectValue(int attrPtr, char quoteChar, PName attrName)
         throws XMLStreamException
     {
         char[] attrBuffer = _attrCollector.startNewValue(attrName, attrPtr);
@@ -896,7 +896,7 @@ public final class ReaderScanner
                     throwUnexpectedChar(c, "'<' not allowed in attribute value");
                 case XmlCharTypes.CT_AMP:
                     {
-                        if (!_config.willRetainGeneralEntities()) {
+                        if (!_config.willRetainAttributeGeneralEntities()) {
                             int d = handleEntityInText(false);
                             if (d == 0) { // unexpanded general entity... not good
                                 reportUnexpandedEntityInAttr(attrName, false);
