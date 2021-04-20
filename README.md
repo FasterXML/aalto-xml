@@ -22,8 +22,7 @@ Aalto is licensed under [Apache License 2.0](http://www.apache.org/licenses/LICE
 There are 2 types of support available:
 
 * Community support via mailing lists: [aalto-xml-interest](aalto-xml-interest@yahoogroups.com)
-* Optional Commercial Support is available via [Tidelift Subscriptions](https://tidelift.com/subscription/pkg/mav\
-en-com-fasterxml-aalto-xml?utm_source=maven-com-fasterxml-aalto-xml&utm_medium=referral&utm_campaign=readme)
+* Optional Commercial Support is available via [Tidelift Subscriptions](https://tidelift.com/subscription/pkg/maven-com-fasterxml-aalto-xml?utm_source=maven-com-fasterxml-aalto-xml&utm_medium=referral&utm_campaign=readme)
 
 ## Contributing
 
@@ -36,7 +35,7 @@ a subscriber to do this).
 ## Documentation
 
 * [Project Wiki](https://github.com/FasterXML/aalto-xml/wiki) (docs, downloads)
-* [Aalto tutorial](http://www.studytrails.com/java/xml/aalto/java-xml-aalto-introduction.jsp) (by [StudyTrails](http://www.studytrails.com))
+* [Aalto tutorial](https://www.studytrails.com/2016/09/12/java-xml-aalto-introduction/) (by [StudyTrails](http://www.studytrails.com))
 * Cowtown blog:
     * [Non-blocking XML parsing with Aalto 0.9.7](http://www.cowtowncoder.com/blog/archives/2011/03/entry_451.html) (note: minor changes to API since then)
 
