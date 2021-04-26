@@ -27,27 +27,27 @@ public final class ReaderConfig
     public final static int STANDALONE_NO = 2;
 
     // Standard Stax flags:
-    final static int F_NS_AWARE = 0x0001;
-    final static int F_COALESCING = 0x0002;
-    final static int F_DTD_AWARE = 0x0004;
-    final static int F_DTD_VALIDATING = 0x0008;
-    final static int F_EXPAND_ENTITIES = 0x0010;
+    protected final static int F_NS_AWARE = 0x0001;
+    protected final static int F_COALESCING = 0x0002;
+    protected final static int F_DTD_AWARE = 0x0004;
+    protected final static int F_DTD_VALIDATING = 0x0008;
+    protected final static int F_EXPAND_ENTITIES = 0x0010;
 
     // Standard Stax2 flags:
-    final static int F_LAZY_PARSING = 0x0100;
-    final static int F_INTERN_NAMES = 0x0200;
-    final static int F_INTERN_NS_URIS = 0x0400;
-    final static int F_REPORT_CDATA = 0x0800;
-    final static int F_PRESERVE_LOCATION = 0x1000;
-    final static int F_AUTO_CLOSE_INPUT = 0x2000;
+    protected final static int F_LAZY_PARSING = 0x0100;
+    protected final static int F_INTERN_NAMES = 0x0200;
+    protected final static int F_INTERN_NS_URIS = 0x0400;
+    protected final static int F_REPORT_CDATA = 0x0800;
+    protected final static int F_PRESERVE_LOCATION = 0x1000;
+    protected final static int F_AUTO_CLOSE_INPUT = 0x2000;
 
     // Custom flags:
-    final static int F_RETAIN_ATTRIBUTE_GENERAL_ENTITIES = 0x4000;
+    protected final static int F_RETAIN_ATTRIBUTE_GENERAL_ENTITIES = 0x4000;
 
     /**
      * These are the default settings for XMLInputFactory.
      */
-    final static int DEFAULT_FLAGS =
+    protected final static int DEFAULT_FLAGS =
         F_NS_AWARE
         | F_DTD_AWARE
         | F_EXPAND_ENTITIES
@@ -57,8 +57,8 @@ public final class ReaderConfig
         | F_INTERN_NS_URIS
         // and will report CDATA as such (and not as CHARACTERS)
         | F_REPORT_CDATA
-        | F_PRESERVE_LOCATION 
-        ;
+        | F_PRESERVE_LOCATION
+    ;
 
     private final static HashMap<String, Object> sProperties;
     static {
@@ -100,8 +100,11 @@ public final class ReaderConfig
         // !!! Not really implemented, but let's recognize it
         sProperties.put(XMLInputFactory2.P_DTD_OVERRIDE, null);
 
-        // Custom ones
-        sProperties.put(AaltoInputProperties.P_RETAIN_ATTRIBUTE_GENERAL_ENTITIES, Integer.valueOf(F_RETAIN_ATTRIBUTE_GENERAL_ENTITIES));
+        // Custom ones:
+
+        // [aalto-xml#65]: Allow disabling processing of GEs in attribute values:
+        sProperties.put(AaltoInputProperties.P_RETAIN_ATTRIBUTE_GENERAL_ENTITIES,
+                Integer.valueOf(F_RETAIN_ATTRIBUTE_GENERAL_ENTITIES));
     }
 
     /**
@@ -141,6 +144,7 @@ public final class ReaderConfig
     private XMLResolver mResolver;
 
     private IllegalCharHandler illegalCharHandler;
+
     /*
     /**********************************************************************
     /* Buffer recycling:
@@ -283,6 +287,14 @@ public final class ReaderConfig
         setFlag(F_REPORT_CDATA, state);
     }
 
+    /**
+     * Method for enabling or disabling
+     * {@link AaltoInputProperties#P_RETAIN_ATTRIBUTE_GENERAL_ENTITIES}.
+     *
+     * @param state Whether to enable or disable property
+     *
+     * @since 1.3
+     */
     public void doRetainAttributeGeneralEntities(boolean state) {
         setFlag(F_RETAIN_ATTRIBUTE_GENERAL_ENTITIES, state);
     }
@@ -421,6 +433,14 @@ public final class ReaderConfig
 
     // // // Custom properties
 
+    /**
+     * Accessor for checking configured state of
+     * {@link AaltoInputProperties#P_RETAIN_ATTRIBUTE_GENERAL_ENTITIES}.
+     *
+     * @return Whether the property is enabled or disabled
+     *
+     * @since 1.3
+     */
     public boolean willRetainAttributeGeneralEntities() { return hasFlag(F_RETAIN_ATTRIBUTE_GENERAL_ENTITIES); }
 
     /*

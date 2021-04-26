@@ -25,3 +25,7 @@ Mike Conley (conleym@github)
 Michiel Borkent (borkdude@github)
  * Reported #47: NPE when trying to parse document with DTD declaration
   (1.2.1)
+
+Claude Mamo (otcdlink-simpleuser@github)
+ * Contributed #65: Support disabling General Entity Reference replacement in attribute values
+  (1.3.0)
