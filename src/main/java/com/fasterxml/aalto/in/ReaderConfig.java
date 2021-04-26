@@ -5,6 +5,7 @@ import java.util.*;
 
 import javax.xml.stream.*;
 
+import com.fasterxml.aalto.AaltoInputProperties;
 import org.codehaus.stax2.XMLInputFactory2;
 
 import com.fasterxml.aalto.impl.CommonConfig;
@@ -41,9 +42,10 @@ public final class ReaderConfig
     final static int F_AUTO_CLOSE_INPUT = 0x2000;
 
     // Custom flags:
+    final static int F_RETAIN_ATTRIBUTE_GENERAL_ENTITIES = 0x4000;
 
     /**
-     * These are the default settigs for XMLInputFactory.
+     * These are the default settings for XMLInputFactory.
      */
     final static int DEFAULT_FLAGS =
         F_NS_AWARE
@@ -55,7 +57,7 @@ public final class ReaderConfig
         | F_INTERN_NS_URIS
         // and will report CDATA as such (and not as CHARACTERS)
         | F_REPORT_CDATA
-        | F_PRESERVE_LOCATION
+        | F_PRESERVE_LOCATION 
         ;
 
     private final static HashMap<String, Object> sProperties;
@@ -98,7 +100,8 @@ public final class ReaderConfig
         // !!! Not really implemented, but let's recognize it
         sProperties.put(XMLInputFactory2.P_DTD_OVERRIDE, null);
 
-        // Custom ones?
+        // Custom ones
+        sProperties.put(AaltoInputProperties.P_RETAIN_ATTRIBUTE_GENERAL_ENTITIES, Integer.valueOf(F_RETAIN_ATTRIBUTE_GENERAL_ENTITIES));
     }
 
     /**
@@ -280,6 +283,10 @@ public final class ReaderConfig
         setFlag(F_REPORT_CDATA, state);
     }
 
+    public void doRetainAttributeGeneralEntities(boolean state) {
+        setFlag(F_RETAIN_ATTRIBUTE_GENERAL_ENTITIES, state);
+    }
+    
     /*
     /**********************************************************************
     /* Common accessors from CommonConfig
@@ -412,6 +419,9 @@ public final class ReaderConfig
 
     public boolean hasInternNsURIsBeenEnabled() { return hasExplicitFlag(F_INTERN_NS_URIS); }
 
+    // // // Custom properties
+
+    public boolean willRetainAttributeGeneralEntities() { return hasFlag(F_RETAIN_ATTRIBUTE_GENERAL_ENTITIES); }
 
     /*
     /**********************************************************************
