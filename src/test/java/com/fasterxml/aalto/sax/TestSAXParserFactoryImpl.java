@@ -1,17 +1,18 @@
 package com.fasterxml.aalto.sax;
 
-import org.xml.sax.SAXNotRecognizedException;
-import org.xml.sax.SAXNotSupportedException;
+import com.fasterxml.aalto.AaltoInputProperties;
 
-public class TestSAXParserFactoryImpl extends base.BaseTestCase {
-    
-    public void testSetGetFeatureExternalGeneralEntities() throws SAXNotRecognizedException, SAXNotSupportedException {
+public class TestSAXParserFactoryImpl extends base.BaseTestCase
+{
+    // [aalto-xml#65]
+    public void testSetGetFeatureExternalGeneralEntities() throws Exception
+    {
         SAXParserFactoryImpl saxParserFactory = new SAXParserFactoryImpl();
         saxParserFactory.setFeature("http://xml.org/sax/features/external-general-entities", false);
-        assertFalse(saxParserFactory.getFeature("http://xml.org/sax/features/external-general-entities"));
+        assertFalse(saxParserFactory.getFeature(AaltoInputProperties.P_RETAIN_ATTRIBUTE_GENERAL_ENTITIES));
 
-        saxParserFactory.setFeature("http://xml.org/sax/features/external-general-entities", true);
-        assertTrue(saxParserFactory.getFeature("http://xml.org/sax/features/external-general-entities"));
+        saxParserFactory.setFeature(AaltoInputProperties.P_RETAIN_ATTRIBUTE_GENERAL_ENTITIES, true);
+        assertTrue(saxParserFactory.getFeature(AaltoInputProperties.P_RETAIN_ATTRIBUTE_GENERAL_ENTITIES));
     }
-    
+   
 }

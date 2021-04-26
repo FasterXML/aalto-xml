@@ -71,6 +71,8 @@ public final class SAXUtil
     public static Boolean getFixedStdFeatureValue(SAXFeature stdFeat)
     {
         switch (stdFeat) {
+        case EXTERNAL_GENERAL_ENTITIES: // not yet implemented
+            return Boolean.FALSE;
         case EXTERNAL_PARAMETER_ENTITIES: // not yet implemented
             return Boolean.FALSE;
         case IS_STANDALONE: // read-only, but only during parsing

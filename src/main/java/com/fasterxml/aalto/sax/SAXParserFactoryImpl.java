@@ -45,10 +45,6 @@ public class SAXParserFactoryImpl
         mStaxFactory = new InputFactoryImpl();
     }
 
-    // As per [Issue#4], let's re-define this method
-    /**
-     * @since 0.9.8
-     */
     public static SAXParserFactory newInstance() {
         return new SAXParserFactoryImpl();
     }
@@ -69,12 +65,12 @@ public class SAXParserFactoryImpl
             switch (stdFeat) {
             case IS_STANDALONE: // read-only, but only during parsing
                 return true;
-            case EXTERNAL_GENERAL_ENTITIES:
-                return Boolean.FALSE.equals(mStaxFactory.getProperty(AaltoInputProperties.P_RETAIN_ATTRIBUTE_GENERAL_ENTITIES));
             default:
             }
         } else {
-            // any non-standard one we may support?
+            if (name.equals(AaltoInputProperties.P_RETAIN_ATTRIBUTE_GENERAL_ENTITIES)) {
+                return Boolean.TRUE.equals(mStaxFactory.getProperty(AaltoInputProperties.P_RETAIN_ATTRIBUTE_GENERAL_ENTITIES));
+            }
         }
 
         // nope, not recognized:
@@ -98,8 +94,7 @@ public class SAXParserFactoryImpl
 
             switch (stdFeat) {
             case EXTERNAL_GENERAL_ENTITIES:
-                mStaxFactory.setProperty(AaltoInputProperties.P_RETAIN_ATTRIBUTE_GENERAL_ENTITIES, !enabled);
-                ok = true;
+                ok = !enabled;
                 break;
             case EXTERNAL_PARAMETER_ENTITIES:
                 ok = !enabled;
@@ -120,9 +115,8 @@ public class SAXParserFactoryImpl
                 ok = true;
                 break;
             case STRING_INTERNING:
-                /* Can not disable; however, doesn't harm if they try to
-                 * do it, so let's not care
-                 */
+                // Can not disable; however, doesn't harm if they try to
+                // do it, so let's not care
                 ok = true;
                 break;
             case UNICODE_NORMALIZATION_CHECKING:
@@ -154,9 +148,13 @@ public class SAXParserFactoryImpl
                 throw new SAXNotSupportedException("Setting std feature "+stdFeat+" to "+enabled+" not supported");
             }
             return;
+        } else {
+            // [aalto-xml#65]: allow retaining GEs in attribute values
+            if (name.equals(AaltoInputProperties.P_RETAIN_ATTRIBUTE_GENERAL_ENTITIES)) {
+                mStaxFactory.setProperty(AaltoInputProperties.P_RETAIN_ATTRIBUTE_GENERAL_ENTITIES, enabled);
+                return;
+            }
         }
-
-        // any non-standard one we may support?
 
         // nope, not recognized:
         SAXUtil.reportUnknownFeature(name);

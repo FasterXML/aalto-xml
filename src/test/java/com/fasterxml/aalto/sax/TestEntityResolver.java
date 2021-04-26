@@ -4,11 +4,11 @@ import java.io.*;
 import java.util.concurrent.CountDownLatch;
 
 import javax.xml.parsers.SAXParser;
-import javax.xml.stream.XMLInputFactory;
 
-import com.fasterxml.aalto.stax.InputFactoryImpl;
 import org.xml.sax.*;
 import org.xml.sax.helpers.DefaultHandler;
+
+import com.fasterxml.aalto.AaltoInputProperties;
 
 /**
  * Simple unit tests to verify that most fundamental parsing functionality
@@ -30,9 +30,8 @@ public class TestEntityResolver
         SAXParser sp = spf.newSAXParser();
         DefaultHandler h = new DefaultHandler();
 
-        /* First: let's verify that we get an exception for
-         * unresolved reference...
-         */
+        // First: let's verify that we get an exception for
+        // unresolved reference...
         try {
             sp.parse(new InputSource(new StringReader(XML)), h);
         } catch (SAXException e) {
@@ -50,6 +49,7 @@ public class TestEntityResolver
         }
     }
 
+    // [aalto-xml#65]: allow retaining GEs in attribute values
     public void testRetainAttributeEntityReference()
             throws Exception
     {
@@ -58,6 +58,9 @@ public class TestEntityResolver
                         +"<root b=\"&replace-me;\" />";
 
         SAXParserFactoryImpl spf = new SAXParserFactoryImpl();
+        // should be disabled by default:
+        assertEquals(false,
+                spf.getFeature(AaltoInputProperties.P_RETAIN_ATTRIBUTE_GENERAL_ENTITIES));
         SAXParser sp = spf.newSAXParser();
         DefaultHandler h = new DefaultHandler();
         
@@ -67,9 +70,12 @@ public class TestEntityResolver
         } catch (SAXException e) {
             verifyException(e, "General entity reference (&replace-me;) encountered in entity expanding mode: operation not (yet) implemented\n at [row,col {unknown-source}]: [2,22]");
         }
-        
+
         SAXParserFactoryImpl spfKeepEntityReferences = new SAXParserFactoryImpl();
-        spfKeepEntityReferences.setFeature("http://xml.org/sax/features/external-general-entities", false);
+        spfKeepEntityReferences.setFeature(AaltoInputProperties.P_RETAIN_ATTRIBUTE_GENERAL_ENTITIES, true);
+        assertEquals(true,
+                spfKeepEntityReferences.getFeature(AaltoInputProperties.P_RETAIN_ATTRIBUTE_GENERAL_ENTITIES));
+
         SAXParser spKeepEntityReferences = spfKeepEntityReferences.newSAXParser();
 
         final CountDownLatch countDownLatch = new CountDownLatch(1);
