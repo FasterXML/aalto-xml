@@ -17,20 +17,18 @@ package com.fasterxml.aalto.in;
 
 import java.io.*;
 
-
-import com.fasterxml.aalto.in.ReaderConfig;
 import com.fasterxml.aalto.util.XmlConsts;
 
 /**
  * Since JDK does not come with UTF-32/UCS-4, let's implement a simple
  * decoder to use.
  */
-public final class Utf32Reader
+public class Utf32Reader
     extends Reader
 {
-    final static char NULL_CHAR = (char) 0;
+    private final static char NULL_CHAR = (char) 0;
 
-    final ReaderConfig mConfig;
+    protected final ReaderConfig mConfig;
 
     protected InputStream mIn;
 
@@ -39,44 +37,44 @@ public final class Utf32Reader
     protected int mPtr;
     protected int mLength;
 
-    final boolean mBigEndian;
+    protected final boolean mBigEndian;
 
     /**
      * Although input is fine with full Unicode set, Java still uses
      * 16-bit chars, so we may have to split high-order chars into
      * surrogate pairs.
      */
-    char mSurrogate = NULL_CHAR;
+    protected char mSurrogate = NULL_CHAR;
 
     /**
      * Total read character count; used for error reporting purposes
      */
-    int mCharCount = 0;
+    protected int mCharCount = 0;
 
     /**
      * Total read byte count; used for error reporting purposes
      */
-    int mByteCount = 0;
+    protected int mByteCount = 0;
 
     /*
-    ////////////////////////////////////////
-    // Life-cycle
-    ////////////////////////////////////////
-    */
+    /**********************************************************************
+    /* Life-cycle
+    /**********************************************************************
+     */
 
     public Utf32Reader(ReaderConfig cfg, InputStream in,
-                       byte[] buf, int ptr, int len,
-                       boolean isBigEndian)
+            byte[] buf, int ptr, int len,
+            boolean isBigEndian)
     {
         mConfig = cfg;
         mBigEndian = isBigEndian;
     }
 
     /*
-    ////////////////////////////////////////
-    // Reader API
-    ////////////////////////////////////////
-    */
+    /**********************************************************************
+    /* Reader API
+    /**********************************************************************
+     */
 
     @Override
     public void close() throws IOException
@@ -110,10 +108,10 @@ public final class Utf32Reader
     }
 
     /*
-    ////////////////////////////////////////
-    // Public API
-    ////////////////////////////////////////
-    */
+    /**********************************************************************
+    /* Public API
+    /**********************************************************************
+     */
 
     @Override
     public int read(char[] cbuf, int start, int len) throws IOException
@@ -203,10 +201,10 @@ public final class Utf32Reader
     }
 
     /*
-    ////////////////////////////////////////
-    // Internal methods
-    ////////////////////////////////////////
-    */
+    /**********************************************************************
+    /* Internal methods
+    /**********************************************************************
+     */
 
 
     /**
@@ -230,9 +228,8 @@ public final class Utf32Reader
             }
             mLength = available;
         } else {
-            /* Ok; here we can actually reasonably expect an EOF,
-             * so let's do a separate read right away:
-             */
+            // Ok; here we can actually reasonably expect an EOF,
+            // so let's do a separate read right away:
             mPtr = 0;
             int count = mIn.read(mBuffer);
             if (count < 1) {
@@ -247,9 +244,8 @@ public final class Utf32Reader
             mLength = count;
         }
 
-        /* Need at least 4 bytes; if we don't get that many, it's an
-         * error.
-         */
+        // Need at least 4 bytes; if we don't get that many, it's an
+        // error.
         while (mLength < 4) {
             int count = mIn.read(mBuffer, mLength, mBuffer.length - mLength);
             if (count < 1) {
@@ -277,9 +273,9 @@ public final class Utf32Reader
     }
 
     /*
-    //////////////////////////////////////////
-    // Error reporting
-    //////////////////////////////////////////
+    /**********************************************************************
+    /* Error reporting
+    /**********************************************************************
      */
 
     private void reportUnexpectedEOF(int gotBytes, int needed)
@@ -289,8 +285,8 @@ public final class Utf32Reader
         int charPos = mCharCount;
 
         throw new CharConversionException("Unexpected EOF in the middle of a 4-byte UTF-32 char: got "
-                                          +gotBytes+", needed "+needed
-                                          +", at char #"+charPos+", byte #"+bytePos+")");
+                +gotBytes+", needed "+needed
+                +", at char #"+charPos+", byte #"+bytePos+")");
     }
 
     private void reportInvalid(int value, int offset, String msg)
@@ -300,8 +296,8 @@ public final class Utf32Reader
         int charPos = mCharCount + offset;
 
         throw new CharConversionException("Invalid UTF-32 character 0x"
-                                          +Integer.toHexString(value)
-                                          +msg+" at char #"+charPos+", byte #"+bytePos+")");
+                +Integer.toHexString(value)
+                +msg+" at char #"+charPos+", byte #"+bytePos+")");
     }
 
     protected void reportBounds(char[] cbuf, int start, int len)

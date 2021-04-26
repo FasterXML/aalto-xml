@@ -207,7 +207,7 @@ public class TestClosing
     {
         final MyWriter mWriter;
 
-        private MyResult() {
+        MyResult() {
             super();
             mWriter = new MyWriter();
             setWriter(mWriter);

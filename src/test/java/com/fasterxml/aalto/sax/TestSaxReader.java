@@ -4,11 +4,10 @@ import java.io.IOException;
 import java.io.StringReader;
 
 import javax.xml.parsers.SAXParser;
+
 import org.xml.sax.*;
 import org.xml.sax.ext.DeclHandler;
 import org.xml.sax.ext.DefaultHandler2;
-
-import com.fasterxml.aalto.sax.*;
 
 public class TestSaxReader
     extends base.BaseTestCase
@@ -35,7 +34,7 @@ public class TestSaxReader
 
     /*
     //////////////////////////////////////////////////////
-    // Helper methods:
+    // Helper methods
     //////////////////////////////////////////////////////
     */
 

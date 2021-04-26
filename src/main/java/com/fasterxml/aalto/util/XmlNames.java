@@ -87,7 +87,8 @@ public final class XmlNames
             return false;
         }
         // And the composite, is it ok?
-        int val = ((firstChar - 0xD800) << 10) + 0x10000;
+//        int val = ((firstChar - 0xD800) << 10) + 0x10000;
+ 
         // 04-Jan-2021, tatu: As per lgtm.com's warning, yes, due to range checks
         //   for first and second char, cannot exceed maximum
 //        if (val > XmlConsts.MAX_UNICODE_CHAR) {

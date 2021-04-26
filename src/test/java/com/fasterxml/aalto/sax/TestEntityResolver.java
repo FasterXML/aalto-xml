@@ -7,8 +7,6 @@ import javax.xml.parsers.SAXParser;
 import org.xml.sax.*;
 import org.xml.sax.helpers.DefaultHandler;
 
-import com.fasterxml.aalto.sax.*;
-
 /**
  * Simple unit tests to verify that most fundamental parsing functionality
  * works via Woodstox SAX implementation.
