@@ -8,7 +8,6 @@ public class TestSAXParserFactoryImpl extends base.BaseTestCase
     public void testSetGetFeatureExternalGeneralEntities() throws Exception
     {
         SAXParserFactoryImpl saxParserFactory = new SAXParserFactoryImpl();
-        saxParserFactory.setFeature("http://xml.org/sax/features/external-general-entities", false);
         assertFalse(saxParserFactory.getFeature(AaltoInputProperties.P_RETAIN_ATTRIBUTE_GENERAL_ENTITIES));
 
         saxParserFactory.setFeature(AaltoInputProperties.P_RETAIN_ATTRIBUTE_GENERAL_ENTITIES, true);

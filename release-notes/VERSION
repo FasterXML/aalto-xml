@@ -4,7 +4,7 @@ Project: aalto-xml
 = Releases
 ------------------------------------------------------------------------
 
-1.3.0 (not yet released)
+1.3.0 (11-May-2021)
 
 #65: Support disabling General Entity Reference replacement in attribute values
  (contributed by Claude M)
