@@ -30,6 +30,7 @@ public class TestSaxWriter extends base.BaseTestCase {
         writer.writeStartTagEnd();
         writer.writeEndTag(writer.constructName("testelement"));
         writer.close(false);
+
     }
 
     public void testSurrogateMemory2() throws Exception {
@@ -52,6 +53,5 @@ public class TestSaxWriter extends base.BaseTestCase {
         writer.writeStartTagEnd();
         writer.writeEndTag(writer.constructName("testelement"));
         writer.close(false);
-        System.out.println(byteArrayOutputStream);
     }
 }
