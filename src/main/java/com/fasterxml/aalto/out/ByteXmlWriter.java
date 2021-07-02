@@ -390,7 +390,7 @@ public abstract class ByteXmlWriter
             flushBuffer();
         }
         _outputBuffer[_outputPtr++] = BYTE_GT;
-    }    
+    }
 
     @Override
     public void writeStartTagEmptyEnd()
@@ -435,7 +435,7 @@ public abstract class ByteXmlWriter
         ptr += name.appendBytes(bbuf, ptr);
         bbuf[ptr++] = BYTE_GT;
         _outputPtr = ptr;
-    }    
+    }
 
     /*
     /**********************************************************************
@@ -572,6 +572,8 @@ public abstract class ByteXmlWriter
     {
         if (_surrogate != 0) {
             outputSurrogates(_surrogate, vbuf[offset]);
+//           reset the temporary surrogate storage
+            _surrogate = 0;
             ++offset;
             --len;
         }
@@ -785,7 +787,7 @@ public abstract class ByteXmlWriter
             writeCDataEnd(); // will check surrogates
         }
         return ix;
-    }    
+    }
 
     protected int writeCDataContents(char[] cbuf, int offset, int len)
         throws IOException, XMLStreamException
@@ -865,7 +867,7 @@ public abstract class ByteXmlWriter
             }
         }
         return -1;
-    }    
+    }
 
     @Override
     public final void writeCharacters(String text)
@@ -908,6 +910,8 @@ public abstract class ByteXmlWriter
     {
         if (_surrogate != 0) {
             outputSurrogates(_surrogate, cbuf[offset]);
+//           reset the temporary surrogate storage
+            _surrogate = 0;
             ++offset;
             --len;
         }
@@ -1088,7 +1092,7 @@ public abstract class ByteXmlWriter
             }
             _outputBuffer[_outputPtr++] = (byte)ch;
         }
-    }    
+    }
 
     /*
     /**********************************************************************
@@ -1439,7 +1443,7 @@ public abstract class ByteXmlWriter
         // !!! TBI: check validity
         writeRaw(version, 0, version.length());
         writeRaw(BYTE_APOS);
-        
+
         if (encoding != null && encoding.length() > 0) {
             writeRaw(BYTES_XMLDECL_ENCODING);
             // !!! TBI: check validity
@@ -1453,7 +1457,7 @@ public abstract class ByteXmlWriter
             writeRaw(BYTE_APOS);
         }
         writeRaw(BYTE_QMARK, BYTE_GT);
-    }    
+    }
 
     /*
     /**********************************************************************
@@ -1594,7 +1598,7 @@ public abstract class ByteXmlWriter
     protected final void writeAsEntity(int c)
         throws IOException
     {
-        // Quickie check to avoid 
+        // Quickie check to avoid
 
         byte[] buf = _outputBuffer;
         int ptr = _outputPtr;
