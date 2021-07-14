@@ -23,9 +23,9 @@ public final class FixedNsContext
     }
 
     /*
-    ////////////////////////////////////////////////////////
-    // Persisted namespace information
-    ////////////////////////////////////////////////////////
+    /**********************************************************************
+    /* Persisted namespace information
+    /**********************************************************************
      */
 
     /**
@@ -89,17 +89,16 @@ public final class FixedNsContext
     }
 
     /*
-    /////////////////////////////////////////////
-    // NamespaceContext API
-    /////////////////////////////////////////////
+    /**********************************************************************
+    /* NamespaceContext API
+    /**********************************************************************
      */
 
     @Override
     public final String getNamespaceURI(String prefix)
     {
-        /* First the known offenders; invalid args, 2 predefined xml
-         * namespace prefixes
-         */
+        // First the known offenders; invalid args, 2 predefined xml
+        // namespace prefixes
         if (prefix == null) {
             throw new IllegalArgumentException("Null prefix not allowed");
         }
@@ -115,7 +114,7 @@ public final class FixedNsContext
         String[] ns = _declarationData;
         for (int i = 0, len = ns.length; i < len; i += 2) {
             if (prefix.equals(ns[i])) {
-                return ns[i+1];
+                return ns[i+1]; // lgtm [java/index-out-of-bounds]
             }
         }
         return null;
@@ -124,9 +123,8 @@ public final class FixedNsContext
     @Override
     public final String getPrefix(String nsURI)
     {
-        /* First the known offenders; invalid args, 2 predefined xml
-         * namespace prefixes
-         */
+        // First the known offenders; invalid args, 2 predefined xml
+        // namespace prefixes
         if (nsURI == null || nsURI.length() == 0) {
             throw new IllegalArgumentException("Illegal to pass null/empty prefix as argument.");
         }
@@ -209,9 +207,9 @@ public final class FixedNsContext
     }
 
     /*
-    /////////////////////////////////////////////
-    // Other methods
-    /////////////////////////////////////////////
+    /**********************************************************************
+    /* Standard method overrides
+    /**********************************************************************
      */
 
     @Override
@@ -227,7 +225,7 @@ public final class FixedNsContext
                 sb.append(", ");
             }
             sb.append('"').append(_declarationData[i]).append("\"->\"");
-            sb.append(_declarationData[i+1]).append('"');
+            sb.append(_declarationData[i+1]).append('"'); // lgtm [java/index-out-of-bounds]
         }
         sb.append(']');
         return sb.toString();

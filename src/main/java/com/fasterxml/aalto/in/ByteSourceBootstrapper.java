@@ -48,7 +48,7 @@ public final class ByteSourceBootstrapper
     /**
      * Underlying InputStream to use for reading content.
      */
-    final InputStream _in;
+    protected final InputStream _in;
 
     /*
     /**********************************************************************
@@ -56,7 +56,7 @@ public final class ByteSourceBootstrapper
     /**********************************************************************
      */
 
-    final byte[] _inputBuffer;
+    protected final byte[] _inputBuffer;
 
     private int _inputPtr;
 
@@ -68,11 +68,11 @@ public final class ByteSourceBootstrapper
     /**********************************************************************
      */
 
-    boolean mBigEndian = true;
-    int mBytesPerChar = 0; // 0 means "dunno yet"
+    protected boolean mBigEndian = true;
+    protected int mBytesPerChar = 0; // 0 means "dunno yet"
 
-    boolean mHadBOM = false;
-    boolean mByteSizeFound = false;
+    protected boolean mHadBOM = false;
+    protected boolean mByteSizeFound = false;
 
     /*
     /**********************************************************************
@@ -164,9 +164,9 @@ public final class ByteSourceBootstrapper
             return new Utf8Scanner(_config,
                                    _in, _inputBuffer, _inputPtr, _inputLen);
         } else if (normEnc.startsWith(CharsetNames.CS_UTF32)) {
-            /* Since this is such a rare encoding, we'll just create
-             * a Reader, and dispatch it to reader scanner?
-             */
+            // Since this is such a rare encoding, we'll just create
+            // a Reader, and dispatch it to reader scanner?
+
             // let's augment with actual endianness info
             if (normEnc == CharsetNames.CS_UTF32) {
                 normEnc = mBigEndian ? CharsetNames.CS_UTF32BE : CharsetNames.CS_UTF32LE;
@@ -176,19 +176,17 @@ public final class ByteSourceBootstrapper
             return new ReaderScanner(_config, r);
         }
 
-        /* And finally, if all else fails, we'll also fall back to
-         * using JDK-provided decoders and ReaderScanner:
-         */
+        // And finally, if all else fails, we'll also fall back to
+        // using JDK-provided decoders and ReaderScanner:
         InputStream in = _in;
         if (_inputPtr < _inputLen) {
-            in = new MergedStream(_config, in, _inputBuffer, _inputPtr, _inputLen);
+            in = new MergedStream(_config, in, _inputBuffer, _inputPtr, _inputLen); // lgtm [java/input-resource-leak]
         }
         if (normEnc == CharsetNames.CS_UTF16) {
             normEnc = mBigEndian ? CharsetNames.CS_UTF16BE : CharsetNames.CS_UTF16LE;
         }
         try {
-            Reader r = new InputStreamReader(in, normEnc);
-            return new ReaderScanner(_config, r);
+            return new ReaderScanner(_config, new InputStreamReader(in, normEnc));
         } catch (UnsupportedEncodingException usex) {
             throw new IoStreamException("Unsupported encoding: "+usex.getMessage());
         }
@@ -221,9 +219,8 @@ public final class ByteSourceBootstrapper
                     | ((_inputBuffer[_inputPtr+2] & 0xFF) << 8)
                     | (_inputBuffer[_inputPtr+3] & 0xFF);
 
-                /* Handling of (usually) optional BOM (required for
-                 * multi-byte formats); first 32-bit charsets:
-                 */
+                // Handling of (usually) optional BOM (required for
+                // multi-byte formats); first 32-bit charsets:
                 switch (quartet) {
                 case 0x0000FEFF:
                     mBigEndian = true;
@@ -760,9 +757,8 @@ public final class ByteSourceBootstrapper
         throws XMLStreamException
     {
         if (mByteSizeFound) {
-            /* Let's verify that if we matched an encoding, it's the same
-             * as what was declared...
-             */
+            // Let's verify that if we matched an encoding, it's the same
+            // as what was declared...
             if (bpc != mBytesPerChar) {
                 reportXmlProblem("Declared encoding '"+id+"' uses "+bpc
                                  +" bytes per character; but physical encoding appeared to use "+mBytesPerChar+"; cannot decode");
