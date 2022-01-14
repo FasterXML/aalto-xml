@@ -29,3 +29,7 @@ Michiel Borkent (borkdude@github)
 Claude Mamo (otcdlink-simpleuser@github)
  * Contributed #65: Support disabling General Entity Reference replacement in attribute values
   (1.3.0)
+
+Erik Fäßler (khituras@github)
+ * Contributed #75: Fixing a bug when multi-byte characters were split
+  (1.3.1)
