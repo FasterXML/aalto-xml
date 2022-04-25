@@ -2393,7 +2393,7 @@ public class AsyncByteArrayScanner
                         && _inputBuffer[ptr+2] == BYTE_t
                         && _inputBuffer[ptr+3] == BYTE_SEMICOLON) {
                     _inputPtr = ptr + 4;
-                    return INT_APOS;
+                    return INT_QUOTE;
                 }
             }
         }
@@ -2949,7 +2949,7 @@ public class AsyncByteArrayScanner
                         && _inputBuffer[ptr+2] == BYTE_t
                         && _inputBuffer[ptr+3] == BYTE_SEMICOLON) {
                     _inputPtr = ptr + 4;
-                    return INT_APOS;
+                    return INT_QUOTE;
                 }
             }
         }

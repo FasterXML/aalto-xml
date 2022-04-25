@@ -372,7 +372,7 @@ public abstract class AsyncByteScanner
     protected void _releaseBuffers()
     {
         super._releaseBuffers();
-        if (_symbols.maybeDirty()) {
+        if ((_symbols != null) && _symbols.maybeDirty()) {
             _config.updateBBSymbols(_symbols);
         }
     }

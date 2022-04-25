@@ -141,7 +141,17 @@ public class TestCharactersParsing extends AsyncTestBase
 
     private void _testTextWithEntities(final int chunkSize, final boolean checkValues, final String SPC) throws Exception
     {
-        final String XML = SPC + "<root>a&lt;b\rMOT</root>";
+        _testTextWithEntities(chunkSize, checkValues, SPC, "&lt", "<");
+        _testTextWithEntities(chunkSize, checkValues, SPC, "&gt", ">");
+        _testTextWithEntities(chunkSize, checkValues, SPC, "&apos", "'");
+        // for [aalto-xml#78]
+        _testTextWithEntities(chunkSize, checkValues, SPC, "&quot", "\"");
+    }
+
+    private void _testTextWithEntities(final int chunkSize, final boolean checkValues, final String SPC,
+            final String entity, final String entityExpanded) throws Exception
+    {
+        final String XML = SPC + "<root>a"+entity+";b\rMOT</root>";
 
         final AsyncXMLInputFactory f = new InputFactoryImpl();
 
@@ -150,7 +160,7 @@ public class TestCharactersParsing extends AsyncTestBase
         try {
             sr_array = f.createAsyncForByteArray();
             final AsyncReaderWrapperForByteArray reader_array = new AsyncReaderWrapperForByteArray(sr_array, chunkSize, XML);
-            _testTextWithEntities(sr_array, reader_array, checkValues);
+            _testTextWithEntities(sr_array, reader_array, checkValues, entityExpanded);
         } finally {
             if (sr_array != null) {
                 sr_array.close();
@@ -162,7 +172,7 @@ public class TestCharactersParsing extends AsyncTestBase
         try {
             sr_buffer = f.createAsyncForByteBuffer();
             final AsyncReaderWrapperForByteBuffer reader_buffer = new AsyncReaderWrapperForByteBuffer(sr_buffer, chunkSize, XML);
-            _testTextWithEntities(sr_buffer, reader_buffer, checkValues);
+            _testTextWithEntities(sr_buffer, reader_buffer, checkValues, entityExpanded);
         } finally {
             if (sr_buffer != null) {
                 sr_buffer.close();
@@ -170,7 +180,9 @@ public class TestCharactersParsing extends AsyncTestBase
         }
     }
 
-    private void _testTextWithEntities(final AsyncXMLStreamReader<?> sr, final AsyncReaderWrapper reader, final boolean checkValues) throws Exception
+    private void _testTextWithEntities(final AsyncXMLStreamReader<?> sr, final AsyncReaderWrapper reader,
+            final boolean checkValues,
+            final String entityExpanded) throws Exception
     {
         // should start with START_DOCUMENT, but for now skip
         int t = verifyStart(reader);
@@ -182,7 +194,7 @@ public class TestCharactersParsing extends AsyncTestBase
         assertTokenType(CHARACTERS, reader.nextToken());
         if (checkValues) {
             String str = collectAsyncText(reader, CHARACTERS); // moves to end-element
-            assertEquals("a<b\nMOT", str);
+            assertEquals("a"+entityExpanded+"b\nMOT", str);
         } else {
             reader.nextToken();
         }
