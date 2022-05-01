@@ -15,7 +15,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        java_version: ['8', '11', '17']
+        # 01-May-2022, tatu: Until we require Java 8, cannot test against JDK 17 or above
+        java_version: ['8', '11']
         os: ['ubuntu-20.04']
     env:
       JAVA_OPTS: "-XX:+TieredCompilation -XX:TieredStopAtLevel=1"
