@@ -792,6 +792,13 @@ public abstract class ByteXmlWriter
     protected int writeCDataContents(char[] cbuf, int offset, int len)
         throws IOException, XMLStreamException
     {
+        if (_surrogate != 0) {
+            outputSurrogates(_surrogate, cbuf[offset]);
+//           reset the temporary surrogate storage
+            _surrogate = 0;
+            ++offset;
+            --len;
+        }
         /* Unlike with writeCharacters() and fastWriteName(), let's not
          * worry about split buffers here: this is unlikely to become
          * performance bottleneck. This allows keeping it simple; and
