@@ -4,7 +4,7 @@
   <parent>
     <groupId>com.fasterxml</groupId>
     <artifactId>oss-parent</artifactId>
-    <version>44</version>
+    <version>58</version>
   </parent>
 
   <artifactId>aalto-xml</artifactId>
@@ -82,7 +82,7 @@ org.xml.sax, org.xml.sax.ext, org.xml.sax.helpers</osgi.import>
     <dependency>
       <groupId>com.fasterxml.woodstox</groupId>
       <artifactId>woodstox-core</artifactId>
-      <version>6.2.6</version>
+      <version>6.6.2</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
