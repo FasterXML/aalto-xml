@@ -24,15 +24,19 @@ public class ManualIssue29Repro implements Runnable
     private static XMLEventAllocator allocator = EventAllocatorImpl.getDefaultInstance();
     private static AsyncXMLInputFactory inputFactory = new InputFactoryImpl();
 
-    public static void main(String[] args) throws InterruptedException {
+    public static void main(String[] args) throws InterruptedException
+    {
+        System.out.println("Starting test...");
         ExecutorService ex = Executors.newFixedThreadPool(NUM_THREADS);
 
         for (int i = 0; i < 100000; i++) {
             ex.submit(new ManualIssue29Repro(i));
         }
 
+        System.out.println("Stopping test...");
         ex.shutdown();
         ex.awaitTermination(Integer.MAX_VALUE, TimeUnit.SECONDS);
+        System.out.println("Completed: SUCCESS");
     }
 
     private final int count;
