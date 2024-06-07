@@ -1293,12 +1293,10 @@ public abstract class ByteXmlWriter
     protected int writePIData(char[] cbuf, int offset, int len)
         throws IOException, XMLStreamException
     {
-        /* Unlike with writeCharacters() and fastWriteName(), let's not
-         * worry about split buffers here: this is unlikely to become
-         * performance bottleneck. This allows keeping it simple; and
-         * should it matter, we could start doing fast version here
-         * as well.
-         */
+        // Unlike with writeCharacters() and fastWriteName(), let's not
+        // worry about split buffers here: this is unlikely to become
+        // performance bottleneck. This allows keeping it simple; and
+        // should it matter, we could start doing fast version here as well.
         len += offset; // now marks the end
 
         main_loop:
