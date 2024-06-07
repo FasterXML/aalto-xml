@@ -368,9 +368,8 @@ public final class AttributeCollector
     {
         int count = _attrCount;
 
-        /* Note: no checks, caller is to ensure index is ok. Acceptable
-         * since it's not externally exposed
-         */
+        // Note: no checks, caller is to ensure index is ok. Acceptable
+        // since it's not externally exposed
         if (_allAttrValues == null) {
             int len = _valueOffsets[count-1];
             _allAttrValues = (len == 0) ? "" : new String(_valueBuffer, 0, len);
@@ -382,9 +381,8 @@ public final class AttributeCollector
             int len = _valueOffsets[0];
             return (len == 0) ? "" : _allAttrValues.substring(0, len);
         }
-        /* !!! 11-Nov-2006, tatus: Should we cache constructed value?
-         *   Might be worth the trouble
-         */
+        // !!! 11-Nov-2006, tatus: Should we cache constructed value?
+        //   Might be worth the trouble
         int start = _valueOffsets[index-1];
         int end = _valueOffsets[index];
         return (start == end) ? "" : _allAttrValues.substring(start, end);
@@ -421,16 +419,14 @@ public final class AttributeCollector
             if (_names[ix].boundEquals(nsUri, localName)) {
                 return ix;
             }
-            /* Nope, need to traverse spill list, which has 2 entries for
-             * each spilled attribute id; first for hash value, second index.
-             */
+            // Nope, need to traverse spill list, which has 2 entries for
+            // each spilled attribute id; first for hash value, second index.
             for (int i = hashSize, len = _spillAreaEnd; i < len; i += 2) {
                 if (_attrMap[i] != hash) {
                     continue;
                 }
-                /* Note: spill indexes are not off-by-one, since there's
-                 * no need to mask 0
-                 */
+                // Note: spill indexes are not off-by-one, since there's
+                // no need to mask 0
                 ix = _attrMap[i+1];
                 if (_names[ix].boundEquals(nsUri, localName)) {
                     return ix;
