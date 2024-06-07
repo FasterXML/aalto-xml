@@ -6,10 +6,12 @@ Project: aalto-xml
 
 1.3.3 (not yet released)
 
-#86: Multi-byte characters are split in writeCData() if first byte sits
+#86: Multi-byte characters are split in `writeCData()` if first byte sits
   right at the end of the buffer
  (reported, fix contributed by @tatsel)
 #90: Update stax2-api dep to 4.2.2 (from 4.2)
+#91: Multi-byte characters are split in `writeComment()` if first byte sits
+  right at the end of the buffer
 
 1.3.2 (25-Apr-2022)
 
