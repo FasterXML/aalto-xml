@@ -54,4 +54,29 @@ public class TestSaxWriter extends base.BaseTestCase {
         writer.writeEndTag(writer.constructName("testelement"));
         writer.close(false);
     }
+
+    public void testSurrogateMemory3() throws Exception {
+        // This test aims to produce the
+        // javax.xml.stream.XMLStreamException: Incomplete surrogate pair in content: first char 0xdfce, second 0x78
+        // error message. The issue was similar to the one described in testSurrogateMemory1(), except it happened in
+        // ByteXmlWriter#writeCDataContents(), where check for existing _surrogate was missing prior to the fix,
+        // as opposed to ByteXmlWriter#writeCharacters().
+        StringBuilder testText = new StringBuilder();
+        for (int i = 0; i < 511; i++)
+            testText.append('x');
+        testText.append("\uD835\uDFCE");
+        for (int i = 0; i < 512; i++)
+            testText.append('x');
+
+        WriterConfig writerConfig = new WriterConfig();
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        Utf8XmlWriter writer = new Utf8XmlWriter(writerConfig, byteArrayOutputStream);
+        writer.writeStartTagStart(writer.constructName("testelement"));
+        writer.writeCData(testText.toString());
+        writer.writeStartTagEnd();
+        writer.writeEndTag(writer.constructName("testelement"));
+        writer.close(false);
+
+    }
+
 }
