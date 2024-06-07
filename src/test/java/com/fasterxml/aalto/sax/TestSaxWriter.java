@@ -7,6 +7,19 @@ import java.io.ByteArrayOutputStream;
 
 public class TestSaxWriter extends base.BaseTestCase
 {
+    private final String TEXT_WITH_SURROGATE;
+    {
+        StringBuilder testText = new StringBuilder(1025);
+        for (int i = 0; i < 511; i++) {
+            testText.append('x');
+        }
+        testText.append("\uD835\uDFCE");
+        for (int i = 0; i < 512; i++) {
+            testText.append('x');
+        }
+        TEXT_WITH_SURROGATE = testText.toString();
+    }
+
     public void testSplitSurrogateWithAttributeValue() throws Exception
     {
         // This test aims to produce the
@@ -16,19 +29,11 @@ public class TestSaxWriter extends base.BaseTestCase
         // to also fill the next two internal reading buffers. Then, the code would try to fuse the first byte
         // of the original multi-byte character with the first character in the third buffer because
         // ByteXmlWriter#_surrogate was not set back to 0 after writing the original multi-byte character.
-        StringBuilder testText = new StringBuilder();
-        for (int i = 0; i < 511; i++) {
-            testText.append('x');
-        }
-        testText.append("\uD835\uDFCE");
-        for (int i = 0; i < 512; i++) {
-            testText.append('x');
-        }
         WriterConfig writerConfig = new WriterConfig();
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         Utf8XmlWriter writer = new Utf8XmlWriter(writerConfig, byteArrayOutputStream);
         writer.writeStartTagStart(writer.constructName("testelement"));
-        writer.writeAttribute(writer.constructName("testattr"), testText.toString());
+        writer.writeAttribute(writer.constructName("testattr"), TEXT_WITH_SURROGATE);
         writer.writeStartTagEnd();
         writer.writeEndTag(writer.constructName("testelement"));
         writer.close(false);
@@ -61,43 +66,37 @@ public class TestSaxWriter extends base.BaseTestCase
     public void testSplitSurrogateWithCData() throws Exception
     {
         // Modification of "testSplitSurrogateWithAttributeValue()" but for CDATA
-        StringBuilder testText = new StringBuilder();
-        for (int i = 0; i < 511; i++) {
-            testText.append('x');
-        }
-        testText.append("\uD835\uDFCE");
-        for (int i = 0; i < 512; i++) {
-            testText.append('x');
-        }
-
         WriterConfig writerConfig = new WriterConfig();
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         Utf8XmlWriter writer = new Utf8XmlWriter(writerConfig, byteArrayOutputStream);
         writer.writeStartTagStart(writer.constructName("testelement"));
-        writer.writeCData(testText.toString());
+        writer.writeCData(TEXT_WITH_SURROGATE);
         writer.writeStartTagEnd();
         writer.writeEndTag(writer.constructName("testelement"));
         writer.close(false);
     }
 
-
     public void testSplitSurrogateWithComment() throws Exception
     {
         // Modification of "testSplitSurrogateWithAttributeValue()" but for Comment
-        StringBuilder testText = new StringBuilder();
-        for (int i = 0; i < 511; i++) {
-            testText.append('x');
-        }
-        testText.append("\uD835\uDFCE");
-        for (int i = 0; i < 512; i++) {
-            testText.append('x');
-        }
-
         WriterConfig writerConfig = new WriterConfig();
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         Utf8XmlWriter writer = new Utf8XmlWriter(writerConfig, byteArrayOutputStream);
         writer.writeStartTagStart(writer.constructName("testelement"));
-        writer.writeComment(testText.toString());
+        writer.writeComment(TEXT_WITH_SURROGATE);
+        writer.writeStartTagEnd();
+        writer.writeEndTag(writer.constructName("testelement"));
+        writer.close(false);
+    }
+
+    public void testSplitSurrogateWithPI() throws Exception
+    {
+        // Modification of "testSplitSurrogateWithAttributeValue()" but for Processing instructions
+        WriterConfig writerConfig = new WriterConfig();
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        Utf8XmlWriter writer = new Utf8XmlWriter(writerConfig, byteArrayOutputStream);
+        writer.writeStartTagStart(writer.constructName("testelement"));
+        writer.writePI(writer.constructName("target"), TEXT_WITH_SURROGATE);
         writer.writeStartTagEnd();
         writer.writeEndTag(writer.constructName("testelement"));
         writer.close(false);
