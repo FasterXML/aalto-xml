@@ -1193,7 +1193,7 @@ public abstract class ByteXmlWriter
 
     /**
      * Note: the only way to fix comment contents is to inject a space
-     * to split up consequtive '--' (or '-' that ends a comment).
+     * to split up consecutive '--' (or '-' that ends a comment).
      */
     protected int writeCommentContents(char[] cbuf, int offset, int len)
         throws IOException, XMLStreamException
@@ -1293,6 +1293,14 @@ public abstract class ByteXmlWriter
     protected int writePIData(char[] cbuf, int offset, int len)
         throws IOException, XMLStreamException
     {
+        if (_surrogate != 0) {
+            outputSurrogates(_surrogate, cbuf[offset]);
+            // reset the temporary surrogate storage
+            _surrogate = 0;
+            ++offset;
+            --len;
+        }
+
         // Unlike with writeCharacters() and fastWriteName(), let's not
         // worry about split buffers here: this is unlikely to become
         // performance bottleneck. This allows keeping it simple; and
