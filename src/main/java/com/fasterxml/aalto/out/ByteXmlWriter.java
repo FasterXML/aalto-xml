@@ -794,17 +794,15 @@ public abstract class ByteXmlWriter
     {
         if (_surrogate != 0) {
             outputSurrogates(_surrogate, cbuf[offset]);
-//           reset the temporary surrogate storage
+            // reset the temporary surrogate storage
             _surrogate = 0;
             ++offset;
             --len;
         }
-        /* Unlike with writeCharacters() and fastWriteName(), let's not
-         * worry about split buffers here: this is unlikely to become
-         * performance bottleneck. This allows keeping it simple; and
-         * should it matter, we could start doing fast version here
-         * as well.
-         */
+        // Unlike with writeCharacters() and fastWriteName(), let's not
+        // worry about split buffers here: this is unlikely to become
+        // performance bottleneck. This allows keeping it simple; and
+        // should it matter, we could start doing fast version here as well.
         len += offset; // now marks the end
 
         main_loop:
