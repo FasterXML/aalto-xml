@@ -89,8 +89,6 @@ org.xml.sax, org.xml.sax.ext, org.xml.sax.helpers</osgi.import>
 
   <build>
     <plugins>
-      <!--  base definitions work for OSGi; no more Automatic Module name for 1.2.0 -->
-
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
@@ -142,6 +140,25 @@ org.xml.sax, org.xml.sax.ext, org.xml.sax.helpers</osgi.import>
                 <moduleInfoFile>src/moditect/module-info.java</moduleInfoFile>
               </module>
             </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <!-- 07-Jun-2024, tatu: JaCoCo for code coverage -->
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <goals>
+              <goal>prepare-agent</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>report</id>
+            <phase>test</phase>
+            <goals>
+              <goal>report</goal>
+            </goals>
           </execution>
         </executions>
       </plugin>
