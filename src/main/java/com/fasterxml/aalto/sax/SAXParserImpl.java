@@ -624,14 +624,14 @@ class SAXParserImpl
     public String getType(String qName)
     {
         int ix = getIndex(qName);
-        return (ix < 0) ? null : _scanner.getAttrType(ix);
+        return this.getType(ix);
     }
 
     @Override
     public String getType(String uri, String localName)
     {
         int ix = getIndex(uri, localName);
-        return (ix < 0) ? null : _scanner.getAttrType(ix);
+        return this.getType(ix);
     }
 
     @Override
@@ -655,14 +655,14 @@ class SAXParserImpl
     public String getValue(String qName)
     {
         int ix = getIndex(qName);
-        return (ix < 0) ? null :  _attrCollector.getValue(ix);
+        return this.getValue(ix);
     }
 
     @Override
     public String getValue(String uri, String localName) 
     {
         int ix = getIndex(uri, localName);
-        return (ix < 0) ? null :  _attrCollector.getValue(ix);
+        return this.getValue(ix);
     }
 
     /*
