@@ -13,9 +13,14 @@ Aalto is licensed under [Apache License 2.0](http://www.apache.org/licenses/LICE
 
 ## Status
 
-[![Build Status](https://travis-ci.org/FasterXML/aalto-xml.svg)](https://travis-ci.org/FasterXML/aalto-xml)
-[![Javadoc](https://javadoc-emblem.rhcloud.com/doc/com.fasterxml/aalto-xml/badge.svg)](http://www.javadoc.io/doc/com.fasterxml/aalto-xml)
-[![Tidelift](https://tidelift.com/badges/package/maven/com.fasterxml:aalto-xml)](https://tidelift.com/subscription/pkg/maven-com-fasterxml-aalto-xml?utm_source=maven-com-fasterxml-aalto-xml&utm_medium=referral&utm_campaign=readme)
+| Type | Status |
+| ---- | ------ |
+| Build (CI) | [![Build (github)](https://github.com/FasterXML/aalto-xml/actions/workflows/main.yml/badge.svg)](https://github.com/FasterXML/aalto-xml/actions/workflows/main.yml) |
+| Artifact |  [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.fasterxml/aalto-xml/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.fasterxml/aalto-xml/) |
+| OSS Sponsorship | [![Tidelift](https://tidelift.com/subscription/pkg/maven-com-fasterxml-aalto-xml?utm_source=maven-com-fasterxml-aalto-xml&utm_medium=referral&utm_campaign=readme)
+| Javadocs | [![Javadoc](https://javadoc.io/badge/com.fasterxml/aalto-xml.svg)](http://www.javadoc.io/doc/com.fasterxml/aalto-xml)
+| Code coverage (5.x) | [![codecov.io](https://codecov.io/github/FasterXML/aalto-xml/coverage.svg?branch=master)](https://codecov.io/github/FasterXML/aalto-xml?branch=master) |
+| OpenSSF Score | [![OpenSSF  Scorecard](https://api.securityscorecards.dev/projects/github.com/FasterXML/aalto-xml/badge)](https://securityscorecards.dev/viewer/?uri=github.com/FasterXML/aalto-xml) |
 
 ## Support
 
