@@ -48,7 +48,7 @@ final class NsBinding
          * bindings for "xml" or "xmlns". These should be catched earlier,
          * but just in case they aren't let's verify them here.
          */
-        if (prefix == "xml" || prefix == "xmlns") {
+        if ("xml".equals(prefix) || "xmlns".equals(prefix)) {
             throw new RuntimeException("Trying to create non-singleton binding for ns prefix '"+prefix+"'");
         }
         mPrefix = prefix;
@@ -56,7 +56,7 @@ final class NsBinding
     }
 
     public final static NsBinding createDefaultNs() {
-        return new NsBinding(null);
+        return new NsBinding(XMLConstants.DEFAULT_NS_PREFIX);
     }
 
     private NsBinding(String prefix, String uri, Object DUMMY)
