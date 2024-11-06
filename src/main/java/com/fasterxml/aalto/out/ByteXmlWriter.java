@@ -857,6 +857,12 @@ public abstract class ByteXmlWriter
                             // Then new start, and '>'
                             writeCDataStart();
                             writeRaw(BYTE_GT);
+                        } else {
+                            // no end found, write first bracket
+                            if (_outputPtr >= _outputBufferLen) {
+                                flushBuffer();
+                            }
+                            _outputBuffer[_outputPtr++] = (byte) ch;
                         }
                         continue main_loop;
                     }
