@@ -2,13 +2,14 @@ name: Build and Deploy Snapshot
 on:
   push:
     branches:
-    - master
+    - main
     paths-ignore:
     - "README.md"
     - "release-notes/*"
   pull_request:
     branches:
-    - master
+    - main
+
 permissions:
   contents: read
 
@@ -37,7 +38,7 @@ jobs:
       run: ./mvnw -B -q -ff -ntp verify
     - name: Extract project Maven version
       id: projectVersion
-      run: echo "version=$(./mvnw org.apache.maven.plugins:maven-help-plugin:3.4.1:evaluate -DforceStdout -Dexpression=project.version -q)" >> $GITHUB_OUTPUT
+      run: echo "version=$(./mvnw org.apache.maven.plugins:maven-help-plugin:3.5.1:evaluate -DforceStdout -Dexpression=project.version -q)" >> $GITHUB_OUTPUT
     - name: Deploy snapshot
       if: ${{ github.event_name != 'pull_request' && matrix.java_version == '8' && endsWith(steps.projectVersion.outputs.version, '-SNAPSHOT') }}
       env:
@@ -53,5 +54,5 @@ jobs:
       uses: codecov/codecov-action@e28ff129e5465c2c0dcc6f003fc735cb6ae0c673 # v4.5.0
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
-        file: ./target/site/jacoco/jacoco.xml
+        files: ./target/site/jacoco/jacoco.xml
         flags: unittests
