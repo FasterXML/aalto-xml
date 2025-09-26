@@ -4,9 +4,10 @@ Project: aalto-xml
 = Releases
 ------------------------------------------------------------------------
 
-1.3.4 (not yet released)
+1.3.4 (26-Sep-2025)
 
 - Branch "master" renamed as "main"
+- Update to `oss-parent` v68 to switch to Central Portal publishing
 
 1.3.3 (07-Jun-2024)
 
