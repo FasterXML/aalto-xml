@@ -4,6 +4,10 @@ Project: aalto-xml
 = Releases
 ------------------------------------------------------------------------
 
+1.4.0 (not yet released:
+
+#105: Change JDK baseline to Java 8 (from 1.6)
+
 1.3.4 (26-Sep-2025)
 
 - Branch "master" renamed as "main"
