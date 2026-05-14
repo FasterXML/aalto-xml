@@ -6,9 +6,14 @@ Project: aalto-xml
 
 1.4.0 (not yet released)
 
+#56: Aalto writes too many default namespace `xmlns` attributes if
+  `IS_REPAIRING_NAMESPACES` enabled
+ (reported by Arnaud V)
 #105: Change JDK baseline to Java 8 (from 1.6)
 - Fix `Utf32Reader` constructor: previously failed to assign input stream,
   buffer and pointer fields, so UTF-32 documents always parsed as empty.
+- Update to `oss-parent` v79
+- Update stax2-api dep to 4.3.0 (from 4.2.2)
 
 1.3.4 (26-Sep-2025)
 
