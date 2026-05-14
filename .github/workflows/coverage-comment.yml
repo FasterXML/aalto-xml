@@ -7,6 +7,10 @@ on:
 permissions:
   pull-requests: write
 
+concurrency:
+  group: coverage-comment-${{ github.event.workflow_run.head_branch }}
+  cancel-in-progress: true
+
 jobs:
   comment:
     runs-on: ubuntu-24.04
