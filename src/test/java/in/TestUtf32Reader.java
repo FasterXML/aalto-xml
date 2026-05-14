@@ -52,7 +52,7 @@ public class TestUtf32Reader
     {
         String enc = "UTF-32BE";
         String xml = "<?xml version='1.0' encoding='" + enc + "'?>"
-                + "<root>a😀b</root>"; // 😀
+                + "<root>a\uD83D\uDE00b</root>"; // 😀
         byte[] bytes = xml.getBytes(Charset.forName(enc));
 
         XMLStreamReader sr = getInputFactory().createXMLStreamReader(new ByteArrayInputStream(bytes));
@@ -60,7 +60,7 @@ public class TestUtf32Reader
         assertTokenType(START_ELEMENT, sr.next());
         assertEquals("root", sr.getLocalName());
         assertTokenType(CHARACTERS, sr.next());
-        assertEquals("a😀b", sr.getText());
+        assertEquals("a\uD83D\uDE00b", sr.getText());
         assertTokenType(END_ELEMENT, sr.next());
         sr.close();
     }

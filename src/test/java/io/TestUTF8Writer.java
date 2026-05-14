@@ -57,7 +57,7 @@ public class TestUTF8Writer
         w.write(0xDE00);
         w.close();
         String s = new String(bytes.toByteArray(), "UTF-8");
-        assertEquals("ä中😀", s);
+        assertEquals("\u00E4\u4E2D\uD83D\uDE00", s);
     }
 
     public void testStringWriteAll() throws IOException
@@ -65,7 +65,7 @@ public class TestUTF8Writer
         // Mix ascii, 2-byte, 3-byte and surrogate pair in a single String write.
         ByteArrayOutputStream bytes = new ByteArrayOutputStream();
         UTF8Writer w = new UTF8Writer(new WriterConfig(), bytes, true);
-        String input = "Hi! ä中😀 end";
+        String input = "Hi! \u00E4\u4E2D\uD83D\uDE00 end";
         w.write(input);
         w.close();
         assertEquals(input, new String(bytes.toByteArray(), "UTF-8"));
@@ -100,7 +100,7 @@ public class TestUTF8Writer
     {
         ByteArrayOutputStream bytes = new ByteArrayOutputStream();
         UTF8Writer w = new UTF8Writer(new WriterConfig(), bytes, true);
-        char[] data = ("Hi! ä中😀 end").toCharArray();
+        char[] data = ("Hi! \u00E4\u4E2D\uD83D\uDE00 end").toCharArray();
         w.write(data, 0, data.length);
         w.close();
         assertEquals(new String(data), new String(bytes.toByteArray(), "UTF-8"));
@@ -115,7 +115,7 @@ public class TestUTF8Writer
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < 10000; ++i) {
             sb.append('A' + (i % 26));
-            sb.append('ä');
+            sb.append('\u00E4');
         }
         String s = sb.toString();
         w.write(s);
@@ -132,7 +132,7 @@ public class TestUTF8Writer
         w.write(new char[] { 'a', '\uD83D' }, 0, 2);
         w.write(new char[] { '\uDE00', 'b' }, 0, 2);
         w.close();
-        assertEquals("a😀b", new String(bytes.toByteArray(), "UTF-8"));
+        assertEquals("a\uD83D\uDE00b", new String(bytes.toByteArray(), "UTF-8"));
     }
 
     public void testSplitSurrogateAcrossStringCalls() throws IOException
@@ -142,7 +142,7 @@ public class TestUTF8Writer
         w.write("a\uD83D");
         w.write("\uDE00b");
         w.close();
-        assertEquals("a😀b", new String(bytes.toByteArray(), "UTF-8"));
+        assertEquals("a\uD83D\uDE00b", new String(bytes.toByteArray(), "UTF-8"));
     }
 
     public void testFailOnSecondHalfWithoutFirst() throws IOException
