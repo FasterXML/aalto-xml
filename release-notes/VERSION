@@ -10,6 +10,7 @@ Project: aalto-xml
   `IS_REPAIRING_NAMESPACES` enabled
  (reported by Arnaud V)
 #105: Change JDK baseline to Java 8 (from 1.6)
+#116: Convert tests from JUnit 4 to JUnit 5
 - Fix `Utf32Reader` constructor: previously failed to assign input stream,
   buffer and pointer fields, so UTF-32 documents always parsed as empty.
 - Update to `oss-parent` v79
