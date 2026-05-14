@@ -48,9 +48,9 @@ jobs:
         CI_DEPLOY_PASSWORD: ${{ secrets.CENTRAL_DEPLOY_PASSWORD }}
         # MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
       run: ./mvnw -B -q -ff -DskipTests -ntp source:jar deploy
-    - name: Generate code coverage
-      if: ${{ matrix.release_build }}
-      run: ./mvnw -B -q -ff -ntp test jacoco:report
+    # JaCoCo report (jacoco.csv/xml/html) is already produced by the
+    # Build step above: jacoco-maven-plugin binds the `report` goal to
+    # the `test` phase (see pom.xml), which `verify` runs through.
     - name: Publish code coverage
       if: ${{ matrix.release_build && github.event_name != 'pull_request' && github.repository == 'FasterXML/aalto-xml' }}
       uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de # v5.5.2
