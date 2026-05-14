@@ -4,7 +4,7 @@ Project: aalto-xml
 = Releases
 ------------------------------------------------------------------------
 
-1.4.0 (not yet released:
+1.4.0 (not yet released)
 
 #105: Change JDK baseline to Java 8 (from 1.6)
 
