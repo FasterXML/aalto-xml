@@ -173,7 +173,7 @@ public final class RepairingStreamWriter
         // via writeStartElement when needed, so an explicit call here must be
         // a no-op once the binding is already in place — mirrors how
         // writeNamespace() skips already-bound prefixed namespaces (#56).
-        if (!nsURI.equals(_currElem.getDefaultNsURI())) {
+        if (!_currElem.isPrefixBoundTo("", nsURI, _rootNsContext)) {
             _currElem.setDefaultNsURI(nsURI);
             _writeDefaultNamespace(nsURI);
         }
