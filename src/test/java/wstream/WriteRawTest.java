@@ -7,9 +7,14 @@ import javax.xml.stream.XMLStreamReader;
 import org.codehaus.stax2.XMLOutputFactory2;
 import org.codehaus.stax2.XMLStreamWriter2;
 
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
+
 // for [aalto-xml#46]
 public class WriteRawTest extends base.BaseTestCase
 {
+    @Test
     public void testSerialization_failsWithUtf8() throws Exception
     {
         final String TEXT = "Left \u2265 Right";

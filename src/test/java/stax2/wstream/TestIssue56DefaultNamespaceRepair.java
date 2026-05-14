@@ -8,6 +8,10 @@ import javax.xml.stream.XMLEventWriter;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLOutputFactory;
 
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
+
 /**
  * Regression test for <a href="https://github.com/FasterXML/aalto-xml/issues/56">#56</a>:
  * with {@code IS_REPAIRING_NAMESPACES=true}, copying events from an
@@ -18,6 +22,7 @@ import javax.xml.stream.XMLOutputFactory;
 public class TestIssue56DefaultNamespaceRepair
     extends BaseWriterTest
 {
+    @Test
     public void testDefaultNamespaceNotDuplicatedOnCopy() throws Exception
     {
         // Minimal analogue of the xmldsig schema referenced in the issue:
@@ -45,13 +50,12 @@ public class TestIssue56DefaultNamespaceRepair
         String out = sw.toString();
 
         int firstXmlns = out.indexOf("xmlns=");
-        assertTrue("Expected an xmlns= in output: " + out, firstXmlns >= 0);
+        assertTrue(firstXmlns >= 0, "Expected an xmlns= in output: " + out);
         int secondXmlns = out.indexOf("xmlns=", firstXmlns + 1);
-        assertEquals("Default xmlns attribute written more than once on root: "
-                + out, -1, secondXmlns);
+        assertEquals(-1, secondXmlns, "Default xmlns attribute written more than once on root: "
+                + out);
 
         // And the prefixed namespace must still be present.
-        assertTrue("Expected xmlns:ds= in output: " + out,
-                out.indexOf("xmlns:ds=") >= 0);
+        assertTrue(out.indexOf("xmlns:ds=") >= 0, "Expected xmlns:ds= in output: " + out);
     }
 }

@@ -6,6 +6,10 @@ import javax.xml.stream.*;
 
 import org.codehaus.stax2.*;
 
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
+
 /**
  * These tests try to specifically verify that name encoding and decoding
  * work as expected
@@ -18,6 +22,7 @@ public class TestNameDecoding
     final static String NAME_LATIN1 = "some\u00C0"+"c\u00C7ents";
     final static String NAME_UTF8 = "\u1165_\ud7a2";
 
+    @Test
     public void testValidElemNameDecodingUtf8()
         throws Exception
     {
@@ -26,6 +31,7 @@ public class TestNameDecoding
         verifyValidElemName(NAME_UTF8, ENC_UTF8);
     }
 
+    @Test
     public void testValidElemNameDecodingLatin1()
         throws Exception
     {
@@ -33,6 +39,7 @@ public class TestNameDecoding
         verifyValidElemName(NAME_LATIN1, ENC_LATIN1);
     }
 
+    @Test
     public void testValidElemNameDecodingAscii()
         throws Exception
     {

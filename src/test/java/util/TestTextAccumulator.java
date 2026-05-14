@@ -1,8 +1,9 @@
 package util;
-
-import junit.framework.TestCase;
-
 import com.fasterxml.aalto.util.TextAccumulator;
+
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Simple unit tests for testing {@link TextAccumulator}. That class
@@ -11,8 +12,8 @@ import com.fasterxml.aalto.util.TextAccumulator;
  * instance is passed, before a String is needed.
  */
 public class TestTextAccumulator
-    extends TestCase
 {
+    @Test
     public void testBasic()
     {
         TextAccumulator acc = new TextAccumulator();
@@ -26,6 +27,7 @@ public class TestTextAccumulator
     }
 
     // as per [WSTX-349]
+    @Test
     public void testBasicWithCharArray()
     {
         TextAccumulator acc = new TextAccumulator();

@@ -8,6 +8,8 @@ import javax.xml.stream.XMLStreamException;
 import com.fasterxml.aalto.AsyncByteBufferFeeder;
 import com.fasterxml.aalto.AsyncXMLStreamReader;
 
+import static org.junit.jupiter.api.Assertions.fail;
+
 /**
  * Helper class used with async parser
  */
@@ -70,7 +72,7 @@ public class AsyncReaderWrapperForByteBuffer implements AsyncReaderWrapper
             _buf.clear();
             AsyncByteBufferFeeder feeder = _streamReader.getInputFeeder();
             if (!feeder.needMoreInput()) {
-                AsyncTestBase.fail("Got EVENT_INCOMPLETE, could not feed more input");
+                fail("Got EVENT_INCOMPLETE, could not feed more input");
             }
 
             if (_offset >= _xml.length) { // end-of-input?

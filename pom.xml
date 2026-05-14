@@ -73,9 +73,9 @@ org.xml.sax, org.xml.sax.ext, org.xml.sax.helpers</osgi.import>
      | Test dependencies
     -->
     <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>${version.junit}</version>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <version>${version.junit5}</version>
       <scope>test</scope>
     </dependency>
 

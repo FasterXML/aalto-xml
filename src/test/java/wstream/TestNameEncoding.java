@@ -6,6 +6,10 @@ import javax.xml.stream.*;
 
 import org.codehaus.stax2.*;
 
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
+
 /**
  * These tests try to specifically verify that name encoding and decoding
  * work as expected. Although basic Stax or Stax2 test should cover
@@ -31,6 +35,7 @@ public class TestNameEncoding
     final static String INVALID_NAME_LATIN1 = "abc\u00BEx"; // ctrl-char
     final static String INVALID_NAME_UTF8 = "+a\u2ff0";
 
+    @Test
     public void testValidElemNameEncodingUtf8()
         throws Exception
     {
@@ -39,6 +44,7 @@ public class TestNameEncoding
         verifyValidElemName(NAME_UTF8, ENC_UTF8);
     }
 
+    @Test
     public void testValidElemNameEncodingLatin1()
         throws Exception
     {
@@ -46,6 +52,7 @@ public class TestNameEncoding
         verifyValidElemName(NAME_LATIN1, ENC_LATIN1);
     }
 
+    @Test
     public void testValidElemNameEncodingAscii()
         throws Exception
     {
@@ -54,6 +61,7 @@ public class TestNameEncoding
 
     // // // Then tests for invalid name chars
 
+    @Test
     public void testInvalidElemNameEncodingUtf8()
         throws Exception
     {
@@ -65,6 +73,7 @@ public class TestNameEncoding
         verifyInvalidElemName(INVALID_NAME_UTF8, ENC_UTF8);
     }
 
+    @Test
     public void testInvalidElemNameEncodingLatin1()
         throws Exception
     {
@@ -80,6 +89,7 @@ public class TestNameEncoding
         verifyInvalidElemName(NAME_UTF8, ENC_LATIN1);
     }
 
+    @Test
     public void testInvalidElemNameEncodingAscii()
         throws Exception
     {

@@ -6,9 +6,14 @@ import com.fasterxml.aalto.AsyncByteArrayFeeder;
 import com.fasterxml.aalto.AsyncXMLInputFactory;
 import com.fasterxml.aalto.AsyncXMLStreamReader;
 
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
+
 // for [aalto-xml#52]: improve error reporting for multiple roots
 public class TestAsyncErrorHandling extends AsyncTestBase
 {
+    @Test
     public void testSimpleByteArray() throws Exception
     {
         final AsyncXMLInputFactory f = newAsyncInputFactory();

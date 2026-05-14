@@ -7,9 +7,14 @@ import java.io.InputStream;
 import com.fasterxml.aalto.in.MergedStream;
 import com.fasterxml.aalto.in.ReaderConfig;
 
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
+
 public class TestMergedStream
     extends base.BaseTestCase
 {
+    @Test
     public void testReadSingleByteFromPushback() throws IOException
     {
         byte[] pushed = "abc".getBytes("US-ASCII");
@@ -27,6 +32,7 @@ public class TestMergedStream
         ms.close();
     }
 
+    @Test
     public void testReadSubrangeOfPushback() throws IOException
     {
         // Start/end window in the pushback array — only middle bytes are visible.
@@ -41,6 +47,7 @@ public class TestMergedStream
         ms.close();
     }
 
+    @Test
     public void testReadBulkSpansPushbackAndTail() throws IOException
     {
         byte[] pushed = "abc".getBytes("US-ASCII");
@@ -63,6 +70,7 @@ public class TestMergedStream
         ms.close();
     }
 
+    @Test
     public void testReadBulkPartialPushback() throws IOException
     {
         // Caller requests fewer bytes than pushback has — should clamp len but not free buffer.
@@ -83,6 +91,7 @@ public class TestMergedStream
         ms.close();
     }
 
+    @Test
     public void testAvailableReportsPushbackThenDelegates() throws IOException
     {
         byte[] pushed = "abc".getBytes("US-ASCII");
@@ -100,6 +109,7 @@ public class TestMergedStream
         ms.close();
     }
 
+    @Test
     public void testSkipInsidePushback() throws IOException
     {
         byte[] pushed = "abcdef".getBytes("US-ASCII");
@@ -112,6 +122,7 @@ public class TestMergedStream
         ms.close();
     }
 
+    @Test
     public void testSkipSpansPushbackAndTail() throws IOException
     {
         byte[] pushed = "abc".getBytes("US-ASCII");
@@ -121,10 +132,11 @@ public class TestMergedStream
 
         long skipped = ms.skip(5);
         // 3 from pushback + however many tail skips — both ByteArrayInputStream backed.
-        assertTrue("should skip at least 3 (the pushback)", skipped >= 3);
+        assertTrue(skipped >= 3, "should skip at least 3 (the pushback)");
         ms.close();
     }
 
+    @Test
     public void testMarkSupportedFalseDuringPushback() throws IOException
     {
         byte[] pushed = "abc".getBytes("US-ASCII");
@@ -148,6 +160,7 @@ public class TestMergedStream
         ms.close();
     }
 
+    @Test
     public void testCloseAlsoClosesUnderlying() throws IOException
     {
         final boolean[] closed = { false };
@@ -157,9 +170,10 @@ public class TestMergedStream
         };
         MergedStream ms = new MergedStream(null, tail, new byte[] { (byte) 'a' }, 0, 1);
         ms.close();
-        assertTrue("underlying stream must be closed via MergedStream.close()", closed[0]);
+        assertTrue(closed[0], "underlying stream must be closed via MergedStream.close()");
     }
 
+    @Test
     public void testWithReaderConfigBufferFreed() throws IOException
     {
         // Using a real ReaderConfig exercises the freeFullBBuffer branch on pushback exhaustion.
