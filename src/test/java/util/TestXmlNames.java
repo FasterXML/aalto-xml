@@ -9,8 +9,14 @@ import com.fasterxml.aalto.util.XmlNames;
  * StreamReaderImpl.verifyQName). The xml11=true path's
  * is11NameStartChar/is11NameChar reject ASCII letters (the check
  * {@code c < 0x00C0} returns false for codepoints below 0xC0), so
- * everyday ASCII names fail under xml11. Tests focus on the realistic
- * xml10 path; one xml11 test covers the surrogate fallthrough.
+ * everyday ASCII names fail under xml11. Tests therefore use Latin-1
+ * letters (0xC0+) to drive the xml11 paths.
+ *
+ * The surrogate-pair tests pin down current behavior of the private
+ * helper validSurrogateNameChar, which always returns false. The
+ * source flags this as suspected-incorrect (see the 2021 TODO in
+ * XmlNames.java); when that helper is fixed, the "expected index 1"
+ * assertions in the surrogate tests will need to flip accordingly.
  */
 public class TestXmlNames
     extends base.BaseTestCase
@@ -44,13 +50,13 @@ public class TestXmlNames
         assertEquals(0, XmlNames.findIllegalNameChar("!", false));
     }
 
-    public void testIllegalMidChar()
+    public void testIllegalNonStartChar()
     {
-        // Space is invalid in the middle of a name.
+        // Space.
         assertEquals(2, XmlNames.findIllegalNameChar("ab cd", false));
         // Punctuation in the middle.
         assertEquals(2, XmlNames.findIllegalNameChar("ab!cd", false));
-        // At the very end.
+        // Trailing illegal char.
         assertEquals(2, XmlNames.findIllegalNameChar("ab*", false));
     }
 
@@ -64,15 +70,16 @@ public class TestXmlNames
 
     public void testSurrogateStartCharShortName()
     {
-        // High surrogate alone (string length 1) is rejected at offset 0
-        // via the "len < 2" branch.
+        // See class-level comment: pins down validSurrogateNameChar's current
+        // (suspected-incorrect) behavior. High surrogate alone (string length 1)
+        // is rejected at offset 0 via the "len < 2" branch.
         assertEquals(0, XmlNames.findIllegalNameChar("\uD800", false));
     }
 
     public void testSurrogateStartCharLongerName()
     {
-        // High+low surrogate at start: validSurrogateNameChar always returns
-        // false in this implementation, so the failure is reported at offset 1.
+        // See class-level comment: validSurrogateNameChar always returns false,
+        // so a valid-looking high+low pair at start is reported at offset 1.
         assertEquals(1, XmlNames.findIllegalNameChar("\uD83D\uDE00rest", false));
     }
 
@@ -90,10 +97,24 @@ public class TestXmlNames
         assertEquals(1, XmlNames.findIllegalNameChar("a\uD800", false));
     }
 
-    public void testXml11SurrogateFallthrough()
+    public void testValidUnderXml11()
     {
-        // Hits the xml11 surrogate handling at start, which calls
-        // validSurrogateNameChar (always returns false here): index 1.
-        assertEquals(1, XmlNames.findIllegalNameChar("\uD83D\uDE00rest", true));
+        // À / é / ñ are all valid xml11 name chars
+        // (start: c >= 0x00C0; non-start: same range, not 0xD7/0xF7/0x37E).
+        assertEquals(-1, XmlNames.findIllegalNameChar("\u00C0\u00E9\u00F1", true));
+    }
+
+    public void testIllegalMidCharUnderXml11()
+    {
+        // Valid start (À), valid 2nd char (é), then a space.
+        // Drives the xml11-specific mid-loop branch (XmlNames.java:43-59).
+        assertEquals(2, XmlNames.findIllegalNameChar("\u00C0\u00E9 ", true));
+    }
+
+    public void testTrailingUnpairedSurrogateUnderXml11()
+    {
+        // Valid Latin-1 start, then unpaired high surrogate at end.
+        // Drives the xml11-specific (ptr+1) >= len branch.
+        assertEquals(1, XmlNames.findIllegalNameChar("\u00C0\uD800", true));
     }
 }

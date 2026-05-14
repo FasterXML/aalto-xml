@@ -4,7 +4,6 @@ import javax.xml.stream.Location;
 
 import org.codehaus.stax2.validation.XMLValidationProblem;
 
-import com.fasterxml.aalto.ValidationException;
 import com.fasterxml.aalto.impl.LocationImpl;
 
 public class TestValidationException

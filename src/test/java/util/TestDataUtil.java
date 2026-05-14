@@ -93,6 +93,22 @@ public class TestDataUtil
         assertNull(grown[3]);
     }
 
+    public void testGrowAnyArrayPrimitive()
+    {
+        // Primitive component types go through a different Array.newInstance
+        // code path than reference types.
+        byte[] in = new byte[] { 1, 2, 3 };
+        Object out = DataUtil.growAnyArrayBy(in, 2);
+        assertTrue("grown array should still be byte[]", out instanceof byte[]);
+        byte[] grown = (byte[]) out;
+        assertEquals(5, grown.length);
+        assertEquals((byte) 1, grown[0]);
+        assertEquals((byte) 2, grown[1]);
+        assertEquals((byte) 3, grown[2]);
+        assertEquals((byte) 0, grown[3]); // tail zero-filled
+        assertEquals((byte) 0, grown[4]);
+    }
+
     public void testGrowAnyArrayRejectsNull()
     {
         try {
