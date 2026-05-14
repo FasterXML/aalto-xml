@@ -9,6 +9,10 @@ import org.codehaus.stax2.XMLInputFactory2;
 import com.fasterxml.aalto.UncheckedStreamException;
 import com.fasterxml.aalto.WFCException;
 
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
+
 /**
  * Set of unit tests that verify that Aalto implementation of
  * {@link XMLEventReader} does obey additional constraints Aalto
@@ -37,6 +41,7 @@ public class TestLaziness
      * Note: whether this test reliably detecs "laziness" may depend
      * on the event reader implementation.
      */
+    @Test
     public void testEventReaderNonLaziness()
         throws XMLStreamException
     {
@@ -46,7 +51,7 @@ public class TestLaziness
         XMLEventReader er = getReader(XML);
 
         // First things first: what does it say about mode?
-        assertEquals("Event reader should have P_LAZY_PARSING == false", Boolean.FALSE, er.getProperty(XMLInputFactory2.P_LAZY_PARSING));
+        assertEquals(Boolean.FALSE, er.getProperty(XMLInputFactory2.P_LAZY_PARSING), "Event reader should have P_LAZY_PARSING == false");
 
         XMLEvent evt = er.nextEvent(); // start document
         assertTrue(evt.isStartDocument());

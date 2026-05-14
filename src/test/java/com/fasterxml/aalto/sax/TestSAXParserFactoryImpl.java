@@ -2,9 +2,14 @@ package com.fasterxml.aalto.sax;
 
 import com.fasterxml.aalto.AaltoInputProperties;
 
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
+
 public class TestSAXParserFactoryImpl extends base.BaseTestCase
 {
     // [aalto-xml#65]
+    @Test
     public void testSetGetFeatureExternalGeneralEntities() throws Exception
     {
         SAXParserFactoryImpl saxParserFactory = new SAXParserFactoryImpl();

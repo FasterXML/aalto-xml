@@ -6,8 +6,13 @@ import com.fasterxml.aalto.AsyncXMLInputFactory;
 import com.fasterxml.aalto.AsyncXMLStreamReader;
 import com.fasterxml.aalto.stax.InputFactoryImpl;
 
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
+
 public class TestCommentParsing extends AsyncTestBase
 {
+    @Test
     public void testParseComments() throws Exception
     {
         for (int spaces = 0; spaces < 3; ++spaces) {
@@ -21,6 +26,7 @@ public class TestCommentParsing extends AsyncTestBase
         }
     }
 
+    @Test
     public void testSkipComments() throws Exception
     {
         for (int spaces = 0; spaces < 3; ++spaces) {

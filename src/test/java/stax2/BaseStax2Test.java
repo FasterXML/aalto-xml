@@ -3,8 +3,6 @@ package stax2;
 import java.io.*;
 import java.util.HashMap;
 
-import junit.framework.TestCase;
-
 import javax.xml.stream.*;
 import javax.xml.stream.events.XMLEvent;
 
@@ -17,12 +15,16 @@ import com.fasterxml.aalto.stax.EventFactoryImpl;
 import com.fasterxml.aalto.stax.InputFactoryImpl;
 import com.fasterxml.aalto.stax.OutputFactoryImpl;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+
 /**
  * Base unit test class to be inherited by all unit tests that test
  * StAX2 API compatibility.
  */
 public abstract class BaseStax2Test
-    extends TestCase
     implements XMLStreamConstants
 {
     /**
@@ -557,12 +559,12 @@ public abstract class BaseStax2Test
          *  mode is not coalescing? Or something
          */
         if (type == CHARACTERS) {
-            assertTrue("Stream reader should never return empty Strings.",  (expLen > 0));
+            assertTrue((expLen > 0), "Stream reader should never return empty Strings.");
         }
         String text = sr.getText();
-        assertNotNull("getText() should never return null.", text);
-        assertEquals("Expected text length of "+expLen+", got "+text.length(),
-		     expLen, text.length());
+        assertNotNull(text, "getText() should never return null.");
+        assertEquals(expLen, text.length(),
+		     "Expected text length of "+expLen+", got "+text.length());
         char[] textChars = sr.getTextCharacters();
         int start = sr.getTextStart();
         String text2 = new String(textChars, start, expLen);

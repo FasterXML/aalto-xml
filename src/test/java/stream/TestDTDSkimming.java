@@ -7,8 +7,13 @@ import javax.xml.stream.XMLStreamException;
 import org.codehaus.stax2.XMLInputFactory2;
 import org.codehaus.stax2.XMLStreamReader2;
 
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
+
 public class TestDTDSkimming extends base.BaseTestCase
 {
+    @Test
     public void testSimple() throws Exception
     {
         _doTestSimple(null, false);
@@ -17,6 +22,7 @@ public class TestDTDSkimming extends base.BaseTestCase
         _doTestSimple("UTF-8", true);
     }
 
+    @Test
     public void testInvalidDup() throws Exception
     {
         _doTestInvalidDup(null, false);
@@ -26,6 +32,7 @@ public class TestDTDSkimming extends base.BaseTestCase
     }
 
     // [aalto-xml#47]
+    @Test
     public void testDtdIssue47() throws Exception
     {
         final String DOC = "<?xml version=\"1.0\" encoding=\"US-ASCII\"?>\n" + 

@@ -5,6 +5,10 @@ import java.nio.charset.Charset;
 
 import javax.xml.stream.XMLStreamReader;
 
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
+
 /**
  * Regression test for Utf32Reader: its constructor previously failed to
  * assign mIn/mBuffer/mPtr/mLength, so the very first read() returned -1
@@ -13,10 +17,12 @@ import javax.xml.stream.XMLStreamReader;
 public class TestUtf32Reader
     extends base.BaseTestCase
 {
+    @Test
     public void testParseUtf32BE() throws Exception {
         _parseAndVerify("UTF-32BE");
     }
 
+    @Test
     public void testParseUtf32LE() throws Exception {
         _parseAndVerify("UTF-32LE");
     }
@@ -48,6 +54,7 @@ public class TestUtf32Reader
      * character (U+1F600, beyond the BMP) which must be emitted as a Java
      * surrogate pair across two read() iterations.
      */
+    @Test
     public void testParseUtf32WithSupplementary() throws Exception
     {
         String enc = "UTF-32BE";

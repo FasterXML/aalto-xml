@@ -2,6 +2,10 @@ package util;
 
 import com.fasterxml.aalto.util.XmlNames;
 
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
+
 /**
  * Exercises {@link XmlNames#findIllegalNameChar(String, boolean)}.
  *
@@ -21,6 +25,7 @@ import com.fasterxml.aalto.util.XmlNames;
 public class TestXmlNames
     extends base.BaseTestCase
 {
+    @Test
     public void testValidSimpleName()
     {
         assertEquals(-1, XmlNames.findIllegalNameChar("a", false));
@@ -32,12 +37,14 @@ public class TestXmlNames
         assertEquals(-1, XmlNames.findIllegalNameChar("a-b.c_d", false));
     }
 
+    @Test
     public void testColonRejected()
     {
         // Colon was removed from the valid set, so "ns:elem" is rejected at the colon.
         assertEquals(2, XmlNames.findIllegalNameChar("ns:elem", false));
     }
 
+    @Test
     public void testIllegalStartChar()
     {
         // Digits cannot start a name.
@@ -50,6 +57,7 @@ public class TestXmlNames
         assertEquals(0, XmlNames.findIllegalNameChar("!", false));
     }
 
+    @Test
     public void testIllegalNonStartChar()
     {
         // Space.
@@ -60,6 +68,7 @@ public class TestXmlNames
         assertEquals(2, XmlNames.findIllegalNameChar("ab*", false));
     }
 
+    @Test
     public void testHighBmpNameStartChar()
     {
         // U+4E00 is the first CJK Ideograph block — valid 10-name-start char.
@@ -68,6 +77,7 @@ public class TestXmlNames
         assertEquals(0, XmlNames.findIllegalNameChar("\uE000", false));
     }
 
+    @Test
     public void testSurrogateStartCharShortName()
     {
         // See class-level comment: pins down validSurrogateNameChar's current
@@ -76,6 +86,7 @@ public class TestXmlNames
         assertEquals(0, XmlNames.findIllegalNameChar("\uD800", false));
     }
 
+    @Test
     public void testSurrogateStartCharLongerName()
     {
         // See class-level comment: validSurrogateNameChar always returns false,
@@ -83,6 +94,7 @@ public class TestXmlNames
         assertEquals(1, XmlNames.findIllegalNameChar("\uD83D\uDE00rest", false));
     }
 
+    @Test
     public void testLowSurrogateFirstRejected()
     {
         // Low surrogate first is invalid — validSurrogateNameChar checks the
@@ -90,6 +102,7 @@ public class TestXmlNames
         assertEquals(1, XmlNames.findIllegalNameChar("\uDC00\uD800", false));
     }
 
+    @Test
     public void testTrailingUnpairedSurrogate()
     {
         // Valid start, then unpaired high surrogate at the end.
@@ -97,6 +110,7 @@ public class TestXmlNames
         assertEquals(1, XmlNames.findIllegalNameChar("a\uD800", false));
     }
 
+    @Test
     public void testValidUnderXml11()
     {
         // À / é / ñ are all valid xml11 name chars
@@ -104,6 +118,7 @@ public class TestXmlNames
         assertEquals(-1, XmlNames.findIllegalNameChar("\u00C0\u00E9\u00F1", true));
     }
 
+    @Test
     public void testIllegalMidCharUnderXml11()
     {
         // Valid start (À), valid 2nd char (é), then a space.
@@ -111,6 +126,7 @@ public class TestXmlNames
         assertEquals(2, XmlNames.findIllegalNameChar("\u00C0\u00E9 ", true));
     }
 
+    @Test
     public void testTrailingUnpairedSurrogateUnderXml11()
     {
         // Valid Latin-1 start, then unpaired high surrogate at end.

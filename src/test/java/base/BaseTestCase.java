@@ -9,8 +9,9 @@ import org.codehaus.stax2.*;
 import com.fasterxml.aalto.AsyncXMLStreamReader;
 import com.fasterxml.aalto.stax.*;
 
+import static org.junit.jupiter.api.Assertions.fail;
+
 public abstract class BaseTestCase
-    extends junit.framework.TestCase
     implements XMLStreamConstants
 {
     public final static String ENC_UTF8 = "UTF-8";

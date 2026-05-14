@@ -12,6 +12,10 @@ import org.codehaus.stax2.XMLStreamReader2;
 
 import com.fasterxml.aalto.in.FixedNsContext;
 
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
+
 /**
  * Exercises {@link FixedNsContext}. The class only exposes a public
  * EMPTY_CONTEXT field and is otherwise populated via reuseOrCreate(), which
@@ -34,6 +38,7 @@ public class TestFixedNsContext
         return (FixedNsContext) nc;
     }
 
+    @Test
     public void testEmptyContextLookups()
     {
         FixedNsContext ctx = FixedNsContext.EMPTY_CONTEXT;
@@ -75,6 +80,7 @@ public class TestFixedNsContext
         assertEquals("[EMPTY non-transient NsContext]", ctx.toString());
     }
 
+    @Test
     public void testNullPrefixRejected()
     {
         try {
@@ -84,6 +90,7 @@ public class TestFixedNsContext
         }
     }
 
+    @Test
     public void testNullOrEmptyUriRejected()
     {
         try {
@@ -108,6 +115,7 @@ public class TestFixedNsContext
         }
     }
 
+    @Test
     public void testReuseOrCreateOnEmptyForSameDecl()
     {
         // Calling reuseOrCreate(null) on the empty context: the last-declaration
@@ -116,6 +124,7 @@ public class TestFixedNsContext
         assertSame(FixedNsContext.EMPTY_CONTEXT, ctx);
     }
 
+    @Test
     public void testPopulatedContext() throws Exception
     {
         FixedNsContext ctx = contextAtRoot(
@@ -143,10 +152,10 @@ public class TestFixedNsContext
 
         // toString covers the non-empty branch.
         String s = ctx.toString();
-        assertTrue("toString must contain a prefix mapping, was: " + s,
-                s.contains("\"a\"->\"urn:A\""));
+        assertTrue(s.contains("\"a\"->\"urn:A\""), "toString must contain a prefix mapping, was: " + s);
     }
 
+    @Test
     public void testMultipleBindingsToSameUri() throws Exception
     {
         // Two prefixes bound to the same URI — getPrefixes should return both
@@ -163,8 +172,8 @@ public class TestFixedNsContext
             if ("b".equals(p)) sawB = true;
             count++;
         }
-        assertEquals("expected two prefixes for shared URI", 2, count);
-        assertTrue("expected prefix 'a'", sawA);
-        assertTrue("expected prefix 'b'", sawB);
+        assertEquals(2, count, "expected two prefixes for shared URI");
+        assertTrue(sawA, "expected prefix 'a'");
+        assertTrue(sawB, "expected prefix 'b'");
     }
 }

@@ -9,15 +9,21 @@ import org.xml.sax.*;
 import org.xml.sax.ext.DeclHandler;
 import org.xml.sax.ext.DefaultHandler2;
 
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
+
 public class TestSaxReader
     extends base.BaseTestCase
 {
+    @Test
     public void testSimpleReader()
         throws IOException, SAXException
     {
         doTest("<root/>", "<root;root></root;root>");
     }
 
+    @Test
     public void testComments()
         throws IOException, SAXException
     {
@@ -25,6 +31,7 @@ public class TestSaxReader
                "<!--c1--><a;a><!--c2--></a;a><!--c3-->");
     }
 
+    @Test
     public void testPI()
         throws IOException, SAXException
     {

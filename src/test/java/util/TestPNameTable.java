@@ -1,14 +1,15 @@
 package util;
-
-import junit.framework.TestCase;
-
 import com.fasterxml.aalto.in.*;
 
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
+
 public class TestPNameTable
-    extends TestCase
 {
     final static String UTF8 = "UTF-8";
 
+    @Test
     public void testUTF8()
     {
         ByteBasedPNameTable table = new ByteBasedPNameTable(16);

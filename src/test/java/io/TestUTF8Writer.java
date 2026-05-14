@@ -7,9 +7,14 @@ import java.io.OutputStream;
 import com.fasterxml.aalto.io.UTF8Writer;
 import com.fasterxml.aalto.out.WriterConfig;
 
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
+
 public class TestUTF8Writer
     extends base.BaseTestCase
 {
+    @Test
     public void testAsciiCharArray() throws IOException
     {
         // Single-char call dispatches to write(int) — different code path.
@@ -33,6 +38,7 @@ public class TestUTF8Writer
         assertEquals(0, bytes.size());
     }
 
+    @Test
     public void testWriteIntAscii() throws IOException
     {
         ByteArrayOutputStream bytes = new ByteArrayOutputStream();
@@ -45,6 +51,7 @@ public class TestUTF8Writer
         w.close();
     }
 
+    @Test
     public void testWriteIntMultiByte() throws IOException
     {
         // Cover 2-byte (Latin), 3-byte (BMP), and 4-byte (supplementary plane) paths via write(int).
@@ -60,6 +67,7 @@ public class TestUTF8Writer
         assertEquals("\u00E4\u4E2D\uD83D\uDE00", s);
     }
 
+    @Test
     public void testStringWriteAll() throws IOException
     {
         // Mix ascii, 2-byte, 3-byte and surrogate pair in a single String write.
@@ -71,6 +79,7 @@ public class TestUTF8Writer
         assertEquals(input, new String(bytes.toByteArray(), "UTF-8"));
     }
 
+    @Test
     public void testStringWriteSingleChar() throws IOException
     {
         ByteArrayOutputStream bytes = new ByteArrayOutputStream();
@@ -80,6 +89,7 @@ public class TestUTF8Writer
         assertEquals("Q", new String(bytes.toByteArray(), "UTF-8"));
     }
 
+    @Test
     public void testStringWriteOffsetLen() throws IOException
     {
         ByteArrayOutputStream bytes = new ByteArrayOutputStream();
@@ -96,6 +106,7 @@ public class TestUTF8Writer
         assertEquals(0, bytes.size());
     }
 
+    @Test
     public void testCharArrayAllForms() throws IOException
     {
         ByteArrayOutputStream bytes = new ByteArrayOutputStream();
@@ -106,6 +117,7 @@ public class TestUTF8Writer
         assertEquals(new String(data), new String(bytes.toByteArray(), "UTF-8"));
     }
 
+    @Test
     public void testBufferFlush() throws IOException
     {
         // Buffer is sized 4000; force several buffer flushes to exercise the
@@ -123,6 +135,7 @@ public class TestUTF8Writer
         assertEquals(s, new String(bytes.toByteArray(), "UTF-8"));
     }
 
+    @Test
     public void testSplitSurrogateAcrossCharArrayCalls() throws IOException
     {
         // First call ends on the high surrogate (it must be buffered);
@@ -135,6 +148,7 @@ public class TestUTF8Writer
         assertEquals("a\uD83D\uDE00b", new String(bytes.toByteArray(), "UTF-8"));
     }
 
+    @Test
     public void testSplitSurrogateAcrossStringCalls() throws IOException
     {
         ByteArrayOutputStream bytes = new ByteArrayOutputStream();
@@ -145,6 +159,7 @@ public class TestUTF8Writer
         assertEquals("a\uD83D\uDE00b", new String(bytes.toByteArray(), "UTF-8"));
     }
 
+    @Test
     public void testFailOnSecondHalfWithoutFirst() throws IOException
     {
         UTF8Writer w = new UTF8Writer(new WriterConfig(), new ByteArrayOutputStream(), true);
@@ -156,6 +171,7 @@ public class TestUTF8Writer
         }
     }
 
+    @Test
     public void testFailOnDanglingHighSurrogateAtClose() throws IOException
     {
         UTF8Writer w = new UTF8Writer(new WriterConfig(), new ByteArrayOutputStream(), true);
@@ -168,6 +184,7 @@ public class TestUTF8Writer
         }
     }
 
+    @Test
     public void testFailOnBrokenSurrogatePair() throws IOException
     {
         UTF8Writer w = new UTF8Writer(new WriterConfig(), new ByteArrayOutputStream(), true);
@@ -180,6 +197,7 @@ public class TestUTF8Writer
         }
     }
 
+    @Test
     public void testDoesNotCloseUnderlyingWhenAutocloseDisabled() throws IOException
     {
         final boolean[] closed = { false };
@@ -191,9 +209,10 @@ public class TestUTF8Writer
         UTF8Writer w = new UTF8Writer(new WriterConfig(), out, false);
         w.write("x");
         w.close();
-        assertFalse("underlying stream must not be closed when autoclose=false", closed[0]);
+        assertFalse(closed[0], "underlying stream must not be closed when autoclose=false");
     }
 
+    @Test
     public void testClosesUnderlyingWhenAutocloseEnabled() throws IOException
     {
         final boolean[] closed = { false };
@@ -205,9 +224,10 @@ public class TestUTF8Writer
         UTF8Writer w = new UTF8Writer(new WriterConfig(), out, true);
         w.write("x");
         w.close();
-        assertTrue("underlying stream must be closed when autoclose=true", closed[0]);
+        assertTrue(closed[0], "underlying stream must be closed when autoclose=true");
     }
 
+    @Test
     public void testDoubleCloseIsNoop() throws IOException
     {
         UTF8Writer w = new UTF8Writer(new WriterConfig(), new ByteArrayOutputStream(), true);

@@ -13,6 +13,8 @@ import com.ctc.wstx.msv.W3CSchemaFactory;
 
 import stax2.BaseStax2Test;
 
+import static org.junit.jupiter.api.Assertions.fail;
+
 public abstract class BaseStax2ValidationTest
     extends BaseStax2Test
 {

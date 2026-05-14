@@ -2,9 +2,14 @@ package util;
 
 import com.fasterxml.aalto.util.DataUtil;
 
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
+
 public class TestDataUtil
     extends base.BaseTestCase
 {
+    @Test
     public void testEmptyCharArray()
     {
         char[] a = DataUtil.getEmptyCharArray();
@@ -14,6 +19,7 @@ public class TestDataUtil
         assertSame(a, DataUtil.getEmptyCharArray());
     }
 
+    @Test
     public void testGrowStringArrayFromNull()
     {
         String[] a = DataUtil.growArrayBy((String[]) null, 4);
@@ -25,6 +31,7 @@ public class TestDataUtil
         }
     }
 
+    @Test
     public void testGrowStringArrayPreservesContents()
     {
         String[] in = new String[] { "a", "b", "c" };
@@ -39,6 +46,7 @@ public class TestDataUtil
         assertNotSame(in, out);
     }
 
+    @Test
     public void testGrowIntArrayFromNull()
     {
         int[] a = DataUtil.growArrayBy((int[]) null, 3);
@@ -50,6 +58,7 @@ public class TestDataUtil
         }
     }
 
+    @Test
     public void testGrowIntArrayPreservesContents()
     {
         int[] in = new int[] { 1, 2, 3 };
@@ -62,6 +71,7 @@ public class TestDataUtil
         assertNotSame(in, out);
     }
 
+    @Test
     public void testGrowCharArrayFromNull()
     {
         char[] a = DataUtil.growArrayBy((char[]) null, 5);
@@ -69,6 +79,7 @@ public class TestDataUtil
         assertEquals(5, a.length);
     }
 
+    @Test
     public void testGrowCharArrayPreservesContents()
     {
         char[] in = new char[] { 'a', 'b' };
@@ -80,11 +91,12 @@ public class TestDataUtil
         assertNotSame(in, out);
     }
 
+    @Test
     public void testGrowAnyArray()
     {
         Long[] in = new Long[] { 10L, 20L };
         Object out = DataUtil.growAnyArrayBy(in, 2);
-        assertTrue("grown array should still be Long[]", out instanceof Long[]);
+        assertTrue(out instanceof Long[], "grown array should still be Long[]");
         Long[] grown = (Long[]) out;
         assertEquals(4, grown.length);
         assertEquals(Long.valueOf(10L), grown[0]);
@@ -93,13 +105,14 @@ public class TestDataUtil
         assertNull(grown[3]);
     }
 
+    @Test
     public void testGrowAnyArrayPrimitive()
     {
         // Primitive component types go through a different Array.newInstance
         // code path than reference types.
         byte[] in = new byte[] { 1, 2, 3 };
         Object out = DataUtil.growAnyArrayBy(in, 2);
-        assertTrue("grown array should still be byte[]", out instanceof byte[]);
+        assertTrue(out instanceof byte[], "grown array should still be byte[]");
         byte[] grown = (byte[]) out;
         assertEquals(5, grown.length);
         assertEquals((byte) 1, grown[0]);
@@ -109,6 +122,7 @@ public class TestDataUtil
         assertEquals((byte) 0, grown[4]);
     }
 
+    @Test
     public void testGrowAnyArrayRejectsNull()
     {
         try {

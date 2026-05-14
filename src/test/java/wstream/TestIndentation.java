@@ -8,17 +8,23 @@ import org.codehaus.stax2.XMLStreamWriter2;
 
 import base.BaseTestCase;
 
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
+
 // Simple test(s) to ensure that explicit indentation is fine, even outside
 // root. Related to [#7]
 public class TestIndentation extends BaseTestCase
 {
     final XMLOutputFactory2 OUTPUT_FACTORY = newOutputFactory();
 
+    @Test
     public void testRootLevelIndentBytes() throws Exception
     {
         _testRootLevelIndent(true);
     }
 
+    @Test
     public void testRootLevelIndentChars() throws Exception
     {
         _testRootLevelIndent(false);

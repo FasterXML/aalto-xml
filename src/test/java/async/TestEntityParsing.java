@@ -9,8 +9,13 @@ import com.fasterxml.aalto.AsyncXMLInputFactory;
 import com.fasterxml.aalto.AsyncXMLStreamReader;
 import com.fasterxml.aalto.stax.InputFactoryImpl;
 
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
+
 public class TestEntityParsing extends AsyncTestBase
 {
+    @Test
     public void testEntityParsing() throws Exception
     {
         for (int spaces = 0; spaces < 3; ++spaces) {
@@ -24,6 +29,7 @@ public class TestEntityParsing extends AsyncTestBase
         }
     }
 
+    @Test
     public void testEntitySkipping() throws Exception
     {
         for (int spaces = 0; spaces < 3; ++spaces) {

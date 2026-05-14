@@ -8,6 +8,10 @@ import org.codehaus.stax2.XMLInputFactory2;
 
 import stax2.BaseStax2Test;
 
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
+
 /**
  * This unit test suite verifies use of {@link StreamResult} as output
  * for {@link XMLOutputFactory}.
@@ -23,6 +27,7 @@ public class TestStreamResult
      * This test is related to problem reported as [WSTX-182], inability
      * to use SystemId alone as source.
      */
+    @Test
     public void testCreateUsingSystemId()
         throws IOException, XMLStreamException
     {
