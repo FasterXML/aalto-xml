@@ -848,16 +848,16 @@ public abstract class ByteXmlWriter
                     /* !!! TBI: Need to split CData? Can do, but what about
                      *   content split around buffer boundary?
                      */
-                    if (offset < len && cbuf[offset] == ']') {
-                        if ((offset+1) < len && cbuf[offset+1] == '>') {
-                            // Ok, need to output ']]' first, then end
-                            offset += 2;
-                            writeRaw(BYTE_RBRACKET, BYTE_RBRACKET);
-                            writeCDataEnd();
-                            // Then new start, and '>'
-                            writeCDataStart();
-                            writeRaw(BYTE_GT);
-                        }
+                    // [aalto-xml#100]: only the literal "]]>" sequence is illegal
+                    // inside CDATA; a bare "]]" must be passed through unchanged.
+                    if ((offset+1) < len && cbuf[offset] == ']' && cbuf[offset+1] == '>') {
+                        // Ok, need to output ']]' first, then end
+                        offset += 2;
+                        writeRaw(BYTE_RBRACKET, BYTE_RBRACKET);
+                        writeCDataEnd();
+                        // Then new start, and '>'
+                        writeCDataStart();
+                        writeRaw(BYTE_GT);
                         continue main_loop;
                     }
                     break;
