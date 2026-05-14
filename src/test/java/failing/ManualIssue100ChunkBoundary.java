@@ -11,6 +11,8 @@ import org.codehaus.stax2.XMLStreamWriter2;
 
 import base.BaseTestCase;
 
+import static org.junit.jupiter.api.Assertions.fail;
+
 /**
  * Manually runnable reproducer for the chunk-boundary variant of
  * [aalto-xml#100]. {@code writeCData(String)} chunks its input into 512-char

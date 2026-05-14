@@ -10,6 +10,8 @@ import org.codehaus.stax2.XMLStreamWriter2;
 
 import base.BaseTestCase;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 /**
  * Tests for [aalto-xml#100]: a "]]" sequence inside CDATA content that is NOT
  * followed by '>' must be written through verbatim. Previously the first ']'
