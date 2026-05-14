@@ -9,6 +9,10 @@ import javax.xml.stream.XMLStreamException;
 import org.codehaus.stax2.XMLInputFactory2;
 import org.codehaus.stax2.XMLStreamReader2;
 
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
+
 public class TestSurrogates extends base.BaseTestCase
 {
     private final int HIGH_CODEPOINT = 0x1031c;
@@ -17,12 +21,14 @@ public class TestSurrogates extends base.BaseTestCase
     private final String DOC = "<value>"+VALUE+"</value>";
     
     // for [#27]
+    @Test
     public void testSurrogateSkipping() throws Exception
     {
         _testSurrogate(true, false);
         _testSurrogate(true, true);
     }
 
+    @Test
     public void testSurrogateParsing() throws Exception
     {
         _testSurrogate(false, false);

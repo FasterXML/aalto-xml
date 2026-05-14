@@ -8,8 +8,13 @@ import com.fasterxml.aalto.AsyncXMLInputFactory;
 import com.fasterxml.aalto.AsyncXMLStreamReader;
 import com.fasterxml.aalto.stax.InputFactoryImpl;
 
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
+
 public class TestCDataParsing extends AsyncTestBase
 {
+    @Test
     public void testCDataParse() throws Exception
     {
         // let's try with different chunking, addition (or not) of space
@@ -24,6 +29,7 @@ public class TestCDataParsing extends AsyncTestBase
         }
     }
 
+    @Test
     public void testCDataSkip() throws Exception
     {
         // let's try with different chunking, addition (or not) of space

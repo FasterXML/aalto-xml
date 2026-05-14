@@ -166,17 +166,17 @@ public final class RepairingStreamWriter
         if (!_stateStartElementOpen) {
             throwOutputError(ErrorConsts.WERR_NS_NO_ELEM);
         }
-         /* ... We have one complication though: if the current element
-          * uses default namespace, can not change it (attributes don't
-          * matter -- they never use the default namespace, but either don't
-          * belong to a namespace, or belong to one using explicit prefix)
-          */
-
-        if (!_currElem.hasPrefix()) {
-             _currElem.setDefaultNsURI(nsURI);
-             _writeDefaultNamespace(nsURI);
-         }
-        _writeDefaultNamespace(nsURI);
+        if (nsURI == null) {
+            nsURI = "";
+        }
+        // In repairing mode the writer auto-emits the default-ns declaration
+        // via writeStartElement when needed, so an explicit call here must be
+        // a no-op once the binding is already in place — mirrors how
+        // writeNamespace() skips already-bound prefixed namespaces (#56).
+        if (!_currElem.isPrefixBoundTo("", nsURI, _rootNsContext)) {
+            _currElem.setDefaultNsURI(nsURI);
+            _writeDefaultNamespace(nsURI);
+        }
     }
 
     //public void writeDTD(String dtd)

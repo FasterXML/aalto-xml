@@ -11,8 +11,13 @@ import com.fasterxml.aalto.AsyncXMLInputFactory;
 import com.fasterxml.aalto.AsyncXMLStreamReader;
 import com.fasterxml.aalto.stax.InputFactoryImpl;
 
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
+
 public class TestDoctypeParsing extends AsyncTestBase
 {
+    @Test
     public void testSimplest() throws Exception
     {
         for (int spaces = 0; spaces < 3; ++spaces) {
@@ -26,6 +31,7 @@ public class TestDoctypeParsing extends AsyncTestBase
         }
     }
 
+    @Test
     public void testWithSystemId() throws Exception
     {
         for (int spaces = 0; spaces < 3; ++spaces) {
@@ -38,6 +44,7 @@ public class TestDoctypeParsing extends AsyncTestBase
         }
     }
 
+    @Test
     public void testWithPublicId() throws Exception
     {
         final String PUBLIC_ID = "-//W3C//DTD XHTML 1.0 Strict//EN";
@@ -52,6 +59,7 @@ public class TestDoctypeParsing extends AsyncTestBase
         }
     }
 
+    @Test
     public void testParseFull() throws Exception
     {
         for (int spaces = 0; spaces < 3; ++spaces) {
@@ -64,6 +72,7 @@ public class TestDoctypeParsing extends AsyncTestBase
         }
     }
 
+    @Test
     public void testSkipFull() throws Exception
     {
         for (int spaces = 0; spaces < 3; ++spaces) {
@@ -76,6 +85,7 @@ public class TestDoctypeParsing extends AsyncTestBase
         }
     }
     
+    @Test
     public void testInvalidDup() throws Exception
     {
         for (int spaces = 0; spaces < 3; ++spaces) {

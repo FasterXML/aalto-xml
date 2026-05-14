@@ -6,6 +6,10 @@ import com.fasterxml.aalto.AsyncXMLInputFactory;
 import com.fasterxml.aalto.AsyncXMLStreamReader;
 import com.fasterxml.aalto.stax.InputFactoryImpl;
 
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
+
 public class TestSurrogates extends AsyncTestBase
 {
     private final int HIGH_CODEPOINT = 0x1031c;
@@ -13,6 +17,7 @@ public class TestSurrogates extends AsyncTestBase
     private final String VALUE = "a/"+SURROGATE+"/b";
     private final String DOC = "<value>"+VALUE+"</value>";
 
+    @Test
     public void testCdataWithSurrogate() throws Exception
     {
         for (int spaces = 0; spaces < 3; ++spaces) {
@@ -26,6 +31,7 @@ public class TestSurrogates extends AsyncTestBase
         }
     }
 
+    @Test
     public void testSkipWithSurrogate() throws Exception
     {
         for (int spaces = 0; spaces < 3; ++spaces) {

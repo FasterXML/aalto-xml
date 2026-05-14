@@ -10,6 +10,10 @@ import org.codehaus.stax2.XMLStreamWriter2;
 
 import base.BaseTestCase;
 
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
+
 public class TestLongerContent extends BaseTestCase
 {
     final static String TEXT_UTF8_2BYTES = "\u00C0"+"c\u00C7ent! ";
@@ -20,18 +24,22 @@ public class TestLongerContent extends BaseTestCase
     
     // To test [#26]
 
+    @Test
     public void testLongerWithMultiByteBytes() throws Exception {
         _testLongerWithMultiByte(true, false);
     }
 
+    @Test
     public void testLongerWithMultiByteBytesCData() throws Exception {
         _testLongerWithMultiByte(true, true);
     }
 
+    @Test
     public void testLongerWithMultiByteChars() throws Exception {
         _testLongerWithMultiByte(false, false);
     }
 
+    @Test
     public void testLongerWithMultiByteCharsCData() throws Exception {
         _testLongerWithMultiByte(false, true);
     }
@@ -85,7 +93,7 @@ public class TestLongerContent extends BaseTestCase
             String EXP = TEXT_UTF8_2BYTES+(i % 1111)+"\n";
             String ACT = sr.getElementText();
             if (!EXP.equals(ACT)) {
-                assertEquals("Strings differ at "+sr.getLocation(), EXP, ACT);
+                assertEquals(EXP, ACT, "Strings differ at "+sr.getLocation());
             }
             assertTokenType(END_ELEMENT, sr.getEventType());
             assertEquals("a", sr.getLocalName());

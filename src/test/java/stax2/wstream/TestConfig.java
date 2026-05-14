@@ -4,6 +4,10 @@ import javax.xml.stream.*;
 
 import org.codehaus.stax2.*;
 
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
+
 /**
  * Set of unit tests that checks that configuring of
  * {@link XMLOutputFactory2} works ok.
@@ -14,6 +18,7 @@ import org.codehaus.stax2.*;
 public class TestConfig
     extends BaseWriterTest
 {
+    @Test
     public void testProfiles() throws XMLStreamException
     {
         // configureForXmlConformance

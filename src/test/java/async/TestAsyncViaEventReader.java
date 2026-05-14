@@ -8,12 +8,17 @@ import com.fasterxml.aalto.stax.InputFactoryImpl;
 
 import java.nio.ByteBuffer;
 
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
+
 /**
  * Set of tests to ensure that it is possible to use Stax {@link XMLEventReader} with
  * async parser.
  */
 public class TestAsyncViaEventReader extends AsyncTestBase
 {
+    @Test
     public void testSimpleByteArray() throws Exception
     {
         final AsyncXMLInputFactory f = newAsyncInputFactory();
@@ -57,6 +62,7 @@ public class TestAsyncViaEventReader extends AsyncTestBase
         sr.close();
     }
 
+    @Test
     public void testSimpleByteBuffer() throws Exception
     {
         final AsyncXMLInputFactory f = new InputFactoryImpl();

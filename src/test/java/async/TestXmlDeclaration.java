@@ -8,10 +8,15 @@ import com.fasterxml.aalto.stax.InputFactoryImpl;
 
 import static com.fasterxml.aalto.AsyncXMLStreamReader.EVENT_INCOMPLETE;
 
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
+
 public class TestXmlDeclaration extends AsyncTestBase
 {
     private final int[] CHUNK_SIZES = new int[] { 1, 2, 3, 5, 9, 33 };
 
+    @Test
     public void testNoDeclaration() throws Exception
     {
         final AsyncXMLInputFactory f = new InputFactoryImpl();
@@ -46,6 +51,7 @@ public class TestXmlDeclaration extends AsyncTestBase
         assertEquals("root", sr.getLocalName());
     }
 
+    @Test
     public void testVersionOnlyDeclaration() throws Exception
     {
         final String XML = "<?xml version='1.0' ?><root />";
@@ -79,6 +85,7 @@ public class TestXmlDeclaration extends AsyncTestBase
         assertEquals("root", sr.getLocalName());
     }
 
+    @Test
     public void testEncodingDeclaration() throws Exception
     {
         final String XML = "<?xml version= \"1.0\"   encoding='UTF-8' ?><root/>";
@@ -112,6 +119,7 @@ public class TestXmlDeclaration extends AsyncTestBase
         assertEquals("root", sr.getLocalName());
     }
 
+    @Test
     public void testStandAloneDeclaration() throws Exception
     {
         final String XML = "<?xml version  ='1.0' encoding=\"UTF-8\"  standalone='yes' ?>  <root />";
@@ -146,6 +154,7 @@ public class TestXmlDeclaration extends AsyncTestBase
         assertEquals("root", sr.getLocalName());
     }
 
+    @Test
     public void testStandAloneDeclaration2() throws Exception
     {
         final String XML = "<?xml version=\"1.0\" standalone='yes'?>\n<root/>";

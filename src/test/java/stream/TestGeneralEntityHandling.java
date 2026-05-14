@@ -9,6 +9,10 @@ import org.codehaus.stax2.XMLInputFactory2;
 
 import com.fasterxml.aalto.AaltoInputProperties;
 
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
+
 // Mostly for [aalto-xml#65]
 public class TestGeneralEntityHandling extends base.BaseTestCase
 {
@@ -20,6 +24,7 @@ public class TestGeneralEntityHandling extends base.BaseTestCase
                 true);
     }
     
+    @Test
     public void testAttributeGEHandling() throws Exception
     {
         final String DOC = "<root attr='Entity: &ent;'>Text</root>";
