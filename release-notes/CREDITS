@@ -40,6 +40,7 @@ Jamie Phelps (@jphelp32)
 
 Christoph Beck (@beckchr)
  * Reported #5: Complete validation implementation of `XMLStreamWriter`
+  (1.4.0)
 
 Arnaud Vié (@UnasZole)
  * Reported #56: Aalto writes too many default namespace `xmlns` attributes if
