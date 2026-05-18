@@ -38,6 +38,10 @@ Jamie Phelps (@jphelp32)
  * Reported #78: Async parsing turns &quot; inside element content into apostrophe
   (1.3.2)
 
+Christoph Beck (@beckchr)
+ * Requested #5: Complete validation implementation of `XMLStreamWriter`
+  (1.4.0)
+
 Arnaud Vié (@UnasZole)
  * Reported #56: Aalto writes too many default namespace `xmlns` attributes if
   `IS_REPAIRING_NAMESPACES` enabled

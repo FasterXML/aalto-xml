@@ -132,6 +132,16 @@ public abstract class StreamWriterBase
      */
     protected ValidationProblemHandler _vldProblemHandler = null;
 
+    /**
+     * Lazily-allocated buffer used by {@link #_encoderToString} when a
+     * validator is attached and a typed attribute value must be materialized
+     * into a String before being passed to the validator. Recycled across
+     * calls so high-throughput typed output doesn't allocate per attribute.
+     *
+     * @since 1.4
+     */
+    private char[] _attrValueBuffer;
+
     /*
     /**********************************************************************
     /* State information
@@ -332,7 +342,9 @@ public abstract class StreamWriterBase
         if (!_stateStartElementOpen) {
             throwOutputError(ErrorConsts.WERR_ATTR_NO_ELEM);
         }
-        // note: for attributes, no prefix <=> no namespace, so:
+        if (_validator != null) {
+            value = _validateAttribute(localName, "", "", value);
+        }
         _writeAttribute(_symbols.findSymbol(localName), value);
     }
     
@@ -505,9 +517,7 @@ public abstract class StreamWriterBase
     {
         _verifyStartElement(null, localName);
         WName name = _symbols.findSymbol(localName);
-        if (_validator != null) {
-            _validator.validateElementStart(localName, "", "");
-        }
+        _validateElementStart(localName, "", "");
         _writeStartTag(name, true);
     }
 
@@ -569,6 +579,9 @@ public abstract class StreamWriterBase
                  * write empty element), but need to do same processing.
                  */
                 _stateStartElementOpen = false;
+                if (_validator != null) {
+                    _vldContent = _validator.validateElementAndAttributes();
+                }
                 _xmlWriter.writeStartTagEmptyEnd();
             } else { // Otherwise, full end element
                 _xmlWriter.writeEndTag(thisElem.getName());
@@ -686,9 +699,7 @@ public abstract class StreamWriterBase
     {
         _verifyStartElement(null, localName);
         WName name = _symbols.findSymbol(localName);
-        if (_validator != null) {
-            _validator.validateElementStart(localName, "", "");
-        }
+        _validateElementStart(localName, "", "");
         _writeStartTag(name, false);
     }
 
@@ -1384,6 +1395,9 @@ public abstract class StreamWriterBase
         throws XMLStreamException
     {
         _stateStartElementOpen = false;
+        if (_validator != null) {
+            _vldContent = _validator.validateElementAndAttributes();
+        }
         try {
             if (emptyElem) {
                 _xmlWriter.writeStartTagEmptyEnd();
@@ -1397,6 +1411,10 @@ public abstract class StreamWriterBase
         // Need bit more special handling for empty elements...
         if (emptyElem) {
             OutputElement thisElem = _currElem;
+            if (_validator != null) {
+                _vldContent = _validator.validateElementEnd(thisElem.getLocalName(),
+                        thisElem.getNonNullNamespaceURI(), thisElem.getNonNullPrefix());
+            }
             _currElem = thisElem.getParent();
             if (_currElem.isRoot()) { // Did we close the root? (isRoot() returns true for the virtual "document node")
                 _state = State.EPILOG;
@@ -1450,6 +1468,61 @@ public abstract class StreamWriterBase
             _xmlWriter.writeAttribute(name, enc);
         } catch (IOException ioe) {
             throw new IoStreamException(ioe);
+        }
+    }
+
+    /**
+     * Materializes a typed-attribute encoder into a String so the value can be
+     * passed to a validator (which has no streaming-encoder hook). Only used
+     * when a validator is attached — the fast path keeps streaming via
+     * {@link AsciiValueEncoder}. The scratch buffer is recycled across calls.
+     */
+    protected final String _encoderToString(AsciiValueEncoder enc)
+    {
+        char[] buf = _attrValueBuffer;
+        if (buf == null) {
+            buf = new char[256];
+            _attrValueBuffer = buf;
+        }
+        StringBuilder sb = new StringBuilder(64);
+        while (!enc.isCompleted()) {
+            int end = enc.encodeMore(buf, 0, buf.length);
+            if (end == 0) { // misbehaving encoder; avoid infinite loop
+                break;
+            }
+            sb.append(buf, 0, end);
+        }
+        return sb.toString();
+    }
+
+    /**
+     * Invokes the validator's {@code validateAttribute} and returns the value
+     * to write (either the validator's normalized return, when non-null, or
+     * the original {@code value}). Callers MUST check {@code _validator != null}
+     * before calling — keeping the guard at the call site preserves the
+     * no-validator fast path.
+     */
+    protected final String _validateAttribute(String localName, String uri, String prefix, String value)
+        throws XMLStreamException
+    {
+        String normalized = _validator.validateAttribute(localName, uri, prefix, value);
+        return (normalized == null) ? value : normalized;
+    }
+
+    /**
+     * Convenience wrapper around {@code validateElementStart} that gates on
+     * {@code _validator != null} and maps null URI/prefix to empty strings
+     * (the Stax2 contract). Lives in one place so every element-start site
+     * doesn't repeat the boilerplate. The guard is inside the helper because
+     * callers have no other validator-only work to do at element start.
+     */
+    protected final void _validateElementStart(String localName, String uri, String prefix)
+        throws XMLStreamException
+    {
+        if (_validator != null) {
+            _validator.validateElementStart(localName,
+                    (uri == null) ? "" : uri,
+                    (prefix == null) ? "" : prefix);
         }
     }
 

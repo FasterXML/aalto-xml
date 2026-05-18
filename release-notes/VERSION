@@ -6,6 +6,8 @@ Project: aalto-xml
 
 1.4.0 (not yet released)
 
+#5: Complete validation implementation of `XMLStreamWriter`
+ (requested by Christoph B)
 #56: Aalto writes too many default namespace `xmlns` attributes if
   `IS_REPAIRING_NAMESPACES` enabled
  (reported by Arnaud V)
