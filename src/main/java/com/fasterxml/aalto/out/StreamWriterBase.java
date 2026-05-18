@@ -343,7 +343,6 @@ public abstract class StreamWriterBase
             throwOutputError(ErrorConsts.WERR_ATTR_NO_ELEM);
         }
         if (_validator != null) {
-            // note: for attributes, no prefix <=> no namespace
             value = _validateAttribute(localName, "", "", value);
         }
         _writeAttribute(_symbols.findSymbol(localName), value);
@@ -518,9 +517,7 @@ public abstract class StreamWriterBase
     {
         _verifyStartElement(null, localName);
         WName name = _symbols.findSymbol(localName);
-        if (_validator != null) {
-            _validator.validateElementStart(localName, "", "");
-        }
+        _validateElementStart(localName, "", "");
         _writeStartTag(name, true);
     }
 
@@ -702,9 +699,7 @@ public abstract class StreamWriterBase
     {
         _verifyStartElement(null, localName);
         WName name = _symbols.findSymbol(localName);
-        if (_validator != null) {
-            _validator.validateElementStart(localName, "", "");
-        }
+        _validateElementStart(localName, "", "");
         _writeStartTag(name, false);
     }
 
@@ -1512,6 +1507,23 @@ public abstract class StreamWriterBase
     {
         String normalized = _validator.validateAttribute(localName, uri, prefix, value);
         return (normalized == null) ? value : normalized;
+    }
+
+    /**
+     * Convenience wrapper around {@code validateElementStart} that gates on
+     * {@code _validator != null} and maps null URI/prefix to empty strings
+     * (the Stax2 contract). Lives in one place so every element-start site
+     * doesn't repeat the boilerplate. The guard is inside the helper because
+     * callers have no other validator-only work to do at element start.
+     */
+    protected final void _validateElementStart(String localName, String uri, String prefix)
+        throws XMLStreamException
+    {
+        if (_validator != null) {
+            _validator.validateElementStart(localName,
+                    (uri == null) ? "" : uri,
+                    (prefix == null) ? "" : prefix);
+        }
     }
 
     protected final void _writeDefaultNamespace(String uri)

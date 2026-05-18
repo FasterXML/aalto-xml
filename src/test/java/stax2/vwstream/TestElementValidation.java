@@ -20,10 +20,8 @@ import static org.junit.jupiter.api.Assertions.*;
 public class TestElementValidation
     extends BaseOutputTest
 {
-    // DTD where only <root> is declared (with EMPTY content model).
     final String ROOT_ONLY_DTD = "<!ELEMENT root EMPTY>\n";
 
-    // DTD where <root> must contain exactly one <child>, both EMPTY.
     final String ROOT_CHILD_DTD =
             "<!ELEMENT root (child)>\n"
           + "<!ELEMENT child EMPTY>\n";

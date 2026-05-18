@@ -369,9 +369,7 @@ public final class RepairingStreamWriter
                 // also: changes default ns of curr elem etc:
                 _currElem.setDefaultNsURI("");
             }
-            if (_validator != null) {
-                _validator.validateElementStart(localName, "", "");
-            }
+            _validateElementStart(localName, "", "");
             return;
         }
 
@@ -408,10 +406,7 @@ public final class RepairingStreamWriter
         }
 
         // And after all that, validation?
-        if (_validator != null) {
-            _validator.validateElementStart(localName, nsURI,
-                                            ((prefix == null) ? "" : prefix));
-        }
+        _validateElementStart(localName, nsURI, prefix);
         return;
     }
 
