@@ -161,13 +161,18 @@ public abstract class PName
         return (other._prefixedName == _prefixedName);
     }
 
+    /**
+     * Stax-style match used for attribute lookup by namespace + local name:
+     * {@code nsUri == null} skips the namespace check (per
+     * {@link javax.xml.stream.XMLStreamReader#getAttributeValue(String, String)}),
+     * {@code ""} means "no namespace", and any other value must match the
+     * bound URI exactly.
+     */
     public final boolean boundEquals(String nsUri, String ln)
     {
         if (!_localName.equals(ln)) {
             return false;
         }
-        // Stax: null namespace URI means "do not check namespace"
-        // (see XMLStreamReader.getAttributeValue(String, String))
         if (nsUri == null) {
             return true;
         }
