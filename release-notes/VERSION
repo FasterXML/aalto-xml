@@ -9,6 +9,10 @@ Project: aalto-xml
 #56: Aalto writes too many default namespace `xmlns` attributes if
   `IS_REPAIRING_NAMESPACES` enabled
  (reported by Arnaud V)
+#97: `FixedNsContext.getNamespaceURI("")` did not return the default
+  namespace URI because the default-ns prefix was stored as `null`
+  instead of `XMLConstants.DEFAULT_NS_PREFIX`
+ (reported by @arne-bdt)
 #105: Change JDK baseline to Java 8 (from 1.6)
 #116: Convert tests from JUnit 4 to JUnit 5
 - Fix `Utf32Reader` constructor: previously failed to assign input stream,

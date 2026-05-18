@@ -70,7 +70,7 @@ public final class FixedNsContext
         if (this == EMPTY_CONTEXT) {
             ArrayList<String> tmp = new ArrayList<String>();
             for (NsDeclaration curr = currLastDecl; curr != null; curr = curr.getPrev()) {
-                tmp.add(curr.getPrefix());
+                tmp.add(prefixFor(curr));
                 tmp.add(curr.getCurrNsURI());
             }
             return new FixedNsContext(currLastDecl, tmp.toArray(new String[tmp.size()]));
@@ -82,10 +82,17 @@ public final class FixedNsContext
             _tmpDecl.clear();
         }
         for (NsDeclaration curr = currLastDecl; curr != null; curr = curr.getPrev()) {
-            _tmpDecl.add(curr.getPrefix());
+            _tmpDecl.add(prefixFor(curr));
             _tmpDecl.add(curr.getCurrNsURI());
         }
         return new FixedNsContext(currLastDecl, _tmpDecl.toArray(new String[_tmpDecl.size()]));
+    }
+
+    // [aalto-xml#97]: NsBinding uses null as the prefix for the default
+    // namespace, but NamespaceContext callers must use DEFAULT_NS_PREFIX ("").
+    private static String prefixFor(NsDeclaration decl) {
+        String prefix = decl.getPrefix();
+        return (prefix == null) ? XMLConstants.DEFAULT_NS_PREFIX : prefix;
     }
 
     /*

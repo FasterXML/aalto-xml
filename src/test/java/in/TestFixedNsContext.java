@@ -155,6 +155,29 @@ public class TestFixedNsContext
         assertTrue(s.contains("\"a\"->\"urn:A\""), "toString must contain a prefix mapping, was: " + s);
     }
 
+    // [aalto-xml#97]: default namespace must be reachable via DEFAULT_NS_PREFIX ("")
+    @Test
+    public void testDefaultNamespaceLookup() throws Exception
+    {
+        FixedNsContext ctx = contextAtRoot(
+                "<root xmlns='urn:default' xmlns:a='urn:A'/>");
+
+        // Forward lookup for the default ns must use "" per JAXP spec
+        assertEquals("urn:default", ctx.getNamespaceURI(XMLConstants.DEFAULT_NS_PREFIX));
+        assertEquals("urn:default", ctx.getNamespaceURI(""));
+        // Sibling explicit prefix still resolves
+        assertEquals("urn:A", ctx.getNamespaceURI("a"));
+
+        // Reverse lookup: default ns URI maps back to ""
+        assertEquals(XMLConstants.DEFAULT_NS_PREFIX, ctx.getPrefix("urn:default"));
+
+        // getPrefixes for the default-ns URI yields ""
+        Iterator<String> it = ctx.getPrefixes("urn:default");
+        assertTrue(it.hasNext());
+        assertEquals(XMLConstants.DEFAULT_NS_PREFIX, it.next());
+        assertFalse(it.hasNext());
+    }
+
     @Test
     public void testMultipleBindingsToSameUri() throws Exception
     {
