@@ -569,6 +569,9 @@ public abstract class StreamWriterBase
                  * write empty element), but need to do same processing.
                  */
                 _stateStartElementOpen = false;
+                if (_validator != null) {
+                    _vldContent = _validator.validateElementAndAttributes();
+                }
                 _xmlWriter.writeStartTagEmptyEnd();
             } else { // Otherwise, full end element
                 _xmlWriter.writeEndTag(thisElem.getName());
@@ -1384,6 +1387,9 @@ public abstract class StreamWriterBase
         throws XMLStreamException
     {
         _stateStartElementOpen = false;
+        if (_validator != null) {
+            _vldContent = _validator.validateElementAndAttributes();
+        }
         try {
             if (emptyElem) {
                 _xmlWriter.writeStartTagEmptyEnd();
@@ -1397,6 +1403,10 @@ public abstract class StreamWriterBase
         // Need bit more special handling for empty elements...
         if (emptyElem) {
             OutputElement thisElem = _currElem;
+            if (_validator != null) {
+                _vldContent = _validator.validateElementEnd(thisElem.getLocalName(),
+                        thisElem.getNonNullNamespaceURI(), thisElem.getNonNullPrefix());
+            }
             _currElem = thisElem.getParent();
             if (_currElem.isRoot()) { // Did we close the root? (isRoot() returns true for the virtual "document node")
                 _state = State.EPILOG;

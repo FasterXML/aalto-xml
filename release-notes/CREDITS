@@ -3,40 +3,43 @@ Here are people who have contributed to the development of Aalto XML processor.
 
 Tatu Saloranta, tatu.saloranta@iki.fi: author
 
-Adam Retter (adamretter@github)
+Adam Retter (@adamretter)
 
  * Contributed fix for #34: DTD Id parsing issue for public ids
   (1.0.0)
 
-Barry Coughlan (bcoughlan@github):
+Barry Coughlan (@bcoughlan)
 
  * Reported #29: Multi-threading bug in XmlScanner/FixedNsContext
   (1.0.0)
 
-David Moles (dmolesUC3@github)
+David Moles (@dmolesUC3)
  * Reported, contributed fix for #53: AsyncByteScanner.validPublicIdChar()
    incorrectly rejects digits
   (1.1.0)
 
-Mike Conley (conleym@github)
+Mike Conley (@conleym)
  * Reported #35: Carriage return (\r) dropped by `XMLStreamWriter` implementation
   (1.1.0)
 
-Michiel Borkent (borkdude@github)
+Michiel Borkent (@borkdude)
  * Reported #47: NPE when trying to parse document with DTD declaration
   (1.2.1)
 
-Claude Mamo (otcdlink-simpleuser@github)
+Claude Mamo (@otcdlink-simpleuser)
  * Contributed #65: Support disabling General Entity Reference replacement in attribute values
   (1.3.0)
 
-Erik Fäßler (khituras@github)
+Erik Fäßler (@khituras)
  * Contributed #75: Fixing a bug when multi-byte characters were split
   (1.3.1)
 
-Jamie Phelps (jphelp32@github)
+Jamie Phelps (@jphelp32)
  * Reported #78: Async parsing turns &quot; inside element content into apostrophe
   (1.3.2)
+
+Christoph Beck (@beckchr)
+ * Reported #5: Complete validation implementation of `XMLStreamWriter`
 
 Arnaud Vié (@UnasZole)
  * Reported #56: Aalto writes too many default namespace `xmlns` attributes if

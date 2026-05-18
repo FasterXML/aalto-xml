@@ -70,14 +70,20 @@ public final class NonRepairingStreamWriter
             throwOutputError(ErrorConsts.WERR_ATTR_NO_ELEM);
         }
         WName name;
+        String prefix;
         if (nsURI == null || nsURI.length() == 0) {
             name = _symbols.findSymbol(localName);
+            prefix = "";
         } else {
-            String prefix = _currElem.getExplicitPrefix(nsURI, _rootNsContext);
+            prefix = _currElem.getExplicitPrefix(nsURI, _rootNsContext);
             if (prefix == null) {
                 throwOutputError("Unbound namespace URI '"+nsURI+"'");
             }
             name = _symbols.findSymbol(prefix, localName);
+        }
+        if (_validator != null) {
+            _validator.validateAttribute(localName,
+                    (nsURI == null) ? "" : nsURI, prefix, value);
         }
         _writeAttribute(name, value);
     }
@@ -93,6 +99,11 @@ public final class NonRepairingStreamWriter
         WName name = (prefix == null || prefix.length() == 0)
             ? _symbols.findSymbol(localName)
             : _symbols.findSymbol(prefix, localName);
+        if (_validator != null) {
+            _validator.validateAttribute(localName,
+                    (nsURI == null) ? "" : nsURI,
+                    (prefix == null) ? "" : prefix, value);
+        }
         _writeAttribute(name, value);
     }
 

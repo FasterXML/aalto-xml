@@ -384,7 +384,7 @@ public final class RepairingStreamWriter
 
         // And after all that, validation?
         if (_validator != null) {
-            _validator.validateElementStart(localName, "",
+            _validator.validateElementStart(localName, nsURI,
                                             ((prefix == null) ? "" : prefix));
         }
         return;
