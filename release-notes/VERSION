@@ -18,6 +18,9 @@ Project: aalto-xml
  (reported by @anomen-s)
 #79: DTD RootName only returned correctly if it consists of a multiple of 4 bytes
  (reported by @Huxlyx)
+#80: SAX `Attributes.getValue(String)` could return a value from a
+  previous element when the current element had no attributes
+ (reported by @nedtwigg)
 #97: `FixedNsContext` could not retrieve the default namespace URI
   because the default-ns prefix was stored as `null` instead of
   `XMLConstants.DEFAULT_NS_PREFIX`; also fix `getNamespaceURI("")` to
