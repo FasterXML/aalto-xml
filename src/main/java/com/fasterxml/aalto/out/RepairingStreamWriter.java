@@ -141,6 +141,12 @@ public final class RepairingStreamWriter
         WName name = (nsURI == null || nsURI.length() == 0)
             ? _symbols.findSymbol(localName)
             : _generateAttrName(null, localName, nsURI);
+        if (_validator != null) {
+            String actualPrefix = name.getPrefix();
+            _validator.validateAttribute(localName,
+                    (nsURI == null) ? "" : nsURI,
+                    (actualPrefix == null) ? "" : actualPrefix, value);
+        }
         _writeAttribute(name, value);
     }
 
@@ -156,6 +162,13 @@ public final class RepairingStreamWriter
         WName name = (nsURI == null || nsURI.length() == 0)
             ? _symbols.findSymbol(localName)
             : _generateAttrName(prefix, localName, nsURI);
+        if (_validator != null) {
+            // _generateAttrName may have substituted a different prefix
+            String actualPrefix = name.getPrefix();
+            _validator.validateAttribute(localName,
+                    (nsURI == null) ? "" : nsURI,
+                    (actualPrefix == null) ? "" : actualPrefix, value);
+        }
         _writeAttribute(name, value);
     }
 

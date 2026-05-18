@@ -9,7 +9,7 @@ import org.codehaus.stax2.XMLStreamWriter2;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
-//import org.codehaus.stax2.validation.*;
+import org.codehaus.stax2.validation.*;
 
 /**
  * Unit tests for testing handling of attribute value validation, mostly
@@ -65,7 +65,6 @@ public class TestAttributeValidation
         sw.close();
     }
 
-/*    
     @Test
     public void testInvalidFixedAttr() throws XMLStreamException
     {
@@ -242,5 +241,4 @@ public class TestAttributeValidation
         }
         // Should not close, since stream is invalid now...
     }
-    */
 }

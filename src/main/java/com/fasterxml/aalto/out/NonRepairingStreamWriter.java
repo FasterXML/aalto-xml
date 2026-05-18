@@ -141,6 +141,11 @@ public final class NonRepairingStreamWriter
             name = _symbols.findSymbol(prefix, localName);
         }
         _verifyStartElement(prefix, localName);
+        if (_validator != null) {
+            _validator.validateElementStart(localName,
+                    (nsURI == null) ? "" : nsURI,
+                    (prefix == null) ? "" : prefix);
+        }
         _writeStartTag(name, true, nsURI);
     }
 
@@ -154,6 +159,11 @@ public final class NonRepairingStreamWriter
             name = _symbols.findSymbol(localName);
         } else {
             name = _symbols.findSymbol(prefix, localName);
+        }
+        if (_validator != null) {
+            _validator.validateElementStart(localName,
+                    (nsURI == null) ? "" : nsURI,
+                    (prefix == null) ? "" : prefix);
         }
         _writeStartTag(name, true, nsURI);
     }
@@ -193,6 +203,11 @@ public final class NonRepairingStreamWriter
             name = _symbols.findSymbol(prefix, localName);
         }
         _verifyStartElement(prefix, localName);
+        if (_validator != null) {
+            _validator.validateElementStart(localName,
+                    (nsURI == null) ? "" : nsURI,
+                    (prefix == null) ? "" : prefix);
+        }
         _writeStartTag(name, false);
     }
 
@@ -207,6 +222,11 @@ public final class NonRepairingStreamWriter
             name = _symbols.findSymbol(localName);
         } else {
             name = _symbols.findSymbol(prefix, localName);
+        }
+        if (_validator != null) {
+            _validator.validateElementStart(localName,
+                    (nsURI == null) ? "" : nsURI,
+                    (prefix == null) ? "" : prefix);
         }
         _writeStartTag(name, false, nsURI);
     }
