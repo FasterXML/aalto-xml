@@ -3,7 +3,10 @@ package com.fasterxml.aalto.sax;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.xml.parsers.SAXParser;
 
@@ -87,9 +90,9 @@ public class SaxAttributes80Test extends base.BaseTestCase
         final String qName;
         final int length;
         // Looked-up values captured at startElement time for assertions later.
-        final java.util.Map<String,String> byQName = new java.util.HashMap<>();
-        final java.util.Map<String,String> byLocal = new java.util.HashMap<>();
-        final java.util.Map<String,Integer> indexes = new java.util.HashMap<>();
+        final Map<String,String> byQName = new HashMap<>();
+        final Map<String,String> byLocal = new HashMap<>();
+        final Map<String,Integer> indexes = new HashMap<>();
 
         StartElementSnapshot(String qName, Attributes attrs) {
             this.qName = qName;
@@ -117,7 +120,8 @@ public class SaxAttributes80Test extends base.BaseTestCase
             for (StartElementSnapshot s : snapshots) {
                 if (s.qName.equals(qName)) return s;
             }
-            throw new AssertionError("no startElement seen for " + qName);
+            String seen = snapshots.stream().map(s -> s.qName).collect(Collectors.joining(", "));
+            throw new AssertionError("no startElement seen for '" + qName + "'; got [" + seen + "]");
         }
 
         int lengthOf(String qName)          { return find(qName).length; }
