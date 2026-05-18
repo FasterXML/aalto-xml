@@ -137,6 +137,8 @@ public abstract class StreamWriterBase
      * validator is attached and a typed attribute value must be materialized
      * into a String before being passed to the validator. Recycled across
      * calls so high-throughput typed output doesn't allocate per attribute.
+     *
+     * @since 1.4
      */
     private char[] _attrValueBuffer;
 
