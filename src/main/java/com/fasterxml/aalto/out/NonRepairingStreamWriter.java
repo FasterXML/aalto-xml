@@ -82,8 +82,11 @@ public final class NonRepairingStreamWriter
             name = _symbols.findSymbol(prefix, localName);
         }
         if (_validator != null) {
-            _validator.validateAttribute(localName,
+            String normalized = _validator.validateAttribute(localName,
                     (nsURI == null) ? "" : nsURI, prefix, value);
+            if (normalized != null) {
+                value = normalized;
+            }
         }
         _writeAttribute(name, value);
     }
@@ -100,9 +103,12 @@ public final class NonRepairingStreamWriter
             ? _symbols.findSymbol(localName)
             : _symbols.findSymbol(prefix, localName);
         if (_validator != null) {
-            _validator.validateAttribute(localName,
+            String normalized = _validator.validateAttribute(localName,
                     (nsURI == null) ? "" : nsURI,
                     (prefix == null) ? "" : prefix, value);
+            if (normalized != null) {
+                value = normalized;
+            }
         }
         _writeAttribute(name, value);
     }
@@ -248,7 +254,16 @@ public final class NonRepairingStreamWriter
         WName name = (prefix == null || prefix.length() == 0)
             ? _symbols.findSymbol(localName)
             : _symbols.findSymbol(prefix, localName);
-        _writeAttribute(name, enc);
+        if (_validator != null) {
+            // Encoder is single-use; materialize, validate, then write as String.
+            String value = _encoderToString(enc);
+            String normalized = _validator.validateAttribute(localName,
+                    (nsURI == null) ? "" : nsURI,
+                    (prefix == null) ? "" : prefix, value);
+            _writeAttribute(name, (normalized != null) ? normalized : value);
+        } else {
+            _writeAttribute(name, enc);
+        }
     }
 
     @Override

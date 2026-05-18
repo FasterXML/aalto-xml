@@ -334,7 +334,10 @@ public abstract class StreamWriterBase
         }
         if (_validator != null) {
             // note: for attributes, no prefix <=> no namespace, so:
-            _validator.validateAttribute(localName, "", "", value);
+            String normalized = _validator.validateAttribute(localName, "", "", value);
+            if (normalized != null) {
+                value = normalized;
+            }
         }
         _writeAttribute(_symbols.findSymbol(localName), value);
     }
@@ -1464,6 +1467,23 @@ public abstract class StreamWriterBase
         } catch (IOException ioe) {
             throw new IoStreamException(ioe);
         }
+    }
+
+    /**
+     * Materializes a typed-attribute encoder into a String so the value can be
+     * passed to a validator (which has no streaming-encoder hook). Only used
+     * when a validator is attached — the fast path keeps streaming via
+     * {@link AsciiValueEncoder}.
+     */
+    protected static String _encoderToString(AsciiValueEncoder enc)
+    {
+        StringBuilder sb = new StringBuilder(64);
+        char[] buf = new char[256];
+        while (!enc.isCompleted()) {
+            int end = enc.encodeMore(buf, 0, buf.length);
+            sb.append(buf, 0, end);
+        }
+        return sb.toString();
     }
 
     protected final void _writeDefaultNamespace(String uri)

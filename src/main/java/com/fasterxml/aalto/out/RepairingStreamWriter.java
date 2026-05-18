@@ -143,9 +143,12 @@ public final class RepairingStreamWriter
             : _generateAttrName(null, localName, nsURI);
         if (_validator != null) {
             String actualPrefix = name.getPrefix();
-            _validator.validateAttribute(localName,
+            String normalized = _validator.validateAttribute(localName,
                     (nsURI == null) ? "" : nsURI,
                     (actualPrefix == null) ? "" : actualPrefix, value);
+            if (normalized != null) {
+                value = normalized;
+            }
         }
         _writeAttribute(name, value);
     }
@@ -165,9 +168,12 @@ public final class RepairingStreamWriter
         if (_validator != null) {
             // _generateAttrName may have substituted a different prefix
             String actualPrefix = name.getPrefix();
-            _validator.validateAttribute(localName,
+            String normalized = _validator.validateAttribute(localName,
                     (nsURI == null) ? "" : nsURI,
                     (actualPrefix == null) ? "" : actualPrefix, value);
+            if (normalized != null) {
+                value = normalized;
+            }
         }
         _writeAttribute(name, value);
     }
@@ -269,7 +275,17 @@ public final class RepairingStreamWriter
         WName name = (prefix == null || prefix.length() == 0)
             ? _symbols.findSymbol(localName)
             : _symbols.findSymbol(prefix, localName);
-        _writeAttribute(name, enc);
+        if (_validator != null) {
+            // Encoder is single-use; materialize, validate, then write as String.
+            String value = _encoderToString(enc);
+            String actualPrefix = name.getPrefix();
+            String normalized = _validator.validateAttribute(localName,
+                    (nsURI == null) ? "" : nsURI,
+                    (actualPrefix == null) ? "" : actualPrefix, value);
+            _writeAttribute(name, (normalized != null) ? normalized : value);
+        } else {
+            _writeAttribute(name, enc);
+        }
     }
 
     @Override
