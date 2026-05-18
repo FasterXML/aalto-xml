@@ -86,20 +86,31 @@ public final class ReaderScanner
         _inputBuffer = buffer;
         _inputPtr = ptr;
         _inputEnd = last;
-        _pastBytesOrChars = 0; // should it be passed by caller?
-        _rowStartOffset = 0; // should probably be passed by caller...
- 
+        _pastBytesOrChars = 0;
+        _rowStartOffset = 0;
+
         _symbols = cfg.getCBSymbols();
    }
 
-    public ReaderScanner(ReaderConfig cfg, Reader r)
+    public ReaderScanner(ReaderConfig cfg, Reader r) {
+        this(cfg, r, 0);
+    }
+
+    /**
+     * @param pastChars Number of characters already consumed from the
+     *   logical input source before this scanner takes over (e.g., the
+     *   length of an XML declaration parsed by a bootstrapper). Used as
+     *   the initial value for the character-offset counter so reported
+     *   locations include the skipped prolog. See [aalto-xml#73].
+     */
+    public ReaderScanner(ReaderConfig cfg, Reader r, int pastChars)
     {
         super(cfg);
         _in = r;
         _inputBuffer = cfg.allocFullCBuffer(ReaderConfig.DEFAULT_CHAR_BUFFER_LEN);
         _inputPtr = _inputEnd = 0;
-        _pastBytesOrChars = 0; // should it be passed by caller?
-        _rowStartOffset = 0; // should probably be passed by caller...
+        _pastBytesOrChars = pastChars;
+        _rowStartOffset = 0;
 
         _symbols = cfg.getCBSymbols();
     }
