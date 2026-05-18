@@ -267,9 +267,12 @@ public final class RepairingStreamWriter
         if (!_stateStartElementOpen) {
             throwOutputError(ErrorConsts.WERR_ATTR_NO_ELEM);
         }
-        WName name = (prefix == null || prefix.length() == 0)
+        // Mirror writeAttribute(prefix, nsURI, ...): when nsURI is non-empty,
+        // route through _generateAttrName so the prefix is properly bound /
+        // a fresh one generated; otherwise no-ns attribute, no prefix.
+        WName name = (nsURI == null || nsURI.length() == 0)
             ? _symbols.findSymbol(localName)
-            : _symbols.findSymbol(prefix, localName);
+            : _generateAttrName(prefix, localName, nsURI);
         if (_validator != null) {
             // Encoder is single-use; materialize, validate, then write as String.
             String actualPrefix = name.getPrefix();
