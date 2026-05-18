@@ -582,8 +582,8 @@ public abstract class StreamWriterBase
 
         // Time to validate?
         if (_validator != null) {
-            _vldContent = _validator.validateElementEnd(thisElem.getLocalName(), thisElem.getNonNullPrefix(),
-                                                        thisElem.getNonNullNamespaceURI());
+            _vldContent = _validator.validateElementEnd(thisElem.getLocalName(),
+                    thisElem.getNonNullNamespaceURI(), thisElem.getNonNullPrefix());
         }
     }
 
