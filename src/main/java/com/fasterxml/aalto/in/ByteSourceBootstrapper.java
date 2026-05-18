@@ -173,7 +173,7 @@ public final class ByteSourceBootstrapper
             }
             Reader r = new Utf32Reader(_config, _in, _inputBuffer, _inputPtr, _inputLen,
                                        mBigEndian);
-            return new ReaderScanner(_config, r);
+            return new ReaderScanner(_config, r, _prologCharsConsumed());
         }
 
         // And finally, if all else fails, we'll also fall back to
@@ -186,10 +186,22 @@ public final class ByteSourceBootstrapper
             normEnc = mBigEndian ? CharsetNames.CS_UTF16BE : CharsetNames.CS_UTF16LE;
         }
         try {
-            return new ReaderScanner(_config, new InputStreamReader(in, normEnc));
+            return new ReaderScanner(_config, new InputStreamReader(in, normEnc),
+                    _prologCharsConsumed());
         } catch (UnsupportedEncodingException usex) {
             throw new IoStreamException("Unsupported encoding: "+usex.getMessage());
         }
+    }
+
+    /**
+     * Number of characters consumed by the bootstrapper so far (e.g., the
+     * XML declaration / BOM). Used to seed character-offset tracking in the
+     * {@link ReaderScanner} since the bytes for the prolog are never seen
+     * by the downstream Reader. See [aalto-xml#73].
+     */
+    private int _prologCharsConsumed() {
+        int total = _inputProcessed + _inputPtr;
+        return (mBytesPerChar > 1) ? (total / mBytesPerChar) : total;
     }
 
     /*
