@@ -16,6 +16,8 @@ Project: aalto-xml
   declaration / prolog for documents using a non-UTF-8 encoding routed
   through `ReaderScanner` (e.g., ISO-8859-2)
  (reported by @anomen-s)
+#79: DTD RootName only returned correctly if it consists of a multiple of 4 bytes
+ (reported by @Huxlyx)
 #97: `FixedNsContext` could not retrieve the default namespace URI
   because the default-ns prefix was stored as `null` instead of
   `XMLConstants.DEFAULT_NS_PREFIX`; also fix `getNamespaceURI("")` to
