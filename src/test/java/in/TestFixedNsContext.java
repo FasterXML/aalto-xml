@@ -27,10 +27,17 @@ public class TestFixedNsContext
 {
     private FixedNsContext contextAtRoot(String xml) throws XMLStreamException
     {
+        return contextAtDepth(xml, 1);
+    }
+
+    private FixedNsContext contextAtDepth(String xml, int depth) throws XMLStreamException
+    {
         XMLStreamReader2 sr = (XMLStreamReader2) getInputFactory().createXMLStreamReader(
                 new ByteArrayInputStream(xml.getBytes()));
-        // Advance to first element so namespace declarations have been processed.
-        sr.nextTag();
+        // Advance to the nth START_ELEMENT so namespace declarations are in scope.
+        for (int i = 0; i < depth; ++i) {
+            sr.nextTag();
+        }
         NamespaceContext nc = sr.getNonTransientNamespaceContext();
         // Drain reader so streams are closed cleanly.
         while (sr.hasNext()) sr.next();
@@ -47,9 +54,10 @@ public class TestFixedNsContext
         assertEquals(XMLConstants.XML_NS_URI, ctx.getNamespaceURI(XMLConstants.XML_NS_PREFIX));
         assertEquals(XMLConstants.XMLNS_ATTRIBUTE_NS_URI, ctx.getNamespaceURI(XMLConstants.XMLNS_ATTRIBUTE));
 
-        // Default ns prefix ("") on an empty context is unbound.
-        assertNull(ctx.getNamespaceURI(""));
-        // Unknown prefix is unbound.
+        // [aalto-xml#97]: per JAXP, unbound DEFAULT_NS_PREFIX returns NULL_NS_URI ("").
+        assertEquals(XMLConstants.NULL_NS_URI, ctx.getNamespaceURI(""));
+        assertEquals(XMLConstants.NULL_NS_URI, ctx.getNamespaceURI(XMLConstants.DEFAULT_NS_PREFIX));
+        // Unknown non-default prefix is unbound -> null.
         assertNull(ctx.getNamespaceURI("nope"));
 
         // Reverse lookup: the well-known URIs map back to canonical prefixes.
@@ -176,6 +184,43 @@ public class TestFixedNsContext
         assertTrue(it.hasNext());
         assertEquals(XMLConstants.DEFAULT_NS_PREFIX, it.next());
         assertFalse(it.hasNext());
+    }
+
+    // Nested re-declaration: inner element shadows outer bindings (both default
+    // namespace and explicit prefix). Outer URIs must be unreachable.
+    @Test
+    public void testNestedDefaultNamespaceRebinding() throws Exception
+    {
+        FixedNsContext ctx = contextAtDepth(
+                "<outer xmlns='urn:o' xmlns:p='urn:po'>" +
+                    "<inner xmlns='urn:i' xmlns:p='urn:pi'/>" +
+                "</outer>", 2);
+
+        // Forward lookups: inner bindings win at this depth.
+        assertEquals("urn:i", ctx.getNamespaceURI(""));
+        assertEquals("urn:i", ctx.getNamespaceURI(XMLConstants.DEFAULT_NS_PREFIX));
+        assertEquals("urn:pi", ctx.getNamespaceURI("p"));
+
+        // Reverse lookups: outer URIs are masked, no current prefix binds them.
+        assertEquals(XMLConstants.DEFAULT_NS_PREFIX, ctx.getPrefix("urn:i"));
+        assertEquals("p", ctx.getPrefix("urn:pi"));
+        assertNull(ctx.getPrefix("urn:o"));
+        assertNull(ctx.getPrefix("urn:po"));
+
+        // getPrefixes for inner URIs returns the inner prefix only.
+        Iterator<String> it = ctx.getPrefixes("urn:i");
+        assertTrue(it.hasNext());
+        assertEquals(XMLConstants.DEFAULT_NS_PREFIX, it.next());
+        assertFalse(it.hasNext());
+
+        it = ctx.getPrefixes("urn:pi");
+        assertTrue(it.hasNext());
+        assertEquals("p", it.next());
+        assertFalse(it.hasNext());
+
+        // getPrefixes for masked outer URIs returns the empty iterator.
+        assertFalse(ctx.getPrefixes("urn:o").hasNext());
+        assertFalse(ctx.getPrefixes("urn:po").hasNext());
     }
 
     @Test
