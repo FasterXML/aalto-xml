@@ -166,8 +166,13 @@ public abstract class PName
         if (!_localName.equals(ln)) {
             return false;
         }
+        // Stax: null namespace URI means "do not check namespace"
+        // (see XMLStreamReader.getAttributeValue(String, String))
+        if (nsUri == null) {
+            return true;
+        }
         String thisUri = getNsUri();
-        if (nsUri == null || nsUri.length() == 0) {
+        if (nsUri.length() == 0) {
             return (thisUri == null);
         }
         return nsUri.equals(thisUri);

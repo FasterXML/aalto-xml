@@ -9,6 +9,9 @@ Project: aalto-xml
 #56: Aalto writes too many default namespace `xmlns` attributes if
   `IS_REPAIRING_NAMESPACES` enabled
  (reported by Arnaud V)
+#66: `XMLReaderImpl.getAttributeValue(String, String)` does not ignore
+  namespace if `null` (should as per Stax API)
+ (reported by @zebrada)
 #97: `FixedNsContext` could not retrieve the default namespace URI
   because the default-ns prefix was stored as `null` instead of
   `XMLConstants.DEFAULT_NS_PREFIX`; also fix `getNamespaceURI("")` to
