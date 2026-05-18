@@ -332,7 +332,10 @@ public abstract class StreamWriterBase
         if (!_stateStartElementOpen) {
             throwOutputError(ErrorConsts.WERR_ATTR_NO_ELEM);
         }
-        // note: for attributes, no prefix <=> no namespace, so:
+        if (_validator != null) {
+            // note: for attributes, no prefix <=> no namespace, so:
+            _validator.validateAttribute(localName, "", "", value);
+        }
         _writeAttribute(_symbols.findSymbol(localName), value);
     }
     
