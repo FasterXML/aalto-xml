@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.*;
 // [aalto-xml#66] Verify the null-namespace lookup fix also applies to the
 // async scanners (which share `AttributeCollector` / `PName` machinery with
 // the blocking side).
-public class Issue66AsyncTest extends AsyncTestBase
+public class AsyncGetAttributeValue66Test extends AsyncTestBase
 {
     private static final AsyncXMLInputFactory F = new InputFactoryImpl();
 
