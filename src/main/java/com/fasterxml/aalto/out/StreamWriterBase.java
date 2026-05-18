@@ -132,6 +132,14 @@ public abstract class StreamWriterBase
      */
     protected ValidationProblemHandler _vldProblemHandler = null;
 
+    /**
+     * Lazily-allocated buffer used by {@link #_encoderToString} when a
+     * validator is attached and a typed attribute value must be materialized
+     * into a String before being passed to the validator. Recycled across
+     * calls so high-throughput typed output doesn't allocate per attribute.
+     */
+    private char[] _attrValueBuffer;
+
     /*
     /**********************************************************************
     /* State information
@@ -333,11 +341,8 @@ public abstract class StreamWriterBase
             throwOutputError(ErrorConsts.WERR_ATTR_NO_ELEM);
         }
         if (_validator != null) {
-            // note: for attributes, no prefix <=> no namespace, so:
-            String normalized = _validator.validateAttribute(localName, "", "", value);
-            if (normalized != null) {
-                value = normalized;
-            }
+            // note: for attributes, no prefix <=> no namespace
+            value = _validateAttribute(localName, "", "", value);
         }
         _writeAttribute(_symbols.findSymbol(localName), value);
     }
@@ -1473,17 +1478,38 @@ public abstract class StreamWriterBase
      * Materializes a typed-attribute encoder into a String so the value can be
      * passed to a validator (which has no streaming-encoder hook). Only used
      * when a validator is attached — the fast path keeps streaming via
-     * {@link AsciiValueEncoder}.
+     * {@link AsciiValueEncoder}. The scratch buffer is recycled across calls.
      */
-    protected static String _encoderToString(AsciiValueEncoder enc)
+    protected final String _encoderToString(AsciiValueEncoder enc)
     {
+        char[] buf = _attrValueBuffer;
+        if (buf == null) {
+            buf = new char[256];
+            _attrValueBuffer = buf;
+        }
         StringBuilder sb = new StringBuilder(64);
-        char[] buf = new char[256];
         while (!enc.isCompleted()) {
             int end = enc.encodeMore(buf, 0, buf.length);
+            if (end == 0) { // misbehaving encoder; avoid infinite loop
+                break;
+            }
             sb.append(buf, 0, end);
         }
         return sb.toString();
+    }
+
+    /**
+     * Invokes the validator's {@code validateAttribute} and returns the value
+     * to write (either the validator's normalized return, when non-null, or
+     * the original {@code value}). Callers MUST check {@code _validator != null}
+     * before calling — keeping the guard at the call site preserves the
+     * no-validator fast path.
+     */
+    protected final String _validateAttribute(String localName, String uri, String prefix, String value)
+        throws XMLStreamException
+    {
+        String normalized = _validator.validateAttribute(localName, uri, prefix, value);
+        return (normalized == null) ? value : normalized;
     }
 
     protected final void _writeDefaultNamespace(String uri)

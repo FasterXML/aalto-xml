@@ -142,13 +142,11 @@ public final class RepairingStreamWriter
             ? _symbols.findSymbol(localName)
             : _generateAttrName(null, localName, nsURI);
         if (_validator != null) {
+            // _generateAttrName may have chosen / bound a prefix
             String actualPrefix = name.getPrefix();
-            String normalized = _validator.validateAttribute(localName,
+            value = _validateAttribute(localName,
                     (nsURI == null) ? "" : nsURI,
                     (actualPrefix == null) ? "" : actualPrefix, value);
-            if (normalized != null) {
-                value = normalized;
-            }
         }
         _writeAttribute(name, value);
     }
@@ -168,12 +166,9 @@ public final class RepairingStreamWriter
         if (_validator != null) {
             // _generateAttrName may have substituted a different prefix
             String actualPrefix = name.getPrefix();
-            String normalized = _validator.validateAttribute(localName,
+            value = _validateAttribute(localName,
                     (nsURI == null) ? "" : nsURI,
                     (actualPrefix == null) ? "" : actualPrefix, value);
-            if (normalized != null) {
-                value = normalized;
-            }
         }
         _writeAttribute(name, value);
     }
@@ -277,12 +272,10 @@ public final class RepairingStreamWriter
             : _symbols.findSymbol(prefix, localName);
         if (_validator != null) {
             // Encoder is single-use; materialize, validate, then write as String.
-            String value = _encoderToString(enc);
             String actualPrefix = name.getPrefix();
-            String normalized = _validator.validateAttribute(localName,
+            _writeAttribute(name, _validateAttribute(localName,
                     (nsURI == null) ? "" : nsURI,
-                    (actualPrefix == null) ? "" : actualPrefix, value);
-            _writeAttribute(name, (normalized != null) ? normalized : value);
+                    (actualPrefix == null) ? "" : actualPrefix, _encoderToString(enc)));
         } else {
             _writeAttribute(name, enc);
         }
