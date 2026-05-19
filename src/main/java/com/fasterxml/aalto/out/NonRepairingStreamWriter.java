@@ -70,14 +70,20 @@ public final class NonRepairingStreamWriter
             throwOutputError(ErrorConsts.WERR_ATTR_NO_ELEM);
         }
         WName name;
+        String prefix;
         if (nsURI == null || nsURI.length() == 0) {
             name = _symbols.findSymbol(localName);
+            prefix = "";
         } else {
-            String prefix = _currElem.getExplicitPrefix(nsURI, _rootNsContext);
+            prefix = _currElem.getExplicitPrefix(nsURI, _rootNsContext);
             if (prefix == null) {
                 throwOutputError("Unbound namespace URI '"+nsURI+"'");
             }
             name = _symbols.findSymbol(prefix, localName);
+        }
+        if (_validator != null) {
+            value = _validateAttribute(localName,
+                    (nsURI == null) ? "" : nsURI, prefix, value);
         }
         _writeAttribute(name, value);
     }
@@ -93,6 +99,11 @@ public final class NonRepairingStreamWriter
         WName name = (prefix == null || prefix.length() == 0)
             ? _symbols.findSymbol(localName)
             : _symbols.findSymbol(prefix, localName);
+        if (_validator != null) {
+            value = _validateAttribute(localName,
+                    (nsURI == null) ? "" : nsURI,
+                    (prefix == null) ? "" : prefix, value);
+        }
         _writeAttribute(name, value);
     }
 
@@ -130,6 +141,7 @@ public final class NonRepairingStreamWriter
             name = _symbols.findSymbol(prefix, localName);
         }
         _verifyStartElement(prefix, localName);
+        _validateElementStart(localName, nsURI, prefix);
         _writeStartTag(name, true, nsURI);
     }
 
@@ -144,6 +156,7 @@ public final class NonRepairingStreamWriter
         } else {
             name = _symbols.findSymbol(prefix, localName);
         }
+        _validateElementStart(localName, nsURI, prefix);
         _writeStartTag(name, true, nsURI);
     }
 
@@ -182,6 +195,7 @@ public final class NonRepairingStreamWriter
             name = _symbols.findSymbol(prefix, localName);
         }
         _verifyStartElement(prefix, localName);
+        _validateElementStart(localName, nsURI, prefix);
         _writeStartTag(name, false);
     }
 
@@ -197,6 +211,7 @@ public final class NonRepairingStreamWriter
         } else {
             name = _symbols.findSymbol(prefix, localName);
         }
+        _validateElementStart(localName, nsURI, prefix);
         _writeStartTag(name, false, nsURI);
     }
 
@@ -217,7 +232,14 @@ public final class NonRepairingStreamWriter
         WName name = (prefix == null || prefix.length() == 0)
             ? _symbols.findSymbol(localName)
             : _symbols.findSymbol(prefix, localName);
-        _writeAttribute(name, enc);
+        if (_validator != null) {
+            // Encoder is single-use; materialize, validate, then write as String.
+            _writeAttribute(name, _validateAttribute(localName,
+                    (nsURI == null) ? "" : nsURI,
+                    (prefix == null) ? "" : prefix, _encoderToString(enc)));
+        } else {
+            _writeAttribute(name, enc);
+        }
     }
 
     @Override

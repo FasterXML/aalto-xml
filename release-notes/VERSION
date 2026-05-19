@@ -6,9 +6,31 @@ Project: aalto-xml
 
 1.4.0 (not yet released)
 
+#5: Complete validation implementation of `XMLStreamWriter`
+ (requested by Christoph B)
 #56: Aalto writes too many default namespace `xmlns` attributes if
   `IS_REPAIRING_NAMESPACES` enabled
  (reported by Arnaud V)
+#66: `XMLReaderImpl.getAttributeValue(String, String)` does not ignore
+  namespace if `null` (should as per Stax API)
+ (reported by @zebrada)
+#73: `getLocation().getCharacterOffset()` did not include the XML
+  declaration / prolog for documents using a non-UTF-8 encoding routed
+  through `ReaderScanner` (e.g., ISO-8859-2)
+ (reported by @anomen-s)
+#79: DTD RootName only returned correctly if it consists of a multiple of 4 bytes
+ (reported by @Huxlyx)
+#80: SAX `Attributes.getValue(String)` could return a value from a
+  previous element when the current element had no attributes
+ (reported by @nedtwigg)
+#97: `FixedNsContext` could not retrieve the default namespace URI
+  because the default-ns prefix was stored as `null` instead of
+  `XMLConstants.DEFAULT_NS_PREFIX`; also fix `getNamespaceURI("")` to
+  return `NULL_NS_URI` (not `null`) when no default ns is in scope,
+  and fix masking direction in `getPrefix` / `getPrefixes` so that
+  outer declarations shadowed by a nested re-declaration are no longer
+  returned
+ (reported by @arne-bdt)
 #100: `]]` (without trailing `>`) inside CDATA loses one `]` on write
  (reported, fix suggested by @lepokle)
 #105: Change JDK baseline to Java 8 (from 1.6)

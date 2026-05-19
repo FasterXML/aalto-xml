@@ -141,6 +141,13 @@ public final class RepairingStreamWriter
         WName name = (nsURI == null || nsURI.length() == 0)
             ? _symbols.findSymbol(localName)
             : _generateAttrName(null, localName, nsURI);
+        if (_validator != null) {
+            // _generateAttrName may have chosen / bound a prefix
+            String actualPrefix = name.getPrefix();
+            value = _validateAttribute(localName,
+                    (nsURI == null) ? "" : nsURI,
+                    (actualPrefix == null) ? "" : actualPrefix, value);
+        }
         _writeAttribute(name, value);
     }
 
@@ -156,6 +163,13 @@ public final class RepairingStreamWriter
         WName name = (nsURI == null || nsURI.length() == 0)
             ? _symbols.findSymbol(localName)
             : _generateAttrName(prefix, localName, nsURI);
+        if (_validator != null) {
+            // _generateAttrName may have substituted a different prefix
+            String actualPrefix = name.getPrefix();
+            value = _validateAttribute(localName,
+                    (nsURI == null) ? "" : nsURI,
+                    (actualPrefix == null) ? "" : actualPrefix, value);
+        }
         _writeAttribute(name, value);
     }
 
@@ -253,10 +267,21 @@ public final class RepairingStreamWriter
         if (!_stateStartElementOpen) {
             throwOutputError(ErrorConsts.WERR_ATTR_NO_ELEM);
         }
-        WName name = (prefix == null || prefix.length() == 0)
+        // Mirror writeAttribute(prefix, nsURI, ...): when nsURI is non-empty,
+        // route through _generateAttrName so the prefix is properly bound /
+        // a fresh one generated; otherwise no-ns attribute, no prefix.
+        WName name = (nsURI == null || nsURI.length() == 0)
             ? _symbols.findSymbol(localName)
-            : _symbols.findSymbol(prefix, localName);
-        _writeAttribute(name, enc);
+            : _generateAttrName(prefix, localName, nsURI);
+        if (_validator != null) {
+            // Encoder is single-use; materialize, validate, then write as String.
+            String actualPrefix = name.getPrefix();
+            _writeAttribute(name, _validateAttribute(localName,
+                    (nsURI == null) ? "" : nsURI,
+                    (actualPrefix == null) ? "" : actualPrefix, _encoderToString(enc)));
+        } else {
+            _writeAttribute(name, enc);
+        }
     }
 
     @Override
@@ -344,9 +369,7 @@ public final class RepairingStreamWriter
                 // also: changes default ns of curr elem etc:
                 _currElem.setDefaultNsURI("");
             }
-            if (_validator != null) {
-                _validator.validateElementStart(localName, "", "");
-            }
+            _validateElementStart(localName, "", "");
             return;
         }
 
@@ -383,10 +406,7 @@ public final class RepairingStreamWriter
         }
 
         // And after all that, validation?
-        if (_validator != null) {
-            _validator.validateElementStart(localName, "",
-                                            ((prefix == null) ? "" : prefix));
-        }
+        _validateElementStart(localName, nsURI, prefix);
         return;
     }
 

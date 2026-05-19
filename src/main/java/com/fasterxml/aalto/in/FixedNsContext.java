@@ -70,7 +70,7 @@ public final class FixedNsContext
         if (this == EMPTY_CONTEXT) {
             ArrayList<String> tmp = new ArrayList<String>();
             for (NsDeclaration curr = currLastDecl; curr != null; curr = curr.getPrev()) {
-                tmp.add(curr.getPrefix());
+                tmp.add(prefixFor(curr));
                 tmp.add(curr.getCurrNsURI());
             }
             return new FixedNsContext(currLastDecl, tmp.toArray(new String[tmp.size()]));
@@ -82,10 +82,17 @@ public final class FixedNsContext
             _tmpDecl.clear();
         }
         for (NsDeclaration curr = currLastDecl; curr != null; curr = curr.getPrev()) {
-            _tmpDecl.add(curr.getPrefix());
+            _tmpDecl.add(prefixFor(curr));
             _tmpDecl.add(curr.getCurrNsURI());
         }
         return new FixedNsContext(currLastDecl, _tmpDecl.toArray(new String[_tmpDecl.size()]));
+    }
+
+    // [aalto-xml#97]: NsBinding uses null as the prefix for the default
+    // namespace, but NamespaceContext callers must use DEFAULT_NS_PREFIX ("").
+    private static String prefixFor(NsDeclaration decl) {
+        String prefix = decl.getPrefix();
+        return (prefix == null) ? XMLConstants.DEFAULT_NS_PREFIX : prefix;
     }
 
     /*
@@ -117,7 +124,9 @@ public final class FixedNsContext
                 return ns[i+1]; // lgtm [java/index-out-of-bounds]
             }
         }
-        return null;
+        // [aalto-xml#97]: per JAXP, DEFAULT_NS_PREFIX returns NULL_NS_URI when unbound;
+        // any other unbound prefix returns null.
+        return (prefix.length() == 0) ? XMLConstants.NULL_NS_URI : null;
     }
 
     @Override
@@ -141,13 +150,15 @@ public final class FixedNsContext
             if (nsURI.equals(ns[i])) {
                 // may still suffer from masking, let's check
                 String prefix = ns[i-1];
-                for (int j = i+1; j < len; j += 2) {
+                // _declarationData is most-recent-first, so masking is by entries
+                // at LOWER indices (more-recent declarations of the same prefix).
+                for (int j = 0; j < i - 1; j += 2) {
                     // Prefixes are interned, can do straight equality check
                     if (ns[j] == prefix) {
-                        continue main_loop; // was masked!
+                        continue main_loop; // masked by more-recent decl
                     }
                 }
-                return ns[i-1];
+                return prefix;
             }
         }
         return null;
@@ -180,10 +191,12 @@ public final class FixedNsContext
             if (currNS == nsURI || currNS.equals(nsURI)) {
                 // Need to ensure no masking occurs...
                 String prefix = ns[i-1];
-                for (int j = i+1; j < len; j += 2) {
+                // _declarationData is most-recent-first, so masking is by entries
+                // at LOWER indices (more-recent declarations of the same prefix).
+                for (int j = 0; j < i - 1; j += 2) {
                     // Prefixes are interned, can do straight equality check
                     if (ns[j] == prefix) {
-                        continue main_loop; // was masked, need to ignore
+                        continue main_loop; // masked by more-recent decl
                     }
                 }
                 if (first == null) {
