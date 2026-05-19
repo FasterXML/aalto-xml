@@ -352,7 +352,22 @@ public final class CharXmlWriter
         while (len > 0) {
             char[] buf = _copyBuffer;
             final int blen = buf.length;
-            int len2 = (len < blen) ? len : blen;
+            int len2;
+            if (len <= blen) {
+                len2 = len;
+            } else {
+                len2 = blen;
+                // [aalto-xml#129]: keep "]]>" intact across chunk boundaries
+                // so writeCDataContents can detect and split it. If the chunk
+                // would end in ']' or "]]", push those into the next chunk.
+                if (data.charAt(offset + len2 - 1) == ']') {
+                    if (len2 >= 2 && data.charAt(offset + len2 - 2) == ']') {
+                        len2 -= 2;
+                    } else {
+                        len2 -= 1;
+                    }
+                }
+            }
             data.getChars(offset, offset+len2, buf, 0);
             int cix = writeCDataContents(buf, 0, len2);
             if (cix >= 0) {
@@ -418,13 +433,31 @@ public final class CharXmlWriter
                     break;
                 case CT_OUTPUT_MUST_QUOTE:
                     reportFailedEscaping("CDATA block", ch);
-                case CT_GT: // part of "]]>"?
-                    if ((offset - start) >= 3 && cbuf[offset-2] == ']'
-                        && cbuf[offset-3] == ']') {
-                        --offset; // let's push it back
-                        // And restart CDATA block...
+                case CT_RBRACKET:
+                    // [aalto-xml#100/#129]: only the literal "]]>" sequence is
+                    // illegal inside CDATA. A bare "]]" passes through unchanged;
+                    // for "]]>" close the current CDATA section and open a new
+                    // one so the '>' lands as content in the next section.
+                    // writeCData(String) ensures "]]>" is never split across
+                    // chunk boundaries, so peeking one or two chars ahead is
+                    // sufficient.
+                    if ((offset+1) < len && cbuf[offset] == ']' && cbuf[offset+1] == '>') {
+                        offset += 2;
+                        if (_outputPtr >= _outputBufferLen) {
+                            flushBuffer();
+                        }
+                        _outputBuffer[_outputPtr++] = ']';
+                        if (_outputPtr >= _outputBufferLen) {
+                            flushBuffer();
+                        }
+                        _outputBuffer[_outputPtr++] = ']';
                         writeCDataEnd();
                         writeCDataStart();
+                        if (_outputPtr >= _outputBufferLen) {
+                            flushBuffer();
+                        }
+                        _outputBuffer[_outputPtr++] = '>';
+                        continue main_loop;
                     }
                     break;
                 }
@@ -441,7 +474,7 @@ public final class CharXmlWriter
             _outputBuffer[_outputPtr++] = (char) ch;
         }
         return -1;
-    }    
+    }
 
     @Override
     public void writeCharacters(String text)
