@@ -31,7 +31,8 @@ Project: aalto-xml
   outer declarations shadowed by a nested re-declaration are no longer
   returned
  (reported by @arne-bdt)
-#100: `]]` (without trailing `>`) inside CDATA loses one `]` on write
+#100: Character sequence "]]" is not fully written inside CDATA section: one
+  "]" is discarded
  (reported, fix suggested by @lepokle)
 #105: Change JDK baseline to Java 8 (from 1.6)
 #116: Convert tests from JUnit 4 to JUnit 5
