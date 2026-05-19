@@ -1405,7 +1405,11 @@ public abstract class AsyncByteScanner
                     _state = STATE_DTD_ROOT_NAME;
                     break;
                 }
-                _state = STATE_DTD_ROOT_NAME;
+                // [aalto-xml#79] On success advance past STATE_DTD_ROOT_NAME;
+                // that state is the *resume* state for an interrupted name
+                // parse and re-entering it here re-invokes parsePName() with
+                // stale _quadBuffer/_currQuad state, truncating the result.
+                _state = STATE_DTD_AFTER_ROOT_NAME;
                 continue main_loop;
             case STATE_DTD_ROOT_NAME:
                 if ((_tokenName = parsePName()) == null) { // incomplete

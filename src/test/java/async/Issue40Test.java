@@ -9,6 +9,10 @@ import com.fasterxml.aalto.AsyncXMLInputFactory;
 import com.fasterxml.aalto.AsyncXMLStreamReader;
 import com.fasterxml.aalto.stax.InputFactoryImpl;
 
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
+
 /*
  * According to the XML spec, an hexadecimal character reference can start with a [A-Fa-f].
  * In the current state of the code, it is not possible.
@@ -34,6 +38,7 @@ public class Issue40Test extends AsyncTestBase
 	static String HEADER = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?><root att=\"";
 	static String FOOTER = "\"></root>";
 
+	@Test
 	public void testHexEntitiesInAttributes() throws XMLStreamException
 	{
 		// non-regression of the fix 

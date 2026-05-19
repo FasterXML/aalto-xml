@@ -5,7 +5,11 @@ import java.io.*;
 import javax.xml.stream.*;
 
 import org.codehaus.stax2.XMLStreamWriter2;
-//import org.codehaus.stax2.validation.*;
+
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
+import org.codehaus.stax2.validation.*;
 
 /**
  * Unit tests for testing handling of attribute value validation, mostly
@@ -26,6 +30,7 @@ public class TestAttributeValidation
     final String IMPLIED_NS_DTD_STR = "<!ELEMENT root EMPTY>\n"
         +"<!ATTLIST root "+NS_PREFIX+":attr CDATA #REQUIRED>\n";
 
+    @Test
     public void testValidFixedAttr() throws XMLStreamException
     {
         if (HAS_NON_NS_MODE) { // only test non-ns mode if supported
@@ -60,7 +65,7 @@ public class TestAttributeValidation
         sw.close();
     }
 
-/*    
+    @Test
     public void testInvalidFixedAttr() throws XMLStreamException
     {
         if (HAS_NON_NS_MODE) { // only test non-ns mode if supported
@@ -85,7 +90,7 @@ public class TestAttributeValidation
             sw.writeAttribute("fixAttr", "otherValue");
             fail(modeDesc+" Expected a validation exception when trying to add a #FIXED attribute with 'wrong' value");
         } catch (XMLValidationException vex) {
-            // expected...
+            verifyException(vex, "Value of attribute \"fixAttr\"");
         }
         // Should not close, since stream is invalid now...
 
@@ -97,7 +102,7 @@ public class TestAttributeValidation
             sw.writeAttribute("fixAttr", "");
             fail(modeDesc+" Expected a validation exception when trying to add a #FIXED attribute with an empty value");
         } catch (XMLValidationException vex) {
-            // expected...
+            verifyException(vex, "Value of attribute \"fixAttr\"");
         }
 
         // And finally, same for empty elem in case impl. is different
@@ -108,10 +113,11 @@ public class TestAttributeValidation
             sw.writeAttribute("fixAttr", "foobar");
             fail(modeDesc+" Expected a validation exception when trying to add a #FIXED attribute with an empty value");
         } catch (XMLValidationException vex) {
-            // expected...
+            verifyException(vex, "Value of attribute \"fixAttr\"");
         }
     }
 
+    @Test
     public void testValidRequiredAttr() throws XMLStreamException
     {
         if (HAS_NON_NS_MODE) { // only test non-ns mode if supported
@@ -152,6 +158,7 @@ public class TestAttributeValidation
         }
     }
 
+    @Test
     public void testInvalidRequiredAttr() throws XMLStreamException
     {
         if (HAS_NON_NS_MODE) { // only test non-ns mode if supported
@@ -174,13 +181,14 @@ public class TestAttributeValidation
             sw.writeEndElement();
             fail(modeDesc+" Expected a validation exception when omitting a #REQUIRED attribute");
         } catch (XMLValidationException vex) {
-            // expected...
+            verifyException(vex, "Required attribute \"reqAttr\" missing from element <root>");
         }
         // Should not close, since stream is invalid now...
     }
 
     //Test to ensure that the namespace-prefix mapping works (to the degree
     // it can... wrt dtd-non-ns-awareness) with attributes.
+    @Test
     public void testValidNsAttr() throws XMLStreamException
     {
         _testValidNsAttr(false);
@@ -205,6 +213,7 @@ public class TestAttributeValidation
         sw.close();
     }
 
+    @Test
     public void testInvalidNsAttr() throws XMLStreamException
     {
         _testInvalidNsAttr(false);
@@ -228,9 +237,8 @@ public class TestAttributeValidation
             sw.writeAttribute(NS_PREFIX2, NS_URI, "attr", "value");
             fail(modeDesc+" Expected a validation exception when trying to add an attribute with wrong ns prefix");
         } catch (XMLValidationException vex) {
-            // expected...
+            verifyException(vex, "Element <root> has no attribute \"ns2:attr\"");
         }
         // Should not close, since stream is invalid now...
     }
-    */
 }

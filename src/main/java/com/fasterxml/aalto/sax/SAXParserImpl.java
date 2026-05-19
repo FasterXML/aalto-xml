@@ -579,15 +579,23 @@ class SAXParserImpl
     @Override
     public int getIndex(String qName)
     {
-        return (_attrCollector == null) ? -1 : 
-            _attrCollector.findIndex(null, qName);
+        // [aalto-xml#80] Guard with `_attrCount < 1`: when the current
+        // element has no attributes, the shared AttributeCollector still
+        // holds the previous element's name/value tables, and findIndex
+        // would happily return a stale match.
+        if (_attrCollector == null || _attrCount < 1) {
+            return -1;
+        }
+        return _attrCollector.findIndex(null, qName);
     }
 
     @Override
     public int getIndex(String uri, String localName)
     {
-        return (_attrCollector == null) ? -1 : 
-            _attrCollector.findIndex(uri, localName);
+        if (_attrCollector == null || _attrCount < 1) {
+            return -1;
+        }
+        return _attrCollector.findIndex(uri, localName);
     }
 
     @Override

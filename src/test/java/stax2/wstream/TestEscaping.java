@@ -6,6 +6,10 @@ import javax.xml.stream.*;
 
 import org.codehaus.stax2.*;
 
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
+
 /**
  * This test checks to see that text/attribute value escaping is
  * working properly.
@@ -18,6 +22,7 @@ public class TestEscaping
      * namespace URIs, it's not a fatal error; and that the 'uri' value
      * should come back as it was written out.
      */
+    @Test
     public void testBrokenNsURLs()
         throws XMLStreamException
     {
@@ -77,6 +82,7 @@ public class TestEscaping
         sr.close();
     }
 
+    @Test
     public void testLatin1Quoting()
         throws XMLStreamException
     {
@@ -104,6 +110,7 @@ public class TestEscaping
         assertTokenType(END_ELEMENT, sr.next());
     }
 
+    @Test
     public void testAsciiQuoting()
         throws XMLStreamException
     {
@@ -131,6 +138,7 @@ public class TestEscaping
         assertTokenType(END_ELEMENT, sr.next());
     }
 
+    @Test
     public void testLinefeedQuoting() throws Exception
     {
         final String EXP = "<root>a\nb&#xd;c</root>";

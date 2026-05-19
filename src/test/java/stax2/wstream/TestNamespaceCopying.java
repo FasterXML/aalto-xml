@@ -11,6 +11,11 @@ import javax.xml.transform.dom.DOMResult;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
+
 /**
  * Tests that namespaces are written to the output stream in namespace
  * repairing mode. See [WSTX-193] for details.
@@ -24,7 +29,7 @@ public class TestNamespaceCopying
     XMLOutputFactory _outputFactory;
     XMLEventFactory _eventFactory;
 
-  @Override
+  @BeforeEach
   protected void setUp() throws Exception {
       _outputFactory = getOutputFactory();
       setRepairing(_outputFactory, true);
@@ -32,6 +37,7 @@ public class TestNamespaceCopying
       _inputFactory = getInputFactory();
   }
 
+  @Test
   public void testStreamXMLNSDeclaration() throws Exception {
     final StringWriter stringWriter = new StringWriter();
     XMLEventWriter xmlWriter = _outputFactory.createXMLEventWriter(stringWriter);

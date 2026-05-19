@@ -10,6 +10,10 @@ import org.xml.sax.helpers.DefaultHandler;
 
 import com.fasterxml.aalto.AaltoInputProperties;
 
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
+
 /**
  * Simple unit tests to verify that most fundamental parsing functionality
  * works via Woodstox SAX implementation.
@@ -17,6 +21,7 @@ import com.fasterxml.aalto.AaltoInputProperties;
 public class TestEntityResolver
     extends base.BaseTestCase
 {
+    @Test
     public void testWithDummyExtSubset()
         throws Exception
     {
@@ -50,6 +55,7 @@ public class TestEntityResolver
     }
 
     // [aalto-xml#65]: allow retaining GEs in attribute values
+    @Test
     public void testRetainAttributeEntityReference()
             throws Exception
     {

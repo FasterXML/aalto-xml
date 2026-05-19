@@ -9,14 +9,20 @@ import javax.xml.stream.*;
 import org.codehaus.stax2.XMLInputFactory2;
 import org.codehaus.stax2.XMLStreamReader2;
 
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
+
 public class TestSimple extends base.BaseTestCase
 {
     private final XMLInputFactory2 F2 = newInputFactory();
     
+    @Test
     public void testNamespacesBytes() throws Exception {
         _testNamespaces(true);
     }
 
+    @Test
     public void testNamespacesChars() throws Exception {
         _testNamespaces(false);
     }

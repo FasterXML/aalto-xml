@@ -12,6 +12,10 @@ import com.fasterxml.aalto.util.IllegalCharHandler;
 
 import java.nio.ByteBuffer;
 
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
+
 public class TestElementParsing extends AsyncTestBase
 {
     private final AsyncXMLInputFactory ASYNC_F = new InputFactoryImpl();
@@ -19,6 +23,7 @@ public class TestElementParsing extends AsyncTestBase
     /**
      * Trivial test to verify basic operation with a full buffer.
      */
+    @Test
     public void testTrivial_array() throws Exception
     {
         final AsyncXMLInputFactory f = new InputFactoryImpl();
@@ -48,6 +53,7 @@ public class TestElementParsing extends AsyncTestBase
     /**
      * Trivial test to verify basic operation with a full buffer.
      */
+    @Test
     public void testTrivial_buffer() throws Exception
     {
         final AsyncXMLInputFactory f = new InputFactoryImpl();
@@ -74,6 +80,7 @@ public class TestElementParsing extends AsyncTestBase
         }
     }
     
+    @Test
     public void testRootElement() throws Exception
     {
         // let's try with different chunking, addition (or not) of space
@@ -97,6 +104,7 @@ public class TestElementParsing extends AsyncTestBase
         }
     }
 
+    @Test
     public void testElements() throws Exception
     {
         // let's try with different chunking, addition (or not) of space
@@ -112,6 +120,7 @@ public class TestElementParsing extends AsyncTestBase
     }
 
     // Bit more stuff with attributes
+    @Test
     public void testParseElementsWithAttrs() throws Exception
     {
         for (int spaces = 0; spaces < 3; ++spaces) {
@@ -126,6 +135,7 @@ public class TestElementParsing extends AsyncTestBase
         }
     }
 
+    @Test
     public void testSkipElementsWithAttrs() throws Exception
     {
         for (int spaces = 0; spaces < 3; ++spaces) {
@@ -141,6 +151,7 @@ public class TestElementParsing extends AsyncTestBase
     }
 
     // [Issue-12], probs with attrs, multi-byte UTF-8 chars
+    @Test
     public void testParseElementsWithUTF8Attrs() throws Exception
     {
         for (int spaces = 0; spaces < 3; ++spaces) {
@@ -153,6 +164,7 @@ public class TestElementParsing extends AsyncTestBase
     }
 
     // [Issue-12]
+    @Test
     public void testSkipElementsWithUTF8Attrs() throws Exception
     {
         for (int spaces = 0; spaces < 3; ++spaces) {
@@ -164,6 +176,7 @@ public class TestElementParsing extends AsyncTestBase
         }
     }
     
+    @Test
     public void testParseElementsWithIllegalChars() throws Exception
     {
         for (int spaces = 0; spaces < 3; ++spaces) {
@@ -176,6 +189,7 @@ public class TestElementParsing extends AsyncTestBase
     }
 
     // [#8]: give useful exception for `getElementText()`
+    @Test
     public void testGetElementText_array() throws Exception
     {
         AsyncXMLStreamReader<AsyncByteArrayFeeder> sr = null;
@@ -199,6 +213,7 @@ public class TestElementParsing extends AsyncTestBase
     }
 
     // [#8]: give useful exception for `getElementText()`
+    @Test
     public void testGetElementText_buffer() throws Exception
     {
         AsyncXMLStreamReader<AsyncByteBufferFeeder> sr = null;

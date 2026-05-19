@@ -4,8 +4,13 @@ import java.io.ByteArrayOutputStream;
 
 import org.codehaus.stax2.XMLStreamWriter2;
 
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
+
 public class TestUTF8Surrogates extends BaseWriterTest
 {
+    @Test
     public void testWithKappas() throws Exception
     {
         // !!! TODO: mark using Unicode escape, for better source compatibility

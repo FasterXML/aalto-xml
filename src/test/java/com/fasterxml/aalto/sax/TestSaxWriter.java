@@ -5,6 +5,10 @@ import com.fasterxml.aalto.out.WriterConfig;
 
 import java.io.ByteArrayOutputStream;
 
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
+
 public class TestSaxWriter extends base.BaseTestCase
 {
     private final String TEXT_WITH_SURROGATE;
@@ -20,6 +24,7 @@ public class TestSaxWriter extends base.BaseTestCase
         TEXT_WITH_SURROGATE = testText.toString();
     }
 
+    @Test
     public void testSplitSurrogateWithAttributeValue() throws Exception
     {
         // This test aims to produce the
@@ -39,6 +44,7 @@ public class TestSaxWriter extends base.BaseTestCase
         writer.close(false);
     }
 
+    @Test
     public void testSplitSurrogateWithAttributeValue2() throws Exception
     {
         // This test aims to produce the
@@ -63,6 +69,7 @@ public class TestSaxWriter extends base.BaseTestCase
         writer.close(false);
     }
 
+    @Test
     public void testSplitSurrogateWithCData() throws Exception
     {
         // Modification of "testSplitSurrogateWithAttributeValue()" but for CDATA
@@ -76,6 +83,7 @@ public class TestSaxWriter extends base.BaseTestCase
         writer.close(false);
     }
 
+    @Test
     public void testSplitSurrogateWithComment() throws Exception
     {
         // Modification of "testSplitSurrogateWithAttributeValue()" but for Comment
@@ -89,6 +97,7 @@ public class TestSaxWriter extends base.BaseTestCase
         writer.close(false);
     }
 
+    @Test
     public void testSplitSurrogateWithPI() throws Exception
     {
         // Modification of "testSplitSurrogateWithAttributeValue()" but for Processing instructions

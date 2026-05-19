@@ -8,16 +8,22 @@ import com.fasterxml.aalto.AsyncXMLInputFactory;
 import com.fasterxml.aalto.AsyncXMLStreamReader;
 import com.fasterxml.aalto.stax.InputFactoryImpl;
 
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
+
 public class TestTextEncoding extends AsyncTestBase
 {
     final String SIMPLE_LATIN1_TEXT = "value:["+UNICODE_2BYTES+"/"+UNICODE_2BYTES+"]";
 
+    @Test
     public void testLatin1ByteArray() throws Exception {
         _testLatin1(false, 1);
         _testLatin1(false, 3);
         _testLatin1(false, 8);
     }
 
+    @Test
     public void testLatin1ByteBuffer() throws Exception {
         _testLatin1(true, 1);
         _testLatin1(true, 3);

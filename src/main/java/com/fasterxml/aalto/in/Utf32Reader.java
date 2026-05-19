@@ -67,6 +67,10 @@ public class Utf32Reader
             boolean isBigEndian)
     {
         mConfig = cfg;
+        mIn = in;
+        mBuffer = buf;
+        mPtr = ptr;
+        mLength = len;
         mBigEndian = isBigEndian;
     }
 

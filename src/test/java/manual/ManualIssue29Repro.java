@@ -1,4 +1,4 @@
-package failing;
+package manual;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;

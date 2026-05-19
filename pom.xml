@@ -4,7 +4,7 @@
   <parent>
     <groupId>com.fasterxml</groupId>
     <artifactId>oss-parent</artifactId>
-    <version>68</version>
+    <version>79</version>
   </parent>
 
   <artifactId>aalto-xml</artifactId>
@@ -67,15 +67,15 @@ org.xml.sax, org.xml.sax.ext, org.xml.sax.helpers</osgi.import>
     <dependency>
       <groupId>org.codehaus.woodstox</groupId>
       <artifactId>stax2-api</artifactId>
-      <version>4.2.2</version>
+      <version>4.3.0</version>
     </dependency>
     <!--
      | Test dependencies
     -->
     <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>${version.junit}</version>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <version>${version.junit5}</version>
       <scope>test</scope>
     </dependency>
 
@@ -96,6 +96,22 @@ org.xml.sax, org.xml.sax.ext, org.xml.sax.helpers</osgi.import>
         <artifactId>central-publishing-maven-plugin</artifactId>
       </plugin>
 
+      <plugin>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <excludes>
+            <exclude>failing/*.java</exclude>
+            <exclude>**/Abstract*.java</exclude>
+            <exclude>**/Base*.java</exclude>
+            <exclude>**/*$*.java</exclude>
+          </excludes>
+          <includes>
+            <include>**/*Test.java</include>
+            <include>**/Test*.java</include>
+          </includes>
+        </configuration>
+      </plugin>
+      
       <!--  04-Mar-2019, tatu: Add rudimentary JDK9+ module info. To build with JDK 8
              will have to use `moduleInfoFile` which is not optimal but anything else
             requires  JDK 9+.
@@ -123,6 +139,13 @@ org.xml.sax, org.xml.sax.ext, org.xml.sax.helpers</osgi.import>
       <plugin>
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
+        <configuration>
+          <!-- Top-level `test` package holds manual perf/runner mains
+               (no JUnit tests), so exclude it from coverage reports. -->
+          <excludes>
+            <exclude>test/**</exclude>
+          </excludes>
+        </configuration>
         <executions>
           <execution>
             <goals>
