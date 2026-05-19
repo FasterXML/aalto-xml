@@ -332,8 +332,11 @@ public class BasicScannerTest
         String a = null, b = null;
         for (int i = 0, n = sr.getAttributeCount(); i < n; ++i) {
             String name = sr.getAttributeLocalName(i);
-            if (name.equals("a")) a = sr.getAttributeValue(i);
-            else if (name.equals("b")) b = sr.getAttributeValue(i);
+            if (name.equals("a")) {
+                a = sr.getAttributeValue(i);
+            } else if (name.equals("b")) {
+                b = sr.getAttributeValue(i);
+            }
         }
         assertEquals("<>&A", a);
         assertEquals("\"'!", b);
@@ -588,9 +591,13 @@ public class BasicScannerTest
         String x = null, y = null, z = null;
         for (int i = 0, n = sr.getAttributeCount(); i < n; ++i) {
             String name = sr.getAttributeLocalName(i);
-            if (name.equals("x")) x = sr.getAttributeValue(i);
-            else if (name.equals("y")) y = sr.getAttributeValue(i);
-            else if (name.equals("z")) z = sr.getAttributeValue(i);
+            if (name.equals("x")) {
+                x = sr.getAttributeValue(i);
+            } else if (name.equals("y")) {
+                y = sr.getAttributeValue(i);
+            } else if (name.equals("z")) {
+                z = sr.getAttributeValue(i);
+            }
         }
         assertEquals("1", x);
         assertEquals("2", y);
@@ -755,7 +762,9 @@ public class BasicScannerTest
     private void _testIndentationOverflow(boolean useBytes) throws Exception
     {
         StringBuilder pad = new StringBuilder("\n");
-        for (int i = 0; i < 200; ++i) pad.append(' ');
+        for (int i = 0; i < 200; ++i) {
+            pad.append(' ');
+        }
         String doc = "<root>" + pad + "<child/></root>";
         XMLStreamReader2 sr = createReader(doc, useBytes);
         assertTokenType(START_ELEMENT, sr.next());
