@@ -133,9 +133,9 @@ public class TestElementValidation
             sw.writeEndElement();
             fail(modeDesc + " Expected a validation exception when closing element with missing required child");
         } catch (XMLValidationException vex) {
-            // 18-May-2026, tatu: Extra space in there... why?
-//            verifyException(vex, "element </root>: Expected  element <child>");
-            verifyException(vex, "element </root>: Expected element <child>");
+            // 18-May-2026, tatu: Extra space in there until Woodstox 7.2, so:
+            verifyException(vex, "element </root>: Expected element");
+            verifyException(vex, "<child>");
         }
     }
 
