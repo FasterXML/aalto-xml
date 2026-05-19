@@ -139,6 +139,13 @@ org.xml.sax, org.xml.sax.ext, org.xml.sax.helpers</osgi.import>
       <plugin>
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
+        <configuration>
+          <!-- Top-level `test` package holds manual perf/runner mains
+               (no JUnit tests), so exclude it from coverage reports. -->
+          <excludes>
+            <exclude>test/**</exclude>
+          </excludes>
+        </configuration>
         <executions>
           <execution>
             <goals>
