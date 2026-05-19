@@ -48,9 +48,10 @@ a subscriber to do this).
 
 Aalto 1.x:
 
-* Can be _used_ on JDK versions 6 (1.6) and up
+* Version 1.4.0 and above require JDK 8
+* Versions before 1.4.0 can be _used_ on JDK versions 6 (1.6) and up
     * needs JDK 8 or higher to _build_ as of Aalto `1.2.0`
-* Contains Java 9 Module definition (`module-info.class`) starting with version `1.2.0`
+* Contains Java 9 Module definition (`module-info.class`) starting with version `1.2.0`, added using Moditect plug-in
 
 ## Usage
 
@@ -62,7 +63,7 @@ Aalto dependency is usually added via Maven repository, so something like:
 <dependency>
     <groupId>com.fasterxml</groupId>
     <artifactId>aalto-xml</artifactId>
-    <version>1.3.1</version>
+    <version>1.4.0</version>
 </dependency>
 ```
 
