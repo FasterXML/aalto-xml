@@ -1,7 +1,9 @@
-package failing;
+package wstream;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.StringReader;
+import java.io.StringWriter;
 
 import javax.xml.stream.XMLStreamReader;
 
@@ -15,17 +17,12 @@ import base.BaseTestCase;
 import static org.junit.jupiter.api.Assertions.fail;
 
 /**
- * Manually runnable reproducer for the chunk-boundary variant of
- * [aalto-xml#100]. {@code writeCData(String)} chunks its input into 512-char
- * pieces (the {@code _copyBuffer}) and {@code writeCDataContents} only sees one
- * chunk at a time. When a "]]" or "]]>" sequence straddles that seam neither
- * chunk can detect it, so the output is either silently corrupted (one ']' lost)
- * or contains a literal "]]>" inside an unterminated CDATA section.
- *
- * <p>Proper fix requires tracking trailing-']' state across {@code
- * writeCDataContents} invocations, analogous to the existing {@code _surrogate}
- * field. Kept under {@code failing/} (and named without the {@code Test} prefix
- * so surefire skips it) until that work is done.
+ * [aalto-xml#129]: {@code writeCData(String)} chunks its input into 512-char
+ * pieces (the {@code _copyBuffer}). When a "]]" or "]]>" sequence straddled
+ * that chunk boundary, the per-chunk scanner in {@code writeCDataContents}
+ * could not see the full pattern, so the output either lost a ']' or contained
+ * a literal "]]>" inside an unterminated CDATA section. Fixed by backing the
+ * chunk end off if it would land between the brackets and '>'.
  */
 public class CDataChunkBoundary129Test extends BaseTestCase
 {
@@ -62,6 +59,28 @@ public class CDataChunkBoundary129Test extends BaseTestCase
         _roundtrip(sb.toString());
     }
 
+    // Parallel coverage for the char-based writer (StringWriter destination).
+    // CharXmlWriter previously had a broader bug: its "]]>" detection was
+    // keyed off the '>' char-type slot which is CT_OK in the writer table, so
+    // the case never fired and literal "]]>" was emitted regardless of chunk
+    // boundaries. Verify both the basic and chunk-boundary cases here.
+
+    @Test
+    public void testBracketSplitAcrossChunkChars() throws Exception {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < 510; ++i) sb.append('a');
+        sb.append("]]>after");
+        _roundtripChars(sb.toString());
+    }
+
+    @Test
+    public void testBracketsStraddlingOneSplitChars() throws Exception {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < 511; ++i) sb.append('a');
+        sb.append("]]>after");
+        _roundtripChars(sb.toString());
+    }
+
     private void _roundtrip(String content) throws Exception
     {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -75,6 +94,29 @@ public class CDataChunkBoundary129Test extends BaseTestCase
 
         byte[] bytes = out.toByteArray();
         XMLStreamReader sr = INPUT_FACTORY.createXMLStreamReader(new ByteArrayInputStream(bytes), ENC_UTF8);
+        _assertRoundtrip(content, sr,
+                "raw output (last 40 bytes): " + new String(bytes, Math.max(0, bytes.length-40), Math.min(40, bytes.length)));
+    }
+
+    private void _roundtripChars(String content) throws Exception
+    {
+        StringWriter out = new StringWriter();
+        XMLStreamWriter2 sw = (XMLStreamWriter2) OUTPUT_FACTORY.createXMLStreamWriter(out);
+        sw.writeStartDocument();
+        sw.writeStartElement("r");
+        sw.writeCData(content);
+        sw.writeEndElement();
+        sw.writeEndDocument();
+        sw.close();
+
+        String written = out.toString();
+        XMLStreamReader sr = INPUT_FACTORY.createXMLStreamReader(new StringReader(written));
+        _assertRoundtrip(content, sr,
+                "raw output (last 40 chars): " + written.substring(Math.max(0, written.length()-40)));
+    }
+
+    private void _assertRoundtrip(String content, XMLStreamReader sr, String diagnostic) throws Exception
+    {
         assertTokenType(START_DOCUMENT, sr.getEventType());
         assertTokenType(START_ELEMENT, sr.next());
         StringBuilder got = new StringBuilder();
@@ -87,7 +129,7 @@ public class CDataChunkBoundary129Test extends BaseTestCase
         if (!content.equals(got.toString())) {
             fail("Content corrupted across chunk boundary.\n"
                     + " expected length=" + content.length() + ", got length=" + got.length()
-                    + "\n raw output (last 40 bytes): " + new String(bytes, Math.max(0, bytes.length-40), Math.min(40, bytes.length)));
+                    + "\n " + diagnostic);
         }
     }
 }

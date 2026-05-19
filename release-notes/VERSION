@@ -36,6 +36,11 @@ Project: aalto-xml
  (reported, fix suggested by @lepokle)
 #105: Change JDK baseline to Java 8 (from 1.6)
 #116: Convert tests from JUnit 4 to JUnit 5
+#129: Buffer boundary failure for "split" CDATA end marker (`]]>`):
+  `]]>` straddling a `_copyBuffer` chunk slipped past detection in
+  `writeCData(String)`, emitting a literal `]]>` that prematurely terminated
+  the CDATA section; also fixes a latent `CharXmlWriter` bug where the
+  `]]>`-split case was keyed off `>` rather than `]` and so never fired
 - Fix `Utf32Reader` constructor: previously failed to assign input stream,
   buffer and pointer fields, so UTF-32 documents always parsed as empty.
 - Update to `oss-parent` v79

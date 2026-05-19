@@ -761,10 +761,23 @@ public abstract class ByteXmlWriter
             int blen = buf.length;
 
             // Can write all the rest?
-            if (blen > len) {
+            if (blen >= len) {
                 blen = len;
+            } else {
+                // [aalto-xml#129]: writeCDataContents scans the source buffer
+                // to find the forbidden "]]>" sequence. If the input is split
+                // in the middle of "]]>" the detection misses it and we'd emit
+                // a literal "]]>" that prematurely terminates the CDATA
+                // section. Push a trailing ']' or "]]" into the next chunk so
+                // the pattern stays visible in one piece.
+                if (data.charAt(offset + blen - 1) == ']') {
+                    if (blen >= 2 && data.charAt(offset + blen - 2) == ']') {
+                        blen -= 2;
+                    } else {
+                        blen -= 1;
+                    }
+                }
             }
-            // Nope, can only do part
             data.getChars(offset, offset+blen, buf, 0);
             int cix = writeCDataContents(buf, 0, blen);
             if (cix >= 0) {

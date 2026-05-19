@@ -63,6 +63,11 @@ public class CDataWithBrackets100Test extends BaseTestCase
         _roundtripCData("x]]]>y", ENC_UTF8);
     }
 
+    @Test
+    public void testTripleBracketGtChars() throws Exception {
+        _roundtripCData("x]]]>y", null);
+    }
+
     /**
      * Drives writeCData(char[],int,int) rather than writeCData(String) to make
      * sure both code paths exercise the same fix.
