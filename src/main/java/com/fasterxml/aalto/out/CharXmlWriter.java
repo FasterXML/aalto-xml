@@ -443,13 +443,19 @@ public final class CharXmlWriter
                     // sufficient.
                     if ((offset+1) < len && cbuf[offset] == ']' && cbuf[offset+1] == '>') {
                         offset += 2;
-                        if (_outputPtr >= _outputBufferLen) flushBuffer();
+                        if (_outputPtr >= _outputBufferLen) {
+                            flushBuffer();
+                        }
                         _outputBuffer[_outputPtr++] = ']';
-                        if (_outputPtr >= _outputBufferLen) flushBuffer();
+                        if (_outputPtr >= _outputBufferLen) {
+                            flushBuffer();
+                        }
                         _outputBuffer[_outputPtr++] = ']';
                         writeCDataEnd();
                         writeCDataStart();
-                        if (_outputPtr >= _outputBufferLen) flushBuffer();
+                        if (_outputPtr >= _outputBufferLen) {
+                            flushBuffer();
+                        }
                         _outputBuffer[_outputPtr++] = '>';
                         continue main_loop;
                     }
