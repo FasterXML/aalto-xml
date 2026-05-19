@@ -70,7 +70,7 @@ public class TestElementValidation
             sw.writeStartElement("wrong");
             fail(modeDesc + " Expected a validation exception writing an undeclared root element");
         } catch (XMLValidationException vex) {
-            // expected
+            verifyException(vex, "Undefined element <wrong>");
         }
     }
 
@@ -110,7 +110,7 @@ public class TestElementValidation
             sw.writeEmptyElement("wrong");
             fail(modeDesc + " Expected a validation exception writing an undeclared child element");
         } catch (XMLValidationException vex) {
-            // expected
+            verifyException(vex, "Undefined element <wrong>");
         }
     }
 
@@ -133,7 +133,9 @@ public class TestElementValidation
             sw.writeEndElement();
             fail(modeDesc + " Expected a validation exception when closing element with missing required child");
         } catch (XMLValidationException vex) {
-            // expected
+            // 18-May-2026, tatu: Extra space in there until Woodstox 7.2, so:
+            verifyException(vex, "element </root>: Expected");
+            verifyException(vex, "<child>");
         }
     }
 
@@ -158,6 +160,7 @@ public class TestElementValidation
             sw.writeCharacters("nope");
             fail(modeDesc + " Expected a validation exception writing text into EMPTY element");
         } catch (XMLValidationException vex) {
+            verifyException(vex, "Element <root> has EMPTY");
             // expected
         } catch (XMLStreamException sex) {
             // Aalto's structural checker may surface this as a plain stream exception

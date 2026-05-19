@@ -31,6 +31,10 @@ public class BasicScannerTest
     // force at least one buffer reload while finishing a token.
     private static final int BIG_LEN = 8500;
 
+    // Supplementary-plane codepoint U+1D11E ("MUSICAL SYMBOL G CLEF"),
+    // encoded as a Java surrogate pair so callers stay ASCII.
+    private static final String SUPPL_CHAR = "\uD834\uDD1E";
+
     /*
     /**********************************************************************
     /* Comments
@@ -104,6 +108,7 @@ public class BasicScannerTest
         String body = sb.toString();
         String doc = "<root><!--" + body + "--></root>";
         XMLStreamReader2 sr = createReader(doc, useBytes);
+
         assertTokenType(START_ELEMENT, sr.next());
         assertTokenType(COMMENT, sr.next());
         assertEquals(body, sr.getText());
@@ -128,6 +133,7 @@ public class BasicScannerTest
     {
         String doc = "<?pi1 target1?><?pi2?><root><?pi3 data with ? mark?></root><?pi4 epilog?>";
         XMLStreamReader2 sr = createReader(doc, useBytes);
+
         assertTokenType(START_DOCUMENT, sr.getEventType());
 
         assertTokenType(PROCESSING_INSTRUCTION, sr.next());
@@ -149,6 +155,7 @@ public class BasicScannerTest
         assertTokenType(PROCESSING_INSTRUCTION, sr.next());
         assertEquals("pi4", sr.getPITarget());
         assertTokenType(END_DOCUMENT, sr.next());
+
         sr.close();
     }
 
@@ -163,6 +170,7 @@ public class BasicScannerTest
     {
         String doc = "<?keep this data?><root><?ignored data ? not yet end ??></root>";
         XMLStreamReader2 sr = createReader(doc, useBytes);
+
         assertTokenType(START_DOCUMENT, sr.getEventType());
         assertTokenType(PROCESSING_INSTRUCTION, sr.next());
         // don't fetch data -> skipPI
@@ -171,6 +179,7 @@ public class BasicScannerTest
         // don't fetch data again
         assertTokenType(END_ELEMENT, sr.next());
         assertTokenType(END_DOCUMENT, sr.next());
+
         sr.close();
     }
 
@@ -332,8 +341,11 @@ public class BasicScannerTest
         String a = null, b = null;
         for (int i = 0, n = sr.getAttributeCount(); i < n; ++i) {
             String name = sr.getAttributeLocalName(i);
-            if (name.equals("a")) a = sr.getAttributeValue(i);
-            else if (name.equals("b")) b = sr.getAttributeValue(i);
+            if (name.equals("a")) {
+                a = sr.getAttributeValue(i);
+            } else if (name.equals("b")) {
+                b = sr.getAttributeValue(i);
+            }
         }
         assertEquals("<>&A", a);
         assertEquals("\"'!", b);
@@ -353,7 +365,7 @@ public class BasicScannerTest
     {
         // Latin-1 supplement (2-byte), CJK (3-byte), supplementary plane (4-byte)
         // Use byte path to drive the UTF-8 decoder branches.
-        String body = "two:é three:中 four:" + new String(Character.toChars(0x1D11E));
+        String body = "two:\u00E9 three:\u4E2D four:" + SUPPL_CHAR;
         String doc = "<root>" + body + "</root>";
         XMLStreamReader2 sr = createReader(doc, true);
         assertTokenType(START_ELEMENT, sr.next());
@@ -370,7 +382,7 @@ public class BasicScannerTest
     @Test
     public void testMultiByteUtf8InAttribute() throws Exception
     {
-        String value = "é-中-" + new String(Character.toChars(0x1D11E));
+        String value = "\u00E9-\u4E2D-" + SUPPL_CHAR;
         String doc = "<root attr=\"" + value + "\"/>";
         XMLStreamReader2 sr = createReader(doc, true);
         assertTokenType(START_ELEMENT, sr.next());
@@ -384,7 +396,7 @@ public class BasicScannerTest
     public void testMultiByteUtf8InElementName() throws Exception
     {
         // Element name with non-ASCII chars: triggers PName multibyte path
-        String name = "elément中";
+        String name = "el\u00E9ment\u4E2D";
         String doc = "<" + name + ">x</" + name + ">";
         XMLStreamReader2 sr = createReader(doc, true);
         assertTokenType(START_ELEMENT, sr.next());
@@ -400,7 +412,7 @@ public class BasicScannerTest
     public void testSurrogateInTextChars() throws Exception
     {
         // Char reader path: input contains actual surrogate pair
-        String body = "x" + new String(Character.toChars(0x1D11E)) + "y";
+        String body = "x" + SUPPL_CHAR + "y";
         String doc = "<root>" + body + "</root>";
         XMLStreamReader2 sr = createReader(doc, false);
         assertTokenType(START_ELEMENT, sr.next());
@@ -432,7 +444,7 @@ public class BasicScannerTest
             concat.append(sr.getText());
         }
         assertTokenType(END_ELEMENT, t);
-        assertEquals("x" + new String(Character.toChars(0x1D11E)) + "y", concat.toString());
+        assertEquals("x" + SUPPL_CHAR + "y", concat.toString());
         sr.close();
     }
 
@@ -547,7 +559,7 @@ public class BasicScannerTest
         XMLStreamReader2 sr = createReader(doc, useBytes);
         assertTokenType(START_ELEMENT, sr.next());
         assertEquals("root", sr.getLocalName());
-        // Whitespace before <child/> — reported as CHARACTERS for mixed content
+        // Whitespace before <child/> -- reported as CHARACTERS for mixed content
         int t = sr.next();
         if (t == CHARACTERS) {
             sr.getText();
@@ -588,9 +600,13 @@ public class BasicScannerTest
         String x = null, y = null, z = null;
         for (int i = 0, n = sr.getAttributeCount(); i < n; ++i) {
             String name = sr.getAttributeLocalName(i);
-            if (name.equals("x")) x = sr.getAttributeValue(i);
-            else if (name.equals("y")) y = sr.getAttributeValue(i);
-            else if (name.equals("z")) z = sr.getAttributeValue(i);
+            if (name.equals("x")) {
+                x = sr.getAttributeValue(i);
+            } else if (name.equals("y")) {
+                y = sr.getAttributeValue(i);
+            } else if (name.equals("z")) {
+                z = sr.getAttributeValue(i);
+            }
         }
         assertEquals("1", x);
         assertEquals("2", y);
@@ -685,6 +701,408 @@ public class BasicScannerTest
         assertTokenType(END_ELEMENT, sr.next()); // /d
         assertTokenType(END_ELEMENT, sr.next()); // /a
         assertTokenType(END_DOCUMENT, sr.next());
+        sr.close();
+    }
+
+    /*
+    /**********************************************************************
+    /* Indentation-aware text handling
+    /**********************************************************************
+     */
+
+    @Test
+    public void testIndentationSpacesBytes() throws Exception { _testIndentationSpaces(true); }
+
+    @Test
+    public void testIndentationSpacesChars() throws Exception { _testIndentationSpaces(false); }
+
+    // Typical "pretty-printed" XML: text segments start with \n + spaces
+    // before each child, which triggers checkInTreeIndentation's fast path.
+    private void _testIndentationSpaces(boolean useBytes) throws Exception
+    {
+        String doc = "<root>\n  <a/>\n  <b/>\n    <c/>\n</root>";
+        XMLStreamReader2 sr = createReader(doc, useBytes);
+        assertTokenType(START_ELEMENT, sr.next()); // root
+        // Walk and accumulate so we don't care whether SPACE vs CHARACTERS is reported
+        StringBuilder text = new StringBuilder();
+        int events = 0;
+        int t;
+        while ((t = sr.next()) != END_DOCUMENT) {
+            if (t == CHARACTERS || t == SPACE) {
+                text.append(sr.getText());
+            } else {
+                ++events;
+            }
+        }
+        // 3 child elements -> 6 element events, plus closing root
+        assertEquals(7, events);
+        assertTrue(text.toString().contains("\n  "));
+        sr.close();
+    }
+
+    @Test
+    public void testIndentationTabsBytes() throws Exception { _testIndentationTabs(true); }
+
+    @Test
+    public void testIndentationTabsChars() throws Exception { _testIndentationTabs(false); }
+
+    private void _testIndentationTabs(boolean useBytes) throws Exception
+    {
+        String doc = "<root>\n\t<a/>\n\t<b/>\n</root>";
+        XMLStreamReader2 sr = createReader(doc, useBytes);
+        assertTokenType(START_ELEMENT, sr.next());
+        int t;
+        while ((t = sr.next()) != END_DOCUMENT) {
+            if (t == CHARACTERS || t == SPACE) {
+                sr.getText();
+            }
+        }
+        sr.close();
+    }
+
+    @Test
+    public void testIndentationOverflowBytes() throws Exception { _testIndentationOverflow(true); }
+
+    @Test
+    public void testIndentationOverflowChars() throws Exception { _testIndentationOverflow(false); }
+
+    // Many leading spaces: exceeds MAX_INDENT_SPACES so the "copy literally"
+    // path is taken instead of the shared indentation token.
+    private void _testIndentationOverflow(boolean useBytes) throws Exception
+    {
+        StringBuilder pad = new StringBuilder("\n");
+        for (int i = 0; i < 200; ++i) {
+            pad.append(' ');
+        }
+        String doc = "<root>" + pad + "<child/></root>";
+        XMLStreamReader2 sr = createReader(doc, useBytes);
+        assertTokenType(START_ELEMENT, sr.next());
+        StringBuilder text = new StringBuilder();
+        int t;
+        while ((t = sr.next()) == CHARACTERS || t == SPACE) {
+            text.append(sr.getText());
+        }
+        assertTokenType(START_ELEMENT, t);
+        assertEquals(pad.toString(), text.toString());
+        sr.close();
+    }
+
+    /*
+    /**********************************************************************
+    /* Skip-mode with multi-byte content (UTF-8 only)
+    /**********************************************************************
+     */
+
+    @Test
+    public void testSkipMultiByteText() throws Exception
+    {
+        // Byte path only: forces skipUtf8_2/3/4 paths in skipCharacters
+        String body = "two:\u00E9 three:\u20AC four:" + SUPPL_CHAR;
+        String doc = "<root>" + body + "</root>";
+        XMLStreamReader2 sr = createReader(doc, true);
+        assertTokenType(START_ELEMENT, sr.next());
+        int t;
+        while ((t = sr.next()) == CHARACTERS) {
+            // skip
+        }
+        assertTokenType(END_ELEMENT, t);
+        sr.close();
+    }
+
+    @Test
+    public void testSkipMultiByteCData() throws Exception
+    {
+        String body = "two:\u00E9 three:\u20AC four:" + SUPPL_CHAR;
+        String doc = "<root><![CDATA[" + body + "]]></root>";
+        XMLStreamReader2 sr = createReader(doc, true);
+        assertTokenType(START_ELEMENT, sr.next());
+        assertTokenType(CDATA, sr.next());
+        // not consuming text -> skipCData
+        assertTokenType(END_ELEMENT, sr.next());
+        sr.close();
+    }
+
+    @Test
+    public void testSkipMultiByteComment() throws Exception
+    {
+        // skipComment with multi-byte content
+        String doc = "<root><!-- a:\u00E9 b:\u20AC c:" + SUPPL_CHAR + " --></root>";
+        XMLStreamReader2 sr = createReader(doc, true);
+        assertTokenType(START_ELEMENT, sr.next());
+        assertTokenType(COMMENT, sr.next());
+        // skip
+        assertTokenType(END_ELEMENT, sr.next());
+        sr.close();
+    }
+
+    @Test
+    public void testSkipMultiBytePI() throws Exception
+    {
+        String doc = "<root><?tgt body:\u00E9 body:\u20AC body:" + SUPPL_CHAR + "?></root>";
+        XMLStreamReader2 sr = createReader(doc, true);
+        assertTokenType(START_ELEMENT, sr.next());
+        assertTokenType(PROCESSING_INSTRUCTION, sr.next());
+        // skip
+        assertTokenType(END_ELEMENT, sr.next());
+        sr.close();
+    }
+
+    /*
+    /**********************************************************************
+    /* Namespace URI with multi-byte content (handleNsDeclaration)
+    /**********************************************************************
+     */
+
+    @Test
+    public void testNamespaceUriWithMultiByteBytes() throws Exception { _testNsUriMultiByte(true); }
+
+    @Test
+    public void testNamespaceUriWithMultiByteChars() throws Exception { _testNsUriMultiByte(false); }
+
+    private void _testNsUriMultiByte(boolean useBytes) throws Exception
+    {
+        String uri = "urn:\u00E9-\u4E2D-" + SUPPL_CHAR;
+        String doc = "<a:elem xmlns:a=\"" + uri + "\"/>";
+        XMLStreamReader2 sr = createReader(doc, useBytes);
+        assertTokenType(START_ELEMENT, sr.next());
+        assertEquals(1, sr.getNamespaceCount());
+        assertEquals(uri, sr.getNamespaceURI(0));
+        assertEquals(uri, sr.getNamespaceURI("a"));
+        assertTokenType(END_ELEMENT, sr.next());
+        sr.close();
+    }
+
+    /*
+    /**********************************************************************
+    /* Whitespace variants in start-tag
+    /**********************************************************************
+     */
+
+    @Test
+    public void testWhitespaceInStartTagBytes() throws Exception { _testWhitespaceInStartTag(true); }
+
+    @Test
+    public void testWhitespaceInStartTagChars() throws Exception { _testWhitespaceInStartTag(false); }
+
+    // Tab and CR/CRLF between attributes, and space before self-closing slash
+    private void _testWhitespaceInStartTag(boolean useBytes) throws Exception
+    {
+        String doc = "<root\tx='1'\r\ny='2'\rz='3' />";
+        XMLStreamReader2 sr = createReader(doc, useBytes);
+        assertTokenType(START_ELEMENT, sr.next());
+        assertEquals(3, sr.getAttributeCount());
+        assertTokenType(END_ELEMENT, sr.next());
+        sr.close();
+    }
+
+    /*
+    /**********************************************************************
+    /* CR (no LF) inside content
+    /**********************************************************************
+     */
+
+    @Test
+    public void testBareCRInTextBytes() throws Exception { _testBareCRInText(true); }
+
+    @Test
+    public void testBareCRInTextChars() throws Exception { _testBareCRInText(false); }
+
+    private void _testBareCRInText(boolean useBytes) throws Exception
+    {
+        // Bare \r (no \n) inside text, between attributes, in attr value
+        String doc = "<root\rattr='v\ra\rb'>x\ry\rz</root>";
+        XMLStreamReader2 sr = createReader(doc, useBytes);
+        assertTokenType(START_ELEMENT, sr.next());
+        // attr CR -> normalized to single space (per XML attr-value normalization)
+        assertEquals("v a b", sr.getAttributeValue(0));
+        StringBuilder text = new StringBuilder();
+        int t;
+        while ((t = sr.next()) == CHARACTERS) {
+            text.append(sr.getText());
+        }
+        assertTokenType(END_ELEMENT, t);
+        assertEquals("x\ny\nz", text.toString());
+        sr.close();
+    }
+
+    /*
+    /**********************************************************************
+    /* Empty CDATA / empty comment
+    /**********************************************************************
+     */
+
+    @Test
+    public void testEmptyCDataBytes() throws Exception { _testEmptyCData(true); }
+
+    @Test
+    public void testEmptyCDataChars() throws Exception { _testEmptyCData(false); }
+
+    private void _testEmptyCData(boolean useBytes) throws Exception
+    {
+        String doc = "<root><![CDATA[]]></root>";
+        XMLStreamReader2 sr = createReader(doc, useBytes);
+        assertTokenType(START_ELEMENT, sr.next());
+        assertTokenType(CDATA, sr.next());
+        assertEquals("", sr.getText());
+        assertTokenType(END_ELEMENT, sr.next());
+        sr.close();
+    }
+
+    @Test
+    public void testEmptyCommentBytes() throws Exception { _testEmptyComment(true); }
+
+    @Test
+    public void testEmptyCommentChars() throws Exception { _testEmptyComment(false); }
+
+    private void _testEmptyComment(boolean useBytes) throws Exception
+    {
+        String doc = "<!----><root/>";
+        XMLStreamReader2 sr = createReader(doc, useBytes);
+        assertTokenType(COMMENT, sr.next());
+        assertEquals("", sr.getText());
+        assertTokenType(START_ELEMENT, sr.next());
+        assertTokenType(END_ELEMENT, sr.next());
+        sr.close();
+    }
+
+    /*
+    /**********************************************************************
+    /* Long attribute value (force buffer reload inside collectValue)
+    /**********************************************************************
+     */
+
+    @Test
+    public void testLongAttrValueBytes() throws Exception { _testLongAttrValue(true); }
+
+    @Test
+    public void testLongAttrValueChars() throws Exception { _testLongAttrValue(false); }
+
+    private void _testLongAttrValue(boolean useBytes) throws Exception
+    {
+        StringBuilder sb = new StringBuilder(BIG_LEN);
+        for (int i = 0; i < BIG_LEN; ++i) {
+            sb.append((char) ('a' + (i % 26)));
+        }
+        String value = sb.toString();
+        String doc = "<root attr='" + value + "'/>";
+        XMLStreamReader2 sr = createReader(doc, useBytes);
+        assertTokenType(START_ELEMENT, sr.next());
+        assertEquals(value, sr.getAttributeValue(0));
+        assertTokenType(END_ELEMENT, sr.next());
+        sr.close();
+    }
+
+    /*
+    /**********************************************************************
+    /* XML declaration variants
+    /**********************************************************************
+     */
+
+    @Test
+    public void testXmlDeclFullBytes() throws Exception { _testXmlDeclFull(true); }
+
+    @Test
+    public void testXmlDeclFullChars() throws Exception { _testXmlDeclFull(false); }
+
+    private void _testXmlDeclFull(boolean useBytes) throws Exception
+    {
+        String doc = "<?xml version='1.0' encoding='UTF-8' standalone='yes'?><root/>";
+        XMLStreamReader2 sr = createReader(doc, useBytes);
+        assertEquals("1.0", sr.getVersion());
+        assertEquals("UTF-8", sr.getCharacterEncodingScheme());
+        assertTrue(sr.isStandalone());
+        assertTokenType(START_ELEMENT, sr.next());
+        assertTokenType(END_ELEMENT, sr.next());
+        sr.close();
+    }
+
+    /*
+    /**********************************************************************
+    /* General entity reference fall-through paths in handleEntityInText
+    /**********************************************************************
+     */
+
+    @Test
+    public void testGeneralEntityVariantsBytes() throws Exception { _testGeneralEntityVariants(true); }
+
+    @Test
+    public void testGeneralEntityVariantsChars() throws Exception { _testGeneralEntityVariants(false); }
+
+    // Drive the partial-prefix fallback branches in handleEntityInText:
+    // "a..", "am..", "ap..", "l..", "g..", "q..", plus a non-prefix start.
+    // Aalto rejects unresolved general entities in expanding mode, so each
+    // entity is fed via a fresh reader and the expected exception verified.
+    private void _testGeneralEntityVariants(boolean useBytes) throws Exception
+    {
+        String[] names = new String[] { "a", "ab", "am", "amx", "ap", "apo",
+                "apox", "l", "lz", "g", "gz", "q", "qu", "quo", "quoX", "zzz" };
+        for (String n : names) {
+            _expectGeneralEntityFailure(n, useBytes);
+        }
+    }
+
+    private void _expectGeneralEntityFailure(String name, boolean useBytes) throws Exception
+    {
+        String doc = "<root>&" + name + ";</root>";
+        XMLStreamReader2 sr = createReader(doc, useBytes);
+        assertTokenType(START_ELEMENT, sr.next());
+        try {
+            sr.next();
+            fail("Expected failure on unknown general entity &" + name + ";");
+        } catch (XMLStreamException e) {
+            verifyException(e, "entity");
+        }
+        sr.close();
+    }
+
+    /*
+    /**********************************************************************
+    /* Reader / stream close
+    /**********************************************************************
+     */
+
+    @Test
+    public void testCloseExplicitBytes() throws Exception { _testCloseExplicit(true); }
+
+    @Test
+    public void testCloseExplicitChars() throws Exception { _testCloseExplicit(false); }
+
+    private void _testCloseExplicit(boolean useBytes) throws Exception
+    {
+        String doc = "<root>text</root>";
+        XMLStreamReader2 sr = createReader(doc, useBytes);
+        sr.next(); // START_ELEMENT
+        sr.close(); // exercise _closeSource()
+        // calling close again should be safe (no-op)
+        sr.close();
+    }
+
+    /*
+    /**********************************************************************
+    /* DTD with internal subset that contains tokens
+    /**********************************************************************
+     */
+
+    @Test
+    public void testDoctypeInternalSubsetBytes() throws Exception { _testDoctypeInternal(true); }
+
+    @Test
+    public void testDoctypeInternalSubsetChars() throws Exception { _testDoctypeInternal(false); }
+
+    // Internal subset includes a comment, a PI, an element decl, and an
+    // entity decl: drives finishDTD's secondary token handling.
+    private void _testDoctypeInternal(boolean useBytes) throws Exception
+    {
+        String subset = "<!-- comment -->"
+                + "<?pi data?>"
+                + "<!ELEMENT root (#PCDATA)>"
+                + "<!ENTITY foo \"bar\">";
+        String doc = "<!DOCTYPE root [" + subset + "]><root/>";
+        XMLStreamReader2 sr = createReader(doc, useBytes);
+        assertTokenType(DTD, sr.next());
+        assertEquals(subset, sr.getText());
+        assertTokenType(START_ELEMENT, sr.next());
+        assertTokenType(END_ELEMENT, sr.next());
         sr.close();
     }
 
