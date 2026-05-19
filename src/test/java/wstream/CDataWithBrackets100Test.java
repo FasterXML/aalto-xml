@@ -8,6 +8,8 @@ import org.codehaus.stax2.XMLInputFactory2;
 import org.codehaus.stax2.XMLOutputFactory2;
 import org.codehaus.stax2.XMLStreamWriter2;
 
+import org.junit.jupiter.api.Test;
+
 import base.BaseTestCase;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -17,31 +19,37 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * followed by '>' must be written through verbatim. Previously the first ']'
  * was dropped by the byte-based writer.
  */
-public class TestCDataWithBrackets extends BaseTestCase
+public class CDataWithBrackets100Test extends BaseTestCase
 {
     final XMLOutputFactory2 OUTPUT_FACTORY = newOutputFactory();
     final XMLInputFactory2 INPUT_FACTORY = newInputFactory();
 
+    @Test
     public void testDoubleBracketSpaceGtUtf8() throws Exception {
         _roundtripCData("a ]] > b", ENC_UTF8);
     }
 
+    @Test
     public void testDoubleBracketSpaceGtLatin1() throws Exception {
         _roundtripCData("a ]] > b", ENC_LATIN1);
     }
 
+    @Test
     public void testDoubleBracketSpaceGtAscii() throws Exception {
         _roundtripCData("a ]] > b", ENC_ASCII);
     }
 
+    @Test
     public void testDoubleBracketSpaceGtChars() throws Exception {
         _roundtripCData("a ]] > b", null);
     }
 
+    @Test
     public void testTrailingDoubleBracketUtf8() throws Exception {
         _roundtripCData("trailing ]]", ENC_UTF8);
     }
 
+    @Test
     public void testSingleBracketGtUtf8() throws Exception {
         _roundtripCData("one ] > bracket", ENC_UTF8);
     }
@@ -50,6 +58,7 @@ public class TestCDataWithBrackets extends BaseTestCase
      * Triple right-bracket: the parser must still split for the literal "]]>"
      * triggered by the last two brackets, leaving a lone ']' in front.
      */
+    @Test
     public void testTripleBracketGtUtf8() throws Exception {
         _roundtripCData("x]]]>y", ENC_UTF8);
     }
@@ -58,6 +67,7 @@ public class TestCDataWithBrackets extends BaseTestCase
      * Drives writeCData(char[],int,int) rather than writeCData(String) to make
      * sure both code paths exercise the same fix.
      */
+    @Test
     public void testDoubleBracketCharArrayUtf8() throws Exception {
         final String content = "a ]] > b";
         char[] cbuf = new char[content.length() + 4];

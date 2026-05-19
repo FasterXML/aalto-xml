@@ -8,6 +8,7 @@ import javax.xml.stream.XMLStreamReader;
 import org.codehaus.stax2.XMLInputFactory2;
 import org.codehaus.stax2.XMLOutputFactory2;
 import org.codehaus.stax2.XMLStreamWriter2;
+import org.junit.jupiter.api.Test;
 
 import base.BaseTestCase;
 
@@ -26,12 +27,13 @@ import static org.junit.jupiter.api.Assertions.fail;
  * field. Kept under {@code failing/} (and named without the {@code Test} prefix
  * so surefire skips it) until that work is done.
  */
-public class ManualIssue100ChunkBoundary extends BaseTestCase
+public class CDataChunkBoundary129Test extends BaseTestCase
 {
     final XMLOutputFactory2 OUTPUT_FACTORY = newOutputFactory();
     final XMLInputFactory2 INPUT_FACTORY = newInputFactory();
 
     // _copyBuffer default is 512 chars
+    @Test
     public void testBracketSplitAcrossChunk() throws Exception {
         // Place "]]" at the very end of the first 512-char chunk and ">" at
         // the start of the next chunk.
@@ -41,6 +43,7 @@ public class ManualIssue100ChunkBoundary extends BaseTestCase
         _roundtrip(sb.toString());
     }
 
+    @Test
     public void testBracketsStraddlingOneSplit() throws Exception {
         // "]" at end of chunk1, "]>" at start of chunk2
         StringBuilder sb = new StringBuilder();
@@ -49,6 +52,7 @@ public class ManualIssue100ChunkBoundary extends BaseTestCase
         _roundtrip(sb.toString());
     }
 
+    @Test
     public void testTwoBracketsStraddlingOnlyBrackets() throws Exception {
         // "]]" at end of chunk1, nothing-special at start of chunk2
         // (this is the bare-]] regression from #100, at the seam)
