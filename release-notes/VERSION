@@ -6,6 +6,7 @@ Project: aalto-xml
 
 1.5.0 (not yet released)
 
+- Update to `oss-parent` v80
 - Update stax2-api dep to 4.3.0 (from 4.2.2)
 
 1.4.0 (19-May-2026)
