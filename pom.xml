@@ -4,11 +4,11 @@
   <parent>
     <groupId>com.fasterxml</groupId>
     <artifactId>oss-parent</artifactId>
-    <version>79</version>
+    <version>80</version>
   </parent>
 
   <artifactId>aalto-xml</artifactId>
-  <version>1.4.1-SNAPSHOT</version>
+  <version>1.5.0-SNAPSHOT</version>
   <packaging>bundle</packaging>
   <licenses>
     <license>
@@ -67,7 +67,7 @@ org.xml.sax, org.xml.sax.ext, org.xml.sax.helpers</osgi.import>
     <dependency>
       <groupId>org.codehaus.woodstox</groupId>
       <artifactId>stax2-api</artifactId>
-      <version>4.3.0</version>
+      <version>4.3.2</version>
     </dependency>
     <!--
      | Test dependencies
