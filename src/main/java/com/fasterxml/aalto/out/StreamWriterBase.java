@@ -1010,6 +1010,10 @@ public abstract class StreamWriterBase
     @Override
     public void writeSpace(String text) throws XMLStreamException
     {
+        _stateAnyOutput = true;
+        if (_stateStartElementOpen) {
+            _closeStartElement(_stateEmptyElement);
+        }
         try {
             _xmlWriter.writeSpace(text);
         } catch (IOException ioe) {
@@ -1020,6 +1024,10 @@ public abstract class StreamWriterBase
     @Override
     public void writeSpace(char[] cbuf, int offset, int len) throws XMLStreamException
     {
+        _stateAnyOutput = true;
+        if (_stateStartElementOpen) {
+            _closeStartElement(_stateEmptyElement);
+        }
         try {
             _xmlWriter.writeSpace(cbuf, offset, len);
         } catch (IOException ioe) {
